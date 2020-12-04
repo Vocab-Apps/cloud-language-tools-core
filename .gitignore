@@ -1,0 +1,6 @@
+.vscode/
+*.egg-info/
+dist/
+*.wav
+*.pyc
+__pycache__/

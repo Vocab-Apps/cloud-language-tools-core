@@ -7,8 +7,11 @@ def main():
     # cloudlanguagetools.list_voices()
     manager = cloudlanguagetools.servicemanager.ServiceManager()
     manager.configure_azure(os.environ['AZURE_REGION'], os.environ['AZURE_KEY'])
-    tts_voice_list = manager.get_tts_voice_list()
-    print(tts_voice_list)
+    # tts_voice_list = manager.get_tts_voice_list()
+    # print(tts_voice_list)
+    tts_voice_list_json = manager.get_tts_voice_list_json()
+    print(tts_voice_list_json)
+
 
 if __name__ == '__main__':
     main()

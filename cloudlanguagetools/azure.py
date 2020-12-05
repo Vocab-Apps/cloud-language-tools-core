@@ -11,13 +11,21 @@ import azure.cognitiveservices.speech.audio
 
 class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
+        self.service = cloudlanguagetools.constants.Service.Azure
+        locale = voice_data['Locale']
+        language_enum_name = locale.replace('-', '_')
+        self.language = cloudlanguagetools.constants.Language[language_enum_name]
         self.name = voice_data['Name']
         self.display_name = voice_data['DisplayName']
         self.local_name = voice_data['LocalName']
         self.short_name = voice_data['ShortName']
         self.gender = cloudlanguagetools.constants.Gender[voice_data['Gender']]
-        self.locale = voice_data['Locale']
+
+        self.locale = locale
         self.voice_type = voice_data['VoiceType']
+
+    def get_voice_id(self):
+        return self.name
 
 class AzureService(cloudlanguagetools.service.Service):
     def __init__(self):

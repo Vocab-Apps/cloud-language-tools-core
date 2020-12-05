@@ -14,3 +14,7 @@ class ServiceManager():
         for key, service in self.services.items():
             result.extend(service.get_tts_voice_list())
         return result
+
+    def get_tts_voice_list_json(self):
+        tts_voice_list = self.get_tts_voice_list()
+        return [voice.json_obj() for voice in tts_voice_list]

@@ -3,6 +3,7 @@ import enum
 
 class Service(enum.Enum):
     Azure = enum.auto()
+    Google = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()

@@ -1,2 +1,3 @@
 azure-cognitiveservices-speech
 requests
+google-cloud-texttospeech

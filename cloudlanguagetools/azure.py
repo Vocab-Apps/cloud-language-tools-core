@@ -1,5 +1,6 @@
 import json
 import requests
+import tempfile
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -43,6 +44,24 @@ class AzureService(cloudlanguagetools.service.Service):
         response = requests.post(fetch_token_url, headers=headers)
         access_token = str(response.text)
         return access_token
+
+    def get_tts_audio(self, text, voice_id, options):
+        output_temp_file = tempfile.NamedTemporaryFile()
+        output_temp_filename = output_temp_file.name
+        output_temp_filename = 'test.wav'
+        speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
+        audio_config = azure.cognitiveservices.speech.audio.AudioOutputConfig(filename=output_temp_filename)
+        synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
+
+        ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+  <voice name="{voice_id}">
+    {text}
+  </voice>
+</speak>"""
+
+        result = synthesizer.start_speaking_ssml(ssml_str)
+
+        return output_temp_filename
 
     def get_tts_voice_list(self):
         # returns list of TtSVoice

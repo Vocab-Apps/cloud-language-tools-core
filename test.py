@@ -24,9 +24,15 @@ def main():
 
     # tts_voice_list = manager.get_tts_voice_list()
     # print(tts_voice_list)
-    tts_voice_list_json = manager.get_tts_voice_list_json()
-    print(tts_voice_list_json)
+    #tts_voice_list_json = manager.get_tts_voice_list_json()
+    #print(tts_voice_list_json)
+    
+    service = 'Azure'
+    voice_id = 'Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'
+    text = 'hello world'
 
+    result = manager.get_tts_audio(text, service, voice_id, {})
+    print(f'tts result: {result}')
 
 if __name__ == '__main__':
     main()

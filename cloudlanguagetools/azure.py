@@ -25,8 +25,11 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.locale = locale
         self.voice_type = voice_data['VoiceType']
 
-    def get_voice_id(self):
-        return self.name
+
+    def get_voice_key(self):
+        return {
+            'name': self.name
+        }
 
 class AzureService(cloudlanguagetools.service.Service):
     def __init__(self):

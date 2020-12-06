@@ -26,8 +26,14 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.google_language_code = voice_data.language_codes[0]
         self.language = language_code_to_enum(self.google_language_code)
 
-    def get_voice_id(self):
-        return self.name
+
+    def get_voice_key(self):
+        return {
+            'name': self.name,
+            'language_code': self.google_language_code,
+            'ssml_gender': self.google_ssml_gender.name
+        }
+
 
 
 class GoogleService(cloudlanguagetools.service.Service):
@@ -35,24 +41,24 @@ class GoogleService(cloudlanguagetools.service.Service):
         pass
 
     def configure(self):
-        self.cache_voice_list()
+        #self.cache_voice_list()
+        pass
 
     def get_client(self):
         client = google.cloud.texttospeech.TextToSpeechClient()
         return client
 
-    def get_tts_audio(self, text, voice_id, options):
+    def get_tts_audio(self, text, voice_key, options):
         client = self.get_client()
 
         input_text = google.cloud.texttospeech.SynthesisInput(text=text)
 
         # Note: the voice can also be specified by name.
         # Names of voices can be retrieved with client.list_voices().
-        voice = self.voice_map[voice_id]
         voice = google.cloud.texttospeech.VoiceSelectionParams(
-            name=voice_id,
-            language_code=voice.google_language_code,
-            ssml_gender=voice.google_ssml_gender
+            name=voice_key['name'],
+            language_code=voice_key['language_code'],
+            ssml_gender=google.cloud.texttospeech.SsmlVoiceGender[voice_key['ssml_gender']]
         )
 
         audio_config = google.cloud.texttospeech.AudioConfig(

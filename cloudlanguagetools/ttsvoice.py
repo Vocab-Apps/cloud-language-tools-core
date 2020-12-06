@@ -18,6 +18,6 @@ class TtsVoice():
             'gender': self.get_gender().name,
             'language_code': self.get_language_code(),
             'language_name': self.get_language_name(),
-            'voice_id': self.get_voice_id()
+            'voice_key': self.get_voice_key()
         }
    

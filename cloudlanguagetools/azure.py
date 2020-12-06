@@ -37,7 +37,7 @@ class AzureService(cloudlanguagetools.service.Service):
         self.region = data['region']
 
     def get_token(self):
-        fetch_token_url = "https://{self.region}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
+        fetch_token_url = f"https://{self.region}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
         headers = {
             'Ocp-Apim-Subscription-Key': self.key
         }
@@ -48,7 +48,6 @@ class AzureService(cloudlanguagetools.service.Service):
     def get_tts_audio(self, text, voice_id, options):
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
-        output_temp_filename = 'test.wav'
         speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
         speech_config.set_speech_synthesis_output_format(azure.cognitiveservices.speech.SpeechSynthesisOutputFormat["Audio24Khz96KBitRateMonoMp3"])
         audio_config = azure.cognitiveservices.speech.audio.AudioOutputConfig(filename=output_temp_filename)
@@ -62,7 +61,7 @@ class AzureService(cloudlanguagetools.service.Service):
 
         result = synthesizer.start_speaking_ssml(ssml_str)
 
-        return output_temp_filename
+        return output_temp_file
 
     def get_tts_voice_list(self):
         # returns list of TtSVoice

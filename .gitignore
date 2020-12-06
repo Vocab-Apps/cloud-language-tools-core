@@ -2,5 +2,6 @@
 *.egg-info/
 dist/
 *.wav
+*.mp3
 *.pyc
 __pycache__/

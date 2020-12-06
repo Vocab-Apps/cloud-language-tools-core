@@ -15,10 +15,12 @@ def test_azure_audio():
     manager = get_manager()
 
     service = 'Azure'
-    voice_id = 'Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'
-    text = 'hello world'
+    text = 'hello world 2'
+    voice_key = {
+        'name': 'Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)' 
+    }
 
-    result = manager.get_tts_audio(text, service, voice_id, {})
+    result = manager.get_tts_audio(text, service, voice_key, {})
     permanent_file_name = 'azure_output.mp3'
     shutil.copyfile(result.name, permanent_file_name)
     print(f'tts result: {permanent_file_name}')
@@ -69,6 +71,6 @@ def main():
 
 
 if __name__ == '__main__':
-    # test_azure_audio()
-    test_google_audio()
+    test_azure_audio()
+    # test_google_audio()
     #get_voice_list()

@@ -48,7 +48,7 @@ class AzureService(cloudlanguagetools.service.Service):
         access_token = str(response.text)
         return access_token
 
-    def get_tts_audio(self, text, voice_id, options):
+    def get_tts_audio(self, text, voice_key, options):
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
         speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
@@ -57,7 +57,7 @@ class AzureService(cloudlanguagetools.service.Service):
         synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
 
         ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-  <voice name="{voice_id}">
+  <voice name="{voice_key['name']}">
     {text}
   </voice>
 </speak>"""

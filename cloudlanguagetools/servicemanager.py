@@ -1,4 +1,6 @@
 import os
+import base64
+import tempfile
 import cloudlanguagetools.constants
 import cloudlanguagetools.azure
 import cloudlanguagetools.google
@@ -8,6 +10,22 @@ class ServiceManager():
         self.services = {}
         self.services[cloudlanguagetools.constants.Service.Azure.name] = cloudlanguagetools.azure.AzureService()
         self.services[cloudlanguagetools.constants.Service.Google.name] = cloudlanguagetools.google.GoogleService()
+
+    def configure(self):
+        # azure
+        self.configure_azure(os.environ['AZURE_REGION'], os.environ['AZURE_KEY'])
+
+        # google
+        google_key = os.environ['GOOGLE_KEY']
+        data_bytes = base64.b64decode(google_key)
+        data_str = data_bytes.decode('utf-8')    
+        # write to file
+        temp_file = tempfile.NamedTemporaryFile()  
+        google_key_filename = temp_file.name    
+        with open(google_key_filename, 'w') as f:
+            f.write(data_str)    
+            f.close()
+        self.configure_google(google_key)
 
     def configure_azure(self, region, key):
         self.services[cloudlanguagetools.constants.Service.Azure.name].configure({'key': key, 'region': region})

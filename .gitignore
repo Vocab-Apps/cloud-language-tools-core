@@ -5,3 +5,4 @@ dist/
 *.mp3
 *.pyc
 __pycache__/
+voicelist.json

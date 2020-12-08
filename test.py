@@ -106,6 +106,23 @@ def output_languages_enum():
         f.close()
     print(f'wrote output to {output_filename}')    
 
+def output_language_audio_mapping():
+    language_map = {}
+    for audio_language in cloudlanguagetools.constants.AudioLanguage:
+        language = audio_language.lang
+        if language not in language_map:
+            language_map[language] = []
+        language_map[language].append(audio_language)
+
+    output_filename = 'temp_data_files/output_language_audio_mapping.txt'
+    with open(output_filename, 'w') as f:
+        for key, data in language_map.items():
+            f.write(f'language: {key} ({key.lang_name})\n')
+            for item in data:
+                f.write(f'    audio language: {item} ({item.audio_lang_name})\n')
+        f.close()
+                
+        
 
 
 if __name__ == '__main__':
@@ -115,4 +132,5 @@ if __name__ == '__main__':
     # get_azure_translation_languages()
     # get_google_translation_languages()
     #output_languages_enum()
-    get_translation_language_list()
+    # get_translation_language_list()
+    output_language_audio_mapping()

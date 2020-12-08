@@ -53,24 +53,66 @@ def get_voice_list():
         f.close()
     print(f'wrote {output_filename}')
 
+def get_translation_language_list():
+    manager = get_manager()
+    language_list_json = manager.get_translation_language_list_json()
+    #print(tts_voice_list_json)    
+    output_filename = 'translation_language_list.json'
+    with open(output_filename, 'w') as f:
+        f.write(json.dumps(language_list_json, indent=4, sort_keys=True))
+        f.close()
+    print(f'wrote {output_filename}')
 
 
+def get_azure_translation_languages():
+    manager = get_manager()
+    data = manager.services[cloudlanguagetools.constants.Service.Azure.name].get_translation_languages()
+    # print(data)
+    output_filename = 'azure_translation_languages.json'
+    with open(output_filename, 'w') as f:
+        f.write(json.dumps(data, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
+        f.close()
+    print(f'wrote output to {output_filename}')
 
-def main():
-    # cloudlanguagetools.text_to_speech('hello world')
-    # cloudlanguagetools.list_voices()
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
-    manager.configure()
 
+def get_google_translation_languages():
+    manager = get_manager()
+    data = manager.services[cloudlanguagetools.constants.Service.Google.name].get_translation_languages()
+    # print(data)
+    output_filename = 'google_translation_languages.json'
+    with open(output_filename, 'w') as f:
+        f.write(json.dumps(data, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
+        f.close()
+    print(f'wrote output to {output_filename}')    
 
-    # tts_voice_list = manager.get_tts_voice_list()
-    # print(tts_voice_list)
-    #tts_voice_list_json = manager.get_tts_voice_list_json()
-    #print(tts_voice_list_json)
-    
+def output_languages_enum():
+    manager = get_manager()
+    data_google = manager.services[cloudlanguagetools.constants.Service.Google.name].get_translation_languages()
+    data_azure = manager.services[cloudlanguagetools.constants.Service.Azure.name].get_translation_languages()
+
+    language_map = {}
+
+    for entry in data_google:
+        language_map[entry['language']] = entry['name']
+
+    for key, data in data_azure['translation'].items():
+        language_map[key] = data['name']
+
+    output_filename = 'languages_enum.txt'
+    with open(output_filename, 'w') as f:
+        for key, name in language_map.items():
+            output = f"{key} = (\"{name}\")\n"
+            f.write(output)
+        f.close()
+    print(f'wrote output to {output_filename}')    
+
 
 
 if __name__ == '__main__':
-    test_azure_audio()
+    # test_azure_audio()
     # test_google_audio()
     #get_voice_list()
+    # get_azure_translation_languages()
+    # get_google_translation_languages()
+    #output_languages_enum()
+    get_translation_language_list()

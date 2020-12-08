@@ -45,6 +45,16 @@ class ServiceManager():
         tts_voice_list = self.get_tts_voice_list()
         return [voice.json_obj() for voice in tts_voice_list]
 
+    def get_translation_language_list(self):
+        result = []
+        for key, service in self.services.items():
+            result.extend(service.get_translation_language_list())
+        return result        
+
+    def get_translation_language_list_json(self):
+        language_list = self.get_translation_language_list()
+        return [language.json_obj() for language in language_list]
+
     def get_tts_audio(self, text, service, voice_id, options):
         service = self.services[service]
         return service.get_tts_audio(text, voice_id, options)

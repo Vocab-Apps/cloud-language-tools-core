@@ -1,6 +1,7 @@
 import os
 import tempfile
 import google.cloud.texttospeech
+import google.cloud.translate_v2
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
 
@@ -91,6 +92,10 @@ class GoogleService(cloudlanguagetools.service.Service):
 
         return result
 
+    def get_translation_language_list(self):
+        result = []
+        return result
+
     def cache_voice_list(self):
         # we need to have a cache in order to properly process tts audio requests
         voice_list = self.get_tts_voice_list()
@@ -99,3 +104,9 @@ class GoogleService(cloudlanguagetools.service.Service):
             self.voice_map[voice.get_voice_id()] = voice
 
         
+    def get_translation_languages(self):
+        translate_client = google.cloud.translate_v2.Client()
+
+        results = translate_client.get_languages()
+
+        return results

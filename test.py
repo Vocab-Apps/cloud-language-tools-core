@@ -57,7 +57,7 @@ def get_translation_language_list():
     manager = get_manager()
     language_list_json = manager.get_translation_language_list_json()
     #print(tts_voice_list_json)    
-    output_filename = 'translation_language_list.json'
+    output_filename = 'temp_data_files/translation_language_list.json'
     with open(output_filename, 'w') as f:
         f.write(json.dumps(language_list_json, indent=4, sort_keys=True))
         f.close()

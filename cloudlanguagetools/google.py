@@ -35,7 +35,34 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
             'ssml_gender': self.google_ssml_gender.name
         }
 
+def get_translation_language_enum(language_id):
+    google_language_id_map = {
+        'as': 'as_',
+        'fr-ca': 'fr_ca',
+        'id': 'id_',
+        'is': 'is_',
+        'or': 'or_',
+        'pt': 'pt_br',
+        'pt-pt': 'pt_pt',
+        'sr-Cyrl': 'sr_cyrl',
+        'sr-Latn': 'sr_latn',
+        'tlh-Latn': 'tlh_latn',
+        'tlh-Piqd': 'tlh_piqd',
+        'zh-CN': 'zh_cn',
+        'zh-TW': 'zh_tw'
+    }
+    if language_id in google_language_id_map:
+        language_id = google_language_id_map[language_id]
+    return cloudlanguagetools.constants.Language[language_id]
 
+class GoogleTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
+    def __init__(self, language_id):
+        self.service = cloudlanguagetools.constants.Service.Google
+        self.language_id = language_id
+        self.language = get_translation_language_enum(language_id)
+
+    def get_language_id(self):
+        return self.language_id
 
 class GoogleService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -94,6 +121,9 @@ class GoogleService(cloudlanguagetools.service.Service):
 
     def get_translation_language_list(self):
         result = []
+        data = self.get_translation_languages()
+        for entry in data:
+            result.append(GoogleTranslationLanguage(entry['language']))
         return result
 
     def cache_voice_list(self):

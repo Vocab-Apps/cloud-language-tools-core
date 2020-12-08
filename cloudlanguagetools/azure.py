@@ -34,7 +34,7 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         }
 
 def get_translation_language_enum(language_id):
-    print(f'language_id: {language_id}')
+    # print(f'language_id: {language_id}')
     azure_language_id_map = {
         'as': 'as_',
         'fr-ca': 'fr_ca',

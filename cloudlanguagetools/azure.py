@@ -69,9 +69,10 @@ class AzureService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass
 
-    def configure(self, data):
-        self.key = data['key']
-        self.region = data['region']
+    def configure(self, key, region, translator_key):
+        self.key = key
+        self.region = region
+        self.translator_key = translator_key
 
     def get_token(self):
         fetch_token_url = f"https://{self.region}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
@@ -146,3 +147,26 @@ class AzureService(cloudlanguagetools.service.Service):
         # print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))        
 
 
+    def detect_language(self, input_text):
+
+        # If you encounter any issues with the base_url or path, make sure
+        # that you are using the latest endpoint: https://docs.microsoft.com/azure/cognitive-services/translator/reference/v3-0-detect
+        url = 'https://api.cognitive.microsofttranslator.com/detect?api-version=3.0'
+
+        headers = {
+            'Ocp-Apim-Subscription-Key': self.translator_key,
+            'Ocp-Apim-Subscription-Region': self.region,
+            'Content-type': 'application/json',
+            'X-ClientTraceId': str(uuid.uuid4())
+        }
+
+        print(headers)
+
+        # You can pass more than one object in body.
+        body = [{
+            'text': input_text
+        }]
+        request = requests.post(url, headers=headers, json=body)
+        response = request.json()
+
+        print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))        

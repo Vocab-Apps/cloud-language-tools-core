@@ -122,7 +122,11 @@ def output_language_audio_mapping():
                 f.write(f'    audio language: {item} ({item.audio_lang_name})\n')
         f.close()
                 
-        
+
+def detect_language():
+    input_text = '江辰 我们一起去上学吧'
+    manager = get_manager()
+    manager.services[cloudlanguagetools.constants.Service.Azure.name].detect_language(input_text)
 
 
 if __name__ == '__main__':
@@ -133,4 +137,5 @@ if __name__ == '__main__':
     # get_google_translation_languages()
     #output_languages_enum()
     # get_translation_language_list()
-    output_language_audio_mapping()
+    # output_language_audio_mapping()
+    detect_language()

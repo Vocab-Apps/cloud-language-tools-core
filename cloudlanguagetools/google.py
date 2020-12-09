@@ -76,6 +76,10 @@ class GoogleService(cloudlanguagetools.service.Service):
         client = google.cloud.texttospeech.TextToSpeechClient()
         return client
 
+    def get_translation_client(self):
+        translate_client = google.cloud.translate_v2.Client()
+        return translate_client
+
     def get_tts_audio(self, text, voice_key, options):
         client = self.get_client()
 
@@ -140,3 +144,14 @@ class GoogleService(cloudlanguagetools.service.Service):
         results = translate_client.get_languages()
 
         return results
+
+    def detect_language(self, input_text):
+        client = self.get_translation_client()
+
+        # Text can also be a sequence of strings, in which case this method
+        # will return a sequence of results for each text.
+        result = client.detect_language(input_text)
+
+        print("Text: {}".format(input_text))
+        print("Confidence: {}".format(result["confidence"]))
+        print("Language: {}".format(result["language"]))

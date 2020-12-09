@@ -58,3 +58,7 @@ class ServiceManager():
     def get_tts_audio(self, text, service, voice_id, options):
         service = self.services[service]
         return service.get_tts_audio(text, voice_id, options)
+
+    def get_translation(self, text, service, from_language_key, to_language_key):
+        service = self.services[service]
+        return service.get_translation(text, from_language_key, to_language_key)

@@ -120,6 +120,27 @@ class AzureService(cloudlanguagetools.service.Service):
                 result.append(AzureVoice(voice_data))
             return result
 
+    def get_translation(self, text, from_language_key, to_language_key):
+        base_url = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0'
+        params = f'&to={to_language_key}&from={from_language_key}'
+        url = base_url + params
+
+        headers = {
+            'Ocp-Apim-Subscription-Key': self.translator_key,
+            'Ocp-Apim-Subscription-Region': self.region,
+            'Content-type': 'application/json',
+            'X-ClientTraceId': str(uuid.uuid4())
+        }
+
+        # You can pass more than one object in body.
+        body = [{
+            'text': text
+        }]
+        request = requests.post(url, headers=headers, json=body)
+        response = request.json()
+
+        return response[0]['translations'][0]['text']
+
     def get_translation_language_list(self):
         azure_data = self.get_supported_languages()
         result = []

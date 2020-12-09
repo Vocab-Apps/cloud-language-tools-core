@@ -137,7 +137,12 @@ class GoogleService(cloudlanguagetools.service.Service):
         for voice in voice_list:
             self.voice_map[voice.get_voice_id()] = voice
 
-        
+
+    def get_translation(self, text, from_language_key, to_language_key):
+        client = self.get_translation_client()
+        result = client.translate(text, source_language=from_language_key, target_language=to_language_key)
+        return result["translatedText"]
+
     def get_translation_languages(self):
         translate_client = google.cloud.translate_v2.Client()
 

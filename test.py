@@ -129,6 +129,18 @@ def detect_language():
     #manager.services[cloudlanguagetools.constants.Service.Azure.name].detect_language(input_text)
     manager.services[cloudlanguagetools.constants.Service.Google.name].detect_language(input_text)
 
+def translate_google():
+    text = 'Bonjour Madame'
+    manager = get_manager()
+    translated_text = manager.get_translation(text, 'Google', 'fr', 'en')
+    print(translated_text)
+
+def translate_azure():
+    text = 'Je suis un ours.'
+    manager = get_manager()
+    translated_text = manager.get_translation(text, 'Azure', 'fr', 'en')
+    print(translated_text)    
+
 
 if __name__ == '__main__':
     # test_azure_audio()
@@ -139,4 +151,6 @@ if __name__ == '__main__':
     #output_languages_enum()
     # get_translation_language_list()
     # output_language_audio_mapping()
-    detect_language()
+    # detect_language()
+    # translate_google()
+    translate_azure()

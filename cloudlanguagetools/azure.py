@@ -67,7 +67,7 @@ class AzureTranslationLanguage(cloudlanguagetools.translationlanguage.Translatio
 
 class AzureService(cloudlanguagetools.service.Service):
     def __init__(self):
-        pass
+        self.url_translator_base = 'https://api.cognitive.microsofttranslator.com'
 
     def configure(self, key, region, translator_key):
         self.key = key
@@ -82,6 +82,15 @@ class AzureService(cloudlanguagetools.service.Service):
         response = requests.post(fetch_token_url, headers=headers)
         access_token = str(response.text)
         return access_token
+
+    def get_translator_headers(self):
+        headers = {
+            'Ocp-Apim-Subscription-Key': self.translator_key,
+            'Ocp-Apim-Subscription-Region': self.region,
+            'Content-type': 'application/json',
+            'X-ClientTraceId': str(uuid.uuid4())
+        }
+        return headers        
 
     def get_tts_audio(self, text, voice_key, options):
         output_temp_file = tempfile.NamedTemporaryFile()
@@ -121,22 +130,15 @@ class AzureService(cloudlanguagetools.service.Service):
             return result
 
     def get_translation(self, text, from_language_key, to_language_key):
-        base_url = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0'
+        base_url = f'{self.url_translator_base}/translate?api-version=3.0'
         params = f'&to={to_language_key}&from={from_language_key}'
         url = base_url + params
-
-        headers = {
-            'Ocp-Apim-Subscription-Key': self.translator_key,
-            'Ocp-Apim-Subscription-Region': self.region,
-            'Content-type': 'application/json',
-            'X-ClientTraceId': str(uuid.uuid4())
-        }
 
         # You can pass more than one object in body.
         body = [{
             'text': text
         }]
-        request = requests.post(url, headers=headers, json=body)
+        request = requests.post(url, headers=self.get_translator_headers(), json=body)
         response = request.json()
 
         return response[0]['translations'][0]['text']
@@ -172,22 +174,51 @@ class AzureService(cloudlanguagetools.service.Service):
 
         # If you encounter any issues with the base_url or path, make sure
         # that you are using the latest endpoint: https://docs.microsoft.com/azure/cognitive-services/translator/reference/v3-0-detect
-        url = 'https://api.cognitive.microsofttranslator.com/detect?api-version=3.0'
-
-        headers = {
-            'Ocp-Apim-Subscription-Key': self.translator_key,
-            'Ocp-Apim-Subscription-Region': self.region,
-            'Content-type': 'application/json',
-            'X-ClientTraceId': str(uuid.uuid4())
-        }
-
-        print(headers)
+        url = f'{self.url_translator_base}/detect?api-version=3.0'
 
         # You can pass more than one object in body.
         body = [{
             'text': input_text
         }]
-        request = requests.post(url, headers=headers, json=body)
+        request = requests.post(url, headers=self.get_translator_headers(), json=body)
         response = request.json()
 
         print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))        
+
+    def dictionary_lookup(self, input_text, from_language_key, to_language_key):
+        base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'
+        params = f'&to={to_language_key}&from={from_language_key}'
+        url = base_url + params
+
+        print(url)
+
+        # You can pass more than one object in body.
+        body = [{
+            'text': input_text
+        }]
+        request = requests.post(url, headers=self.get_translator_headers(), json=body)
+        response = request.json()
+
+        print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
+
+        # return response[0]['translations'][0]['text']
+
+    
+    def dictionary_examples(self, input_text, translation, from_language_key, to_language_key):
+        base_url = f'{self.url_translator_base}/dictionary/examples?api-version=3.0'
+        params = f'&to={to_language_key}&from={from_language_key}'
+        url = base_url + params
+
+        print(url)
+
+        # You can pass more than one object in body.
+        body = [{
+            'text': input_text,
+            'translation': translation
+        }]
+        request = requests.post(url, headers=self.get_translator_headers(), json=body)
+        response = request.json()
+
+        print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
+
+        # return response[0]['translations'][0]['text']    

@@ -141,6 +141,16 @@ def translate_azure():
     translated_text = manager.get_translation(text, 'Azure', 'fr', 'en')
     print(translated_text)    
 
+def dictionary_lookup_azure():
+    text = 'computer'
+    manager = get_manager()
+    manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_lookup(text, 'en', 'zh-Hans')
+
+def dictionary_examples_azure():
+    text = 'computer'
+    translated_text = '电脑'
+    manager = get_manager()
+    manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_examples(text, translated_text, 'en', 'zh-Hans')    
 
 if __name__ == '__main__':
     # test_azure_audio()
@@ -153,4 +163,6 @@ if __name__ == '__main__':
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()
-    translate_azure()
+    # translate_azure()
+    # dictionary_lookup_azure()
+    dictionary_examples_azure()

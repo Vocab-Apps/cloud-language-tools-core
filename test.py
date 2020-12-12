@@ -164,13 +164,29 @@ def end_to_end_test():
         'I\'m not interested.'
     ]
     # step 1: recognize languages
-
     manager = get_manager()
     language1 = manager.detect_language(field1_list)
     print(language1)
     language2 = manager.detect_language(field2_list)
     print(language2)
 
+    # step2 retrieve list of languages supported for translation
+    translation_language_list = manager.get_translation_language_list_json()
+
+    service_wanted = 'Google'
+    languages_service = [x for x in translation_language_list if x['service'] == service_wanted]
+
+    field1_language_id = [x for x in languages_service if x['language_code'] == language1.name][0]['language_id']
+    field2_language_id = [x for x in languages_service if x['language_code'] == language2.name][0]['language_id']
+
+    target_language_enum = cloudlanguagetools.constants.Language.cs
+
+    target_language_id = [x for x in languages_service if x['language_code'] == target_language_enum.name][0]['language_id']
+
+    for text in field1_list:
+        translated_text = manager.get_translation(text, service_wanted, field1_language_id, target_language_id)
+        print(f'source: {text} translated: {translated_text}')
+    
 
 
 

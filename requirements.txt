@@ -2,3 +2,4 @@ azure-cognitiveservices-speech
 requests
 google-cloud-texttospeech
 google-cloud-translate
+pytest

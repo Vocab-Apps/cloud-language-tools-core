@@ -52,6 +52,7 @@ class ServiceManager():
         return result        
 
     def get_translation_language_list_json(self):
+        """return list of languages supported for translation, using plain objects/strings"""
         language_list = self.get_translation_language_list()
         return [language.json_obj() for language in language_list]
 

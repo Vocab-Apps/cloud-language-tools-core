@@ -132,13 +132,13 @@ def detect_language():
 def translate_google():
     text = 'Bonjour Madame'
     manager = get_manager()
-    translated_text = manager.get_translation(text, 'Google', 'fr', 'en')
+    translated_text = manager.get_translation(text, 'Google', 'fr', 'cs')
     print(translated_text)
 
 def translate_azure():
     text = 'Je suis un ours.'
     manager = get_manager()
-    translated_text = manager.get_translation(text, 'Azure', 'fr', 'en')
+    translated_text = manager.get_translation(text, 'Azure', 'fr', 'cs')
     print(translated_text)    
 
 def dictionary_lookup_azure():
@@ -151,6 +151,28 @@ def dictionary_examples_azure():
     translated_text = '电脑'
     manager = get_manager()
     manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_examples(text, translated_text, 'en', 'zh-Hans')    
+
+def end_to_end_test():
+    field1_list = [
+        'Pouvez-vous me faire le change ?',
+        'Pouvez-vous débarrasser la table, s\'il vous plaît?',
+        'Je ne suis pas intéressé.'
+    ]    
+    field2_list = [
+        'Can you change money for me?',
+        'Can you please clear the plates?',
+        'I\'m not interested.'
+    ]
+    # step 1: recognize languages
+
+    manager = get_manager()
+    language1 = manager.detect_language(field1_list)
+    print(language1)
+    language2 = manager.detect_language(field2_list)
+    print(language2)
+
+
+
 
 if __name__ == '__main__':
     # test_azure_audio()
@@ -165,4 +187,5 @@ if __name__ == '__main__':
     # translate_google()
     # translate_azure()
     # dictionary_lookup_azure()
-    dictionary_examples_azure()
+    # dictionary_examples_azure()
+    end_to_end_test()

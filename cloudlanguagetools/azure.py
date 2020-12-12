@@ -2,6 +2,7 @@ import json
 import requests
 import tempfile
 import uuid
+import operator
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -170,20 +171,23 @@ class AzureService(cloudlanguagetools.service.Service):
         # print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))        
 
 
-    def detect_language(self, input_text):
-
-        # If you encounter any issues with the base_url or path, make sure
-        # that you are using the latest endpoint: https://docs.microsoft.com/azure/cognitive-services/translator/reference/v3-0-detect
+    def detect_language(self, text_list):
         url = f'{self.url_translator_base}/detect?api-version=3.0'
+        body = [{'text': text} for text in text_list]
 
-        # You can pass more than one object in body.
-        body = [{
-            'text': input_text
-        }]
         request = requests.post(url, headers=self.get_translator_headers(), json=body)
         response = request.json()
 
-        print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))        
+        language_score = {}
+        for entry in response:
+            score = entry['score']
+            language = entry['language']
+            if language not in language_score:
+                language_score[language] = 0
+            language_score[language] += score
+
+        highest_language = max(language_score.items(), key=operator.itemgetter(1))[0]
+        return get_translation_language_enum(highest_language)
 
     def dictionary_lookup(self, input_text, from_language_key, to_language_key):
         base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'

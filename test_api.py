@@ -21,6 +21,21 @@ class ApiTests(unittest.TestCase):
         voice_list = json.loads(response.data)
         self.assertTrue(len(voice_list) > 100) # with google and azure, we already have 400 voices or so
         
+        subset_1 = [x for x in voice_list if x['language_code'] == 'fr']
+        self.assertTrue(len(subset_1) > 10) # there should be a dozen french voices
+
+        voice1 = subset_1[0]
+
+        self.assertTrue(len(voice1['gender']) > 0)
+        self.assertTrue(len(voice1['language_code']) > 0)
+        self.assertTrue(len(voice1['audio_language_code']) > 0)
+        self.assertTrue(len(voice1['audio_language_name']) > 0)
+        self.assertTrue(len(voice1['voice_description']) > 0)
+        self.assertTrue(len(voice1['service']) > 0)
+        self.assertTrue('voice_key' in voice1)
+
+
+
 
 if __name__ == '__main__':
     unittest.main()  

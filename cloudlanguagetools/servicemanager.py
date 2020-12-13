@@ -61,10 +61,12 @@ class ServiceManager():
         return service.get_tts_audio(text, voice_id, options)
 
     def get_translation(self, text, service, from_language_key, to_language_key):
+        """return text"""
         service = self.services[service]
         return service.get_translation(text, from_language_key, to_language_key)
 
     def detect_language(self, text_list):
+        """returns an enum from constants.Language"""
         service = self.services[cloudlanguagetools.constants.Service.Azure.name]
         result = service.detect_language(text_list)
         return result

@@ -3,13 +3,15 @@ import base64
 import json
 import tempfile
 import shutil 
+import unittest
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
     manager.configure()    
-    return manager    
+    return manager
+
 
 def test_azure_audio():
     manager = get_manager()
@@ -142,13 +144,13 @@ def translate_azure():
     print(translated_text)    
 
 def dictionary_lookup_azure():
-    text = 'computer'
+    text = '雕虫小技'
     manager = get_manager()
-    manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_lookup(text, 'en', 'zh-Hans')
+    manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_lookup(text, 'zh-Hans', 'en')
 
 def dictionary_examples_azure():
-    text = 'computer'
-    translated_text = '电脑'
+    text = '饥不择食'
+    translated_text = 'beggars can\'t be choosers'
     manager = get_manager()
     manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_examples(text, translated_text, 'en', 'zh-Hans')    
 
@@ -202,6 +204,6 @@ if __name__ == '__main__':
     # detect_language()
     # translate_google()
     # translate_azure()
-    # dictionary_lookup_azure()
+    dictionary_lookup_azure()
     # dictionary_examples_azure()
-    end_to_end_test()
+    # end_to_end_test()

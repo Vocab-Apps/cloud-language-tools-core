@@ -118,7 +118,6 @@ class Language(enum.Enum):
     yo = ("Yoruba")
     zu = ("Zulu")
     he = ("Hebrew")
-    zh = ("Chinese (Simplified)")
     as_ = ("Assamese")
     fil = ("Filipino")
     fj = ("Fijian")

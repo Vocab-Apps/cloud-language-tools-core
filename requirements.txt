@@ -5,3 +5,5 @@ google-cloud-translate
 pytest
 pytest-parallel
 pydub
+flask
+flask_restful

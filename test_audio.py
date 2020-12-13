@@ -29,39 +29,30 @@ class TestAudio(unittest.TestCase):
         result = self.manager.services[Service.Azure.name].speech_to_text(audio_temp_file.name, language)
         return result
     
+    def sanitize_recognized_text(self, recognized_text):
+        result_text = recognized_text.replace('.', '').replace('。', '').replace('?', '').replace('？', '')
+        return result_text
+
     def verify_voice(self, voice, text, recognition_language):
         voice_key = voice['voice_key']
         audio_temp_file = self.manager.get_tts_audio(text, voice['service'], voice_key, {})
         audio_text = self.speech_to_text(audio_temp_file, recognition_language)
-        self.assertEqual(text, audio_text)
-        logging.info(f"verified service {voice['service']} voice {voice['voice_key']}")
+        assert_text = f"service {voice['service']} voice_key: {voice['voice_key']}"
+        self.assertEqual(self.sanitize_recognized_text(text), self.sanitize_recognized_text(audio_text), msg=assert_text)
 
-    def verify_service_audio_language(self, text, service, audio_language):
-        voices = self.get_voice_list_service_audio_language(Service.Google, AudioLanguage.fr_FR)
+    def verify_service_audio_language(self, text, service, audio_language, recognition_language):
+        voices = self.get_voice_list_service_audio_language(Service.Google, audio_language)
         for voice in voices:
-            self.verify_voice(voice, text, audio_language)
+            self.verify_voice(voice, text, recognition_language)
 
     def test_french_google(self):
         source_text = 'Je ne suis pas intéressé.'
-        self.verify_service_audio_language(source_text, Service.Google, 'fr-FR')
+        self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.fr_FR, 'fr-FR')
 
-
-    # python -m pytest test_audio.py -s -k 'test_french'
-    def test_french(self):
+    def test_french_azure(self):
         source_text = 'Je ne suis pas intéressé.'
-        source_language = Language.fr
+        self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.fr_FR, 'fr-FR')
 
-        voices = self.get_voice_list_for_language(source_language)
-        self.assertTrue(len(voices) > 1)
-
-        voices = voices[0:1]
-
-        for voice in voices:
-            voice_key = voice['voice_key']
-            audio_temp_file = self.manager.get_tts_audio(source_text, voice['service'], voice_key, {})
-            audio_text = self.speech_to_text(audio_temp_file, 'fr-FR')
-            print(audio_text)
-            self.assertEqual(source_text, audio_text)
-
-
-
+    def test_mandarin_google(self):
+        source_text = '老人家'
+        self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_CN, 'zh-CN')

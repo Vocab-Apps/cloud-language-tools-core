@@ -202,7 +202,7 @@ class AudioLanguage(enum.Enum):
     tr_TR = (Language.tr, "Turkish (Turkey)")
     uk_UA = (Language.uk, "Ukrainian (Ukraine)")
     vi_VN = (Language.vi, "Vietnamese")
-    zh_CN = (Language.zh_cn, "Chinese (Mandarin, simplified)")
+    zh_CN = (Language.zh_cn, "Chinese (Mandarin, Simplified)")
     zh_HK = (Language.yue, "Chinese (Cantonese, Traditional)")
     zh_TW = (Language.zh_tw, "Chinese (Taiwanese Mandarin)")
 

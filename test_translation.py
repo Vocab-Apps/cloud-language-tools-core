@@ -12,7 +12,17 @@ def get_manager():
 class TestTranslation(unittest.TestCase):
     def setUp(self):
         self.manager = get_manager()
+        self.language_list = self.manager.get_language_list()
         self.translation_language_list = self.manager.get_translation_language_list_json()
+
+    def test_language_list(self):
+        self.assertTrue(len(self.language_list) > 0)
+        # check for the presence of a few languages
+        self.assertEqual('French', self.language_list['fr'])
+        self.assertEqual('Chinese (Simplified)', self.language_list['zh_cn'])
+        self.assertEqual('Thai', self.language_list['th'])
+        self.assertEqual('Chinese (Cantonese, Traditional)', self.language_list['yue'])
+        self.assertEqual('Chinese (Traditional)', self.language_list['zh_tw'])
 
     def test_detection(self):
         source_text = 'Je ne suis pas intéressé.'

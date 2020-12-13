@@ -35,6 +35,12 @@ class ServiceManager():
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
         self.services[cloudlanguagetools.constants.Service.Google.name].configure()
 
+    def get_language_list(self):
+        result_dict = {}
+        for language in cloudlanguagetools.constants.Language:
+            result_dict[language.name] = language.lang_name
+        return result_dict
+
     def get_tts_voice_list(self):
         result = []
         for key, service in self.services.items():

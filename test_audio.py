@@ -1,4 +1,5 @@
 import unittest
+import logging
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 from cloudlanguagetools.constants import Language
@@ -33,12 +34,16 @@ class TestAudio(unittest.TestCase):
         audio_temp_file = self.manager.get_tts_audio(text, voice['service'], voice_key, {})
         audio_text = self.speech_to_text(audio_temp_file, recognition_language)
         self.assertEqual(text, audio_text)
+        logging.info(f"verified service {voice['service']} voice {voice['voice_key']}")
+
+    def verify_service_audio_language(self, text, service, audio_language):
+        voices = self.get_voice_list_service_audio_language(Service.Google, AudioLanguage.fr_FR)
+        for voice in voices:
+            self.verify_voice(voice, text, audio_language)
 
     def test_french_google(self):
         source_text = 'Je ne suis pas intéressé.'
-        voices = self.get_voice_list_service_audio_language(Service.Google, AudioLanguage.fr_FR)
-        for voice in voices:
-            self.verify_voice(voice, source_text, 'fr-FR')
+        self.verify_service_audio_language(source_text, Service.Google, 'fr-FR')
 
 
     # python -m pytest test_audio.py -s -k 'test_french'

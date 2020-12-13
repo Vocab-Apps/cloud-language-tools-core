@@ -70,7 +70,6 @@ class GoogleService(cloudlanguagetools.service.Service):
         pass
 
     def configure(self):
-        #self.cache_voice_list()
         pass
 
     def get_client(self):
@@ -125,18 +124,12 @@ class GoogleService(cloudlanguagetools.service.Service):
         return result
 
     def get_translation_language_list(self):
-        result = []
         data = self.get_translation_languages()
+        result_dict = {}
         for entry in data:
-            result.append(GoogleTranslationLanguage(entry['language']))
-        return result
-
-    def cache_voice_list(self):
-        # we need to have a cache in order to properly process tts audio requests
-        voice_list = self.get_tts_voice_list()
-        self.voice_map = {}
-        for voice in voice_list:
-            self.voice_map[voice.get_voice_id()] = voice
+            translation_language = GoogleTranslationLanguage(entry['language'])
+            result_dict[translation_language.get_language_code()] = translation_language
+        return result_dict.values()
 
 
     def get_translation(self, text, from_language_key, to_language_key):

@@ -53,6 +53,8 @@ class TestTranslation(unittest.TestCase):
 
     def test_translate_chinese(self):
         self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, 'The person who delivered the takeaway')
+        self.translate_text(Service.Google, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
+        self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
 
     def test_get_translation_language_list_json(self):
         translation_language_list = self.manager.get_translation_language_list()

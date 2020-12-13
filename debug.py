@@ -81,7 +81,7 @@ def get_google_translation_languages():
     manager = get_manager()
     data = manager.services[cloudlanguagetools.constants.Service.Google.name].get_translation_languages()
     # print(data)
-    output_filename = 'google_translation_languages.json'
+    output_filename = 'temp_data_files/google_translation_languages.json'
     with open(output_filename, 'w') as f:
         f.write(json.dumps(data, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
         f.close()

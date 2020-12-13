@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from flask import Flask, request
-from flask_restful import Resource, Api, inputs, reqparse
+from flask_restful import Resource, Api, inputs
 import json
 import cloudlanguagetools.servicemanager
 
@@ -25,18 +25,21 @@ class TranslationLanguageList(Resource):
 
 class Translate(Resource):
     def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('text', type=str, required=True)
-        parser.add_argument('service', type=str, required=True)
-        parser.add_argument('from_language_key', type=str, required=True)
-        parser.add_argument('to_language_key', type=str, required=True)
-        args = parser.parse_args()
-        return {'translated_text': manager.get_translation(args['text'], args['service'], args['from_language_key'], args['to_language_key'])}
+        data = request.json
+        return {'translated_text': manager.get_translation(data['text'], data['service'], data['from_language_key'], data['to_language_key'])}
+
+class Detect(Resource):
+    def post(self):
+        data = request.json
+        text_list = data['text_list']
+        result = manager.detect_language(text_list)
+        return {'detected_language': result.name}
 
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
 api.add_resource(TranslationLanguageList, '/translation_language_list')
 api.add_resource(Translate, '/translate')
+api.add_resource(Detect, '/detect')
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')

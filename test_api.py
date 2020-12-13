@@ -79,5 +79,18 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(data['translated_text'], 'There are many foreigners in China')
 
 
+    def test_detection(self):
+        source_list = [
+            'Pouvez-vous me faire le change ?',
+            'Pouvez-vous débarrasser la table, s\'il vous plaît?'
+        ]
+
+        response = self.client.post('/detect', json={
+            'text_list': source_list
+        })
+
+        data = json.loads(response.data)
+        self.assertEqual(data['detected_language'], 'fr')
+
 if __name__ == '__main__':
     unittest.main()  

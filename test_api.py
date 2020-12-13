@@ -34,17 +34,23 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(len(voice1['service']) > 0)
         self.assertTrue('voice_key' in voice1)
 
+    def test_translation_language_list(self):
+        response = self.client.get('/translation_language_list')
+        translation_language_list = json.loads(response.data)
+        self.assertTrue(len(translation_language_list) > 100) # with google and azure, we already have 400 voices or so
+        
+        subset_1 = [x for x in translation_language_list if x['language_code'] == 'fr']
+        self.assertTrue(len(subset_1) >= 2) # at least one for google, one for azure
+
+        language1 = subset_1[0]
+
+        self.assertTrue(len(language1['language_code']) > 0)
+        self.assertTrue(len(language1['language_id']) > 0)
+        self.assertTrue(len(language1['language_name']) > 0)
+        self.assertTrue(len(language1['service']) > 0)
+
 
 
 
 if __name__ == '__main__':
     unittest.main()  
-
-
-#rv = client.get('/jyutping/我哋盪失咗')
-#print(rv.data)
-
-#url_base = "http://localhost:5000"
-#url = "{}/jyutping/我哋盪失咗".format(url_base)
-#response = requests.get(url)
-#print(json.loads(response.content)["jyutping"])

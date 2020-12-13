@@ -12,6 +12,7 @@ def get_manager():
 class TestTranslation(unittest.TestCase):
     def setUp(self):
         self.manager = get_manager()
+        self.translation_language_list = self.manager.get_translation_language_list_json()
 
     def test_detection(self):
         source_text = 'Je ne suis pas intéressé.'
@@ -37,28 +38,21 @@ class TestTranslation(unittest.TestCase):
         translated_text = self.manager.get_translation(source_text, cloudlanguagetools.constants.Service.Azure.name, 'fr', 'en')
         self.assertEqual(translated_text, "I'm not interested.")
 
-    def test_translate_chinese(self):
-        source_text = '送外卖的人'
-        source_language = Language.zh_cn
-        target_language = Language.en
+    def translate_text(self, service, source_text, source_language, target_language, expected_result):
+        source_language_list = [x for x in self.translation_language_list if x['language_code'] == source_language.name and x['service'] == service.name]
+        self.assertEqual(1, len(source_language_list))
+        target_language_list = [x for x in self.translation_language_list if x['language_code'] == target_language.name and x['service'] == service.name]
+        self.assertEqual(1, len(target_language_list))
 
-        # first, retrieve language list
-        translation_language_list = self.manager.get_translation_language_list_json()
-
-        # try with azure
-        service = Service.Azure
-        source_language_list_azure = [x for x in translation_language_list if x['language_code'] == source_language.name and x['service'] == service.name]
-        self.assertEqual(1, len(source_language_list_azure))
-        target_language_list_azure = [x for x in translation_language_list if x['language_code'] == target_language.name and x['service'] == service.name]
-        self.assertEqual(1, len(target_language_list_azure))
-
-        from_language_key = source_language_list_azure[0]['language_id']
-        to_language_key = target_language_list_azure[0]['language_id']
+        from_language_key = source_language_list[0]['language_id']
+        to_language_key = target_language_list[0]['language_id']
 
         # now, translate
         translated_text = self.manager.get_translation(source_text, service.name, from_language_key, to_language_key)
-        self.assertEqual('The person who delivered the takeaway', translated_text)
+        self.assertEqual(expected_result, translated_text)
 
+    def test_translate_chinese(self):
+        self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, 'The person who delivered the takeaway')
 
     def test_get_translation_language_list_json(self):
         translation_language_list = self.manager.get_translation_language_list()

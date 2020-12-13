@@ -20,14 +20,43 @@ class TestAudio(unittest.TestCase):
         subset = [x for x in self.voice_list if x['language_code'] == language.name]
         return subset
 
+    def get_voice_list_service_audio_language(self, service, audio_language):
+        subset = [x for x in self.voice_list if x['audio_language_code'] == audio_language.name and x['service'] == service.name]
+        return subset        
+
+    def speech_to_text(self, audio_temp_file, language):
+        result = self.manager.services[Service.Azure.name].speech_to_text(audio_temp_file.name, language)
+        return result
+    
+    def verify_voice(self, voice, text, recognition_language):
+        voice_key = voice['voice_key']
+        audio_temp_file = self.manager.get_tts_audio(text, voice['service'], voice_key, {})
+        audio_text = self.speech_to_text(audio_temp_file, recognition_language)
+        self.assertEqual(text, audio_text)
+
+    def test_french_google(self):
+        source_text = 'Je ne suis pas intéressé.'
+        voices = self.get_voice_list_service_audio_language(Service.Google, AudioLanguage.fr_FR)
+        for voice in voices:
+            self.verify_voice(voice, source_text, 'fr-FR')
+
+
+    # python -m pytest test_audio.py -s -k 'test_french'
     def test_french(self):
         source_text = 'Je ne suis pas intéressé.'
         source_language = Language.fr
 
         voices = self.get_voice_list_for_language(source_language)
-
         self.assertTrue(len(voices) > 1)
-        print(voices)
+
+        voices = voices[0:1]
+
+        for voice in voices:
+            voice_key = voice['voice_key']
+            audio_temp_file = self.manager.get_tts_audio(source_text, voice['service'], voice_key, {})
+            audio_text = self.speech_to_text(audio_temp_file, 'fr-FR')
+            print(audio_text)
+            self.assertEqual(source_text, audio_text)
 
 
 

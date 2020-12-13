@@ -3,6 +3,7 @@ import requests
 import tempfile
 import uuid
 import operator
+import pydub
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -189,6 +190,40 @@ class AzureService(cloudlanguagetools.service.Service):
         highest_language = max(language_score.items(), key=operator.itemgetter(1))[0]
         return get_translation_language_enum(highest_language)
 
+    # supported languages: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support#speech-to-text
+    def speech_to_text(self, mp3_filepath, language):
+        speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
+
+        sound = pydub.AudioSegment.from_mp3(mp3_filepath)
+        wav_filepath = tempfile.NamedTemporaryFile(suffix='.wav').name
+        sound.export(wav_filepath, format="wav")
+
+        audio_input = azure.cognitiveservices.speech.audio.AudioConfig(filename=wav_filepath)
+
+        # Creates a recognizer with the given settings
+        speech_recognizer = azure.cognitiveservices.speech.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input, language=language)
+
+        # Starts speech recognition, and returns after a single utterance is recognized. The end of a
+        # single utterance is determined by listening for silence at the end or until a maximum of 15
+        # seconds of audio is processed.  The task returns the recognition text as result. 
+        # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+        # shot recognition like command or query. 
+        # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
+        result = speech_recognizer.recognize_once()
+
+        # Checks result.
+        if result.reason == azure.cognitiveservices.speech.ResultReason.RecognizedSpeech:
+            return result.text
+        elif result.reason == azure.cognitiveservices.speech.ResultReason.NoMatch:
+            error_message = "No speech could be recognized: {}".format(result.no_match_details)
+            raise Exception(error_message)
+        elif result.reason == azure.cognitiveservices.speech.ResultReason.Canceled:
+            cancellation_details = result.cancellation_details
+            error_message = "Speech Recognition canceled: {}".format(cancellation_details)
+            raise Exception(error_message)
+
+        raise "unknown error"
+
     def dictionary_lookup(self, input_text, from_language_key, to_language_key):
         base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'
         params = f'&to={to_language_key}&from={from_language_key}'
@@ -226,3 +261,5 @@ class AzureService(cloudlanguagetools.service.Service):
         print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
 
         # return response[0]['translations'][0]['text']    
+
+    

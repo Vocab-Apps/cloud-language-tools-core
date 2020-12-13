@@ -55,4 +55,8 @@ class TestAudio(unittest.TestCase):
 
     def test_mandarin_google(self):
         source_text = '老人家'
-        self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_CN, 'zh-CN')
+        self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.zh_CN, 'zh-CN')
+
+    def test_mandarin_azure(self):
+        source_text = '老人家'
+        self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_CN, 'zh-CN')        

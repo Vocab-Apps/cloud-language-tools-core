@@ -3,4 +3,5 @@ requests
 google-cloud-texttospeech
 google-cloud-translate
 pytest
+pytest-parallel
 pydub

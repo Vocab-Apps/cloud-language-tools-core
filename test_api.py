@@ -62,6 +62,22 @@ class ApiTests(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual(data['translated_text'], "I'm not interested.")
 
+        # locate the azure language_id for simplified chinese
+        response = self.client.get('/translation_language_list')
+        translation_language_list = json.loads(response.data)
+        chinese_azure = [x for x in translation_language_list if x['language_code'] == 'zh_cn' and x['service'] == 'Azure']
+        translation_azure_chinese = chinese_azure[0]
+
+        response = self.client.post('/translate', json={
+            'text': '中国有很多外国人',
+            'service': 'Azure',
+            'from_language_key': translation_azure_chinese['language_id'],
+            'to_language_key': 'en'
+        })
+
+        data = json.loads(response.data)
+        self.assertEqual(data['translated_text'], 'There are many foreigners in China')
+
 
 if __name__ == '__main__':
     unittest.main()  

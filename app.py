@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request
+from flask import Flask, request, send_file
 from flask_restful import Resource, Api, inputs
 import json
 import cloudlanguagetools.servicemanager
@@ -35,11 +35,20 @@ class Detect(Resource):
         result = manager.detect_language(text_list)
         return {'detected_language': result.name}
 
+class Audio(Resource):
+    def post(self):
+        data = request.json
+        audio_temp_file = manager.get_tts_audio(data['text'], data['service'], data['voice_key'], data['options'])
+        return send_file(audio_temp_file.name, mimetype='audio/mpeg')
+
+
+
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
 api.add_resource(TranslationLanguageList, '/translation_language_list')
 api.add_resource(Translate, '/translate')
 api.add_resource(Detect, '/detect')
+api.add_resource(Audio, '/audio')
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')

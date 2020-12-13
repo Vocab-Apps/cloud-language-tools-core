@@ -1,5 +1,7 @@
 import unittest
 import json
+import tempfile
+import magic
 from app import app
 
 class ApiTests(unittest.TestCase):
@@ -91,6 +93,34 @@ class ApiTests(unittest.TestCase):
 
         data = json.loads(response.data)
         self.assertEqual(data['detected_language'], 'fr')
+
+    def test_audio(self):
+        # get one azure voice for french
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)        
+        service = 'Azure'
+        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        first_voice = french_voices[0]
+
+        response = self.client.post('/audio', json={
+            'text': 'Je ne suis pas intéressé.',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        })
+
+        output_temp_file = tempfile.NamedTemporaryFile()
+        with open(output_temp_file.name, 'wb') as f:
+            f.write(response.data)
+        f.close()
+
+        # verify file type
+        filetype = magic.from_file(output_temp_file.name)
+        # should be an MP3 file
+        expected_filetype = 'MPEG ADTS, layer III'
+
+        self.assertTrue(expected_filetype in filetype)
+
 
 if __name__ == '__main__':
     unittest.main()  

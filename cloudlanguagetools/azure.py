@@ -16,6 +16,7 @@ import azure.cognitiveservices.speech.audio
 
 class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
+        print(voice_data)
         self.service = cloudlanguagetools.constants.Service.Azure
         locale = voice_data['Locale']
         language_enum_name = locale.replace('-', '_')
@@ -34,6 +35,12 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         return {
             'name': self.name
         }
+
+    def get_voice_shortname(self):
+        if self.local_name != self.display_name:
+            return f'{self.display_name} {self.local_name} ({self.voice_type})'
+        else:
+            return f'{self.display_name} ({self.voice_type})'
 
 def get_translation_language_enum(language_id):
     # print(f'language_id: {language_id}')

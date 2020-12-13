@@ -15,6 +15,9 @@ class TtsVoice():
     def get_audio_language_name(self):
         return self.audio_language.audio_lang_name
 
+    def get_voice_description(self):
+        return f'{self.get_audio_language_name()}, {self.get_gender().name}, {self.get_voice_shortname()}, {self.service.name}'
+
     def json_obj(self):
         return {
             'service': self.service.name,
@@ -22,6 +25,7 @@ class TtsVoice():
             'language_code': self.get_language_code(),
             'audio_language_code': self.get_audio_language_code(),
             'audio_language_name': self.get_audio_language_name(),
-            'voice_key': self.get_voice_key()
+            'voice_key': self.get_voice_key(),
+            'voice_description': self.get_voice_description()
         }
    

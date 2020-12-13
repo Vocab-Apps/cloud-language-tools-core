@@ -49,10 +49,10 @@ def test_google_audio():
 def get_voice_list():
     manager = get_manager()
     tts_voice_list_json = manager.get_tts_voice_list_json()
-    print(tts_voice_list_json)    
+    # print(tts_voice_list_json)    
     output_filename = 'temp_data_files/voicelist.json'
-    with open(output_filename, 'w') as f:
-        f.write(json.dumps(tts_voice_list_json, indent=4, sort_keys=True))
+    with open(output_filename, 'w', encoding='utf8') as f:
+        f.write(json.dumps(tts_voice_list_json, indent=4, sort_keys=True, ensure_ascii=False))
         f.close()
     print(f'wrote {output_filename}')
 

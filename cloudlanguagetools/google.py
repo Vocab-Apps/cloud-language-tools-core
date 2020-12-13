@@ -27,6 +27,8 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.google_language_code = voice_data.language_codes[0]
         self.audio_language = language_code_to_enum(self.google_language_code)
 
+    def get_voice_shortname(self):
+        return self.name
 
     def get_voice_key(self):
         return {
@@ -34,6 +36,7 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
             'language_code': self.google_language_code,
             'ssml_gender': self.google_ssml_gender.name
         }
+
 
 def get_translation_language_enum(language_id):
     google_language_id_map = {

@@ -15,7 +15,12 @@ class LanguageList(Resource):
     def get(self):
         return manager.get_language_list()
 
+class VoiceList(Resource):
+    def get(self):
+        return manager.get_tts_voice_list_json()
+
 api.add_resource(LanguageList, '/language_list')
+api.add_resource(VoiceList, '/voice_list')
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')

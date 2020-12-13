@@ -18,7 +18,7 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.service = cloudlanguagetools.constants.Service.Azure
         locale = voice_data['Locale']
         language_enum_name = locale.replace('-', '_')
-        self.language = cloudlanguagetools.constants.Language[language_enum_name]
+        self.audio_language = cloudlanguagetools.constants.AudioLanguage[language_enum_name]
         self.name = voice_data['Name']
         self.display_name = voice_data['DisplayName']
         self.local_name = voice_data['LocalName']

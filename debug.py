@@ -7,6 +7,7 @@ import unittest
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
+
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
     manager.configure()    
@@ -49,7 +50,7 @@ def get_voice_list():
     manager = get_manager()
     tts_voice_list_json = manager.get_tts_voice_list_json()
     print(tts_voice_list_json)    
-    output_filename = 'voicelist.json'
+    output_filename = 'temp_data_files/voicelist.json'
     with open(output_filename, 'w') as f:
         f.write(json.dumps(tts_voice_list_json, indent=4, sort_keys=True))
         f.close()
@@ -195,11 +196,11 @@ def end_to_end_test():
 if __name__ == '__main__':
     # test_azure_audio()
     # test_google_audio()
-    #get_voice_list()
+    get_voice_list()
     # get_azure_translation_languages()
     # get_google_translation_languages()
     #output_languages_enum()
-    get_translation_language_list()
+    # get_translation_language_list()
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()

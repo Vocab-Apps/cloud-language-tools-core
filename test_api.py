@@ -50,6 +50,17 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(len(language1['service']) > 0)
 
 
+    def test_translate(self):
+        source_text = 'Je ne suis pas intéressé.'
+        response = self.client.post('/translate', json={
+            'text': source_text,
+            'service': 'Azure',
+            'from_language_key': 'fr',
+            'to_language_key': 'en'
+        })
+
+        data = json.loads(response.data)
+        self.assertEqual(data['translated_text'], "I'm not interested.")
 
 
 if __name__ == '__main__':

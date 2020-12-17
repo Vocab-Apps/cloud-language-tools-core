@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 from flask_restful import Resource, Api, inputs
 import json
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.errors
 
 app = Flask(__name__)
 api = Api(app)
 
 manager = cloudlanguagetools.servicemanager.ServiceManager()
 manager.configure()    
+
 
 class LanguageList(Resource):
     def get(self):
@@ -25,8 +27,11 @@ class TranslationLanguageList(Resource):
 
 class Translate(Resource):
     def post(self):
-        data = request.json
-        return {'translated_text': manager.get_translation(data['text'], data['service'], data['from_language_key'], data['to_language_key'])}
+        try:
+            data = request.json
+            return {'translated_text': manager.get_translation(data['text'], data['service'], data['from_language_key'], data['to_language_key'])}
+        except cloudlanguagetools.errors.RequestError as err:
+            return {'error': str(err)}, 400
 
 class Detect(Resource):
     def post(self):

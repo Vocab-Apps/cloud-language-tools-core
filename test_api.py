@@ -80,6 +80,20 @@ class ApiTests(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual(data['translated_text'], 'There are many foreigners in China')
 
+    def test_translate_error(self):
+        source_text = 'Je ne suis pas intéressé.'
+        response = self.client.post('/translate', json={
+            'text': source_text,
+            'service': 'Azure',
+            'from_language_key': 'fr',
+            'to_language_key': 'zh_cn'
+        })
+
+        self.assertEqual(response.status_code, 400)
+        error_response = json.loads(response.data)
+        error_message = error_response['error']
+        self.assertTrue('The target language is not valid' in error_message)
+
 
     def test_detection(self):
         source_list = [

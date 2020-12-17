@@ -3,6 +3,7 @@ import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 from cloudlanguagetools.constants import Language
 from cloudlanguagetools.constants import Service
+import cloudlanguagetools.errors
 
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
@@ -47,6 +48,10 @@ class TestTranslation(unittest.TestCase):
         source_text = 'Je ne suis pas intéressé.'
         translated_text = self.manager.get_translation(source_text, cloudlanguagetools.constants.Service.Azure.name, 'fr', 'en')
         self.assertEqual(translated_text, "I'm not interested.")
+
+    def test_translate_error(self):
+        source_text = 'Je ne suis pas intéressé.'
+        self.assertRaises(cloudlanguagetools.errors.RequestError, self.manager.get_translation, source_text, cloudlanguagetools.constants.Service.Azure.name, 'fr', 'zh_cn')
 
     def translate_text(self, service, source_text, source_language, target_language, expected_result):
         source_language_list = [x for x in self.translation_language_list if x['language_code'] == source_language.name and x['service'] == service.name]

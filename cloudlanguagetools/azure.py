@@ -9,6 +9,7 @@ import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
+import cloudlanguagetools.errors
 
 
 import azure.cognitiveservices.speech
@@ -149,6 +150,10 @@ class AzureService(cloudlanguagetools.service.Service):
         }]
         request = requests.post(url, headers=self.get_translator_headers(), json=body)
         response = request.json()
+
+        if 'error' in response:
+            error_message = f'Azure: could not translate text [{text}] from {from_language_key} to {to_language_key} ({response})'
+            raise cloudlanguagetools.errors.RequestError(error_message)
 
         return response[0]['translations'][0]['text']
 

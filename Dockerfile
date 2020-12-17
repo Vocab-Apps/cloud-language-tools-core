@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-RUN apt-get update -y && apt-get install -y libasound2-dev
+RUN apt-get update -y && apt-get install -y libasound2 python3-pip
 
 COPY requirements.txt app.py cloudlanguagetools ./
 RUN pip install -r requirements.txt

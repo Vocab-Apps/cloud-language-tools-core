@@ -8,3 +8,4 @@ pydub
 flask
 flask_restful
 python-magic
+gunicorn

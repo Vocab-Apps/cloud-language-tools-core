@@ -80,6 +80,21 @@ class ApiTests(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual(data['translated_text'], 'There are many foreigners in China')
 
+    def test_translate_all(self):
+        source_text = '成本很低'
+        response = self.client.post('/translate_all', json={
+            'text': source_text,
+            'service': 'Azure',
+            'from_language': 'zh_cn',
+            'to_language': 'fr'
+        })
+
+        data = json.loads(response.data)
+        self.assertEqual({
+            'Google': 'Coût très bas',
+            'Azure': 'Le coût est faible'
+        }, data)
+
     def test_translate_error(self):
         source_text = 'Je ne suis pas intéressé.'
         response = self.client.post('/translate', json={

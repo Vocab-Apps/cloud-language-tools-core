@@ -33,6 +33,14 @@ class Translate(Resource):
         except cloudlanguagetools.errors.RequestError as err:
             return {'error': str(err)}, 400
 
+class TranslateAll(Resource):
+    def post(self):
+        try:
+            data = request.json
+            return manager.get_all_translations(data['text'], data['from_language'], data['to_language'])
+        except cloudlanguagetools.errors.RequestError as err:
+            return {'error': str(err)}, 400            
+
 class Detect(Resource):
     def post(self):
         data = request.json
@@ -52,6 +60,7 @@ api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
 api.add_resource(TranslationLanguageList, '/translation_language_list')
 api.add_resource(Translate, '/translate')
+api.add_resource(TranslateAll, '/translate_all')
 api.add_resource(Detect, '/detect')
 api.add_resource(Audio, '/audio')
 

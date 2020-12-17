@@ -28,6 +28,8 @@ class ServiceManager():
             f.close()
         self.configure_google(google_key_filename)
 
+        self.translation_language_list = self.get_translation_language_list()
+
     def configure_azure(self, region, key, translator_key):
         self.services[cloudlanguagetools.constants.Service.Azure.name].configure(key, region, translator_key)
 
@@ -70,6 +72,20 @@ class ServiceManager():
         """return text"""
         service = self.services[service]
         return service.get_translation(text, from_language_key, to_language_key)
+
+    def get_all_translations(self, text, from_language, to_language):
+        result = {}
+        for service_name, service in self.services.items():
+            # locate from language key
+            from_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == from_language]
+            assert(len(from_language_entries) == 1)
+            from_language_id = from_language_entries[0].get_language_id()
+            # locate to language key
+            to_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == to_language]
+            assert(len(to_language_entries) == 1)
+            to_language_id = to_language_entries[0].get_language_id()
+            result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
+        return result
 
     def detect_language(self, text_list):
         """returns an enum from constants.Language"""

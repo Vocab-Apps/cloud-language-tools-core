@@ -71,4 +71,12 @@ class TestTranslation(unittest.TestCase):
         self.translate_text(Service.Google, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
         self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
 
-    
+    def test_translate_all(self):
+        source_text = '成本很低'
+        from_language = Language.zh_cn.name
+        to_language =  Language.fr.name
+        result = self.manager.get_all_translations(source_text, from_language, to_language)
+        self.assertTrue('Azure' in result)
+        self.assertTrue('Google' in result)
+        self.assertEqual(result['Azure'], 'Le coût est faible')
+        self.assertEqual(result['Google'], 'Coût très bas')

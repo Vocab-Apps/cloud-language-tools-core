@@ -75,12 +75,18 @@ class AzureTranslationLanguage(cloudlanguagetools.translationlanguage.Translatio
         return self.language_id
 
 class AzureTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
-    def __init__(self, language_id, from_script, to_script):
+    def __init__(self, language_id, from_script, to_script, from_script_name, to_script_name):
         self.service = cloudlanguagetools.constants.Service.Azure
         self.language_id = language_id
         self.language = get_translation_language_enum(language_id)
         self.from_script = from_script
         self.to_script = to_script
+        self.from_script_name = from_script_name
+        self.to_script_name = to_script_name
+
+    def get_transliteration_name(self):
+        result = f'{self.language.lang_name} ({self.from_script_name} to {self.to_script_name})'
+        return result
 
     def get_transliteration_key(self):
         return {
@@ -190,9 +196,11 @@ class AzureService(cloudlanguagetools.service.Service):
             first_script = data['scripts'][0]
             from_script =  first_script['code']
             to_script = first_script['toScripts'][0]['code']
+            from_script_name = first_script['name']
+            to_script_name = first_script['toScripts'][0]['name']
             # print(language_id, from_script, to_script)
             # assert(to_script == 'Latn')
-            result.append(AzureTransliterationLanguage(language_id, from_script, to_script))
+            result.append(AzureTransliterationLanguage(language_id, from_script, to_script, from_script_name, to_script_name))
         return result
 
 

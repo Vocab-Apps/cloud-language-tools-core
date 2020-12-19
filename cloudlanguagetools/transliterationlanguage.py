@@ -14,5 +14,6 @@ class TransliterationLanguage():
             'service': self.service.name,
             'language_code': self.get_language_code(),
             'language_name': self.get_language_name(),
+            'transliteration_name': self.get_transliteration_name(),
             'transliteration_key': self.get_transliteration_key()
         } 

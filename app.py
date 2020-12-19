@@ -25,6 +25,10 @@ class TranslationLanguageList(Resource):
     def get(self):
         return manager.get_translation_language_list_json()
 
+class TransliterationLanguageList(Resource):
+    def get(self):
+        return manager.get_transliteration_language_list_json()
+
 class Translate(Resource):
     def post(self):
         try:
@@ -39,7 +43,15 @@ class TranslateAll(Resource):
             data = request.json
             return manager.get_all_translations(data['text'], data['from_language'], data['to_language'])
         except cloudlanguagetools.errors.RequestError as err:
-            return {'error': str(err)}, 400            
+            return {'error': str(err)}, 400
+
+class Transliterate(Resource):
+    def post(self):
+        try:
+            data = request.json
+            return {'transliterated_text': manager.get_transliteration(data['text'], data['service'], data['transliteration_key'])}
+        except cloudlanguagetools.errors.RequestError as err:
+            return {'error': str(err)}, 400    
 
 class Detect(Resource):
     def post(self):
@@ -59,8 +71,10 @@ class Audio(Resource):
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
 api.add_resource(TranslationLanguageList, '/translation_language_list')
+api.add_resource(TransliterationLanguageList, '/transliteration_language_list')
 api.add_resource(Translate, '/translate')
 api.add_resource(TranslateAll, '/translate_all')
+api.add_resource(Transliterate, '/transliterate')
 api.add_resource(Detect, '/detect')
 api.add_resource(Audio, '/audio')
 

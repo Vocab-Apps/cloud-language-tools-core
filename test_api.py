@@ -110,6 +110,27 @@ class ApiTests(unittest.TestCase):
         self.assertTrue('The target language is not valid' in error_message)
 
 
+    def test_transliteration(self):
+        response = self.client.get('/transliteration_language_list')
+        transliteration_language_list = json.loads(response.data)
+
+        source_text = '成本很低'
+        from_language = 'zh_cn'
+        transliteration_candidates = [x for x in transliteration_language_list if x['language_code'] == from_language]
+        self.assertTrue(len(transliteration_candidates) == 1) # once more services are introduced, change this
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+
+        response = self.client.post('/transliterate', json={
+            'text': source_text,
+            'service': service,
+            'transliteration_key': transliteration_key
+        })
+
+        result = json.loads(response.data)
+        self.assertEqual({'transliterated_text': 'chéng běn hěn dī'}, result)
+
     def test_detection(self):
         source_list = [
             'Pouvez-vous me faire le change ?',

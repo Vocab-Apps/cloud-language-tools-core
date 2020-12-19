@@ -47,6 +47,7 @@ def get_translation_language_enum(language_id):
         'or': 'or_',
         'pt': 'pt_br',
         'pt-pt': 'pt_pt',
+        'sr': 'sr_cyrl',
         'sr-Cyrl': 'sr_cyrl',
         'sr-Latn': 'sr_latn',
         'tlh-Latn': 'tlh_latn',
@@ -134,6 +135,8 @@ class GoogleService(cloudlanguagetools.service.Service):
             result_dict[translation_language.get_language_code()] = translation_language
         return result_dict.values()
 
+    def get_transliteration_language_list(self):
+        return []
 
     def get_translation(self, text, from_language_key, to_language_key):
         client = self.get_translation_client()

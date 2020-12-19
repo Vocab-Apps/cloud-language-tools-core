@@ -9,6 +9,7 @@ import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
+import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
 
 
@@ -73,7 +74,21 @@ class AzureTranslationLanguage(cloudlanguagetools.translationlanguage.Translatio
     def get_language_id(self):
         return self.language_id
 
-    
+class AzureTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
+    def __init__(self, language_id, from_script, to_script):
+        self.service = cloudlanguagetools.constants.Service.Azure
+        self.language_id = language_id
+        self.language = get_translation_language_enum(language_id)
+        self.from_script = from_script
+        self.to_script = to_script
+
+    def get_transliteration_key(self):
+        return {
+            'language_id': self.language_id,
+            'from_script': self.from_script,
+            'to_script': self.to_script
+        }
+
 
 class AzureService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -164,6 +179,20 @@ class AzureService(cloudlanguagetools.service.Service):
             result.append(AzureTranslationLanguage(language_id))
         return result
 
+    def get_transliteration_language_list(self):
+        result = []
+        azure_data = self.get_supported_languages()
+        for language_id, data in azure_data['transliteration'].items():
+            # get the first script
+            first_script = data['scripts'][0]
+            from_script =  first_script['code']
+            to_script = first_script['toScripts'][0]['code']
+            # print(language_id, from_script, to_script)
+            # assert(to_script == 'Latn')
+            result.append(AzureTransliterationLanguage(language_id, from_script, to_script))
+        return result
+
+
     def get_supported_languages(self):
         url = 'https://api.cognitive.microsofttranslator.com/languages?api-version=3.0'
 
@@ -201,6 +230,20 @@ class AzureService(cloudlanguagetools.service.Service):
 
         highest_language = max(language_score.items(), key=operator.itemgetter(1))[0]
         return get_translation_language_enum(highest_language)
+
+    def transliteration(self, text, language_key, from_script, to_script):
+        url = f'{self.url_translator_base}/transliterate?api-version=3.0'
+        params = f'&language={language_key}&fromScript={from_script}&toScript={to_script}'
+        constructed_url = url + params
+
+        body = [{
+            'text': text
+        }]
+        request = requests.post(constructed_url, headers=self.get_translator_headers(), json=body)
+        response = request.json()
+
+        assert(len(response) == 1)
+        return response[0]['text']
 
     # supported languages: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support#speech-to-text
     def speech_to_text(self, mp3_filepath, language):

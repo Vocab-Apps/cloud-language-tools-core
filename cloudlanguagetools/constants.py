@@ -88,7 +88,6 @@ class Language(enum.Enum):
     ru = ("Russian")
     sm = ("Samoan")
     gd = ("Scots Gaelic")
-    sr = ("Serbian")
     st = ("Sesotho")
     sn = ("Shona")
     sd = ("Sindhi")

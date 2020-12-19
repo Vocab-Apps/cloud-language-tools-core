@@ -66,6 +66,15 @@ def get_translation_language_list():
         f.close()
     print(f'wrote {output_filename}')
 
+def get_transliteration_language_list():
+    manager = get_manager()
+    language_list_json = manager.get_transliteration_language_list_json()
+    #print(tts_voice_list_json)    
+    output_filename = 'temp_data_files/transliteration_language_list.json'
+    with open(output_filename, 'w') as f:
+        f.write(json.dumps(language_list_json, indent=4, sort_keys=True))
+        f.close()
+    print(f'wrote {output_filename}')
 
 def get_azure_translation_languages():
     manager = get_manager()
@@ -144,8 +153,23 @@ def translate_azure():
     translated_text = manager.get_translation(text, 'Azure', 'fr', 'cs')
     print(translated_text)    
 
+def transliterate_azure():
+    text = 'Je suis un ours.'
+    manager = get_manager()
+    service = manager.services[cloudlanguagetools.constants.Service.Azure.name]
+    test_thai = True
+    text = 'ผมจะไปประเทศไทยพรุ่งนี้ครับ'
+    text = 'ผม | จะ | ไป | ประเทศไทย | พรุ่ง | นี้ | ครับ'
+    language_key = 'th'
+    from_script = 'Thai'
+    to_script = 'Latn'
+    result = service.transliteration(text, language_key, from_script, to_script)
+    print(result)
+
+
+
 def dictionary_lookup_azure():
-    text = '雕虫小技'
+    text = '出事'
     manager = get_manager()
     manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_lookup(text, 'zh-Hans', 'en')
 
@@ -196,7 +220,7 @@ def end_to_end_test():
 if __name__ == '__main__':
     # test_azure_audio()
     # test_google_audio()
-    get_voice_list()
+    # get_voice_list()
     # get_azure_translation_languages()
     # get_google_translation_languages()
     #output_languages_enum()
@@ -208,3 +232,5 @@ if __name__ == '__main__':
     # dictionary_lookup_azure()
     # dictionary_examples_azure()
     # end_to_end_test()
+    # transliterate_azure()
+    get_transliteration_language_list()

@@ -98,6 +98,10 @@ class ServiceManager():
             result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
         return result
 
+    def get_transliteration(self, text, service, transliteration_key):
+        service = self.services[service]
+        return service.get_transliteration(text, transliteration_key)
+
     def detect_language(self, text_list):
         """returns an enum from constants.Language"""
         service = self.services[cloudlanguagetools.constants.Service.Azure.name]

@@ -15,6 +15,7 @@ class TestTranslation(unittest.TestCase):
         self.manager = get_manager()
         self.language_list = self.manager.get_language_list()
         self.translation_language_list = self.manager.get_translation_language_list_json()
+        self.transliteration_language_list = self.manager.get_transliteration_language_list_json()
 
     def test_language_list(self):
         self.assertTrue(len(self.language_list) > 0)
@@ -80,3 +81,26 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue('Google' in result)
         self.assertEqual(result['Azure'], 'Le coût est faible')
         self.assertEqual(result['Google'], 'Coût très bas')
+
+    def test_transliteration(self):
+        # chinese
+        source_text = '成本很低'
+        from_language = Language.zh_cn.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('chéng běn hěn dī', result)
+
+        # thai
+        source_text = 'ประเทศไทย'
+        from_language = Language.th.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('prathetthai', result)

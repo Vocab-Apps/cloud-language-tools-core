@@ -172,6 +172,9 @@ class AzureService(cloudlanguagetools.service.Service):
 
         return response[0]['translations'][0]['text']
 
+    def get_transliteration(self, text, transliteration_key):
+        return self.transliteration(text, transliteration_key['language_id'], transliteration_key['from_script'], transliteration_key['to_script'])
+
     def get_translation_language_list(self):
         azure_data = self.get_supported_languages()
         result = []

@@ -19,6 +19,10 @@ class ApiTests(unittest.TestCase):
         cls.api_key_expired='test_key_02_expired'
         redis_connection.add_api_key(cls.api_key_expired, 'test', 'pytest', datetime.datetime.now() + datetime.timedelta(days=-2))
 
+    @classmethod
+    def tearDownClass(cls):
+        redis_connection.clear_db(wait=False)
+
     def test_language_list(self):
         response = self.client.get('/language_list')
         actual_language_list = json.loads(response.data) 

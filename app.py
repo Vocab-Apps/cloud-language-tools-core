@@ -1,35 +1,46 @@
 #!/usr/bin/env python3
 
 from flask import Flask, request, send_file, jsonify
-from flask_restful import Resource, Api, inputs
+import flask_restful
 import json
+import functools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.errors
+import redisdb
 
 app = Flask(__name__)
-api = Api(app)
+api = flask_restful.Api(app)
 
 manager = cloudlanguagetools.servicemanager.ServiceManager()
-manager.configure()    
+manager.configure()
+
+redis_connection = redisdb.RedisDb()
+
+def authenticate(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        flask_restful.abort(401)
+    return wrapper
 
 
-class LanguageList(Resource):
+class LanguageList(flask_restful.Resource):
     def get(self):
         return manager.get_language_list()
 
-class VoiceList(Resource):
+class VoiceList(flask_restful.Resource):
     def get(self):
         return manager.get_tts_voice_list_json()
 
-class TranslationLanguageList(Resource):
+class TranslationLanguageList(flask_restful.Resource):
     def get(self):
         return manager.get_translation_language_list_json()
 
-class TransliterationLanguageList(Resource):
+class TransliterationLanguageList(flask_restful.Resource):
     def get(self):
         return manager.get_transliteration_language_list_json()
 
-class Translate(Resource):
+class Translate(flask_restful.Resource):
+    method_decorators = [authenticate]
     def post(self):
         try:
             data = request.json
@@ -37,7 +48,7 @@ class Translate(Resource):
         except cloudlanguagetools.errors.RequestError as err:
             return {'error': str(err)}, 400
 
-class TranslateAll(Resource):
+class TranslateAll(flask_restful.Resource):
     def post(self):
         try:
             data = request.json
@@ -45,7 +56,7 @@ class TranslateAll(Resource):
         except cloudlanguagetools.errors.RequestError as err:
             return {'error': str(err)}, 400
 
-class Transliterate(Resource):
+class Transliterate(flask_restful.Resource):
     def post(self):
         try:
             data = request.json
@@ -53,14 +64,14 @@ class Transliterate(Resource):
         except cloudlanguagetools.errors.RequestError as err:
             return {'error': str(err)}, 400    
 
-class Detect(Resource):
+class Detect(flask_restful.Resource):
     def post(self):
         data = request.json
         text_list = data['text_list']
         result = manager.detect_language(text_list)
         return {'detected_language': result.name}
 
-class Audio(Resource):
+class Audio(flask_restful.Resource):
     def post(self):
         data = request.json
         audio_temp_file = manager.get_tts_audio(data['text'], data['service'], data['voice_key'], data['options'])

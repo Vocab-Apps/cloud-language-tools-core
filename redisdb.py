@@ -11,11 +11,14 @@ KEY_TYPE_API_KEY = 'api_key'
 
 class RedisDb():
     def __init__(self):
+        self.connect()
+
+    def connect(self, db_num=0):
         redis_host = os.environ[ENV_VAR_REDIS_HOST]
         redis_port = os.environ[ENV_VAR_REDIS_PORT]
         redis_password = os.environ[ENV_VAR_REDIS_PASSWORD]
 
-        self.r = redis.Redis(host=redis_host, port=redis_port, db=0, password=redis_password)
+        self.r = redis.Redis(host=redis_host, port=redis_port, db=db_num, password=redis_password)
 
     def build_key(self, key_type, key):
         return f'clt:{key_type}:{key}'
@@ -63,9 +66,10 @@ class RedisDb():
         for key in keys:
             print(key)
 
-    def clear_db(self):
-        print('WARNING! going to remove all keys after 30s')
-        time.sleep(15)
-        print('WARNING! going to remove all keys after 15s')
-        time.sleep(15)
+    def clear_db(self, wait=True):
+        if wait:
+            print('WARNING! going to remove all keys after 30s')
+            time.sleep(15)
+            print('WARNING! going to remove all keys after 15s')
+            time.sleep(15)
         self.r.flushdb()

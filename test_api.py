@@ -2,13 +2,20 @@ import unittest
 import json
 import tempfile
 import magic
-from app import app
+import datetime
+from app import app, redis_connection
 
 class ApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiTests, cls).setUpClass()
         cls.client = app.test_client()
+        # reconnect to a different DB num
+        redis_connection.connect(db_num=1)
+        redis_connection.clear_db(wait=False)
+        # create new API key
+        cls.api_key='test_key_01'
+        redis_connection.add_api_key(cls.api_key, 'test', 'pytest', datetime.datetime.now() + datetime.timedelta(days=2))
 
     def test_language_list(self):
         response = self.client.get('/language_list')
@@ -61,6 +68,7 @@ class ApiTests(unittest.TestCase):
             'to_language_key': 'en'
         })
 
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         self.assertEqual(data['translated_text'], "I'm not interested.")
 

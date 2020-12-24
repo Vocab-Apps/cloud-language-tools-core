@@ -66,7 +66,7 @@ class ApiTests(unittest.TestCase):
             'service': 'Azure',
             'from_language_key': 'fr',
             'to_language_key': 'en'
-        })
+        }, headers={'api_key': self.api_key})
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
@@ -83,9 +83,10 @@ class ApiTests(unittest.TestCase):
             'service': 'Azure',
             'from_language_key': translation_azure_chinese['language_id'],
             'to_language_key': 'en'
-        })
+        }, headers={'api_key': self.api_key})
 
         data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(data['translated_text'], 'There are many foreigners in China')
 
     def test_translate_all(self):
@@ -95,7 +96,7 @@ class ApiTests(unittest.TestCase):
             'service': 'Azure',
             'from_language': 'zh_cn',
             'to_language': 'fr'
-        })
+        }, headers={'api_key': self.api_key})
 
         data = json.loads(response.data)
         self.assertEqual({
@@ -110,7 +111,7 @@ class ApiTests(unittest.TestCase):
             'service': 'Azure',
             'from_language_key': 'fr',
             'to_language_key': 'zh_cn'
-        })
+        }, headers={'api_key': self.api_key})
 
         self.assertEqual(response.status_code, 400)
         error_response = json.loads(response.data)
@@ -134,7 +135,7 @@ class ApiTests(unittest.TestCase):
             'text': source_text,
             'service': service,
             'transliteration_key': transliteration_key
-        })
+        }, headers={'api_key': self.api_key})
 
         result = json.loads(response.data)
         self.assertEqual({'transliterated_text': 'chéng běn hěn dī'}, result)
@@ -147,7 +148,7 @@ class ApiTests(unittest.TestCase):
 
         response = self.client.post('/detect', json={
             'text_list': source_list
-        })
+        }, headers={'api_key': self.api_key})
 
         data = json.loads(response.data)
         self.assertEqual(data['detected_language'], 'fr')
@@ -165,7 +166,7 @@ class ApiTests(unittest.TestCase):
             'service': service,
             'voice_key': first_voice['voice_key'],
             'options': {}
-        })
+        }, headers={'api_key': self.api_key})
 
         output_temp_file = tempfile.NamedTemporaryFile()
         with open(output_temp_file.name, 'wb') as f:

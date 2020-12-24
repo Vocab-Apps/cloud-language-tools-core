@@ -19,7 +19,13 @@ redis_connection = redisdb.RedisDb()
 def authenticate(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        flask_restful.abort(401)
+        api_key = request.headers.get('api_key', None)
+        # is this API key valid ?
+        result = redis_connection.api_key_valid(api_key)
+        if result['key_valid']:
+            # authentication successful
+            return func(*args, **kwargs)
+        return {'error': result['msg']}, 401
     return wrapper
 
 

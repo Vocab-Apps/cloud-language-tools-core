@@ -33,7 +33,7 @@ class RedisDb():
             'owner': owner,
             'expiration': key_expiration_timestamp,
         }
-        self.r.hmset(redis_key, hash_value)
+        self.r.hset(redis_key, mapping=hash_value)
         self.r.expireat(redis_key, key_removal_timestamp_millis)
 
         print(f'added {redis_key}: {hash_value}, expiring at: {expiration_date}, removed at: {key_removal_date}')

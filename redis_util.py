@@ -26,18 +26,23 @@ def password_generator():
 
 
 def main():
-    r = redisdb.get_redis_connection()
-
     parser = argparse.ArgumentParser(description='Interact with Redis DB')
-    parser.add_argument('--action', choices=['add_key', 'list_api_keys'], help='Indicate what to do', required=True)
+    choices = ['add_api_key', 'list_api_keys', 'list_all_keys', 'clear_db']
+    parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
 
     args = parser.parse_args()
     
-    if args.action == 'add_key':
+    connection = redisdb.RedisDb()
+
+    if args.action == 'add_api_key':
         api_key = password_generator()
-        redisdb.add_api_key(r, api_key, 'test_key', 'luc')
+        connection.add_api_key(api_key, 'test_key', 'luc')
     elif args.action == 'list_api_keys':
-        redisdb.list_api_keys(r)
+        connection.list_api_keys()
+    elif args.action == 'list_all_keys':
+        connection.list_all_keys()
+    elif args.action == 'clear_db':
+        connection.clear_db()
 
 
 if __name__ == '__main__':

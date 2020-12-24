@@ -9,3 +9,4 @@ flask
 flask_restful
 python-magic
 gunicorn
+redis

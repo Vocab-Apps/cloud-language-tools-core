@@ -242,6 +242,23 @@ class ApiTests(unittest.TestCase):
 
         self.assertTrue(expected_filetype in filetype)
 
+    def test_audio_not_authenticated(self):
+        # get one azure voice for french
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)        
+        service = 'Azure'
+        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        first_voice = french_voices[0]
+
+        response = self.client.post('/audio', json={
+            'text': 'Je ne suis pas intéressé.',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        })
+
+        self.assertEqual(response.status_code, 401)
+        
 
 if __name__ == '__main__':
     unittest.main()  

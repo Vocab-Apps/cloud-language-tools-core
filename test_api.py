@@ -23,6 +23,19 @@ class ApiTests(unittest.TestCase):
     def tearDownClass(cls):
         redis_connection.clear_db(wait=False)
 
+    def test_verify_api_key(self):
+        response = self.client.post('/verify_api_key', json={'api_key': self.api_key})
+        data = json.loads(response.data)
+        self.assertEqual({'key_valid': True, 'msg': 'API Key expires in 1 days'}, data)
+
+        response = self.client.post('/verify_api_key', json={'api_key': self.api_key_expired})
+        data = json.loads(response.data)
+        self.assertEqual({'key_valid': False, 'msg': 'API Key expired'}, data)
+
+        response = self.client.post('/verify_api_key', json={'api_key': 'ho ho ho'})
+        data = json.loads(response.data)
+        self.assertEqual({'key_valid': False, 'msg': 'API Key not valid'}, data)
+
     def test_language_list(self):
         response = self.client.get('/language_list')
         actual_language_list = json.loads(response.data) 

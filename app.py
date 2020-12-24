@@ -87,7 +87,12 @@ class Audio(flask_restful.Resource):
         audio_temp_file = manager.get_tts_audio(data['text'], data['service'], data['voice_key'], data['options'])
         return send_file(audio_temp_file.name, mimetype='audio/mpeg')
 
-
+class VerifyApiKey(flask_restful.Resource):
+    def post(self):
+        data = request.json
+        api_key = data['api_key']
+        result = redis_connection.api_key_valid(api_key)
+        return result
 
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
@@ -98,6 +103,7 @@ api.add_resource(TranslateAll, '/translate_all')
 api.add_resource(Transliterate, '/transliterate')
 api.add_resource(Detect, '/detect')
 api.add_resource(Audio, '/audio')
+api.add_resource(VerifyApiKey, '/verify_api_key')
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')

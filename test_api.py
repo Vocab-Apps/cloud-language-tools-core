@@ -166,6 +166,28 @@ class ApiTests(unittest.TestCase):
         result = json.loads(response.data)
         self.assertEqual({'transliterated_text': 'chéng běn hěn dī'}, result)
 
+    def test_transliteration_not_authenticated(self):
+        response = self.client.get('/transliteration_language_list')
+        transliteration_language_list = json.loads(response.data)
+
+        source_text = '成本很低'
+        from_language = 'zh_cn'
+        transliteration_candidates = [x for x in transliteration_language_list if x['language_code'] == from_language]
+        self.assertTrue(len(transliteration_candidates) == 1) # once more services are introduced, change this
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+
+        response = self.client.post('/transliterate', json={
+            'text': source_text,
+            'service': service,
+            'transliteration_key': transliteration_key
+        })
+
+        self.assertEqual(response.status_code, 401)
+        result = json.loads(response.data)
+        self.assertEqual({'error': 'API Key not valid'}, result)
+
     def test_detection(self):
         source_list = [
             'Pouvez-vous me faire le change ?',
@@ -178,6 +200,20 @@ class ApiTests(unittest.TestCase):
 
         data = json.loads(response.data)
         self.assertEqual(data['detected_language'], 'fr')
+
+    def test_detection_not_authenticated(self):
+        source_list = [
+            'Pouvez-vous me faire le change ?',
+            'Pouvez-vous débarrasser la table, s\'il vous plaît?'
+        ]
+
+        response = self.client.post('/detect', json={
+            'text_list': source_list
+        }, headers={'api_key': self.api_key_expired})
+
+        self.assertEqual(response.status_code, 401)
+        data = json.loads(response.data)
+        self.assertEqual(data['error'], 'API Key expired')
 
     def test_audio(self):
         # get one azure voice for french

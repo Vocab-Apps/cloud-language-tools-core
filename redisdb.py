@@ -13,3 +13,23 @@ def get_redis_connection():
 
     r = redis.Redis(host=redis_host, port=redis_port, db=0, password=redis_password)
     return r
+
+def add_api_key(r, api_key, key_type, owner):
+    redis_key = f'api_key:{api_key}'
+    hash_value = {
+        'key_type': key_type,
+        'owner': owner
+    }
+    r.hmset(redis_key, hash_value)
+
+def list_api_keys(r):
+    cursor, keys = r.scan(match='api_key:*')
+    for key in keys:
+        print(key)
+        key_data = r.hgetall(key)
+        print(key_data)
+
+def list_all_keys(r):
+    cursor, keys = r.scan()
+    for key in keys:
+        print(key)

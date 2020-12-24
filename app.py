@@ -55,6 +55,7 @@ class Translate(flask_restful.Resource):
             return {'error': str(err)}, 400
 
 class TranslateAll(flask_restful.Resource):
+    method_decorators = [authenticate]
     def post(self):
         try:
             data = request.json
@@ -63,6 +64,7 @@ class TranslateAll(flask_restful.Resource):
             return {'error': str(err)}, 400
 
 class Transliterate(flask_restful.Resource):
+    method_decorators = [authenticate]
     def post(self):
         try:
             data = request.json
@@ -71,6 +73,7 @@ class Transliterate(flask_restful.Resource):
             return {'error': str(err)}, 400    
 
 class Detect(flask_restful.Resource):
+    method_decorators = [authenticate]
     def post(self):
         data = request.json
         text_list = data['text_list']
@@ -78,6 +81,7 @@ class Detect(flask_restful.Resource):
         return {'detected_language': result.name}
 
 class Audio(flask_restful.Resource):
+    method_decorators = [authenticate]
     def post(self):
         data = request.json
         audio_temp_file = manager.get_tts_audio(data['text'], data['service'], data['voice_key'], data['options'])

@@ -51,7 +51,7 @@ class RedisDb():
         if expiration_timestamp > current_timestamp:
             expire_time_delta = expiration_dt - current_dt
             return {'key_valid': True, 'msg': f'API Key expires in {expire_time_delta.days} days'}
-        return {'key_valid': False, 'msg':f'API Key expired: {expiration_timestamp} {current_timestamp}'}
+        return {'key_valid': False, 'msg':f'API Key expired'}
         
     def list_api_keys(self):
         pattern = self.build_key(KEY_TYPE_API_KEY, '*')

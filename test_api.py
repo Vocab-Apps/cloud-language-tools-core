@@ -16,6 +16,8 @@ class ApiTests(unittest.TestCase):
         # create new API key
         cls.api_key='test_key_01'
         redis_connection.add_api_key(cls.api_key, 'test', 'pytest', datetime.datetime.now() + datetime.timedelta(days=2))
+        cls.api_key_expired='test_key_02_expired'
+        redis_connection.add_api_key(cls.api_key_expired, 'test', 'pytest', datetime.datetime.now() + datetime.timedelta(days=-2))
 
     def test_language_list(self):
         response = self.client.get('/language_list')
@@ -88,6 +90,30 @@ class ApiTests(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['translated_text'], 'There are many foreigners in China')
+
+    def test_translate_not_authenticated(self):
+        source_text = 'Je ne suis pas intéressé.'
+        response = self.client.post('/translate', json={
+            'text': source_text,
+            'service': 'Azure',
+            'from_language_key': 'fr',
+            'to_language_key': 'en'
+        })
+
+        self.assertEqual(response.status_code, 401)
+        data = json.loads(response.data)
+        self.assertEqual(data['error'], "API Key not valid")
+
+        response = self.client.post('/translate', json={
+            'text': '中国有很多外国人',
+            'service': 'Azure',
+            'from_language_key': 'zh-Hans',
+            'to_language_key': 'en'
+        }, headers={'api_key': self.api_key_expired})
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data['error'], 'API Key expired')
 
     def test_translate_all(self):
         source_text = '成本很低'

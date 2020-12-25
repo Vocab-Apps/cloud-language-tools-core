@@ -1,4 +1,5 @@
-
+import json
+import requests
 import cloudlanguagetools.constants
 
 class MandarinCantoneseTransliteration(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
@@ -28,7 +29,7 @@ class MandarinCantoneseTransliteration(cloudlanguagetools.transliterationlanguag
 
 class MandarinCantoneseService(cloudlanguagetools.service.Service):
     def __init__(self):
-        self.url_translator_base = 'https://apiv2.mandarincantonese.com'
+        self.base_url = 'https://apiv2.mandarincantonese.com'
 
 
     def get_tts_voice_list(self):
@@ -47,4 +48,11 @@ class MandarinCantoneseService(cloudlanguagetools.service.Service):
         return result
 
     def get_transliteration(self, text, transliteration_key):
-        return None
+        response = requests.post(self.base_url + '/convert', json={
+            'text': text,
+            'conversion_type': transliteration_key['conversion_type'],
+            'tone_numbers': transliteration_key['tone_numbers'],
+            'spaces': transliteration_key['spaces']
+        })
+        data = json.loads(response.content)
+        return data['romanization']

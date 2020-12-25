@@ -91,13 +91,14 @@ class ServiceManager():
         for service_name, service in self.services.items():
             # locate from language key
             from_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == from_language]
-            assert(len(from_language_entries) == 1)
-            from_language_id = from_language_entries[0].get_language_id()
-            # locate to language key
-            to_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == to_language]
-            assert(len(to_language_entries) == 1)
-            to_language_id = to_language_entries[0].get_language_id()
-            result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
+            if len(from_language_entries) == 1:
+                # this service provides the "from" language in translation list
+                from_language_id = from_language_entries[0].get_language_id()
+                # locate to language key
+                to_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == to_language]
+                assert(len(to_language_entries) == 1)
+                to_language_id = to_language_entries[0].get_language_id()
+                result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
         return result
 
     def get_transliteration(self, text, service, transliteration_key):

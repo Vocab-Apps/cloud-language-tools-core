@@ -4,12 +4,14 @@ import tempfile
 import cloudlanguagetools.constants
 import cloudlanguagetools.azure
 import cloudlanguagetools.google
+import cloudlanguagetools.mandarincantonese
 
 class ServiceManager():
     def  __init__(self):
         self.services = {}
         self.services[cloudlanguagetools.constants.Service.Azure.name] = cloudlanguagetools.azure.AzureService()
         self.services[cloudlanguagetools.constants.Service.Google.name] = cloudlanguagetools.google.GoogleService()
+        self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()
 
     def configure(self):
         # azure

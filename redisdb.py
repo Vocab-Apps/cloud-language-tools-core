@@ -3,9 +3,6 @@ import time
 import datetime
 import redis
 
-ENV_VAR_REDIS_HOST = 'REDIS_HOST'
-ENV_VAR_REDIS_PORT = 'REDIS_PORT'
-ENV_VAR_REDIS_PASSWORD ='REDIS_PASSWORD'
 ENV_VAR_REDIS_URL = 'REDIS_URL'
 
 KEY_TYPE_API_KEY = 'api_key'
@@ -16,9 +13,6 @@ class RedisDb():
 
     def connect(self, db_num=0):
         redis_url = os.environ[ENV_VAR_REDIS_URL]
-        redis_host = os.environ[ENV_VAR_REDIS_HOST]
-        redis_port = os.environ[ENV_VAR_REDIS_PORT]
-        redis_password = os.environ[ENV_VAR_REDIS_PASSWORD]
 
         self.r = redis.from_url(redis_url, db=db_num)
 

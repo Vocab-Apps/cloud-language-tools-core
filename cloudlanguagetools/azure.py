@@ -85,7 +85,7 @@ class AzureTransliterationLanguage(cloudlanguagetools.transliterationlanguage.Tr
         self.to_script_name = to_script_name
 
     def get_transliteration_name(self):
-        result = f'{self.language.lang_name} ({self.from_script_name} to {self.to_script_name})'
+        result = f'{self.language.lang_name} ({self.from_script_name} to {self.to_script_name}), {self.service.name}'
         return result
 
     def get_transliteration_key(self):

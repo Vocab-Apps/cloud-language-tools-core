@@ -11,7 +11,7 @@ class ApiTests(unittest.TestCase):
         super(ApiTests, cls).setUpClass()
         cls.client = app.test_client()
         # reconnect to a different DB num
-        redis_connection.connect(db_num=1)
+        redis_connection.connect(db_num=15)
         redis_connection.clear_db(wait=False)
         # create new API key
         cls.api_key='test_key_01'

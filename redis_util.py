@@ -31,6 +31,9 @@ def main():
     choices = ['add_api_key', 'list_api_keys', 'api_key_valid', 'list_all_keys', 'clear_db']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--api_key', help='Pass in API key to check validity')
+    parser.add_argument('--api_key_type')
+    parser.add_argument('--api_key_owner')
+    parser.add_argument('--api_key_validity', type=int)
 
     args = parser.parse_args()
     
@@ -38,7 +41,10 @@ def main():
 
     if args.action == 'add_api_key':
         api_key = password_generator()
-        connection.add_api_key(api_key, 'test_key', 'luc', datetime.datetime.now() + datetime.timedelta(days=2))
+        api_key_type = args.api_key_type
+        api_key_owner = args.api_key_owner
+        api_key_validity = args.api_key_validity
+        connection.add_api_key(api_key, api_key_type, api_key_owner, datetime.datetime.now() + datetime.timedelta(days=api_key_validity))
     elif args.action == 'list_api_keys':
         connection.list_api_keys()
     elif args.action == 'api_key_valid':

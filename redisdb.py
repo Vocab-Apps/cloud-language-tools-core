@@ -53,9 +53,12 @@ class RedisDb():
         pattern = self.build_key(KEY_TYPE_API_KEY, '*')
         cursor, keys = self.r.scan(match=pattern)
         for key in keys:
-            print(key)
+            key_str = key.decode('utf-8')
+            api_key = key_str.split(':')[-1]
+            validity = self.api_key_valid(api_key)
+            # print(key)
             key_data = self.r.hgetall(key)
-            print(key_data)
+            print(f'{api_key} {key_data}, {validity}')
 
     def list_all_keys(self):
         cursor, keys = self.r.scan()

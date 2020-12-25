@@ -211,6 +211,33 @@ class ApiTests(unittest.TestCase):
         result = json.loads(response.data)
         self.assertEqual({'transliterated_text': 'chéngběn hěn dī'}, result)
 
+    def test_transliteration_mandarin_cantonese_2(self):
+        response = self.client.get('/transliteration_language_list')
+        transliteration_language_list = json.loads(response.data)
+
+        service = 'MandarinCantonese'
+        source_text = '好多嘢要搞'
+        from_language = 'yue'
+        transliteration_candidates = [x for x in transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
+        self.assertTrue(len(transliteration_candidates) > 0) # once more services are introduced, change this
+
+        # pick the one
+        selected_candidate = [x for x in transliteration_candidates if '(Diacritics )' in x['transliteration_name']]
+        self.assertTrue(len(selected_candidate) == 1)
+
+        transliteration_option = selected_candidate[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+
+        response = self.client.post('/transliterate', json={
+            'text': source_text,
+            'service': service,
+            'transliteration_key': transliteration_key
+        }, headers={'api_key': self.api_key})
+
+        result = json.loads(response.data)
+        self.assertEqual({'transliterated_text': 'hóudō jě jîu gáau'}, result)
+
     def test_transliteration_not_authenticated(self):
         response = self.client.get('/transliteration_language_list')
         transliteration_language_list = json.loads(response.data)

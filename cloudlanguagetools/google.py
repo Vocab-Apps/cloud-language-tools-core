@@ -1,5 +1,6 @@
 import os
 import tempfile
+import html
 import google.cloud.texttospeech
 import google.cloud.translate_v2
 import cloudlanguagetools.service
@@ -141,7 +142,7 @@ class GoogleService(cloudlanguagetools.service.Service):
     def get_translation(self, text, from_language_key, to_language_key):
         client = self.get_translation_client()
         result = client.translate(text, source_language=from_language_key, target_language=to_language_key)
-        return result["translatedText"]
+        return html.unescape(result["translatedText"])
 
     def get_translation_languages(self):
         translate_client = google.cloud.translate_v2.Client()

@@ -86,7 +86,8 @@ class TestTranslation(unittest.TestCase):
         # chinese
         source_text = '成本很低'
         from_language = Language.zh_cn.name
-        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language]
+        service = 'Azure'
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
         self.assertTrue(len(transliteration_candidates) == 1)
         transliteration_option = transliteration_candidates[0]
         service = transliteration_option['service']

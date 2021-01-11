@@ -1,0 +1,21 @@
+speed and pitch for text to speech:
+
+
+documentation:
+Azure: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup?tabs=csharp#adjust-prosody
+AWS polly: https://docs.aws.amazon.com/polly/latest/dg/supportedtags.html#prosody-tag
+Google: https://googleapis.dev/python/texttospeech/latest/texttospeech_v1/types.html
+IBM Watson: https://cloud.ibm.com/docs/text-to-speech?topic=text-to-speech-elements#prosody_element
+
+pitch:
+Azure: no range specified, -20Hz to +80Hz ?
+AWS polly: no range specified, -20%  to 20%?
+Google: -20.0 to +20.0
+Watson: no range specified, -50% to +50% ?
+
+
+speed:
+Azure: no range specified, 0.5 to 3 ?
+AWS polly: 20% - 200%
+Google: speaking_rate, 0.25 to 4.0
+Watson: no range specified, -50% to +%50 ?

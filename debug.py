@@ -46,6 +46,7 @@ def test_google_audio():
     print(f'tts result: {permanent_file_name}')
 
 
+
 def get_voice_list():
     manager = get_manager()
     tts_voice_list_json = manager.get_tts_voice_list_json()
@@ -220,7 +221,7 @@ def end_to_end_test():
 if __name__ == '__main__':
     # test_azure_audio()
     # test_google_audio()
-    # get_voice_list()
+    get_voice_list()
     # get_azure_translation_languages()
     # get_google_translation_languages()
     #output_languages_enum()
@@ -233,4 +234,4 @@ if __name__ == '__main__':
     # dictionary_examples_azure()
     # end_to_end_test()
     # transliterate_azure()
-    get_transliteration_language_list()
+    # get_transliteration_language_list()

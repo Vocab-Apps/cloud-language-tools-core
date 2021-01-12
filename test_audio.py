@@ -68,3 +68,18 @@ class TestAudio(unittest.TestCase):
     def test_cantonese_azure(self):
         source_text = '天氣預報'
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_HK, 'zh-HK')
+
+
+    def test_azure_options(self):
+        service = 'Azure'
+        source_text = 'Je ne suis pas intéressé.'
+
+        voice_key = {
+            "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
+        }
+
+        options = {'rate': 0.8, 'pitch': -10}
+
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR')
+        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))

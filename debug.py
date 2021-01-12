@@ -55,12 +55,14 @@ def play_google_audio():
     text = 'hello world test 1'
 
     voice_key = {
-        'language_code': "en-US",
-        'name': "en-US-Standard-C",
+        'language_code': "en-GB",
+        'name': "en-GB-Wavenet-A",
         'ssml_gender': "FEMALE"
     }    
 
-    result = manager.get_tts_audio(text, service, voice_key, {})
+    options = {'speaking_rate': 1.5}
+    options = {'pitch': 5}
+    result = manager.get_tts_audio(text, service, voice_key, options)
     filename = result.name
     music = pydub.AudioSegment.from_mp3(filename)
     pydub.playback.play(music)    

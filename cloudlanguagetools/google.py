@@ -99,7 +99,9 @@ class GoogleService(cloudlanguagetools.service.Service):
         )
 
         audio_config = google.cloud.texttospeech.AudioConfig(
-            audio_encoding=google.cloud.texttospeech.AudioEncoding.MP3
+            audio_encoding=google.cloud.texttospeech.AudioEncoding.MP3,
+            speaking_rate=options.get('speaking_rate', 1.0),
+            pitch=options.get('pitch', 0.0)
         )
 
         response = client.synthesize_speech(

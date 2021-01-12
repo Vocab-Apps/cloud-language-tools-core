@@ -38,6 +38,22 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
             'ssml_gender': self.google_ssml_gender.name
         }
 
+    def get_options(self):
+        return {
+            'speaking_rate': {
+                'type': 'number',
+                'min': 0.25,
+                'max': 4.0,
+                'default': 1.0
+            },
+            'pitch': {
+                'type': 'number',
+                'min': -20.0,
+                'max': 20.0,
+                'default': 0.0
+            }
+        }        
+
 
 def get_translation_language_enum(language_id):
     google_language_id_map = {
@@ -69,6 +85,7 @@ class GoogleTranslationLanguage(cloudlanguagetools.translationlanguage.Translati
 
     def get_language_id(self):
         return self.language_id
+
 
 class GoogleService(cloudlanguagetools.service.Service):
     def __init__(self):

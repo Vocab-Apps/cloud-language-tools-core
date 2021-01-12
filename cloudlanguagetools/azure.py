@@ -44,6 +44,22 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         else:
             return f'{self.display_name} ({self.voice_type})'
 
+    def get_options(self):
+        return {
+            'rate' : {
+                'type': 'number',
+                'min': 0.5,
+                'max': 3.0,
+                'default': 1.0
+            },
+            'pitch': {
+                'type': 'number',
+                'min': -100,
+                'max': 100,
+                'default': 0
+            }
+        }
+
 def get_translation_language_enum(language_id):
     # print(f'language_id: {language_id}')
     azure_language_id_map = {
@@ -166,7 +182,7 @@ class AzureService(cloudlanguagetools.service.Service):
             voice_list = json.loads(response.content)
             result = []
             for voice_data in voice_list:
-                print(voice_data)
+                # print(voice_data)
                 result.append(AzureVoice(voice_data))
             return result
 

@@ -60,8 +60,8 @@ def play_google_audio():
         'ssml_gender': "FEMALE"
     }    
 
-    options = {'speaking_rate': 1.5}
-    options = {'pitch': 5}
+    options = {'speaking_rate': 1.5} # 0.25 to 4.0
+    options = {'pitch': 5} # -20.0 to 20.0
     result = manager.get_tts_audio(text, service, voice_key, options)
     filename = result.name
     music = pydub.AudioSegment.from_mp3(filename)
@@ -261,8 +261,8 @@ if __name__ == '__main__':
     # test_azure_audio()
     # test_google_audio()
     # play_google_audio()
-    play_azure_audio()
-    # get_voice_list()
+    # play_azure_audio()
+    get_voice_list()
     # get_azure_translation_languages()
     # get_google_translation_languages()
     #output_languages_enum()

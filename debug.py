@@ -4,6 +4,8 @@ import json
 import tempfile
 import shutil 
 import unittest
+import pydub
+import pydub.playback
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
@@ -45,6 +47,23 @@ def test_google_audio():
     shutil.copyfile(result.name, permanent_file_name)
     print(f'tts result: {permanent_file_name}')
 
+
+def play_google_audio():
+    manager = get_manager()
+
+    service = 'Google'
+    text = 'hello world test 1'
+
+    voice_key = {
+        'language_code': "en-US",
+        'name': "en-US-Standard-C",
+        'ssml_gender': "FEMALE"
+    }    
+
+    result = manager.get_tts_audio(text, service, voice_key, {})
+    filename = result.name
+    music = pydub.AudioSegment.from_mp3(filename)
+    pydub.playback.play(music)    
 
 
 def get_voice_list():
@@ -221,7 +240,8 @@ def end_to_end_test():
 if __name__ == '__main__':
     # test_azure_audio()
     # test_google_audio()
-    get_voice_list()
+    play_google_audio()
+    # get_voice_list()
     # get_azure_translation_languages()
     # get_google_translation_languages()
     #output_languages_enum()

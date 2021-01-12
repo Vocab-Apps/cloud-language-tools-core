@@ -67,6 +67,24 @@ def play_google_audio():
     music = pydub.AudioSegment.from_mp3(filename)
     pydub.playback.play(music)    
 
+def play_azure_audio():
+    manager = get_manager()
+
+    service = 'Azure'
+    text = 'hello world test 1'
+
+    voice_key = {
+        "name": "Microsoft Server Speech Text to Speech Voice (en-GB, MiaNeural)"
+    }
+
+    #options = {'speaking_rate': 1.5}
+    #options = {'pitch': 5}
+    # options = {'pitch': 100} # -100 to +100?
+    options = {'rate': 3.0} # 0.5 to 3 ?
+    result = manager.get_tts_audio(text, service, voice_key, options)
+    filename = result.name
+    music = pydub.AudioSegment.from_mp3(filename)
+    pydub.playback.play(music)    
 
 def get_voice_list():
     manager = get_manager()
@@ -242,7 +260,8 @@ def end_to_end_test():
 if __name__ == '__main__':
     # test_azure_audio()
     # test_google_audio()
-    play_google_audio()
+    # play_google_audio()
+    play_azure_audio()
     # get_voice_list()
     # get_azure_translation_languages()
     # get_google_translation_languages()

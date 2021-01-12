@@ -131,11 +131,20 @@ class AzureService(cloudlanguagetools.service.Service):
         audio_config = azure.cognitiveservices.speech.audio.AudioOutputConfig(filename=output_temp_filename)
         synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
 
+        pitch = options.get('pitch', 0)
+        pitch_str = f'{pitch:+.0f}Hz'
+        rate = options.get('rate', 0)
+        rate_str = f'{rate:0.1f}'
+
         ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">
   <voice name="{voice_key['name']}">
-    {text}
+    <prosody pitch="{pitch_str}" rate="{rate_str}" >
+        {text}
+    </prosody>
   </voice>
 </speak>"""
+
+        # print(ssml_str)
 
         result = synthesizer.start_speaking_ssml(ssml_str)
 

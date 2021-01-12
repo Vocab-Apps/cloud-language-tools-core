@@ -149,7 +149,7 @@ class AzureService(cloudlanguagetools.service.Service):
 
         pitch = options.get('pitch', 0)
         pitch_str = f'{pitch:+.0f}Hz'
-        rate = options.get('rate', 0)
+        rate = options.get('rate', 1.0)
         rate_str = f'{rate:0.1f}'
 
         ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">

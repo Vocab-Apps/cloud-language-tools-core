@@ -5,6 +5,7 @@ import cloudlanguagetools.constants
 import cloudlanguagetools.azure
 import cloudlanguagetools.google
 import cloudlanguagetools.mandarincantonese
+import cloudlanguagetools.easypronunciation
 
 class ServiceManager():
     def  __init__(self):
@@ -12,6 +13,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.Azure.name] = cloudlanguagetools.azure.AzureService()
         self.services[cloudlanguagetools.constants.Service.Google.name] = cloudlanguagetools.google.GoogleService()
         self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()
+        self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name] = cloudlanguagetools.easypronunciation.EasyPronunciationService()
 
     def configure(self):
         # azure
@@ -30,6 +32,10 @@ class ServiceManager():
             f.close()
         self.configure_google(google_key_filename)
 
+        # easypronunciation
+        easypronunciation_key = os.environ['EASYPRONUNCIATION_KEY']
+        self.configure_easypronunciation(easypronunciation_key)
+
         self.translation_language_list = self.get_translation_language_list()
 
     def configure_azure(self, region, key, translator_key):
@@ -38,6 +44,9 @@ class ServiceManager():
     def configure_google(self, credentials_path):
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
         self.services[cloudlanguagetools.constants.Service.Google.name].configure()
+
+    def configure_easypronunciation(self, access_token):
+        self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name].configure(access_token)
 
     def get_language_list(self):
         result_dict = {}

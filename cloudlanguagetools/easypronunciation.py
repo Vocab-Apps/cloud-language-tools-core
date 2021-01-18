@@ -45,7 +45,12 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'show_rare_pronunciations':0,
                 'french_liaison_styling': 'one_by_one',
                 'spell_numbers':1
-            })
+            }),
+            EasyPronunciationTransliterationLanguage('/italian-api.php', cloudlanguagetools.constants.Language.it,
+            {
+                'version': 1,
+                'spell_numbers':1
+            })            
         ]
         return result
 
@@ -59,11 +64,11 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
         encoded_parameters = urllib.parse.urlencode(parameters)
         full_url = f'{api_url}?{encoded_parameters}'
 
-        # print(f'full_url: {full_url}')
-
+        print(full_url)
         request = requests.get(full_url)
         result = request.json()
 
+        print(result)
 
         phonetic_transcription = result['phonetic_transcription']
         result_components = []

@@ -46,11 +46,6 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'french_liaison_styling': 'one_by_one',
                 'spell_numbers':1
             }),
-            EasyPronunciationTransliterationLanguage('/italian-api.php', cloudlanguagetools.constants.Language.it,
-            {
-                'version': 1,
-                'spell_numbers':1
-            })            
         ]
         return result
 

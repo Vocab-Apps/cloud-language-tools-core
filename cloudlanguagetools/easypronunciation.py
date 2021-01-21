@@ -59,11 +59,11 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
         encoded_parameters = urllib.parse.urlencode(parameters)
         full_url = f'{api_url}?{encoded_parameters}'
 
-        print(full_url)
+        # print(full_url)
         request = requests.get(full_url)
         result = request.json()
 
-        print(result)
+        # print(result)
 
         phonetic_transcription = result['phonetic_transcription']
         result_components = []

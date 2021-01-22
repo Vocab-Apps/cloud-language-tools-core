@@ -6,6 +6,7 @@ class Service(enum.Enum):
     Google = enum.auto()
     MandarinCantonese = enum.auto()
     EasyPronunciation = enum.auto()
+    Watson = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()
@@ -77,6 +78,7 @@ class Language(enum.Enum):
     mi = ("Maori")
     mr = ("Marathi")
     mn = ("Mongolian")
+    cnr = ("Montenegrin")
     my = ("Myanmar (Burmese)")
     ne = ("Nepali")
     no = ("Norwegian")

@@ -137,6 +137,18 @@ def get_google_translation_languages():
         f.close()
     print(f'wrote output to {output_filename}')    
 
+
+def get_watson_translation_languages():
+    manager = get_manager()
+    data = manager.services[cloudlanguagetools.constants.Service.Watson.name].get_translation_languages()
+    # data = manager.services[cloudlanguagetools.constants.Service.Google.name].get_translation_language_list()
+    # print(data)
+    output_filename = 'temp_data_files/watson_translation_languages.json'
+    with open(output_filename, 'w') as f:
+        f.write(json.dumps(data, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
+        f.close()
+    print(f'wrote output to {output_filename}')        
+
 def output_languages_enum():
     manager = get_manager()
     data_google = manager.services[cloudlanguagetools.constants.Service.Google.name].get_translation_languages()
@@ -265,8 +277,9 @@ if __name__ == '__main__':
     # get_voice_list()
     # get_azure_translation_languages()
     # get_google_translation_languages()
+    # get_watson_translation_languages()
     #output_languages_enum()
-    # get_translation_language_list()
+    get_translation_language_list()
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()
@@ -275,4 +288,4 @@ if __name__ == '__main__':
     # dictionary_examples_azure()
     # end_to_end_test()
     # transliterate_azure()
-    get_transliteration_language_list()
+    # get_transliteration_language_list()

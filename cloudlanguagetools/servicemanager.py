@@ -6,6 +6,7 @@ import cloudlanguagetools.azure
 import cloudlanguagetools.google
 import cloudlanguagetools.mandarincantonese
 import cloudlanguagetools.easypronunciation
+import cloudlanguagetools.watson
 
 class ServiceManager():
     def  __init__(self):
@@ -14,6 +15,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.Google.name] = cloudlanguagetools.google.GoogleService()
         self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()
         self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name] = cloudlanguagetools.easypronunciation.EasyPronunciationService()
+        self.services[cloudlanguagetools.constants.Service.Watson.name] = cloudlanguagetools.watson.WatsonService()
 
     def configure(self):
         # azure
@@ -36,7 +38,12 @@ class ServiceManager():
         easypronunciation_key = os.environ['EASYPRONUNCIATION_KEY']
         self.configure_easypronunciation(easypronunciation_key)
 
-        self.translation_language_list = self.get_translation_language_list()
+        # watson
+        watson_api_key = os.environ['WATSON_API_KEY']
+        watson_url = os.environ['WATSON_URL']
+        self.configure_watson(watson_api_key, watson_url)
+
+        # self.translation_language_list = self.get_translation_language_list()
 
     def configure_azure(self, region, key, translator_key):
         self.services[cloudlanguagetools.constants.Service.Azure.name].configure(key, region, translator_key)
@@ -47,6 +54,9 @@ class ServiceManager():
 
     def configure_easypronunciation(self, access_token):
         self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name].configure(access_token)
+
+    def configure_watson(self, api_key, url):
+        self.services[cloudlanguagetools.constants.Service.Watson.name].configure(api_key, url)
 
     def get_language_list(self):
         result_dict = {}

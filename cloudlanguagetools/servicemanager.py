@@ -43,7 +43,7 @@ class ServiceManager():
         watson_url = os.environ['WATSON_URL']
         self.configure_watson(watson_api_key, watson_url)
 
-        # self.translation_language_list = self.get_translation_language_list()
+        self.translation_language_list = self.get_translation_language_list()
 
     def configure_azure(self, region, key, translator_key):
         self.services[cloudlanguagetools.constants.Service.Azure.name].configure(key, region, translator_key)

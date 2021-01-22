@@ -57,3 +57,22 @@ class WatsonService(cloudlanguagetools.service.Service):
                 language_id = entry['language']
                 result.append(WatsonTranslationLanguage(language_id))
         return result        
+
+    def get_transliteration_language_list(self):
+        return []
+
+    def get_translation(self, text, from_language_key, to_language_key):
+        body = {
+            'text': text,
+            'source': from_language_key,
+            'target': to_language_key
+        }
+        response = requests.post(self.url + '/v3/translate?version=2018-05-01', auth=('apikey', self.key), json=body)
+
+        if response.status_code == 200:
+            # {'translations': [{'translation': 'Le coût est très bas.'}], 'word_count': 2, 'character_count': 4}
+            data = response.json()
+            return data['translations'][0]['translation']
+
+        error_message = error_message = f'Watson: could not translate text [{text}] from {from_language_key} to {to_language_key} ({response.json()})'
+        raise cloudlanguagetools.errors.RequestError(error_message)

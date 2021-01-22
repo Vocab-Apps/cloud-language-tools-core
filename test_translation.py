@@ -80,8 +80,10 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_all_translations(source_text, from_language, to_language)
         self.assertTrue('Azure' in result)
         self.assertTrue('Google' in result)
+        self.assertTrue('Watson' in result)
         self.assertEqual(result['Azure'], 'Le coût est faible')
         self.assertEqual(result['Google'], 'Coût très bas')
+        self.assertEqual(result['Watson'], 'Le coût est très bas.')
 
     def test_transliteration(self):
         

@@ -63,11 +63,17 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
         request = requests.get(full_url)
         result = request.json()
 
+        # print(request)
         # print(result)
 
-        phonetic_transcription = result['phonetic_transcription']
-        result_components = []
-        for entry in phonetic_transcription:
-            result_components.append(entry['transcriptions'][0])
+        if 'phonetic_transcription' in result:
+            phonetic_transcription = result['phonetic_transcription']
+            result_components = []
+            for entry in phonetic_transcription:
+                result_components.append(entry['transcriptions'][0])
 
-        return ' '.join(result_components)
+            return ' '.join(result_components)
+
+        # an error occured
+        error_message = f'EasyPronunciation: could not perform conversion: {str(result)}'
+        raise cloudlanguagetools.errors.RequestError(error_message)

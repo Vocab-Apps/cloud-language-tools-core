@@ -86,6 +86,17 @@ def play_azure_audio():
     music = pydub.AudioSegment.from_mp3(filename)
     pydub.playback.play(music)    
 
+def get_watson_voice_list():
+    manager = get_manager()
+    #tts_voice_list_json = manager.get_tts_voice_list_json()
+    # print(tts_voice_list_json)    
+    data = manager.services[cloudlanguagetools.constants.Service.Watson.name].list_voices()
+    output_filename = 'temp_data_files/watson_voicelist.json'
+    with open(output_filename, 'w', encoding='utf8') as f:
+        f.write(json.dumps(data, indent=4, sort_keys=True, ensure_ascii=False))
+        f.close()
+    print(f'wrote {output_filename}')
+
 def get_voice_list():
     manager = get_manager()
     tts_voice_list_json = manager.get_tts_voice_list_json()
@@ -274,12 +285,13 @@ if __name__ == '__main__':
     # test_google_audio()
     # play_google_audio()
     # play_azure_audio()
-    # get_voice_list()
+    get_voice_list()
+    # get_watson_voice_list()
     # get_azure_translation_languages()
     # get_google_translation_languages()
     # get_watson_translation_languages()
     #output_languages_enum()
-    get_translation_language_list()
+    #get_translation_language_list()
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()

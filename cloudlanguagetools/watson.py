@@ -23,6 +23,15 @@ def get_translation_language_enum(language_id):
         language_id = watson_language_id_map[language_id]
     return cloudlanguagetools.constants.Language[language_id]
 
+def get_audio_language_enum(voice_language):
+    watson_audio_id_map = {
+        'ar-MS': 'ar_XA'
+    }
+    language_enum_name = voice_language.replace('-', '_')
+    if voice_language in watson_audio_id_map:
+        language_enum_name = watson_audio_id_map[voice_language]
+    return cloudlanguagetools.constants.AudioLanguage[language_enum_name]
+
 class WatsonTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language_id):
         self.service = cloudlanguagetools.constants.Service.Watson
@@ -31,6 +40,26 @@ class WatsonTranslationLanguage(cloudlanguagetools.translationlanguage.Translati
 
     def get_language_id(self):
         return self.language_id
+
+class WatsonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
+    def __init__(self, voice_data):
+        self.service = cloudlanguagetools.constants.Service.Watson
+        self.audio_language = get_audio_language_enum(voice_data['language'])
+        self.name = voice_data['name']
+        self.description = voice_data['description']
+        self.gender = cloudlanguagetools.constants.Gender[voice_data['gender'].capitalize()]
+
+
+    def get_voice_key(self):
+        return {
+            'name': self.name
+        }
+
+    def get_voice_shortname(self):
+        return self.description.split(':')[0]
+
+    def get_options(self):
+        return {}
 
 class WatsonService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -60,10 +89,19 @@ class WatsonService(cloudlanguagetools.service.Service):
                 result.append(WatsonTranslationLanguage(language_id))
         return result        
 
+    def list_voices(self):
+        response = requests.get(self.speech_url + '/v1/voices', auth=('apikey', self.speech_key))
+        data = response.json()
+        return data['voices']
+
     def get_tts_voice_list(self):
+        result = []
 
+        voice_list = self.list_voices()
+        for voice in voice_list:
+            result.append(WatsonVoice(voice))
 
-        return []
+        return result
 
     def get_transliteration_language_list(self):
         return []

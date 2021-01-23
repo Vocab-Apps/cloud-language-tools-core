@@ -167,6 +167,8 @@ class AudioLanguage(enum.Enum):
     en_US = (Language.en, "English (US)")
     es_ES = (Language.es, "Spanish (Spain)")
     es_MX = (Language.es, "Spanish (Mexico)")
+    es_LA = (Language.es, "Spanish (Latin America)")
+    es_US = (Language.es, "Spanish (North America)")
     et_EE = (Language.et, "Estonian")
     fi_FI = (Language.fi, "Finnish")
     fil_PH = (Language.tl, "Filipino (Philippines)")

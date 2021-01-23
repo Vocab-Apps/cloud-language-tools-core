@@ -48,6 +48,7 @@ class WatsonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.audio_language = get_audio_language_enum(voice_data['language'])
         self.name = voice_data['name']
         self.description = voice_data['description']
+        self.description = voice_data['description']
         self.gender = cloudlanguagetools.constants.Gender[voice_data['gender'].capitalize()]
 
 
@@ -57,7 +58,10 @@ class WatsonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         }
 
     def get_voice_shortname(self):
-        return self.description.split(':')[0]
+        is_dnn = ''
+        if 'Dnn' in self.description:
+            is_dnn = ' (Dnn)'
+        return self.description.split(':')[0] + is_dnn
 
     def get_options(self):
         return {}

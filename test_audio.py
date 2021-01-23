@@ -65,6 +65,10 @@ class TestAudio(unittest.TestCase):
         source_text = '老人家'
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_CN, 'zh-CN') 
 
+    def test_mandarin_watson(self):
+        source_text = '老人家'
+        self.verify_service_audio_language(source_text, Service.Watson, AudioLanguage.zh_CN, 'zh-CN')
+
     def test_cantonese_google(self):
         source_text = '天氣預報'
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.zh_HK, 'zh-HK')

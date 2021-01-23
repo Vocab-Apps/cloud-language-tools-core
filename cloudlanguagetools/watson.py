@@ -1,5 +1,6 @@
 import json
 import requests
+import tempfile
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -102,6 +103,35 @@ class WatsonService(cloudlanguagetools.service.Service):
             result.append(WatsonVoice(voice))
 
         return result
+
+    def get_tts_audio(self, text, voice_key, options):
+        output_temp_file = tempfile.NamedTemporaryFile()
+        output_temp_filename = output_temp_file.name
+
+        base_url = self.speech_url
+        url_path = '/v1/synthesize'
+        voice_name = voice_key["name"]
+        constructed_url = base_url + url_path + f'?voice={voice_name}'
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'audio/mp3'
+        }
+
+        data = {
+            'text': text
+        }
+
+        response = requests.post(constructed_url, data=json.dumps(data), auth=('apikey', self.speech_key), headers=headers)
+
+        if response.status_code == 200:
+            with open(output_temp_filename, 'wb') as audio:
+                audio.write(response.content)
+            return output_temp_file
+
+        # otherwise, an error occured
+        error_message = f"Status code: {response.status_code} reason: {response.reason} voice: [{voice_name}] api key: [{api_key}]]"
+        raise cloudlanguagetools.errors.RequestError(error_message)
+
 
     def get_transliteration_language_list(self):
         return []

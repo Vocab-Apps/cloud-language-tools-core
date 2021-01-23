@@ -36,15 +36,17 @@ class WatsonService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass
 
-    def configure(self, key, url):
-        self.key = key
-        self.url = url
+    def configure(self, translator_key, translator_url, speech_key, speech_url):
+        self.translator_key = translator_key
+        self.translator_url = translator_url
+        self.speech_key = speech_key
+        self.speech_url = speech_url
     
     def get_tts_voice_list(self):
         return []
 
     def get_translation_languages(self):
-        response = requests.get(self.url + '/v3/languages?version=2018-05-01', auth=('apikey', self.key))
+        response = requests.get(self.translator_url + '/v3/languages?version=2018-05-01', auth=('apikey', self.translator_key))
         return response.json()
 
     def get_translation_language_list(self):
@@ -58,6 +60,11 @@ class WatsonService(cloudlanguagetools.service.Service):
                 result.append(WatsonTranslationLanguage(language_id))
         return result        
 
+    def get_tts_voice_list(self):
+
+
+        return []
+
     def get_transliteration_language_list(self):
         return []
 
@@ -67,7 +74,7 @@ class WatsonService(cloudlanguagetools.service.Service):
             'source': from_language_key,
             'target': to_language_key
         }
-        response = requests.post(self.url + '/v3/translate?version=2018-05-01', auth=('apikey', self.key), json=body)
+        response = requests.post(self.translator_url + '/v3/translate?version=2018-05-01', auth=('apikey', self.translator_key), json=body)
 
         if response.status_code == 200:
             # {'translations': [{'translation': 'Le coût est très bas.'}], 'word_count': 2, 'character_count': 4}

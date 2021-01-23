@@ -39,9 +39,11 @@ class ServiceManager():
         self.configure_easypronunciation(easypronunciation_key)
 
         # watson
-        watson_api_key = os.environ['WATSON_API_KEY']
-        watson_url = os.environ['WATSON_URL']
-        self.configure_watson(watson_api_key, watson_url)
+        watson_translator_api_key = os.environ['WATSON_TRANSLATOR_API_KEY']
+        watson_translator_url = os.environ['WATSON_TRANSLATOR_URL']
+        watson_speech_api_key = os.environ['WATSON_SPEECH_API_KEY']
+        watson_speech_url = os.environ['WATSON_SPEECH_URL']
+        self.configure_watson(watson_translator_api_key, watson_translator_url, watson_speech_api_key, watson_speech_url)
 
         self.translation_language_list = self.get_translation_language_list()
 
@@ -55,8 +57,8 @@ class ServiceManager():
     def configure_easypronunciation(self, access_token):
         self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name].configure(access_token)
 
-    def configure_watson(self, api_key, url):
-        self.services[cloudlanguagetools.constants.Service.Watson.name].configure(api_key, url)
+    def configure_watson(self, translator_api_key, translator_url, speech_api_key, speech_url):
+        self.services[cloudlanguagetools.constants.Service.Watson.name].configure(translator_api_key, translator_url, speech_api_key, speech_url)
 
     def get_language_list(self):
         result_dict = {}

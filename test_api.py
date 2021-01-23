@@ -144,7 +144,8 @@ class ApiTests(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual({
             'Google': 'Coût très bas',
-            'Azure': 'Le coût est faible'
+            'Azure': 'Le coût est faible',
+            'Watson': 'Le coût est très bas.'
         }, data)
 
     def test_translate_error(self):

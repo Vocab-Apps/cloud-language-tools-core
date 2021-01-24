@@ -4,9 +4,12 @@ from flask import Flask, request, send_file, jsonify
 import flask_restful
 import json
 import functools
+import os
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.errors
 import redisdb
+import patreon
+import patreon.schemas
 
 app = Flask(__name__)
 api = flask_restful.Api(app)
@@ -94,6 +97,46 @@ class VerifyApiKey(flask_restful.Resource):
         result = redis_connection.api_key_valid(api_key)
         return result
 
+class PatreonKey(flask_restful.Resource):
+    def get(self):
+        client_id = os.environ['PATREON_CLIENT_ID']
+        client_secret = os.environ['PATREON_CLIENT_SECRET']
+        redirect_uri = os.environ['PATREON_REDIRECT_URI']
+        oauth_client = patreon.OAuth(client_id, client_secret)
+        tokens = oauth_client.get_tokens(request.args.get('code'), redirect_uri)
+        access_token = tokens['access_token']
+
+        api_client = patreon.API(access_token)
+
+        # user_response = api_client.fetch_user()
+        # user = user_response.data()
+        # pledges = user.relationship('pledges')
+        # pledge = pledges[0] if pledges and len(pledges) > 0 else None
+
+        # print(f'pledge: {pledge}')
+
+        user_response = api_client.get_identity(includes=['memberships','campaign'])
+        user_data = user_response.json_data
+        print(f'user_data: {user_data}')
+        user_id = user_data['data']['id']
+        print(f'user_id: {user_id}')
+
+        # # now, get member data
+        # member_response = api_client.get_members_by_id(user_id)
+        # print(type(member_response))
+        # print(dir(member_response))
+        # print(member_response)
+
+
+
+        # user = user_response.data()
+        # user = api_client.fetch_user()
+        # print(type(user))
+        # print(dir(user))
+        # print(user)
+        # print(user.json_data)
+        return 'query done'
+
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
 api.add_resource(TranslationLanguageList, '/translation_language_list')
@@ -104,6 +147,7 @@ api.add_resource(Transliterate, '/transliterate')
 api.add_resource(Detect, '/detect')
 api.add_resource(Audio, '/audio')
 api.add_resource(VerifyApiKey, '/verify_api_key')
+api.add_resource(PatreonKey, '/patreon_key')
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')

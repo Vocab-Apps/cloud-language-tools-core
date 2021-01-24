@@ -8,8 +8,7 @@ import os
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.errors
 import redisdb
-import patreon
-import patreon.schemas
+import patreon_utils
 
 app = Flask(__name__)
 api = flask_restful.Api(app)
@@ -99,61 +98,12 @@ class VerifyApiKey(flask_restful.Resource):
 
 class PatreonKey(flask_restful.Resource):
     def get(self):
-        client_id = os.environ['PATREON_CLIENT_ID']
-        client_secret = os.environ['PATREON_CLIENT_SECRET']
-        redirect_uri = os.environ['PATREON_REDIRECT_URI']
+        # www.patreon.com/oauth2/authorize?response_type=code&client_id=trDOSYhOAtp3MRuBhaZgnfCv4Visg237B2gslK4dha9K780iEClYNBM0QW1OH8MM&redirect_uri=https://4b1c5e33b08b.ngrok.io/patreon_key
 
-        creator_access_token = os.environ['PATREON_ACCESS_TOKEN']
-        campaign_id = os.environ['PATREON_CAMPAIGN_ID']
+        oauth_code = request.args.get('code')
+        result = patreon_utils.user_authorized(oauth_code)
 
-        oauth_client = patreon.OAuth(client_id, client_secret)
-        tokens = oauth_client.get_tokens(request.args.get('code'), redirect_uri)
-        access_token = tokens['access_token']
-
-        api_client = patreon.API(access_token)
-
-        user_authorized = False
-
-        user_response = api_client.get_identity(includes=['memberships', 'campaign'])
-        user_data = user_response.json_data
-        print(f'user_data: {user_data}')
-        user_id = user_data['data']['id']
-        print(f'user_id: {user_id}')
-        
-        # check for memberships
-        memberships = user_data['data']['relationships']['memberships']['data']
-        if len(memberships) > 0:
-            print(memberships[0])
-            membership_id = memberships[0]['id']
-
-            # obtain info about this membership:
-            creator_api_client = patreon.API(creator_access_token)
-            membership_data = creator_api_client.get_members_by_id(membership_id, includes=['currently_entitled_tiers'])
-
-            enabled_tiers = membership_data.json_data['data']['relationships']['currently_entitled_tiers']['data']
-            if len(enabled_tiers) > 0:
-                enabled_tier = enabled_tiers[0]
-                user_tier_id = enabled_tier['id']
-
-                # make sure this is one of the tiers of the campaign
-                campaign_data = creator_api_client.get_campaigns_by_id(campaign_id, includes=['tiers'])
-                print(f'campaign_data: {campaign_data.json_data}')
-                # {'data': {'attributes': {}, 'id': '3214584', 'relationships': {'tiers': {'data': [{'id': '4087058', 'type': 'tier'}, {'id': '4087060', 'type': 'tier'}]}},
-                tier_list = campaign_data.json_data['data']['relationships']['tiers']['data']
-                tier_set = {tier['id']:True for tier in tier_list}
-
-                if user_tier_id in tier_set:
-                    user_authorized = True
-
-
-
-            # {'data': {'attributes': {}, 'id': 'ff8e86a7-9038-4fe8-a75a-9abcf837973e', 'relationships': {'currently_entitled_tiers': {'data': [{'id': '4087058', 'type': 'tier'}]}}, 'type': 'member'}, 'included': [{'attributes': {}, 'id': '4087058', 'type': 'tier'}], 'links': {'self': 'https://www.patreon.com/api/oauth2/v2/members/ff8e86a7-9038-4fe8-a75a-9abcf837973e'}}
-
-            # obtain info about the campaign
-
-
-
-        return f'user_authorized: {user_authorized}'
+        return result
 
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')

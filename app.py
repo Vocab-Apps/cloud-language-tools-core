@@ -98,7 +98,7 @@ class VerifyApiKey(flask_restful.Resource):
 
 class PatreonKey(flask_restful.Resource):
     def get(self):
-        # www.patreon.com/oauth2/authorize?response_type=code&client_id=trDOSYhOAtp3MRuBhaZgnfCv4Visg237B2gslK4dha9K780iEClYNBM0QW1OH8MM&redirect_uri=https://4b1c5e33b08b.ngrok.io/patreon_key
+        # www.patreon.com/oauth2/authorize?response_type=code&client_id=trDOSYhOAtp3MRuBhaZgnfCv4Visg237B2gslK4dha9K780iEClYNBM0QW1OH8MM&redirect_uri=https://4b1c5e33b08b.ngrok.io/patreon_key&scope=identity%20identity%5Bemail%5D
 
         oauth_code = request.args.get('code')
         result = patreon_utils.user_authorized(oauth_code)

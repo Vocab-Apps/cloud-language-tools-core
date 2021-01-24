@@ -17,11 +17,12 @@ def user_authorized(oauth_code):
 
     user_authorized = False
 
-    user_response = api_client.get_identity(includes=['memberships', 'campaign'])
+    user_response = api_client.get_identity(includes=['memberships', 'campaign'], fields={'user': ['email']})
     # print(user_response)
     user_data = user_response.json_data
-    # print(user_data)
+    print(user_data)
     user_id = user_data['data']['id']
+    user_email = user_data['data']['attributes']['email']
     
     # check for memberships
     memberships = user_data['data']['relationships']['memberships']['data']
@@ -31,7 +32,7 @@ def user_authorized(oauth_code):
 
         # obtain info about this membership:
         creator_api_client = patreon.API(creator_access_token)
-        membership_data = creator_api_client.get_members_by_id(membership_id, includes=['currently_entitled_tiers'])
+        membership_data = creator_api_client.get_members_by_id(membership_id, includes=['currently_entitled_tiers','user'], fields={'user': ['full_name', 'email']})
         # print(f'membership_data: {membership_data.json_data}')
 
         enabled_tiers = membership_data.json_data['data']['relationships']['currently_entitled_tiers']['data']
@@ -47,7 +48,30 @@ def user_authorized(oauth_code):
             if user_tier_id in tier_set:
                 user_authorized = True
 
-    return {'authorized': user_authorized, 'user_id': user_id}
+    return {'authorized': user_authorized, 'user_id': user_id, 'email': user_email}
+
+def get_campaign_members(creator_access_token, campaign_id):
+    api_client = patreon.API(creator_access_token)
+    memberships = []
+    members = []
+    cursor = None
+    while True:
+        members_response = api_client.get_campaigns_by_id_members(campaign_id, 900, cursor=cursor, includes=['user'], fields={'user': ['email', 'full_name']})
+        # print(members_response.json_data)
+        for member in members_response.json_data['data']:
+            members.append(member)
+            print(member)
+        # members += members_response.data()
+        cursor = api_client.extract_cursor(members_response)
+        print(cursor)
+        if not cursor:
+            break
+
+    
+    # names_and_membershipss = [{
+    #     'full_name': member.relationship('user').attribute('full_name'),
+    #     'amount_cents': member.attribute('amount_cents'),
+    # } for member in members]    
 
 
 def list_campaigns(access_token, campaign_id):
@@ -61,4 +85,5 @@ def list_campaigns(access_token, campaign_id):
 if __name__ == '__main__':
     access_token = os.environ['PATREON_ACCESS_TOKEN']
     campaign_id = os.environ['PATREON_CAMPAIGN_ID']
-    list_campaigns(access_token, campaign_id)
+    # list_campaigns(access_token, campaign_id)
+    get_campaign_members(access_token, campaign_id)

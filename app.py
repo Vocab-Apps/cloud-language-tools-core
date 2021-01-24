@@ -115,7 +115,7 @@ class PatreonKey(flask_restful.Resource):
 
         # print(f'pledge: {pledge}')
 
-        user_response = api_client.get_identity(includes=['memberships','campaign'])
+        user_response = api_client.get_identity()
         user_data = user_response.json_data
         print(f'user_data: {user_data}')
         user_id = user_data['data']['id']

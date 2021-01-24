@@ -5,7 +5,7 @@ import patreon
 def list_campaigns(access_token, campaign_id):
     api_client = patreon.API(access_token)
     # data = api_client.get_campaigns(10)
-    data = api_client.get_campaigns_by_id_members(campaign_id, 10, includes=['user'])
+    data = api_client.get_campaigns_by_id_members(campaign_id, 10, includes=['user', 'currently_entitled_tiers'])
     print(data.json_data)
 
 

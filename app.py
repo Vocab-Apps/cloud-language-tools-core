@@ -102,6 +102,9 @@ class PatreonKey(flask_restful.Resource):
         client_id = os.environ['PATREON_CLIENT_ID']
         client_secret = os.environ['PATREON_CLIENT_SECRET']
         redirect_uri = os.environ['PATREON_REDIRECT_URI']
+
+        creator_access_token = os.environ['PATREON_ACCESS_TOKEN']
+
         oauth_client = patreon.OAuth(client_id, client_secret)
         tokens = oauth_client.get_tokens(request.args.get('code'), redirect_uri)
         access_token = tokens['access_token']
@@ -115,11 +118,22 @@ class PatreonKey(flask_restful.Resource):
 
         # print(f'pledge: {pledge}')
 
-        user_response = api_client.get_identity()
+        user_response = api_client.get_identity(includes=['memberships', 'campaign'])
         user_data = user_response.json_data
         print(f'user_data: {user_data}')
         user_id = user_data['data']['id']
         print(f'user_id: {user_id}')
+        
+        # check for memberships
+        memberships = user_data['data']['relationships']['memberships']['data']
+        if len(memberships) > 0:
+            print(memberships[0])
+            membership_id = memberships[0]['id']
+
+            # obtain info about this membership:
+            creator_api_client = patreon.API(creator_access_token)
+            membership_data = creator_api_client.get_members_by_id(membership_id, includes=['currently_entitled_tiers'])
+            print(membership_data.json_data)
 
         # # now, get member data
         # member_response = api_client.get_members_by_id(user_id)

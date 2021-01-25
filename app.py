@@ -106,7 +106,7 @@ class PatreonKey(flask_restful.Resource):
         if result['authorized'] == True:
             # locate user key
             api_key = redis_connection.get_patreon_user_key(result['user_id'], result['email'])
-            return f"Hello {result['email']}! Thanks for being a fan! You help make this possible. Your API key: {api_key.decode('utf-8')}"
+            return f"Hello {result['email']}! Thanks for being a fan! You help make this possible. Your API key: {api_key}"
 
         return 'You need to be a patreon subscriber to obtain an API key'
 

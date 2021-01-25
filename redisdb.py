@@ -43,7 +43,7 @@ class RedisDb():
         patreon_user_key = self.build_key(KEY_TYPE_PATREON_USER, user_id)
         if self.r.exists(patreon_user_key):
             # user already requested a key
-            return self.r.get(patreon_user_key)
+            return self.r.get(patreon_user_key).decode('utf-8')
         
         # need to create a new key
         api_key = self.password_generator()

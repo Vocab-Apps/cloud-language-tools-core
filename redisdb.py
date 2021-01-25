@@ -2,10 +2,13 @@ import os
 import time
 import datetime
 import redis
+import string
+import random
 
 ENV_VAR_REDIS_URL = 'REDIS_URL'
 
 KEY_TYPE_API_KEY = 'api_key'
+KEY_TYPE_PATREON_USER ='patreon_user'
 
 class RedisDb():
     def __init__(self):
@@ -19,20 +22,55 @@ class RedisDb():
     def build_key(self, key_type, key):
         return f'clt:{key_type}:{key}'
 
-    def add_api_key(self, api_key, key_type, owner, expiration_date):
+    def add_api_key(self, api_key, user_id, email, expiration_date):
         key_removal_date = expiration_date + datetime.timedelta(days=31)
         key_expiration_timestamp = int(expiration_date.timestamp())
         key_removal_timestamp_millis = int(key_removal_date.timestamp() * 1000.0)
+
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
-            'key_type': key_type,
-            'owner': owner,
+            'user_id': user_id,
+            'email': email,
             'expiration': key_expiration_timestamp,
         }
         self.r.hset(redis_key, mapping=hash_value)
         self.r.expireat(redis_key, key_removal_timestamp_millis)
-
         print(f'added {redis_key}: {hash_value}, expiring at: {expiration_date}, removed at: {key_removal_date}')
+
+        # now add a map from user id to key
+        
+    def get_patreon_user_key(self, user_id, email):
+        patreon_user_key = self.build_key(KEY_TYPE_PATREON_USER, user_id)
+        if self.r.exists(patreon_user_key):
+            # user already requested a key
+            return self.r.get(patreon_user_key)
+        
+        # need to create a new key
+        api_key = self.password_generator()
+        expiration_date = datetime.datetime.now() + datetime.timedelta(days=60)
+        self.add_api_key(api_key, user_id, email, expiration_date)
+
+        # map to the patreon user
+        self.r.set(patreon_user_key, api_key)
+
+        return api_key
+
+    def password_generator(self):
+
+        LETTERS = string.ascii_letters
+        NUMBERS = string.digits  
+        
+        # create alphanumerical from string constants
+        printable = f'{LETTERS}{NUMBERS}'
+
+        # convert printable from string to list and shuffle
+        printable = list(printable)
+        random.shuffle(printable)
+
+        # generate random password and convert to string
+        random_password = random.choices(printable, k=16)
+        random_password = ''.join(random_password)
+        return random_password
 
     def api_key_valid(self, api_key):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)

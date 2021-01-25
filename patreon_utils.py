@@ -20,7 +20,7 @@ def user_authorized(oauth_code):
     user_response = api_client.get_identity(includes=['memberships', 'campaign'], fields={'user': ['email']})
     # print(user_response)
     user_data = user_response.json_data
-    print(user_data)
+    # print(user_data)
     user_id = user_data['data']['id']
     user_email = user_data['data']['attributes']['email']
     

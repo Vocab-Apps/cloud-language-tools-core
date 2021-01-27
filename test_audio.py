@@ -77,6 +77,11 @@ class TestAudio(unittest.TestCase):
         source_text = '天氣預報'
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_HK, 'zh-HK')
 
+    def test_korean_naver(self):
+        # python -m pytest test_audio.py -s -k 'test_naverclova'
+        source_text = '여보세요'
+        self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ko_KR, 'ko-KR')
+
 
     def test_azure_options(self):
         service = 'Azure'

@@ -7,6 +7,7 @@ class Service(enum.Enum):
     MandarinCantonese = enum.auto()
     EasyPronunciation = enum.auto()
     Watson = enum.auto()
+    Naver = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()

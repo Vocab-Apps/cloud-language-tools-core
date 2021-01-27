@@ -33,6 +33,16 @@ class RedisDb():
         key_removal_timestamp_millis = int(key_removal_date.timestamp() * 1000.0)
         return key_removal_timestamp_millis
 
+    def add_test_api_key(self, api_key, expiration_datetime):
+        redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+        hash_value = {
+            'expiration': int(expiration_datetime.timestamp()),
+            'type': 'test'
+        }
+        self.r.hset(redis_key, mapping=hash_value)
+        self.r.expireat(redis_key, self.get_api_key_removal_timestamp_millis())
+        logging.info(f'added {redis_key}: {hash_value}, (key removal time: {self.get_api_key_removal_timestamp_millis()})')
+
     def add_patreon_api_key(self, api_key, user_id, email):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
@@ -44,8 +54,6 @@ class RedisDb():
         self.r.hset(redis_key, mapping=hash_value)
         self.r.expireat(redis_key, self.get_api_key_removal_timestamp_millis())
         logging.info(f'added {redis_key}: {hash_value}, (key removal time: {self.get_api_key_removal_timestamp_millis()})')
-
-        # now add a map from user id to key
         
     def get_patreon_user_key(self, user_id, email):
         logging.info(f'patreon user: {user_id}, email: {email}')

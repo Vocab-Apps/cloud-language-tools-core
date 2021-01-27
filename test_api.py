@@ -15,9 +15,9 @@ class ApiTests(unittest.TestCase):
         redis_connection.clear_db(wait=False)
         # create new API key
         cls.api_key='test_key_01'
-        redis_connection.add_api_key(cls.api_key, 'test', 'pytest', datetime.datetime.now() + datetime.timedelta(days=2))
+        redis_connection.add_test_api_key(cls.api_key, datetime.datetime.now() + datetime.timedelta(days=2))
         cls.api_key_expired='test_key_02_expired'
-        redis_connection.add_api_key(cls.api_key_expired, 'test', 'pytest', datetime.datetime.now() + datetime.timedelta(days=-2))
+        redis_connection.add_test_api_key(cls.api_key_expired, datetime.datetime.now() + datetime.timedelta(days=-2))
 
     @classmethod
     def tearDownClass(cls):

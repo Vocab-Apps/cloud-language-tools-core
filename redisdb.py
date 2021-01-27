@@ -28,11 +28,6 @@ class RedisDb():
         key_expiration_timestamp = int(expiration_date.timestamp())
         return key_expiration_timestamp
 
-    def get_api_key_removal_timestamp_millis(self):
-        key_removal_date = datetime.datetime.now() + datetime.timedelta(days=91)
-        key_removal_timestamp_millis = int(key_removal_date.timestamp() * 1000.0)
-        return key_removal_timestamp_millis
-
     def add_test_api_key(self, api_key, expiration_datetime):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
@@ -40,8 +35,7 @@ class RedisDb():
             'type': 'test'
         }
         self.r.hset(redis_key, mapping=hash_value)
-        self.r.expireat(redis_key, self.get_api_key_removal_timestamp_millis())
-        logging.info(f'added {redis_key}: {hash_value}, (key removal time: {self.get_api_key_removal_timestamp_millis()})')
+        logging.info(f'added {redis_key}: {hash_value}')
 
     def add_patreon_api_key(self, api_key, user_id, email):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
@@ -52,22 +46,16 @@ class RedisDb():
             'type': 'patreon'
         }
         self.r.hset(redis_key, mapping=hash_value)
-        self.r.expireat(redis_key, self.get_api_key_removal_timestamp_millis())
-        logging.info(f'added {redis_key}: {hash_value}, (key removal time: {self.get_api_key_removal_timestamp_millis()})')
+        logging.info(f'added {redis_key}: {hash_value}')
         
     def get_patreon_user_key(self, user_id, email):
         logging.info(f'patreon user: {user_id}, email: {email}')
-        removal_time_millis = self.get_api_key_removal_timestamp_millis()
 
         redis_patreon_user_key = self.build_key(KEY_TYPE_PATREON_USER, user_id)
         if self.r.exists(redis_patreon_user_key):
             logging.info(f'mapping exists: patreon user: {user_id}, email: {email} mapping: {redis_patreon_user_key}')
             
             # user already requested a key
-            # update expiry time of the key mapping
-            logging.info(f'refreshing expiry of mapping: patreon user: {user_id}, email: {email} updating key removal time ({redis_patreon_user_key} / {removal_time_millis})')
-            self.r.expireat(redis_patreon_user_key, self.get_api_key_removal_timestamp_millis())
-
             api_key = self.r.get(redis_patreon_user_key).decode('utf-8')
             redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
             if self.r.exists(redis_api_key):
@@ -75,8 +63,6 @@ class RedisDb():
                 expiration_timestamp = self.get_api_key_expiration_timestamp()
                 logging.info(f'refreshing expiration date of api key: patreon user: {user_id}, email: {email} updating key removal time ({redis_api_key} / {expiration_timestamp})')
                 self.r.hset(redis_api_key, 'expiration', expiration_timestamp)
-                logging.info(f'refreshing expiry of api key: patreon user: {user_id}, email: {email} updating key removal time ({redis_api_key} / {removal_time_millis})')
-                self.r.expireat(redis_api_key, removal_time_millis)
             else:
                 # add the key back in
                 self.add_patreon_api_key(api_key, user_id, email)
@@ -88,8 +74,7 @@ class RedisDb():
 
         # map to the patreon user
         self.r.set(redis_patreon_user_key, api_key)
-        self.r.expireat(redis_patreon_user_key,removal_time_millis)
-        logging.info(f'added mapping: patreon user: {user_id}, email: {email} ({redis_patreon_user_key} / {removal_time_millis})')
+        logging.info(f'added mapping: patreon user: {user_id}, email: {email} ({redis_patreon_user_key})')
 
         return api_key
 

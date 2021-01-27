@@ -19,7 +19,7 @@ class ServiceManager():
 
     def configure(self):
         # azure
-        self.configure_azure(os.environ['AZURE_REGION'], os.environ['AZURE_KEY'], os.environ['AZURE_TRANSLATOR_KEY'])
+        self.configure_azure(os.environ['AZURE_REGION'], os.environ['AZURE_KEY'])
 
         # google
         google_key = os.environ['GOOGLE_KEY']
@@ -47,8 +47,8 @@ class ServiceManager():
 
         self.translation_language_list = self.get_translation_language_list()
 
-    def configure_azure(self, region, key, translator_key):
-        self.services[cloudlanguagetools.constants.Service.Azure.name].configure(key, region, translator_key)
+    def configure_azure(self, region, key):
+        self.services[cloudlanguagetools.constants.Service.Azure.name].configure(key, region)
 
     def configure_google(self, credentials_path):
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path

@@ -4,7 +4,7 @@ import os
 
 
 def encode():
-    json_path = '/mnt/d/storage/dev/account_keys/cloudlanguagetools.json'
+    json_path = '/mnt/d/storage/dev/account_keys/cloud-language-tools-b93709580ad4.json'
 
     with open(json_path) as json_file:
         data = json.load(json_file)
@@ -20,8 +20,8 @@ def decode():
 
 
 if __name__ == '__main__':
-    # encode()
-    decode()
+    encode()
+    # decode()
 
 
 

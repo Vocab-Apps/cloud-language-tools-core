@@ -116,10 +116,9 @@ class AzureService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.url_translator_base = 'https://api.cognitive.microsofttranslator.com'
 
-    def configure(self, key, region, translator_key):
+    def configure(self, key, region):
         self.key = key
         self.region = region
-        self.translator_key = translator_key
 
     def get_token(self):
         fetch_token_url = f"https://{self.region}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
@@ -132,7 +131,7 @@ class AzureService(cloudlanguagetools.service.Service):
 
     def get_translator_headers(self):
         headers = {
-            'Ocp-Apim-Subscription-Key': self.translator_key,
+            'Ocp-Apim-Subscription-Key': self.key,
             'Ocp-Apim-Subscription-Region': self.region,
             'Content-type': 'application/json',
             'X-ClientTraceId': str(uuid.uuid4())

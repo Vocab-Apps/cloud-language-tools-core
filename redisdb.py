@@ -24,12 +24,12 @@ class RedisDb():
         return f'clt:{key_type}:{key}'
 
     def get_api_key_expiration_timestamp(self):
-        expiration_date = datetime.datetime.now() + datetime.timedelta(days=31)
+        expiration_date = datetime.datetime.now() + datetime.timedelta(days=60)
         key_expiration_timestamp = int(expiration_date.timestamp())
         return key_expiration_timestamp
 
     def get_api_key_removal_timestamp_millis(self):
-        key_removal_date = datetime.datetime.now() + datetime.timedelta(days=61)
+        key_removal_date = datetime.datetime.now() + datetime.timedelta(days=91)
         key_removal_timestamp_millis = int(key_removal_date.timestamp() * 1000.0)
         return key_removal_timestamp_millis
 
@@ -72,6 +72,9 @@ class RedisDb():
             redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
             if self.r.exists(redis_api_key):
                 # update expiry time
+                expiration_timestamp = self.get_api_key_expiration_timestamp()
+                logging.info(f'refreshing expiration date of api key: patreon user: {user_id}, email: {email} updating key removal time ({redis_api_key} / {expiration_timestamp})')
+                self.r.hset(redis_api_key, 'expiration', expiration_timestamp)
                 logging.info(f'refreshing expiry of api key: patreon user: {user_id}, email: {email} updating key removal time ({redis_api_key} / {removal_time_millis})')
                 self.r.expireat(redis_api_key, removal_time_millis)
             else:

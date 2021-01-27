@@ -48,6 +48,7 @@ class Language(enum.Enum):
     ha = ("Hausa")
     haw = ("Hawaiian")
     iw = ("Hebrew")
+    iu = ("Inuktitut")
     hi = ("Hindi")
     hmn = ("Hmong")
     hu = ("Hungarian")

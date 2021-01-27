@@ -40,10 +40,23 @@ class RedisDb():
         # now add a map from user id to key
         
     def get_patreon_user_key(self, user_id, email):
+        # whatever keys we retrieve, refresh their expiry date
+        key_removal_date = datetime.datetime.now() + datetime.timedelta(days=31)
+        key_expiration_timestamp_millis = int(key_removal_date.timestamp() * 1000.0)
+
         patreon_user_key = self.build_key(KEY_TYPE_PATREON_USER, user_id)
         if self.r.exists(patreon_user_key):
             # user already requested a key
-            return self.r.get(patreon_user_key).decode('utf-8')
+            # update expiry time of the key mapping
+            self.r.expireat(patreon_user_key, key_expiration_timestamp_millis)
+            api_key = self.r.get(patreon_user_key).decode('utf-8')
+            if self.r.exists(api_key):
+                # update expiry time
+                self.r.expireat(api_key, key_expiration_timestamp_millis)
+            else:
+                # add the key back in
+                self.add_api_key(api_key, user_id, email)
+            return api_key
         
         # need to create a new key
         api_key = self.password_generator()
@@ -52,6 +65,7 @@ class RedisDb():
 
         # map to the patreon user
         self.r.set(patreon_user_key, api_key)
+        self.r.expireat(patreon_user_key, key_expiration_timestamp_millis)
 
         return api_key
 

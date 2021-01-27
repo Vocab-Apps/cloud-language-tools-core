@@ -5,10 +5,16 @@ import flask_restful
 import json
 import functools
 import os
+import logging
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.errors
 import redisdb
 import patreon_utils
+
+#logging.basicConfig()
+logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                    datefmt='%Y%m%d-%H:%M:%S',
+                    level=logging.INFO)
 
 app = Flask(__name__)
 api = flask_restful.Api(app)
@@ -106,7 +112,7 @@ class PatreonKey(flask_restful.Resource):
         if result['authorized'] == True:
             # locate user key
             api_key = redis_connection.get_patreon_user_key(result['user_id'], result['email'])
-            return f"Hello {result['email']}! Thanks for being a fan! You help make this possible. Your API key: {api_key}"
+            return f"Hello {result['email']}! Thanks for being a fan! Here is your API Key, to use with AwesomeTTS Plus or Language Tools: {api_key}"
 
         return 'You need to be a patreon subscriber to obtain an API key'
 

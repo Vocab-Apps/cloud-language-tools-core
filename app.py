@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, send_file, jsonify
+from flask import Flask, request, send_file, jsonify, make_response
 import flask_restful
 import json
 import functools
@@ -109,13 +109,24 @@ class PatreonKey(flask_restful.Resource):
         oauth_code = request.args.get('code')
         result = patreon_utils.user_authorized(oauth_code)
 
+        headers = {'Content-Type': 'text/html'}
+
         if result['authorized'] == True:
             # locate user key
             api_key = redis_connection.get_patreon_user_key(result['user_id'], result['email'])
-            return f"Hello {result['email']}! Thanks for being a fan! Here is your API Key, to use with AwesomeTTS Plus or Language Tools: {api_key}"
+            result_html = f"Hello {result['email']}! Thanks for being a fan! Here is your API Key, to use with AwesomeTTS Plus or Language Tools: <b>{api_key}</b>"
+            return make_response(result_html, 200, headers)
 
         return 'You need to be a patreon subscriber to obtain an API key'
 
+class PatreonKeyRequest(flask_restful.Resource):
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        patreon_client_id = os.environ['PATREON_CLIENT_ID']
+        redirect_uri = os.environ['PATREON_REDIRECT_URI']
+        oauth_request_link = f'https://www.patreon.com/oauth2/authorize?response_type=code&client_id={patreon_client_id}&redirect_uri={redirect_uri}&scope=identity%20identity%5Bemail%5D'
+        result_html = f'Click here to request your AwesomeTTS Plus / Language Tools API Key: <a href="{oauth_request_link}">Connect with Patreon</a>'
+        return make_response(result_html, 200, headers)
 
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
@@ -128,6 +139,7 @@ api.add_resource(Detect, '/detect')
 api.add_resource(Audio, '/audio')
 api.add_resource(VerifyApiKey, '/verify_api_key')
 api.add_resource(PatreonKey, '/patreon_key')
+api.add_resource(PatreonKeyRequest, '/request_patreon_key')
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')

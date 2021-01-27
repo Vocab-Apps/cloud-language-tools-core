@@ -118,7 +118,10 @@ class RedisDb():
     def list_all_keys(self):
         cursor, keys = self.r.scan()
         for key in keys:
-            print(key)
+            key_ttl = self.r.ttl(key)
+            expire_time = datetime.datetime.fromtimestamp(key_ttl / 1000.0)
+            expire_distance = expire_time - datetime.datetime.now()
+            print(f'key: [{key}] expire in: {expire_distance.days} days ({key_ttl})')
 
     def clear_db(self, wait=True):
         if wait:

@@ -13,6 +13,9 @@ def get_manager():
 
 class TestAudio(unittest.TestCase):
     def setUp(self):
+        logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                            datefmt='%Y%m%d-%H:%M:%S',
+                            level=logging.INFO)
         self.manager = get_manager()
         self.language_list = self.manager.get_language_list()
         self.voice_list = self.manager.get_tts_voice_list_json()
@@ -41,6 +44,7 @@ class TestAudio(unittest.TestCase):
         self.assertEqual(self.sanitize_recognized_text(text), self.sanitize_recognized_text(audio_text), msg=assert_text)
 
     def verify_service_audio_language(self, text, service, audio_language, recognition_language):
+        # logging.info(f'verify_service_audio: service: {service} audio_language: {audio_language}')
         voices = self.get_voice_list_service_audio_language(Service.Google, audio_language)
         for voice in voices:
             self.verify_voice(voice, text, recognition_language)
@@ -78,7 +82,7 @@ class TestAudio(unittest.TestCase):
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_HK, 'zh-HK')
 
     def test_korean_naver(self):
-        # python -m pytest test_audio.py -s -k 'test_naverclova'
+        # pytest test_audio.py -k test_korean_naver
         source_text = '여보세요'
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ko_KR, 'ko-KR')
 

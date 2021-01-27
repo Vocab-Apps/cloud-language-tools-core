@@ -45,7 +45,7 @@ class TestAudio(unittest.TestCase):
 
     def verify_service_audio_language(self, text, service, audio_language, recognition_language):
         # logging.info(f'verify_service_audio: service: {service} audio_language: {audio_language}')
-        voices = self.get_voice_list_service_audio_language(Service.Google, audio_language)
+        voices = self.get_voice_list_service_audio_language(service, audio_language)
         for voice in voices:
             self.verify_voice(voice, text, recognition_language)
 
@@ -86,6 +86,10 @@ class TestAudio(unittest.TestCase):
         source_text = '여보세요'
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ko_KR, 'ko-KR')
 
+    def test_japanese_naver(self):
+        # pytest test_audio.py -k test_japanese_naver
+        source_text = 'おはようございます'
+        self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ja_JP, 'ja-JP')
 
     def test_azure_options(self):
         service = 'Azure'

@@ -69,8 +69,8 @@ class NaverService(cloudlanguagetools.service.Service):
         data = {
             'text': text,
             'speaker': voice_key['name'],
-            'speed': options['speed'],
-            'pitch': options['pitch']
+            'speed': options.get('speed', NAVER_VOICE_SPEED_DEFAULT),
+            'pitch': options.get('pitch', NAVER_VOICE_PITCH_DEFAULT)
         }
 
         response = requests.post(url, data, headers=headers)

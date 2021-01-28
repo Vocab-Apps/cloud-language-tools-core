@@ -73,6 +73,11 @@ class TestTranslation(unittest.TestCase):
         self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
         self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, "Changer de carte d'embarquement")
 
+    def test_translate_naver(self):
+        # pytest test_translation.py -k test_translate_naver
+        self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.en, 'Please speak slowly.')
+        self.translate_text(Service.Naver, 'Please speak slowly', Language.en, Language.ko, '천천히 말씀해 주세요.')
+
     def test_translate_all(self):
         source_text = '成本很低'
         from_language = Language.zh_cn.name

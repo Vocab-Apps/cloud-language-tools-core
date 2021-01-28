@@ -48,6 +48,15 @@ class NaverVoice(cloudlanguagetools.ttsvoice.TtsVoice):
             }
         }
 
+class NaverTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
+    def __init__(self, language, language_id):
+        self.service = cloudlanguagetools.constants.Service.Naver
+        self.language = language
+        self.language_id = language_id
+
+    def get_language_id(self):
+        return self.language_id
+
 class NaverService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass
@@ -55,6 +64,29 @@ class NaverService(cloudlanguagetools.service.Service):
     def configure(self, client_id, client_secret):
         self.client_id = client_id
         self.client_secret = client_secret
+
+    def get_translation(self, text, from_language_key, to_language_key):
+        url = 'https://naveropenapi.apigw.ntruss.com/nmt/v1/translation'
+        headers = {
+            'X-NCP-APIGW-API-KEY-ID': self.client_id,
+            'X-NCP-APIGW-API-KEY': self.client_secret
+        }
+
+        data = {
+            'text': text,
+            'source': from_language_key,
+            'target': to_language_key
+        }
+
+        # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
+        response = requests.post(url, json=data, headers=headers)
+        if response.status_code == 200:
+            response_data = response.json()
+            return response_data['message']['result']['translatedText']
+
+        error_message = f'Status code: {response.status_code}: {response.content}'
+        raise cloudlanguagetools.errors.RequestError(error_message)
+
 
     def get_tts_audio(self, text, voice_key, options):
         output_temp_file = tempfile.NamedTemporaryFile()
@@ -123,7 +155,20 @@ class NaverService(cloudlanguagetools.service.Service):
         ]
 
     def get_translation_language_list(self):
-        result = []
+        result = [
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.ko, 'ko'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.en, 'en'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.ja, 'ja'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.zh_cn, 'zh-CN'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.zh_tw, 'zh-TW'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.vi, 'vi'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.id_, 'id'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.th, 'th'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.de, 'de'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.ru, 'ru'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.it, 'it'),
+            NaverTranslationLanguage(cloudlanguagetools.constants.Language.fr, 'fr'),
+        ]
         return result
 
     def get_transliteration_language_list(self):

@@ -2,6 +2,7 @@ import os
 import base64
 import tempfile
 import cloudlanguagetools.constants
+import cloudlanguagetools.errors
 import cloudlanguagetools.azure
 import cloudlanguagetools.google
 import cloudlanguagetools.mandarincantonese
@@ -129,7 +130,10 @@ class ServiceManager():
                 to_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == to_language]
                 assert(len(to_language_entries) == 1)
                 to_language_id = to_language_entries[0].get_language_id()
-                result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
+                try:
+                    result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
+                except cloudlanguagetools.errors.RequestError:
+                    pass # don't do anything
         return result
 
     def get_transliteration(self, text, service, transliteration_key):

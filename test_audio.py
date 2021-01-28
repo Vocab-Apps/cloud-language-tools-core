@@ -17,6 +17,17 @@ class TestAudio(unittest.TestCase):
         self.language_list = self.manager.get_language_list()
         self.voice_list = self.manager.get_tts_voice_list_json()
 
+        logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                            datefmt='%Y%m%d-%H:%M:%S',
+                            level=logging.DEBUG)
+        import http.client as http_client                            
+        http_client.HTTPConnection.debuglevel = 1
+        requests_log = logging.getLogger("requests.packages.urllib3")
+        requests_log.setLevel(logging.DEBUG)
+        requests_log.propagate = True        
+
+
+
     def get_voice_list_for_language(self, language):
         subset = [x for x in self.voice_list if x['language_code'] == language.name]
         return subset
@@ -30,7 +41,7 @@ class TestAudio(unittest.TestCase):
         return result
     
     def sanitize_recognized_text(self, recognized_text):
-        result_text = recognized_text.replace('.', '').replace('。', '').replace('?', '').replace('？', '')
+        result_text = recognized_text.replace('.', '').replace('。', '').replace('?', '').replace('？', '').lower()
         return result_text
 
     def verify_voice(self, voice, text, recognition_language):
@@ -41,7 +52,8 @@ class TestAudio(unittest.TestCase):
         self.assertEqual(self.sanitize_recognized_text(text), self.sanitize_recognized_text(audio_text), msg=assert_text)
 
     def verify_service_audio_language(self, text, service, audio_language, recognition_language):
-        voices = self.get_voice_list_service_audio_language(Service.Google, audio_language)
+        # logging.info(f'verify_service_audio: service: {service} audio_language: {audio_language}')
+        voices = self.get_voice_list_service_audio_language(service, audio_language)
         for voice in voices:
             self.verify_voice(voice, text, recognition_language)
 
@@ -77,6 +89,21 @@ class TestAudio(unittest.TestCase):
         source_text = '天氣預報'
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_HK, 'zh-HK')
 
+    def test_korean_naver(self):
+        # pytest test_audio.py -k test_korean_naver
+        source_text = '여보세요'
+        self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ko_KR, 'ko-KR')
+
+    def test_japanese_naver(self):
+        # pytest test_audio.py -k test_japanese_naver
+        source_text = 'おはようございます'
+        self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ja_JP, 'ja-JP')
+
+    def test_english_naver(self):
+        # pytest test_audio.py -k test_english_naver
+        source_text = 'this is the first sentence'
+        # source_text = 'hello'
+        self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.en_US, 'en-US')
 
     def test_azure_options(self):
         service = 'Azure'

@@ -7,6 +7,7 @@ import cloudlanguagetools.google
 import cloudlanguagetools.mandarincantonese
 import cloudlanguagetools.easypronunciation
 import cloudlanguagetools.watson
+import cloudlanguagetools.naver
 
 class ServiceManager():
     def  __init__(self):
@@ -16,6 +17,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()
         self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name] = cloudlanguagetools.easypronunciation.EasyPronunciationService()
         self.services[cloudlanguagetools.constants.Service.Watson.name] = cloudlanguagetools.watson.WatsonService()
+        self.services[cloudlanguagetools.constants.Service.Naver.name] = cloudlanguagetools.naver.NaverService()
 
     def configure(self):
         # azure
@@ -45,6 +47,11 @@ class ServiceManager():
         watson_speech_url = os.environ['WATSON_SPEECH_URL']
         self.configure_watson(watson_translator_api_key, watson_translator_url, watson_speech_api_key, watson_speech_url)
 
+        # naver
+        naver_client_id = os.environ['NAVER_CLIENT_ID']
+        naver_client_secret = os.environ['NAVER_CLIENT_SECRET']
+        self.configure_naver(naver_client_id, naver_client_secret)
+
         self.translation_language_list = self.get_translation_language_list()
 
     def configure_azure(self, region, key):
@@ -59,6 +66,9 @@ class ServiceManager():
 
     def configure_watson(self, translator_api_key, translator_url, speech_api_key, speech_url):
         self.services[cloudlanguagetools.constants.Service.Watson.name].configure(translator_api_key, translator_url, speech_api_key, speech_url)
+
+    def configure_naver(self, naver_client_id, naver_client_secret):
+        self.services[cloudlanguagetools.constants.Service.Naver.name].configure(naver_client_id, naver_client_secret)
 
     def get_language_list(self):
         result_dict = {}

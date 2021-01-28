@@ -41,7 +41,7 @@ class TestAudio(unittest.TestCase):
         return result
     
     def sanitize_recognized_text(self, recognized_text):
-        result_text = recognized_text.replace('.', '').replace('。', '').replace('?', '').replace('？', '')
+        result_text = recognized_text.replace('.', '').replace('。', '').replace('?', '').replace('？', '').lower()
         return result_text
 
     def verify_voice(self, voice, text, recognition_language):
@@ -101,8 +101,8 @@ class TestAudio(unittest.TestCase):
 
     def test_english_naver(self):
         # pytest test_audio.py -k test_english_naver
-        # source_text = 'this is the first sentence'
-        source_text = 'hello'
+        source_text = 'this is the first sentence'
+        # source_text = 'hello'
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.en_US, 'en-US')
 
     def test_azure_options(self):

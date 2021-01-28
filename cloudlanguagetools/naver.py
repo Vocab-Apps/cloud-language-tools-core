@@ -50,7 +50,7 @@ class NaverVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
 class NaverService(cloudlanguagetools.service.Service):
     def __init__(self):
-        self.url_translator_base = 'https://api.cognitive.microsofttranslator.com'
+        pass
 
     def configure(self, client_id, client_secret):
         self.client_id = client_id
@@ -60,8 +60,9 @@ class NaverService(cloudlanguagetools.service.Service):
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
 
-        url = 'https://naveropenapi.apigw.ntruss.com/voice-premium/v1/tts'
+        url = 'https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts'
         headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
             'X-NCP-APIGW-API-KEY-ID': self.client_id,
             'X-NCP-APIGW-API-KEY': self.client_secret
         }
@@ -73,13 +74,14 @@ class NaverService(cloudlanguagetools.service.Service):
             'pitch': options.get('pitch', NAVER_VOICE_PITCH_DEFAULT)
         }
 
-        response = requests.post(url, data, headers=headers)
+        # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
+        response = requests.post(url, data=data, headers=headers)
         if response.status_code == 200:
             with open(output_temp_filename, 'wb') as audio:
                 audio.write(response.content)
             return output_temp_file
 
-        error_message = f'Status code: {response.status_code}: {response}'
+        error_message = f'Status code: {response.status_code}: {response.content}'
         raise cloudlanguagetools.errors.RequestError(error_message)
 
     def get_tts_voice_list(self):

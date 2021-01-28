@@ -13,12 +13,20 @@ def get_manager():
 
 class TestAudio(unittest.TestCase):
     def setUp(self):
-        logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
-                            datefmt='%Y%m%d-%H:%M:%S',
-                            level=logging.INFO)
         self.manager = get_manager()
         self.language_list = self.manager.get_language_list()
         self.voice_list = self.manager.get_tts_voice_list_json()
+
+        logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                            datefmt='%Y%m%d-%H:%M:%S',
+                            level=logging.DEBUG)
+        import http.client as http_client                            
+        http_client.HTTPConnection.debuglevel = 1
+        requests_log = logging.getLogger("requests.packages.urllib3")
+        requests_log.setLevel(logging.DEBUG)
+        requests_log.propagate = True        
+
+
 
     def get_voice_list_for_language(self, language):
         subset = [x for x in self.voice_list if x['language_code'] == language.name]
@@ -90,6 +98,12 @@ class TestAudio(unittest.TestCase):
         # pytest test_audio.py -k test_japanese_naver
         source_text = 'おはようございます'
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ja_JP, 'ja-JP')
+
+    def test_english_naver(self):
+        # pytest test_audio.py -k test_english_naver
+        # source_text = 'this is the first sentence'
+        source_text = 'hello'
+        self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.en_US, 'en-US')
 
     def test_azure_options(self):
         service = 'Azure'

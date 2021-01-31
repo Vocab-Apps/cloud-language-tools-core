@@ -135,29 +135,36 @@ class RedisDb():
         cursor, keys = self.r.scan()
         for key in keys:
             key_ttl = self.r.ttl(key)
-            expire_time = datetime.datetime.fromtimestamp(float(key_ttl) / 1000.0)
-            expire_distance = expire_time - datetime.datetime.now()
-            print(f'key: [{key}] expire in: {expire_distance.days} days ({key_ttl})')
+            expiration = 'permanent'
+            if key_ttl != -1:
+                expire_distance = datetime.timedelta(seconds=key_ttl)
+                expiration = f'expire: {expire_distance.days} days ({expire_distance.seconds} seconds)'
+            print(f'key: [{key}] ({expiration})')
 
     def track_usage(self, api_key, service, request_type, characters):
         yyyymmdd_date_str = datetime.datetime.today().strftime('%Y%m%d')
         yyyymm_date_str = datetime.datetime.today().strftime('%Y%m')
+        expire_time_seconds = 30*3*24*3600 # 3 months
 
         # per user, per day
         user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymmdd_date_str}:{api_key}')
         self.r.incrby(user_usage_key, characters)
+        self.r.expire(user_usage_key, expire_time_seconds)
 
         # per user, per month
         user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymm_date_str}:{api_key}')
         self.r.incrby(user_usage_key, characters)
+        self.r.expire(user_usage_key, expire_time_seconds)
 
         # per day
         user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymmdd_date_str}')
         self.r.incrby(user_usage_key, characters)
+        self.r.expire(user_usage_key, expire_time_seconds)
 
         # per month
         user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymm_date_str}')
         self.r.incrby(user_usage_key, characters)        
+        self.r.expire(user_usage_key, expire_time_seconds)
 
     def list_usage(self):
         pattern = self.build_key(KEY_TYPE_USAGE, '*')

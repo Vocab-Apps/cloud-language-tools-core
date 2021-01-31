@@ -18,7 +18,7 @@ class RedisDb():
     def connect(self, db_num=0):
         redis_url = os.environ[ENV_VAR_REDIS_URL]
 
-        self.r = redis.from_url(redis_url, db=db_num)
+        self.r = redis.from_url(redis_url, db=db_num, decode_responses=True)
 
     def build_key(self, key_type, key):
         return f'clt:{key_type}:{key}'
@@ -111,15 +111,22 @@ class RedisDb():
         return {'key_valid': False, 'msg':f'API Key expired'}
         
     def list_api_keys(self):
+        result = []
         pattern = self.build_key(KEY_TYPE_API_KEY, '*')
         cursor, keys = self.r.scan(match=pattern)
         for key in keys:
-            key_str = key.decode('utf-8')
+            key_str = key
             api_key = key_str.split(':')[-1]
             validity = self.api_key_valid(api_key)
             # print(key)
             key_data = self.r.hgetall(key)
+            result.append({
+                'api_key': api_key,
+                'key_data': key_data,
+                'validity': validity
+            })
             print(f'{api_key} {key_data}, {validity}')
+        return result
 
     def list_all_keys(self):
         cursor, keys = self.r.scan()

@@ -86,13 +86,27 @@ def list_patreon_user_ids(creator_access_token, campaign_id):
     # print(entitled_user_ids)
     api_key_list = [x for x in api_key_list if x['key_data']['type'] == 'patreon']
     print('keys for entitled users:')
+    result = []
     for api_key_entry in api_key_list:
         patreon_user_id = api_key_entry['key_data']['user_id']
         email = api_key_entry['key_data']['email']
         key_valid = api_key_entry['validity']
         user_entitled = patreon_user_id in entitled_user_ids
         print(f'user_id: {patreon_user_id} email: {email} key_valid: {key_valid} user_entitled: {user_entitled}')
+        if user_entitled:
+            result.append(api_key_entry)
     # print(api_key_list)
+
+    return result
+
+def extend_user_key_validity(creator_access_token, campaign_id):
+    api_key_list = list_patreon_user_ids(creator_access_token, campaign_id)
+    redis_connection = redisdb.RedisDb()
+    for api_key_entry in api_key_list:
+        patreon_user_id = api_key_entry['key_data']['user_id']
+        email = api_key_entry['key_data']['email']
+        print(f'extending validity for {patreon_user_id}, {email}')
+        redis_connection.get_patreon_user_key(patreon_user_id, email)
 
 
 def list_campaigns(access_token, campaign_id):
@@ -109,3 +123,4 @@ if __name__ == '__main__':
     # list_campaigns(access_token, campaign_id)
     # get_entitled_users(access_token, campaign_id)
     list_patreon_user_ids(access_token, campaign_id)
+    # extend_user_key_validity(access_token, campaign_id)

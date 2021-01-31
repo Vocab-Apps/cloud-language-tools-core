@@ -56,7 +56,7 @@ class RedisDb():
             logging.info(f'mapping exists: patreon user: {user_id}, email: {email} mapping: {redis_patreon_user_key}')
             
             # user already requested a key
-            api_key = self.r.get(redis_patreon_user_key).decode('utf-8')
+            api_key = self.r.get(redis_patreon_user_key)
             redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
             if self.r.exists(redis_api_key):
                 # update expiry time

@@ -10,6 +10,9 @@ ENV_VAR_REDIS_URL = 'REDIS_URL'
 
 KEY_TYPE_API_KEY = 'api_key'
 KEY_TYPE_PATREON_USER ='patreon_user'
+KEY_TYPE_USAGE ='usage'
+
+KEY_PREFIX = 'clt'
 
 class RedisDb():
     def __init__(self):
@@ -21,7 +24,7 @@ class RedisDb():
         self.r = redis.from_url(redis_url, db=db_num, decode_responses=True)
 
     def build_key(self, key_type, key):
-        return f'clt:{key_type}:{key}'
+        return f'{KEY_PREFIX}:{key_type}:{key}'
 
     def get_api_key_expiration_timestamp(self):
         expiration_date = datetime.datetime.now() + datetime.timedelta(days=60)
@@ -135,6 +138,33 @@ class RedisDb():
             expire_time = datetime.datetime.fromtimestamp(float(key_ttl) / 1000.0)
             expire_distance = expire_time - datetime.datetime.now()
             print(f'key: [{key}] expire in: {expire_distance.days} days ({key_ttl})')
+
+    def track_usage(self, api_key, service, request_type, characters):
+        yyyymmdd_date_str = datetime.datetime.today().strftime('%Y%m%d')
+        yyyymm_date_str = datetime.datetime.today().strftime('%Y%m')
+
+        # per user, per day
+        user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymmdd_date_str}:{api_key}')
+        self.r.incrby(user_usage_key, characters)
+
+        # per user, per month
+        user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymm_date_str}:{api_key}')
+        self.r.incrby(user_usage_key, characters)
+
+        # per day
+        user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymmdd_date_str}')
+        self.r.incrby(user_usage_key, characters)
+
+        # per month
+        user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymm_date_str}')
+        self.r.incrby(user_usage_key, characters)        
+
+    def list_usage(self):
+        pattern = self.build_key(KEY_TYPE_USAGE, '*')
+        cursor, keys = self.r.scan(match=pattern)
+        for key in keys:
+            value = self.r.get(key)
+            print(f'{key}: {value}')
 
     def clear_db(self, wait=True):
         if wait:

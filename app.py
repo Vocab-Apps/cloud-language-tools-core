@@ -36,6 +36,34 @@ def authenticate(func):
         return {'error': result['msg']}, 401
     return wrapper
 
+def track_usage(request_type, request):
+    api_key = request.headers.get('api_key', None)
+    if api_key != None:
+        text = request.json['text']
+        characters = len(text)
+        service = request.json['service']
+        redis_connection.track_usage(api_key, service, request_type, characters)
+
+def track_usage_translation(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        track_usage('translation', request)
+        return func(*args, **kwargs)
+    return wrapper        
+
+def track_usage_transliteration(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        track_usage('transliteration', request)
+        return func(*args, **kwargs)
+    return wrapper            
+
+def track_usage_audio(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        track_usage('audio', request)
+        return func(*args, **kwargs)
+    return wrapper            
 
 class LanguageList(flask_restful.Resource):
     def get(self):
@@ -54,7 +82,7 @@ class TransliterationLanguageList(flask_restful.Resource):
         return manager.get_transliteration_language_list_json()
 
 class Translate(flask_restful.Resource):
-    method_decorators = [authenticate]
+    method_decorators = [authenticate, track_usage_translation]
     def post(self):
         try:
             data = request.json
@@ -72,7 +100,7 @@ class TranslateAll(flask_restful.Resource):
             return {'error': str(err)}, 400
 
 class Transliterate(flask_restful.Resource):
-    method_decorators = [authenticate]
+    method_decorators = [authenticate, track_usage_transliteration]
     def post(self):
         try:
             data = request.json
@@ -89,7 +117,7 @@ class Detect(flask_restful.Resource):
         return {'detected_language': result.name}
 
 class Audio(flask_restful.Resource):
-    method_decorators = [authenticate]
+    method_decorators = [authenticate, track_usage_audio]
     def post(self):
         data = request.json
         audio_temp_file = manager.get_tts_audio(data['text'], data['service'], data['voice_key'], data['options'])

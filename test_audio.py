@@ -41,7 +41,7 @@ class TestAudio(unittest.TestCase):
         return result
     
     def sanitize_recognized_text(self, recognized_text):
-        result_text = recognized_text.replace('.', '').replace('。', '').replace('?', '').replace('？', '').lower()
+        result_text = recognized_text.replace('.', '').replace('。', '').replace('?', '').replace('？', '').replace(':', '').lower()
         return result_text
 
     def verify_voice(self, voice, text, recognition_language):
@@ -76,6 +76,11 @@ class TestAudio(unittest.TestCase):
     def test_mandarin_azure(self):
         source_text = '你好'
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_CN, 'zh-CN') 
+
+    def test_german_colon_azure(self):
+        # pytest test_audio.py -k test_german_colon_azure
+        source_text = 'anders: es hängt von jemandem oder etwas ab'
+        self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.de_DE, 'de-DE')
 
     def test_mandarin_watson(self):
         source_text = '老人家'

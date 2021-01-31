@@ -54,20 +54,24 @@ def user_authorized(oauth_code):
 def get_campaign_members(creator_access_token, campaign_id):
     api_client = patreon.API(creator_access_token)
     memberships = []
-    members = []
+    entitled_members = []
     cursor = None
     while True:
-        members_response = api_client.get_campaigns_by_id_members(campaign_id, 900, cursor=cursor, includes=['user'], fields={'user': ['email', 'full_name']})
+        members_response = api_client.get_campaigns_by_id_members(campaign_id, 900, cursor=cursor, includes=['user', 'currently_entitled_tiers'], fields={'user': ['email', 'full_name']})
         # print(members_response.json_data)
         for member in members_response.json_data['data']:
-            members.append(member)
-            print(member)
-        # members += members_response.data()
-        cursor = api_client.extract_cursor(members_response)
-        print(cursor)
-        if not cursor:
+            if len(member['relationships']['currently_entitled_tiers']['data']) > 0:
+                entitled_members.append(member)
+        try:
+            cursor = api_client.extract_cursor(members_response)
+            # print(cursor)
+            if not cursor:
+                break
+        except:
+            # no more data
             break
 
+    print(f'number of currently entitled users: {len(entitled_members)}')
     
     # names_and_membershipss = [{
     #     'full_name': member.relationship('user').attribute('full_name'),

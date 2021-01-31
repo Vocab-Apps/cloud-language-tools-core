@@ -1,6 +1,7 @@
 import os
 import patreon
 import redisdb
+import argparse
 
 def user_authorized(oauth_code):
     client_id = os.environ['PATREON_CLIENT_ID']
@@ -120,7 +121,17 @@ def list_campaigns(access_token, campaign_id):
 if __name__ == '__main__':
     access_token = os.environ['PATREON_ACCESS_TOKEN']
     campaign_id = os.environ['PATREON_CAMPAIGN_ID']
-    # list_campaigns(access_token, campaign_id)
-    # get_entitled_users(access_token, campaign_id)
-    list_patreon_user_ids(access_token, campaign_id)
-    # extend_user_key_validity(access_token, campaign_id)
+
+    parser = argparse.ArgumentParser(description='Patreon Utils')
+    choices = ['list_patreon_entitled_users', 'extend_key_validity']
+    parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
+    args = parser.parse_args()
+
+    if args.action == 'list_patreon_entitled_users':
+        list_patreon_user_ids(access_token, campaign_id)
+    elif args.action == 'extend_key_validity':
+        extend_user_key_validity(access_token, campaign_id)
+
+    
+
+    

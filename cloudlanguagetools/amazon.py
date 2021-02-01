@@ -1,6 +1,9 @@
 import json
 import requests
+import tempfile
 import boto3
+import botocore.exceptions
+import contextlib
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -24,16 +27,17 @@ def get_audio_language_enum(language_code):
 
 class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
-        print(voice_data)
+        # print(voice_data)
         # {'Gender': 'Female', 'Id': 'Lotte', 'LanguageCode': 'nl-NL', 'LanguageName': 'Dutch', 'Name': 'Lotte', 'SupportedEngines': ['standard']}
         self.service = cloudlanguagetools.constants.Service.Amazon
         self.gender = cloudlanguagetools.constants.Gender[voice_data['Gender']]
-        self.name = voice_data['Id']
+        self.voice_id = voice_data['Id']
+        self.name = voice_data['Name']
         self.audio_language = get_audio_language_enum(voice_data['LanguageCode'])
 
     def get_voice_key(self):
         return {
-            'name': self.name
+            'voice_id': self.voice_id
         }
 
     def get_voice_shortname(self):
@@ -83,29 +87,25 @@ class AmazonService(cloudlanguagetools.service.Service):
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
 
-        url = 'https://Amazonopenapi.apigw.ntruss.com/tts-premium/v1/tts'
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-NCP-APIGW-API-KEY-ID': self.client_id,
-            'X-NCP-APIGW-API-KEY': self.client_secret
-        }
+        try:
+            response = self.polly_client.synthesize_speech(Text=text, OutputFormat="mp3", VoiceId=voice_key['voice_id'])
+        except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
+            raise cloudlanguagetools.errors.RequestError(str(error))
 
-        data = {
-            'text': text,
-            'speaker': voice_key['name'],
-            'speed': options.get('speed', Amazon_VOICE_SPEED_DEFAULT),
-            'pitch': options.get('pitch', Amazon_VOICE_PITCH_DEFAULT)
-        }
+        if "AudioStream" in response:
+            # Note: Closing the stream is important because the service throttles on the
+            # number of parallel connections. Here we are using contextlib.closing to
+            # ensure the close method of the stream object will be called automatically
+            # at the end of the with statement's scope.
+            with contextlib.closing(response["AudioStream"]) as stream:
+                with open(output_temp_filename, 'wb') as audio:
+                    audio.write(stream.read())
+                return output_temp_file
 
-        # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
-        response = requests.post(url, data=data, headers=headers)
-        if response.status_code == 200:
-            with open(output_temp_filename, 'wb') as audio:
-                audio.write(response.content)
-            return output_temp_file
+        else:
+            # The response didn't contain audio data, exit gracefully
+            raise cloudlanguagetools.errors.RequestError('no audio stream')
 
-        error_message = f'Status code: {response.status_code}: {response.content}'
-        raise cloudlanguagetools.errors.RequestError(error_message)
 
     def get_tts_voice_list(self):
         result = []

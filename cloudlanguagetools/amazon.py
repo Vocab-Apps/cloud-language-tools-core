@@ -45,7 +45,7 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         }
 
     def get_voice_shortname(self):
-        return f'{self.name}'
+        return f'{self.name} ({self.engine.capitalize()})'
 
     def get_options(self):
         return {

@@ -69,6 +69,10 @@ class TestAudio(unittest.TestCase):
         source_text = 'Je ne suis pas intéressé.'
         self.verify_service_audio_language(source_text, Service.Watson, AudioLanguage.fr_FR, 'fr-FR')
 
+    def test_french_amazon(self):
+        source_text = 'Je ne suis pas intéressé.'
+        self.verify_service_audio_language(source_text, Service.Amazon, AudioLanguage.fr_FR, 'fr-FR')        
+
     def test_mandarin_google(self):
         source_text = '老人家'
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.zh_CN, 'zh-CN')

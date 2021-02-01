@@ -117,8 +117,7 @@ class RedisDb():
     def list_api_keys(self):
         result = []
         pattern = self.build_key(KEY_TYPE_API_KEY, '*')
-        cursor, keys = self.r.scan(match=pattern)
-        for key in keys:
+        for key in self.r.scan_iter(pattern):
             key_str = key
             api_key = key_str.split(':')[-1]
             validity = self.api_key_valid(api_key)
@@ -133,8 +132,7 @@ class RedisDb():
         return result
 
     def list_all_keys(self):
-        cursor, keys = self.r.scan()
-        for key in keys:
+        for key in self.r.scan_iter():
             key_ttl = self.r.ttl(key)
             expiration = 'permanent'
             if key_ttl != -1:

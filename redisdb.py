@@ -136,9 +136,9 @@ class RedisDb():
             key_ttl = self.r.ttl(key)
             expiration = 'permanent'
             if key_ttl != -1:
-                expire_datetime = datetime.datetime.fromtimestamp(float(key_ttl) / 1000.0)
-                expire_distance = expire_datetime - datetime.datetime.now()
-                expiration = f'expire: {expire_distance.days} days ({expire_distance.seconds} seconds)'
+                # note: the digital ocean redis DB seems to return a ttl in number of seconds
+                expire_distance = datetime.timedelta(seconds=key_ttl)
+                expiration = f'expire: {expire_distance.days} days ({expire_distance.seconds} seconds) [ttl: {key_ttl}]' 
             print(f'key: [{key}] ({expiration})')
 
     def track_usage(self, api_key, service, request_type, characters):

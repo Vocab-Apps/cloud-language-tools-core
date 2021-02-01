@@ -34,10 +34,14 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.voice_id = voice_data['Id']
         self.name = voice_data['Name']
         self.audio_language = get_audio_language_enum(voice_data['LanguageCode'])
+        self.engine = 'standard'
+        if 'neural' in voice_data['SupportedEngines']:
+            self.engine = 'neural'
 
     def get_voice_key(self):
         return {
-            'voice_id': self.voice_id
+            'voice_id': self.voice_id,
+            'engine': self.engine
         }
 
     def get_voice_shortname(self):
@@ -88,7 +92,7 @@ class AmazonService(cloudlanguagetools.service.Service):
         output_temp_filename = output_temp_file.name
 
         try:
-            response = self.polly_client.synthesize_speech(Text=text, OutputFormat="mp3", VoiceId=voice_key['voice_id'])
+            response = self.polly_client.synthesize_speech(Text=text, OutputFormat="mp3", VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
             raise cloudlanguagetools.errors.RequestError(str(error))
 

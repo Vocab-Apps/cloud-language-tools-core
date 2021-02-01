@@ -20,6 +20,7 @@ class RedisDb():
 
     def connect(self, db_num=0):
         redis_url = os.environ[ENV_VAR_REDIS_URL]
+        logging.info(f'connecting to redis url: {redis_url}, db_num: {db_num}')
 
         self.r = redis.from_url(redis_url, db=db_num, decode_responses=True)
 
@@ -145,32 +146,23 @@ class RedisDb():
         yyyymmdd_date_str = datetime.datetime.today().strftime('%Y%m%d')
         yyyymm_date_str = datetime.datetime.today().strftime('%Y%m')
         expire_time_seconds = 30*3*24*3600 # 3 months
+        
+        key_list = [
+            self.build_key(KEY_TYPE_USAGE + ':user:daily', f'{yyyymmdd_date_str}:{service}:{request_type}:{api_key}'),
+            self.build_key(KEY_TYPE_USAGE + ':user:monthly', f'{yyyymm_date_str}:{service}:{request_type}:{api_key}'),
+            self.build_key(KEY_TYPE_USAGE + ':global:daily', f'{yyyymmdd_date_str}:{service}:{request_type}'),
+            self.build_key(KEY_TYPE_USAGE + ':global:monthly', f'{yyyymm_date_str}:{service}:{request_type}')
+        ]
 
-        # per user, per day
-        user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymmdd_date_str}:{api_key}')
-        self.r.incrby(user_usage_key, characters)
-        self.r.expire(user_usage_key, expire_time_seconds)
-
-        # per user, per month
-        user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymm_date_str}:{api_key}')
-        self.r.incrby(user_usage_key, characters)
-        self.r.expire(user_usage_key, expire_time_seconds)
-
-        # per day
-        user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymmdd_date_str}')
-        self.r.incrby(user_usage_key, characters)
-        self.r.expire(user_usage_key, expire_time_seconds)
-
-        # per month
-        user_usage_key = self.build_key(KEY_TYPE_USAGE, f'{service}:{request_type}:{yyyymm_date_str}')
-        self.r.incrby(user_usage_key, characters)        
-        self.r.expire(user_usage_key, expire_time_seconds)
+        for key in key_list:
+            self.r.hincrby(key, 'characters', characters)
+            self.r.hincrby(key, 'requests', 1)
+            self.r.expire(key, expire_time_seconds)
 
     def list_usage(self):
         pattern = self.build_key(KEY_TYPE_USAGE, '*')
-        cursor, keys = self.r.scan(match=pattern)
-        for key in keys:
-            value = self.r.get(key)
+        for key in self.r.scan_iter(pattern):
+            value = self.r.hgetall(key)
             print(f'{key}: {value}')
 
     def clear_db(self, wait=True):

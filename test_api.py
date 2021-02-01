@@ -3,6 +3,7 @@ import json
 import tempfile
 import magic
 import datetime
+import logging
 from app import app, redis_connection
 
 class ApiTests(unittest.TestCase):
@@ -10,8 +11,6 @@ class ApiTests(unittest.TestCase):
     def setUpClass(cls):
         super(ApiTests, cls).setUpClass()
         cls.client = app.test_client()
-        # reconnect to a different DB num
-        redis_connection.connect(db_num=15)
         redis_connection.clear_db(wait=False)
         # create new API key
         cls.api_key='test_key_01'
@@ -335,4 +334,5 @@ class ApiTests(unittest.TestCase):
         
 
 if __name__ == '__main__':
+    # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate
     unittest.main()  

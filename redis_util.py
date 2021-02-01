@@ -5,6 +5,7 @@ import redisdb
 import string
 import random
 import datetime
+import logging
 
 import cloudlanguagetools.constants
 
@@ -27,6 +28,10 @@ def password_generator():
 
 
 def main():
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                        datefmt='%Y%m%d-%H:%M:%S',
+                        level=logging.INFO)
+
     parser = argparse.ArgumentParser(description='Interact with Redis DB')
     choices = ['add_api_key', 'list_api_keys', 'api_key_valid', 'list_all_keys', 'clear_db', 'list_usage']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)

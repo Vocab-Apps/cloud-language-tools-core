@@ -8,6 +8,7 @@ class Service(enum.Enum):
     EasyPronunciation = enum.auto()
     Watson = enum.auto()
     Naver = enum.auto()
+    Amazon = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()
@@ -156,6 +157,7 @@ class AudioLanguage(enum.Enum):
     bn_IN = (Language.bn, "Bengali (India)")
     ca_ES = (Language.ca, "Catalan")
     cs_CZ = (Language.cs, "Czech")
+    cy_GB = (Language.cy, "Welsh")
     da_DK = (Language.da, "Danish")
     de_AT = (Language.de, "German (Austria)")
     de_CH = (Language.de, "German (Switzerland)")
@@ -164,6 +166,7 @@ class AudioLanguage(enum.Enum):
     en_AU = (Language.en, "English (Australia)")
     en_CA = (Language.en, "English (Canada)")
     en_GB = (Language.en, "English (UK)")
+    en_GB_WLS = (Language.en, "English (Welsh)")
     en_IE = (Language.en, "English (Ireland)")
     en_IN = (Language.en, "English (India)")
     en_US = (Language.en, "English (US)")
@@ -184,6 +187,7 @@ class AudioLanguage(enum.Enum):
     hr_HR = (Language.hr, "Croatian")
     hu_HU = (Language.hu, "Hungarian")
     id_ID = (Language.id_, "Indonesian")
+    is_IS = (Language.is_, "Icelandic")
     it_IT = (Language.it, "Italian")
     ja_JP = (Language.ja, "Japanese")
     ko_KR = (Language.ko, "Korean")

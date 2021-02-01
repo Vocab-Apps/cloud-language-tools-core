@@ -10,3 +10,4 @@ flask_restful
 python-magic
 gunicorn
 redis
+boto3

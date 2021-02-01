@@ -40,10 +40,11 @@ def authenticate(func):
 def track_usage(request_type, request):
     api_key = request.headers.get('api_key', None)
     if api_key != None:
-        text = request.json['text']
-        characters = len(text)
-        service = request.json['service']
-        redis_connection.track_usage(api_key, service, request_type, characters)
+        text = request.json.get('text', None)
+        service = request.json.get('service', None)
+        if text != None and service != None:
+            characters = len(text)
+            redis_connection.track_usage(api_key, service, request_type, characters)
 
 def track_usage_translation(func):
     @functools.wraps(func)

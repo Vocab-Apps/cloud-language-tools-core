@@ -136,7 +136,8 @@ class RedisDb():
             key_ttl = self.r.ttl(key)
             expiration = 'permanent'
             if key_ttl != -1:
-                expire_distance = datetime.timedelta(seconds=key_ttl)
+                expire_datetime = datetime.datetime.fromtimestamp(float(key_ttl) / 1000.0)
+                expire_distance = expire_datetime - datetime.datetime.now()
                 expiration = f'expire: {expire_distance.days} days ({expire_distance.seconds} seconds)'
             print(f'key: [{key}] ({expiration})')
 

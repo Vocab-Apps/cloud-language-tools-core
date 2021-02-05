@@ -12,6 +12,8 @@ import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
 
+DEFAULT_VOICE_PITCH = 0
+DEFAULT_VOICE_RATE = 100
 
 def get_audio_language_enum(language_code):
     language_map = {
@@ -49,6 +51,18 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
     def get_options(self):
         return {
+            'rate' : {
+                'type': 'number',
+                'min': 20,
+                'max': 200,
+                'default': DEFAULT_VOICE_RATE
+            },
+            'pitch': {
+                'type': 'number',
+                'min': -50,
+                'max': 50,
+                'default': DEFAULT_VOICE_PITCH
+            }            
         }
 
 class AmazonTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
@@ -74,8 +88,25 @@ class AmazonService(cloudlanguagetools.service.Service):
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
 
+        pitch = options.get('pitch', DEFAULT_VOICE_PITCH)
+        pitch_str = f'{pitch:+.0f}%'
+        rate = options.get('rate', DEFAULT_VOICE_RATE)
+        rate_str = f'{rate:0.0f}%'
+
+        prosody_tags = f'pitch="{pitch_str}" rate="{rate_str}"'
+        if voice_key['engine'] == 'neural':
+            # pitch not supported on neural voices
+            prosody_tags = f'rate="{rate_str}"'
+
+
+        ssml_str = f"""<speak>
+    <prosody {prosody_tags} >
+        {text}
+    </prosody>
+</speak>"""
+
         try:
-            response = self.polly_client.synthesize_speech(Text=text, OutputFormat="mp3", VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
+            response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat="mp3", VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
             raise cloudlanguagetools.errors.RequestError(str(error))
 

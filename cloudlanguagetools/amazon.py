@@ -63,29 +63,12 @@ class AmazonTranslationLanguage(cloudlanguagetools.translationlanguage.Translati
 class AmazonService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.polly_client = boto3.client("polly")
+        self.translate_client = boto3.client("translate")
 
     def get_translation(self, text, from_language_key, to_language_key):
-        url = 'https://Amazonopenapi.apigw.ntruss.com/nmt/v1/translation'
-        headers = {
-            'X-NCP-APIGW-API-KEY-ID': self.client_id,
-            'X-NCP-APIGW-API-KEY': self.client_secret
-        }
-
-        data = {
-            'text': text,
-            'source': from_language_key,
-            'target': to_language_key
-        }
-
-        # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
-        response = requests.post(url, json=data, headers=headers)
-        if response.status_code == 200:
-            response_data = response.json()
-            return response_data['message']['result']['translatedText']
-
-        error_message = f'Status code: {response.status_code}: {response.content}'
-        raise cloudlanguagetools.errors.RequestError(error_message)
-
+        result = self.translate_client.translate_text(Text=text, 
+                    SourceLanguageCode=from_language_key, TargetLanguageCode=to_language_key)
+        return result.get('TranslatedText')
 
     def get_tts_audio(self, text, voice_key, options):
         output_temp_file = tempfile.NamedTemporaryFile()

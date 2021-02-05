@@ -103,6 +103,7 @@ class Language(enum.Enum):
     sl = ("Slovenian")
     so = ("Somali")
     es = ("Spanish")
+    es_mx = ("Spanish (Mexico)")
     su = ("Sundanese")
     sw = ("Swahili")
     sv = ("Swedish")

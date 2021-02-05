@@ -135,13 +135,13 @@ class ApiTests(unittest.TestCase):
         source_text = '成本很低'
         response = self.client.post('/translate_all', json={
             'text': source_text,
-            'service': 'Azure',
             'from_language': 'zh_cn',
             'to_language': 'fr'
         }, headers={'api_key': self.api_key})
 
         data = json.loads(response.data)
         self.assertEqual({
+            'Amazon': 'Très faible coût',
             'Google': 'Coût très bas',
             'Azure': 'Le coût est faible',
             'Watson': 'Le coût est très bas.'

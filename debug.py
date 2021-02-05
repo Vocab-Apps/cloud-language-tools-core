@@ -103,6 +103,15 @@ def get_amazon_voice_list():
     # print(tts_voice_list_json)    
     manager.services[cloudlanguagetools.constants.Service.Amazon.name].get_tts_voice_list()
 
+def get_amazon_voice_list_awesometts():
+    manager = get_manager()
+    #tts_voice_list_json = manager.get_tts_voice_list_json()
+    # print(tts_voice_list_json)    
+    voice_list = manager.services[cloudlanguagetools.constants.Service.Amazon.name].get_tts_voice_list()
+    # print(voice_list)
+    for voice in voice_list:
+        code = f"AmazonVoice(Language.{voice.audio_language.name}, Gender.{voice.gender.name}, '{voice.name}', '{voice.voice_id}', '{voice.engine}'),"
+        print(code)
 
 def get_voice_list():
     manager = get_manager()
@@ -295,11 +304,12 @@ if __name__ == '__main__':
     # get_voice_list()
     # get_watson_voice_list()
     # get_amazon_voice_list()
+    get_amazon_voice_list_awesometts()
     # get_azure_translation_languages()
     # get_google_translation_languages()
     # get_watson_translation_languages()
     #output_languages_enum()
-    get_translation_language_list()
+    # get_translation_language_list()
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()

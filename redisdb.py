@@ -132,14 +132,15 @@ class RedisDb():
         return result
 
     def list_all_keys(self):
-        for key in self.r.scan_iter():
-            key_ttl = self.r.ttl(key)
-            expiration = 'permanent'
-            if key_ttl != -1:
-                # note: the digital ocean redis DB seems to return a ttl in number of seconds
-                expire_distance = datetime.timedelta(seconds=key_ttl)
-                expiration = f'expire: {expire_distance.days} days ({expire_distance.seconds} seconds) [ttl: {key_ttl}]' 
-            print(f'key: [{key}] ({expiration})')
+        for key in self.r.scan_iter(count=100):
+            print(f'key: [{key}]')
+            # key_ttl = self.r.ttl(key)
+            # expiration = 'permanent'
+            # if key_ttl != -1:
+            #     # note: the digital ocean redis DB seems to return a ttl in number of seconds
+            #     expire_distance = datetime.timedelta(seconds=key_ttl)
+            #     expiration = f'expire: {expire_distance.days} days ({expire_distance.seconds} seconds) [ttl: {key_ttl}]' 
+            # print(f'key: [{key}] ({expiration})')
 
     def track_usage(self, api_key, service, request_type, characters):
         yyyymmdd_date_str = datetime.datetime.today().strftime('%Y%m%d')
@@ -159,10 +160,19 @@ class RedisDb():
             self.r.expire(key, expire_time_seconds)
 
     def list_usage(self):
+        # first, build list of keys
         pattern = self.build_key(KEY_TYPE_USAGE, '*')
-        for key in self.r.scan_iter(pattern):
-            value = self.r.hgetall(key)
-            print(f'{key}: {value}')
+        key_list = []
+        cursor = '0'
+        while cursor != 0:
+            cursor, keys = self.r.scan(cursor=cursor, match=pattern, count=100)
+            pipe = self.r.pipeline()
+            for key in keys:
+                pipe.hgetall(key)
+            hashes = pipe.execute()
+            for key, value in zip(keys, hashes):
+                print(f'{key}: {value}')
+        
 
     def clear_db(self, wait=True):
         if wait:

@@ -159,9 +159,13 @@ class RedisDb():
             self.r.hincrby(key, 'requests', 1)
             self.r.expire(key, expire_time_seconds)
 
-    def list_usage(self):
+    def list_usage(self, scan_pattern):
         # first, build list of keys
-        pattern = self.build_key(KEY_TYPE_USAGE, '*')
+        if scan_pattern == None:
+            pattern = self.build_key(KEY_TYPE_USAGE, '*')
+        else:
+            pattern = self.build_key(scan_pattern, '*')
+        # print(pattern)
         key_list = []
         cursor = '0'
         while cursor != 0:

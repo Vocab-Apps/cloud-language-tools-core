@@ -36,6 +36,7 @@ def main():
     choices = ['add_api_key', 'list_api_keys', 'api_key_valid', 'list_all_keys', 'clear_db', 'list_usage']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--api_key', help='Pass in API key to check validity')
+    parser.add_argument('--pattern', help='Use a special pattern for key iteration')
     parser.add_argument('--dbnum', help='connect to a different db number', type=int)
 
 
@@ -59,7 +60,8 @@ def main():
     elif args.action == 'list_all_keys':
         connection.list_all_keys()
     elif args.action == 'list_usage':
-        connection.list_usage()
+        # example: python redis_util.py --action list_usage --pattern usage:global:daily
+        connection.list_usage(args.pattern)
     elif args.action == 'clear_db':
         connection.clear_db()
 

@@ -113,7 +113,8 @@ class NaverService(cloudlanguagetools.service.Service):
                 audio.write(response.content)
             return output_temp_file
 
-        error_message = f'Status code: {response.status_code}: {response.content}'
+        response_data = json.loads(response.content)['error']
+        error_message = f'Status code: {response.status_code}: {response_data}'
         raise cloudlanguagetools.errors.RequestError(error_message)
 
     def get_tts_voice_list(self):

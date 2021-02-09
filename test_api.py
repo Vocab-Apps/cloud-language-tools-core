@@ -4,6 +4,7 @@ import tempfile
 import magic
 import datetime
 import logging
+import pytest
 from app import app, redis_connection
 
 class ApiTests(unittest.TestCase):
@@ -314,6 +315,29 @@ class ApiTests(unittest.TestCase):
         expected_filetype = 'MPEG ADTS, layer III'
 
         self.assertTrue(expected_filetype in filetype)
+
+
+    @pytest.mark.skip(reason="only succeeds when quota is exceeded")
+    def test_audio_naver_quota_exceeded(self):
+        # pytest test_api.py -k test_audio_naver_quota_exceeded
+
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)        
+        service = 'Naver'
+        french_voices = [x for x in voice_list if x['language_code'] == 'en' and x['service'] == service]
+        first_voice = french_voices[0]
+
+        response = self.client.post('/audio', json={
+            'text': 'Hello World',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.api_key})
+
+        self.assertEqual(response.status_code, 400)
+        error_response = json.loads(response.data)
+        # self.assertEqual(error_response, 'yoyo')
+
 
     def test_audio_not_authenticated(self):
         # get one azure voice for french

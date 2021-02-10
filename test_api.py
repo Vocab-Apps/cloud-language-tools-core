@@ -142,7 +142,7 @@ class ApiTests(unittest.TestCase):
 
         data = json.loads(response.data)
         self.assertEqual({
-            'Amazon': 'Très faible coût',
+            'Amazon': 'Faible coût',
             'Google': 'Coût très bas',
             'Azure': 'Le coût est faible',
             'Watson': 'Le coût est très bas.'

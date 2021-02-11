@@ -5,7 +5,10 @@ import magic
 import datetime
 import logging
 import pytest
+import quotas
+import redisdb
 from app import app, redis_connection
+import cloudlanguagetools.constants
 
 class ApiTests(unittest.TestCase):
     @classmethod
@@ -13,11 +16,17 @@ class ApiTests(unittest.TestCase):
         super(ApiTests, cls).setUpClass()
         cls.client = app.test_client()
         redis_connection.clear_db(wait=False)
+        
         # create new API key
         cls.api_key='test_key_01'
         redis_connection.add_test_api_key(cls.api_key, datetime.datetime.now() + datetime.timedelta(days=2))
+
         cls.api_key_expired='test_key_02_expired'
         redis_connection.add_test_api_key(cls.api_key_expired, datetime.datetime.now() + datetime.timedelta(days=-2))
+
+        cls.api_key_over_quota='test_key_03_over_quota'
+        redis_connection.add_test_api_key(cls.api_key_over_quota, datetime.datetime.now() + datetime.timedelta(days=2))        
+
 
     @classmethod
     def tearDownClass(cls):
@@ -305,6 +314,8 @@ class ApiTests(unittest.TestCase):
             'options': {}
         }, headers={'api_key': self.api_key})
 
+        self.assertEqual(response.status_code, 200)
+
         output_temp_file = tempfile.NamedTemporaryFile()
         with open(output_temp_file.name, 'wb') as f:
             f.write(response.data)
@@ -316,6 +327,38 @@ class ApiTests(unittest.TestCase):
         expected_filetype = 'MPEG ADTS, layer III'
 
         self.assertTrue(expected_filetype in filetype)
+
+    def test_audio_overquota(self):
+        # pytest test_api.py -rPP -k test_audio_overquota
+
+        # increase the usage of that API key
+        usage_slice = quotas.UsageSlice(cloudlanguagetools.constants.RequestType.audio,
+                            cloudlanguagetools.constants.UsageScope.User, 
+                            cloudlanguagetools.constants.UsagePeriod.daily, 
+                            cloudlanguagetools.constants.Service.Naver, 
+                            self.api_key_over_quota)
+        usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
+        redis_connection.r.hincrby(usage_redis_key, 'characters', 21000)
+        redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
+
+
+
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)
+        service = 'Naver'
+        english_voices = [x for x in voice_list if x['language_code'] == 'en' and x['service'] == service]
+        first_voice = english_voices[0]
+
+        response = self.client.post('/audio', json={
+            'text': 'Hello World',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.api_key_over_quota})
+
+        self.assertEqual(response.status_code, 429)
+        data = json.loads(response.data)
+        print(data)
 
 
     @pytest.mark.skip(reason="only succeeds when quota is exceeded")
@@ -337,7 +380,7 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
         error_response = json.loads(response.data)
-        # self.assertEqual(error_response, 'yoyo')
+        self.assertEqual(error_response['error'], 'Exceeded User daily quota')
 
 
     def test_audio_not_authenticated(self):

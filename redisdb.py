@@ -173,11 +173,11 @@ class RedisDb():
 
         for usage_slice in usage_slice_list:
             key = self.build_key(KEY_TYPE_USAGE, usage_slice.build_key_suffix())
-            characters = self.r.hincrby(key, 'characters', characters)
-            requests = self.r.hincrby(key, 'requests', 1)
+            quota_characters = self.r.hincrby(key, 'characters', characters)
+            quota_requests = self.r.hincrby(key, 'requests', 1)
             self.r.expire(key, expire_time_seconds)
             
-            if usage_slice.over_quota(characters, requests):
+            if usage_slice.over_quota(quota_characters, quota_requests):
                 error_msg = f'Exceeded {usage_slice.usage_scope.name} {usage_slice.usage_period.name} quota'
                 raise cloudlanguagetools.errors.OverQuotaError(error_msg)
 

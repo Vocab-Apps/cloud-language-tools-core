@@ -17,6 +17,9 @@ class UsageSlice():
     def over_quota(self, characters, requests) -> bool:
         if self.usage_scope == cloudlanguagetools.constants.UsageScope.User:
             if self.usage_period == cloudlanguagetools.constants.UsagePeriod.daily:
+                if self.service == cloudlanguagetools.constants.Service.Naver:
+                    if characters > 20000:
+                        return True
                 if characters > 100000:
                     return True
         return False

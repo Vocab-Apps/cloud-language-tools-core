@@ -40,3 +40,13 @@ class TestQuotas(unittest.TestCase):
             'api_key_2')
         self.assertEqual(usage_slice_daily_user.over_quota(50000, 30000), False)
         self.assertEqual(usage_slice_daily_user.over_quota(200000, 30000), True)
+
+    def test_quotas_user_naver(self):
+        usage_slice_daily_user = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.daily, 
+            cloudlanguagetools.constants.Service.Naver,
+            'api_key_3')
+        self.assertEqual(usage_slice_daily_user.over_quota(19900, 30000), False)
+        self.assertEqual(usage_slice_daily_user.over_quota(20100, 30000), True)

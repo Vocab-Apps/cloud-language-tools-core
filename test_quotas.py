@@ -64,3 +64,36 @@ class TestQuotas(unittest.TestCase):
         
         date_str = datetime.datetime.today().strftime('%Y%m%d')
         self.assertEqual(usage_slice_daily_user.build_key_suffix(), f':user:daily:{date_str}:Naver:audio:zrrVDK3svzDOLzI6')
+
+        # clt:usage:user:monthly:202102:Azure:audio:zrrVDK3svzDOLzI6
+        usage_slice_monthly_user = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.monthly, 
+            cloudlanguagetools.constants.Service.Azure,
+            'zrrVDK3svzDOLzI6')
+        
+        date_str = datetime.datetime.today().strftime('%Y%m')
+        self.assertEqual(usage_slice_monthly_user.build_key_suffix(), f':user:monthly:{date_str}:Azure:audio:zrrVDK3svzDOLzI6')
+
+        # clt:usage:global:monthly:202102:Amazon:audio
+        usage_slice_monthly_global = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.Global, 
+            cloudlanguagetools.constants.UsagePeriod.monthly, 
+            cloudlanguagetools.constants.Service.Amazon,
+            'zrrVDK3svzDOLzI6')
+        
+        date_str = datetime.datetime.today().strftime('%Y%m')
+        self.assertEqual(usage_slice_monthly_global.build_key_suffix(), f':global:monthly:{date_str}:Amazon:audio')
+
+        # clt:usage:global:daily:20210205:MandarinCantonese:transliteration
+        usage_slice_monthly_user = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.transliteration,
+            cloudlanguagetools.constants.UsageScope.Global, 
+            cloudlanguagetools.constants.UsagePeriod.daily, 
+            cloudlanguagetools.constants.Service.MandarinCantonese,
+            'zrrVDK3svzDOLzI6')
+        
+        date_str = datetime.datetime.today().strftime('%Y%m%d')
+        self.assertEqual(usage_slice_monthly_user.build_key_suffix(), f':global:daily:{date_str}:MandarinCantonese:transliteration')

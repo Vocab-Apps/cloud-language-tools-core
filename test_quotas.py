@@ -1,5 +1,6 @@
 import unittest
 import quotas
+import datetime
 
 import cloudlanguagetools.constants
 
@@ -50,3 +51,16 @@ class TestQuotas(unittest.TestCase):
             'api_key_3')
         self.assertEqual(usage_slice_daily_user.over_quota(19900, 30000), False)
         self.assertEqual(usage_slice_daily_user.over_quota(20100, 30000), True)
+
+    def test_build_key_suffix(self):
+        # clt:usage:user:daily:20210209:Naver:audio:zrrVDK3svzDOLzI6
+
+        usage_slice_daily_user = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.daily, 
+            cloudlanguagetools.constants.Service.Naver,
+            'zrrVDK3svzDOLzI6')
+        
+        date_str = datetime.datetime.today().strftime('%Y%m%d')
+        self.assertEqual(usage_slice_daily_user.build_key_suffix(), f':user:daily:{date_str}:Naver:audio:zrrVDK3svzDOLzI6')

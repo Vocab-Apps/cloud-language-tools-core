@@ -7,6 +7,7 @@ import functools
 import os
 import sys
 import logging
+import cloudlanguagetools.constants
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.errors
 import redisdb
@@ -37,34 +38,36 @@ def authenticate(func):
         return {'error': result['msg']}, 401
     return wrapper
 
-def track_usage(request_type, request):
+def track_usage(request_type, request, func, *args, **kwargs):
     api_key = request.headers.get('api_key', None)
     if api_key != None:
         text = request.json.get('text', None)
-        service = request.json.get('service', None)
-        if text != None and service != None:
+        service_str = request.json.get('service', None)
+        if text != None and service_str != None:
+            service = cloudlanguagetools.constants.Service[service_str]
             characters = len(text)
-            redis_connection.track_usage(api_key, service, request_type, characters)
+            try:
+                redis_connection.track_usage(api_key, service, request_type, characters)
+            except cloudlanguagetools.errors.OverQuotaError as err:
+                return {'error': str(err)}, 429
+    return func(*args, **kwargs)
 
 def track_usage_translation(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        track_usage('translation', request)
-        return func(*args, **kwargs)
+        return track_usage(cloudlanguagetools.constants.RequestType.translation, request, func, *args, **kwargs)
     return wrapper        
 
 def track_usage_transliteration(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        track_usage('transliteration', request)
-        return func(*args, **kwargs)
+        return track_usage(cloudlanguagetools.constants.RequestType.transliteration, request, func, *args, **kwargs)
     return wrapper            
 
 def track_usage_audio(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        track_usage('audio', request)
-        return func(*args, **kwargs)
+        return track_usage(cloudlanguagetools.constants.RequestType.audio, request, func, *args, **kwargs)
     return wrapper            
 
 class LanguageList(flask_restful.Resource):

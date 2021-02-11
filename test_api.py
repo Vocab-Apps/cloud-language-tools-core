@@ -290,6 +290,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(data['error'], 'API Key expired')
 
     def test_audio(self):
+        # pytest test_api.py -k test_audio
         # get one azure voice for french
         response = self.client.get('/voice_list')
         voice_list = json.loads(response.data)        

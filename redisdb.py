@@ -6,6 +6,8 @@ import string
 import random
 import logging
 import cloudlanguagetools.constants
+import cloudlanguagetools.errors
+import quotas
 
 ENV_VAR_REDIS_URL = 'REDIS_URL'
 
@@ -143,22 +145,42 @@ class RedisDb():
             #     expiration = f'expire: {expire_distance.days} days ({expire_distance.seconds} seconds) [ttl: {key_ttl}]' 
             # print(f'key: [{key}] ({expiration})')
 
-    def track_usage(self, api_key: str, service, request_type, characters: int):
-        yyyymmdd_date_str = datetime.datetime.today().strftime('%Y%m%d')
-        yyyymm_date_str = datetime.datetime.today().strftime('%Y%m')
+    def track_usage(self, api_key, service, request_type, characters: int):
         expire_time_seconds = 30*3*24*3600 # 3 months
         
-        key_list = [
-            self.build_key(KEY_TYPE_USAGE + ':user:daily', f'{yyyymmdd_date_str}:{service}:{request_type}:{api_key}'),
-            self.build_key(KEY_TYPE_USAGE + ':user:monthly', f'{yyyymm_date_str}:{service}:{request_type}:{api_key}'),
-            self.build_key(KEY_TYPE_USAGE + ':global:daily', f'{yyyymmdd_date_str}:{service}:{request_type}'),
-            self.build_key(KEY_TYPE_USAGE + ':global:monthly', f'{yyyymm_date_str}:{service}:{request_type}')
+        usage_slice_list = [
+            quotas.UsageSlice(request_type, 
+                              cloudlanguagetools.constants.UsageScope.User, 
+                              cloudlanguagetools.constants.UsagePeriod.daily, 
+                              service, 
+                              api_key),
+            quotas.UsageSlice(request_type, 
+                              cloudlanguagetools.constants.UsageScope.User, 
+                              cloudlanguagetools.constants.UsagePeriod.monthly, 
+                              service, 
+                              api_key),
+            quotas.UsageSlice(request_type, 
+                              cloudlanguagetools.constants.UsageScope.Global, 
+                              cloudlanguagetools.constants.UsagePeriod.daily, 
+                              service, 
+                              api_key),
+            quotas.UsageSlice(request_type, 
+                              cloudlanguagetools.constants.UsageScope.Global, 
+                              cloudlanguagetools.constants.UsagePeriod.monthly, 
+                              service, 
+                              api_key)
         ]
 
-        for key in key_list:
-            self.r.hincrby(key, 'characters', characters)
-            self.r.hincrby(key, 'requests', 1)
+        for usage_slice in usage_slice_list:
+            key = self.build_key(KEY_TYPE_USAGE, usage_slice.build_key_suffix())
+            characters = self.r.hincrby(key, 'characters', characters)
+            requests = self.r.hincrby(key, 'requests', 1)
             self.r.expire(key, expire_time_seconds)
+            
+            if usage_slice.over_quota(characters, requests):
+                error_msg = f'Exceeded {usage_slice.usage_scope.name} {usage_slice.usage_period.name} quota'
+                raise cloudlanguagetools.errors.OverQuotaError(error_msg)
+
 
     def list_usage(self, scan_pattern):
         # first, build list of keys

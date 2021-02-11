@@ -2,6 +2,9 @@ import datetime
 import cloudlanguagetools.constants
 
 
+DEFAULT_USER_DAILY_CHAR_LIMIT = 100000
+NAVER_USER_DAILY_CHAR_LIMIT = 20000
+
 class UsageSlice():
     def __init__(self, 
                 request_type: cloudlanguagetools.constants.RequestType, 
@@ -24,16 +27,16 @@ class UsageSlice():
         if self.usage_scope == cloudlanguagetools.constants.UsageScope.User:
             api_key_suffix = f':{self.api_key}'
 
-        return f':{self.usage_scope.key_str}:{self.usage_period.name}:{date_str}:{self.service.name}:{self.request_type.name}{api_key_suffix}'
+        return f'{self.usage_scope.key_str}:{self.usage_period.name}:{date_str}:{self.service.name}:{self.request_type.name}{api_key_suffix}'
 
 
     def over_quota(self, characters, requests) -> bool:
         if self.usage_scope == cloudlanguagetools.constants.UsageScope.User:
             if self.usage_period == cloudlanguagetools.constants.UsagePeriod.daily:
                 if self.service == cloudlanguagetools.constants.Service.Naver:
-                    if characters > 20000:
+                    if characters > NAVER_USER_DAILY_CHAR_LIMIT:
                         return True
-                if characters > 100000:
+                if characters > DEFAULT_USER_DAILY_CHAR_LIMIT:
                     return True
         return False
 

@@ -1,5 +1,6 @@
 import unittest
 import logging
+import random
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 from cloudlanguagetools.constants import Language
@@ -54,6 +55,10 @@ class TestAudio(unittest.TestCase):
     def verify_service_audio_language(self, text, service, audio_language, recognition_language):
         # logging.info(f'verify_service_audio: service: {service} audio_language: {audio_language}')
         voices = self.get_voice_list_service_audio_language(service, audio_language)
+        # pick 3 random voices
+        max_voices = 3
+        if len(voices) > max_voices:
+            voices = random.sample(voices, max_voices)
         for voice in voices:
             self.verify_voice(voice, text, recognition_language)
 

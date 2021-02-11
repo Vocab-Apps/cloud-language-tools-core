@@ -10,6 +10,21 @@ class Service(enum.Enum):
     Naver = enum.auto()
     Amazon = enum.auto()
 
+class RequestType(enum.Enum):
+    translation = enum.auto()
+    transliteration = enum.auto()
+    audio = enum.auto()
+
+class UsageScope(enum.Enum):
+    def __init__(self, key_str):
+        self.key_str = key_str 
+    User = ("user")
+    Global = ("global")
+
+class UsagePeriod(enum.Enum):
+    daily = enum.auto()
+    monthly = enum.auto()
+
 class Gender(enum.Enum):
     Male = enum.auto()
     Female = enum.auto()

@@ -5,6 +5,7 @@ import redis
 import string
 import random
 import logging
+import cloudlanguagetools.constants
 
 ENV_VAR_REDIS_URL = 'REDIS_URL'
 
@@ -142,7 +143,7 @@ class RedisDb():
             #     expiration = f'expire: {expire_distance.days} days ({expire_distance.seconds} seconds) [ttl: {key_ttl}]' 
             # print(f'key: [{key}] ({expiration})')
 
-    def track_usage(self, api_key, service, request_type, characters):
+    def track_usage(self, api_key: str, service, request_type, characters: int):
         yyyymmdd_date_str = datetime.datetime.today().strftime('%Y%m%d')
         yyyymm_date_str = datetime.datetime.today().strftime('%Y%m')
         expire_time_seconds = 30*3*24*3600 # 3 months

@@ -25,12 +25,12 @@ def generate_sound_sample():
     for voice in voice_list:
         audio_language = voice.audio_language
         target_language = audio_language.lang
-        print(f'source_language: {source_language} target_language: {target_language}')
+        # print(f'source_language: {source_language} target_language: {target_language}')
         if target_language == source_language:
             # don't translate
             translation = source_text
         elif target_language not in translations:
-            print(f'need to translate into {target_language}')
+            logging.info(f'need to translate into {target_language}')
             # translate
             # get azure translation service
             target_translation_option = [x for x in translation_language_list if x.language == target_language][0]
@@ -41,7 +41,7 @@ def generate_sound_sample():
             # print(translation)
         else:
             translation = translations[target_language]
-        print(f'translation into {target_language}: {translation}')
+        logging.info(f'translation into {target_language}: {translation}')
         # print(voice)
 
         # generate audio
@@ -49,7 +49,7 @@ def generate_sound_sample():
 
         dir_path = f'sound_samples/{target_language.lang_name}'
         file_name = f'{voice.get_voice_description()}.mp3'
-        os.makedirs(dir_path)
+        os.makedirs(dir_path, exist_ok=True)
         final_path = os.path.join(dir_path, file_name)
         shutil.copyfile(audio_temp_file.name, final_path)
         logging.info(f'copied into {final_path}')

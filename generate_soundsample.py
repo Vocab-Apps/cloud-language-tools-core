@@ -1,11 +1,8 @@
 import os
-import base64
 import json
 import tempfile
 import shutil 
-import unittest
-import pydub
-import pydub.playback
+import logging
 import cloudlanguagetools
 import cloudlanguagetools.constants
 import cloudlanguagetools.servicemanager
@@ -45,9 +42,22 @@ def generate_sound_sample():
         else:
             translation = translations[target_language]
         print(f'translation into {target_language}: {translation}')
-        print(voice)
+        # print(voice)
+
+        # generate audio
+        audio_temp_file = manager.get_tts_audio(translation, voice.service.name, voice.get_voice_key(), {})
+
+        dir_path = f'sound_samples/{target_language.lang_name}'
+        file_name = f'{voice.get_voice_description()}.mp3'
+        os.makedirs(dir_path)
+        final_path = os.path.join(dir_path, file_name)
+        shutil.copyfile(audio_temp_file.name, final_path)
+        logging.info(f'copied into {final_path}')
 
 
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                        datefmt='%Y%m%d-%H:%M:%S',
+                        level=logging.INFO)    
     generate_sound_sample()

@@ -338,10 +338,8 @@ class ApiTests(unittest.TestCase):
                             cloudlanguagetools.constants.Service.Naver, 
                             self.api_key_over_quota)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
-        redis_connection.r.hincrby(usage_redis_key, 'characters', 21000)
+        redis_connection.r.hincrby(usage_redis_key, 'characters', 19985)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
-
-
 
         response = self.client.get('/voice_list')
         voice_list = json.loads(response.data)
@@ -349,16 +347,24 @@ class ApiTests(unittest.TestCase):
         english_voices = [x for x in voice_list if x['language_code'] == 'en' and x['service'] == service]
         first_voice = english_voices[0]
 
+        # the first request should go through
         response = self.client.post('/audio', json={
             'text': 'Hello World',
             'service': service,
             'voice_key': first_voice['voice_key'],
             'options': {}
         }, headers={'api_key': self.api_key_over_quota})
+        self.assertEqual(response.status_code, 200)
 
+        # the second request should get blocked
+        response = self.client.post('/audio', json={
+            'text': 'Hello World 2',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.api_key_over_quota})
         self.assertEqual(response.status_code, 429)
-        data = json.loads(response.data)
-        print(data)
+
 
 
     @pytest.mark.skip(reason="only succeeds when quota is exceeded")

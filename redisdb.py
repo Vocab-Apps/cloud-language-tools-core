@@ -171,15 +171,27 @@ class RedisDb():
                               api_key)
         ]
 
+        def convert_usage(usage_output):
+            if usage_output == None:
+                return 0
+            return int(usage_output)
+
+        # do a pre check to see whether the current request would put us over the quota
         for usage_slice in usage_slice_list:
             key = self.build_key(KEY_TYPE_USAGE, usage_slice.build_key_suffix())
-            quota_characters = self.r.hincrby(key, 'characters', characters)
-            quota_requests = self.r.hincrby(key, 'requests', 1)
-            self.r.expire(key, expire_time_seconds)
+            current_quota_characters = convert_usage(self.r.hget(key, 'characters'))
+            current_quota_requests = convert_usage(self.r.hget(key, 'requests'))
             
-            if usage_slice.over_quota(quota_characters, quota_requests):
+            if usage_slice.over_quota(current_quota_characters + characters, current_quota_requests + 1):
                 error_msg = f'Exceeded {usage_slice.usage_scope.name} {usage_slice.usage_period.name} quota'
-                raise cloudlanguagetools.errors.OverQuotaError(error_msg)
+                raise cloudlanguagetools.errors.OverQuotaError(error_msg)        
+
+        # track usage
+        for usage_slice in usage_slice_list:
+            key = self.build_key(KEY_TYPE_USAGE, usage_slice.build_key_suffix())
+            self.r.hincrby(key, 'characters', characters)
+            self.r.hincrby(key, 'requests', 1)
+            self.r.expire(key, expire_time_seconds)
 
 
     def list_usage(self, scan_pattern):

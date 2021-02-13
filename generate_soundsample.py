@@ -3,6 +3,7 @@ import json
 import tempfile
 import shutil 
 import logging
+import boto3
 import cloudlanguagetools
 import cloudlanguagetools.constants
 import cloudlanguagetools.servicemanager
@@ -14,6 +15,13 @@ def get_manager():
     return manager
 
 def generate_sound_sample():
+    session = boto3.session.Session()
+    client = session.client('s3',
+                            region_name=os.environ['SPACE_REGION'],
+                            endpoint_url=os.environ['SPACE_ENDPOINT_URL'],
+                            aws_access_key_id=os.environ['SPACE_KEY'],
+                            aws_secret_access_key=os.environ['SPACE_SECRET'])
+
     manager = get_manager()
     voice_list = manager.get_tts_voice_list()
     translation_language_list = manager.get_translation_language_list()
@@ -25,6 +33,17 @@ def generate_sound_sample():
     for voice in voice_list:
         audio_language = voice.audio_language
         target_language = audio_language.lang
+
+        dir_path = f'sound_samples/{target_language.lang_name}'
+        file_name = f'{voice.get_voice_description()}.mp3'
+        final_path = os.path.join(dir_path, file_name)
+
+        if os.path.isfile(final_path):
+            # skip
+            continue
+
+        s3_path = f'{target_language.lang_name}/{voice.get_voice_description()}.mp3'
+
         # print(f'source_language: {source_language} target_language: {target_language}')
         if target_language == source_language:
             # don't translate
@@ -47,12 +66,13 @@ def generate_sound_sample():
         # generate audio
         audio_temp_file = manager.get_tts_audio(translation, voice.service.name, voice.get_voice_key(), {})
 
-        dir_path = f'sound_samples/{target_language.lang_name}'
-        file_name = f'{voice.get_voice_description()}.mp3'
         os.makedirs(dir_path, exist_ok=True)
-        final_path = os.path.join(dir_path, file_name)
+
         shutil.copyfile(audio_temp_file.name, final_path)
         logging.info(f'copied into {final_path}')
+
+        # upload to the space
+        # client.upload_file(audio_temp_file.name, 'cloud-language-tools-samples', s3_path)
 
 
 

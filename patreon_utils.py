@@ -85,7 +85,7 @@ def list_patreon_user_ids(creator_access_token, campaign_id):
     # retain patreon keys
     # print(api_key_list[0])
     # print(entitled_user_ids)
-    api_key_list = [x for x in api_key_list if x['key_data']['type'] == 'patreon']
+    api_key_list = [x for x in api_key_list if 'type' in x['key_data'] and x['key_data']['type'] == 'patreon']
     print('keys for entitled users:')
     result = []
     for api_key_entry in api_key_list:

@@ -4,6 +4,7 @@ import tempfile
 import uuid
 import operator
 import pydub
+import logging
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -210,7 +211,10 @@ class AzureService(cloudlanguagetools.service.Service):
         azure_data = self.get_supported_languages()
         result = []
         for language_id, data in azure_data['translation'].items():
-            result.append(AzureTranslationLanguage(language_id))
+            try:
+                result.append(AzureTranslationLanguage(language_id))
+            except KeyError:
+                logging.error(f'could not process translation language for {language_id}, {data}', exc_info=True)
         return result
 
     def get_transliteration_language_list(self):

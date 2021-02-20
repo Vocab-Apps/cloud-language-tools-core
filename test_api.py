@@ -72,6 +72,7 @@ class ApiTests(unittest.TestCase):
         self.assertTrue('voice_key' in voice1)
 
     def test_translation_language_list(self):
+        # pytest test_api.py -rPP -k 'test_translation_language_list'
         response = self.client.get('/translation_language_list')
         translation_language_list = json.loads(response.data)
         self.assertTrue(len(translation_language_list) > 100) # with google and azure, we already have 400 voices or so

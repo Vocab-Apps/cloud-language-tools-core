@@ -87,6 +87,22 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(len(language1['language_name']) > 0)
         self.assertTrue(len(language1['service']) > 0)
 
+    def test_transliteration_language_list(self):
+        # pytest test_api.py -rPP -k 'test_transliteration_language_list'
+        response = self.client.get('/transliteration_language_list')
+        transliteration_language_list = json.loads(response.data)
+        self.assertTrue(len(transliteration_language_list) > 30) # 
+        
+        subset_1 = [x for x in transliteration_language_list if x['language_code'] == 'zh_cn']
+        self.assertTrue(len(subset_1) >= 1) # at least one, azure
+
+        language1 = subset_1[0]
+
+        self.assertTrue(len(language1['language_code']) > 0)
+        self.assertTrue(len(language1['language_name']) > 0)
+        self.assertTrue(len(language1['service']) > 0)
+        self.assertTrue(len(language1['transliteration_name']) > 0)
+
 
     def test_translate(self):
         source_text = 'Je ne suis pas intéressé.'

@@ -127,6 +127,7 @@ class Language(enum.Enum):
     tt = ("Tatar")
     te = ("Telugu")
     th = ("Thai")
+    ti = ("Tigrinya")
     tr = ("Turkish")
     tk = ("Turkmen")
     uk = ("Ukrainian")

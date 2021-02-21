@@ -1,6 +1,7 @@
 import json
 import requests
 import tempfile
+import logging
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -91,7 +92,10 @@ class WatsonService(cloudlanguagetools.service.Service):
             if entry['supported_as_source'] == True and entry['supported_as_target'] == True:
                 # print(entry)
                 language_id = entry['language']
-                result.append(WatsonTranslationLanguage(language_id))
+                try:
+                    result.append(WatsonTranslationLanguage(language_id))
+                except KeyError:
+                    logging.error(f'could not process translation language for {language_id}, {entry}', exc_info=True)                    
         return result        
 
     def list_voices(self):
@@ -104,7 +108,10 @@ class WatsonService(cloudlanguagetools.service.Service):
 
         voice_list = self.list_voices()
         for voice in voice_list:
-            result.append(WatsonVoice(voice))
+            try:
+                result.append(WatsonVoice(voice))
+            except KeyError:
+                logging.error(f'could not process voice for {voice}', exc_info=True)
 
         return result
 

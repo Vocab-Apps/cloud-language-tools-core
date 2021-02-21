@@ -1,6 +1,7 @@
 import os
 import tempfile
 import html
+import logging
 import google.cloud.texttospeech
 import google.cloud.translate_v2
 import cloudlanguagetools.service
@@ -143,7 +144,10 @@ class GoogleService(cloudlanguagetools.service.Service):
         result = []
 
         for voice in voices.voices:
-            result.append(GoogleVoice(voice))
+            try:
+                result.append(GoogleVoice(voice))
+            except KeyError:
+                logging.error(f'could not process voice for {voice}', exc_info=True)
 
         return result
 
@@ -151,8 +155,11 @@ class GoogleService(cloudlanguagetools.service.Service):
         data = self.get_translation_languages()
         result_dict = {}
         for entry in data:
-            translation_language = GoogleTranslationLanguage(entry['language'])
-            result_dict[translation_language.get_language_code()] = translation_language
+            try:
+                translation_language = GoogleTranslationLanguage(entry['language'])
+                result_dict[translation_language.get_language_code()] = translation_language
+            except KeyError:
+                logging.error(f'could not process translation language for {entry}', exc_info=True)                
         return result_dict.values()
 
     def get_transliteration_language_list(self):

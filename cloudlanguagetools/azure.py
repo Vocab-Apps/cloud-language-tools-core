@@ -183,7 +183,10 @@ class AzureService(cloudlanguagetools.service.Service):
             result = []
             for voice_data in voice_list:
                 # print(voice_data)
-                result.append(AzureVoice(voice_data))
+                try:
+                    result.append(AzureVoice(voice_data))
+                except KeyError:
+                    logging.error(f'could not process voice for {voice_data}', exc_info=True)
             return result
 
     def get_translation(self, text, from_language_key, to_language_key):
@@ -229,7 +232,10 @@ class AzureService(cloudlanguagetools.service.Service):
             to_script_name = first_script['toScripts'][0]['name']
             # print(language_id, from_script, to_script)
             # assert(to_script == 'Latn')
-            result.append(AzureTransliterationLanguage(language_id, from_script, to_script, from_script_name, to_script_name))
+            try:
+                result.append(AzureTransliterationLanguage(language_id, from_script, to_script, from_script_name, to_script_name))
+            except KeyError:
+                logging.error(f'could not process transliteration language for {language_id}, {data}', exc_info=True)
         return result
 
 

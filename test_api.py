@@ -54,6 +54,8 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(actual_language_list['zh_cn'], 'Chinese (Simplified)')
 
     def test_voice_list(self):
+        # pytest test_api.py -rPP -k 'test_voice_list'
+
         response = self.client.get('/voice_list')
         voice_list = json.loads(response.data)
         self.assertTrue(len(voice_list) > 100) # with google and azure, we already have 400 voices or so

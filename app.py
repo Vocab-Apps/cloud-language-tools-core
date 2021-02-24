@@ -131,6 +131,34 @@ class Audio(flask_restful.Resource):
         except cloudlanguagetools.errors.RequestError as err:
             return {'error': str(err)}, 400
 
+class YomichanAudio(flask_restful.Resource):
+    def get(self):
+        # hardcode one voice for now, for testing purposes
+        expression = request.args.get('expression')
+        try:
+            data = request.json
+            source_text = expression
+            service = 'Azure'
+            voice_key = {
+                "name": "Microsoft Server Speech Text to Speech Voice (ja-JP, NanamiNeural)"
+            }
+            options = {}
+            audio_temp_file = manager.get_tts_audio(source_text, service, voice_key, options)
+            return send_file(audio_temp_file.name, mimetype='audio/mpeg')
+        except cloudlanguagetools.errors.RequestError as err:
+            return {'error': str(err)}, 400        
+
+        # return {
+        #     'type': 'audioSourceList',
+        #     'audioSources': [
+        #         {'name': 'audio1',
+        #         'url': 'http://localhost:5000/yomichan_audio_2/audio1.mp3'},
+        #         {'name': 'audio2',
+        #         'url': 'http://localhost:5000/yomichan_audio_2/audio2.mp3'}
+        #     ]
+        # }
+
+
 class VerifyApiKey(flask_restful.Resource):
     def post(self):
         data = request.json
@@ -173,6 +201,7 @@ api.add_resource(TranslateAll, '/translate_all')
 api.add_resource(Transliterate, '/transliterate')
 api.add_resource(Detect, '/detect')
 api.add_resource(Audio, '/audio')
+api.add_resource(YomichanAudio, '/yomichan_audio')
 api.add_resource(VerifyApiKey, '/verify_api_key')
 api.add_resource(PatreonKey, '/patreon_key')
 api.add_resource(PatreonKeyRequest, '/request_patreon_key')

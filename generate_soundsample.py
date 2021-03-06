@@ -32,6 +32,9 @@ def generate_sound_sample():
     source_translation_option = [x for x in translation_language_list if x.language == source_language][0]
     translation_service = 'Azure'
     translations = {}
+
+    entries = []
+
     for voice in voice_list:
         audio_language = voice.audio_language
         target_language = audio_language.lang
@@ -40,42 +43,38 @@ def generate_sound_sample():
         file_name = f'{voice.get_voice_description()}.mp3'
         final_path = os.path.join(dir_path, file_name)
 
-        if os.path.isfile(final_path):
-            # skip
-            # continue
-            pass
+        if not os.path.isfile(final_path):
+            logging.info(f'{final_path} not present, requesting')
+            # print(f'source_language: {source_language} target_language: {target_language}')
+            if target_language == source_language:
+                # don't translate
+                translation = source_text
+            elif target_language not in translations:
+                logging.info(f'need to translate into {target_language}')
+                # translate
+                # get azure translation service
+                target_translation_option = [x for x in translation_language_list if x.language == target_language][0]
+                # print(source_translation_option.json_obj())
+                # print(target_translation_option.json_obj())
+                translation = manager.get_translation(source_text, translation_service, source_translation_option.get_language_id(), target_translation_option.get_language_id())
+                translations[target_language] = translation
+                # print(translation)
+            else:
+                translation = translations[target_language]
+            logging.info(f'translation into {target_language}: {translation}')
+            # print(voice)
 
-        s3_path = f'{target_language.lang_name}/{voice.get_voice_description()}.mp3'
+            # generate audio
+            audio_temp_file = manager.get_tts_audio(translation, voice.service.name, voice.get_voice_key(), {})
 
-        # print(f'source_language: {source_language} target_language: {target_language}')
-        if target_language == source_language:
-            # don't translate
-            translation = source_text
-        elif target_language not in translations:
-            logging.info(f'need to translate into {target_language}')
-            # translate
-            # get azure translation service
-            target_translation_option = [x for x in translation_language_list if x.language == target_language][0]
-            # print(source_translation_option.json_obj())
-            # print(target_translation_option.json_obj())
-            translation = manager.get_translation(source_text, translation_service, source_translation_option.get_language_id(), target_translation_option.get_language_id())
-            translations[target_language] = translation
-            # print(translation)
-        else:
-            translation = translations[target_language]
-        logging.info(f'translation into {target_language}: {translation}')
-        # print(voice)
+            os.makedirs(dir_path, exist_ok=True)
 
-        # generate audio
-        audio_temp_file = manager.get_tts_audio(translation, voice.service.name, voice.get_voice_key(), {})
-
-        os.makedirs(dir_path, exist_ok=True)
-
-        shutil.copyfile(audio_temp_file.name, final_path)
-        logging.info(f'copied into {final_path}')
+            shutil.copyfile(audio_temp_file.name, final_path)
+            logging.info(f'copied into {final_path}')
 
         # upload to the space
-        client.upload_file(audio_temp_file.name, 'cloud-language-tools-samples', s3_path, ExtraArgs={'ACL':'public-read'})
+        s3_path = f'{target_language.lang_name}/{voice.get_voice_description()}.mp3'
+        client.upload_file(final_path, 'cloud-language-tools-samples', s3_path, ExtraArgs={'ACL':'public-read'})
         # urllib.parse.urlencode(f)
         public_url = f'https://sound-samples.anki.study/{urllib.parse.quote(s3_path)}'
 
@@ -89,6 +88,11 @@ def generate_sound_sample():
         }
 
         print(voice_entry)
+        entries.append(voice_entry)
+
+    # write out voice entries as CSV
+    voices_df = pandas.DataFrame(entries)
+    voices_df.to_csv(f'temp_data_files/voicelist.csv')
 
 
 

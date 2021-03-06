@@ -4,6 +4,8 @@ import tempfile
 import shutil 
 import logging
 import boto3
+import pandas
+import urllib.parse
 import cloudlanguagetools
 import cloudlanguagetools.constants
 import cloudlanguagetools.servicemanager
@@ -40,7 +42,8 @@ def generate_sound_sample():
 
         if os.path.isfile(final_path):
             # skip
-            continue
+            # continue
+            pass
 
         s3_path = f'{target_language.lang_name}/{voice.get_voice_description()}.mp3'
 
@@ -72,7 +75,20 @@ def generate_sound_sample():
         logging.info(f'copied into {final_path}')
 
         # upload to the space
-        # client.upload_file(audio_temp_file.name, 'cloud-language-tools-samples', s3_path)
+        client.upload_file(audio_temp_file.name, 'cloud-language-tools-samples', s3_path, ExtraArgs={'ACL':'public-read'})
+        # urllib.parse.urlencode(f)
+        public_url = f'https://sound-samples.anki.study/{urllib.parse.quote(s3_path)}'
+
+        voice_entry = {
+            'audio_language': audio_language.name,
+            'language': audio_language.lang.name,
+            'language_name': audio_language.lang.lang_name,
+            'audio_language_name': audio_language.audio_lang_name,
+            'voice_description': voice.get_voice_description(),
+            'public_url': public_url
+        }
+
+        print(voice_entry)
 
 
 

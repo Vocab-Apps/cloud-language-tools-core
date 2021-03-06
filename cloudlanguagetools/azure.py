@@ -66,11 +66,13 @@ def get_translation_language_enum(language_id):
     azure_language_id_map = {
         'as': 'as_',
         'fr-ca': 'fr_ca',
+        'fr-CA': 'fr_ca',
         'id': 'id_',
         'is': 'is_',
         'or': 'or_',
         'pt': 'pt_br',
         'pt-pt': 'pt_pt',
+        'pt-PT': 'pt_pt',
         'sr-Cyrl': 'sr_cyrl',
         'sr-Latn': 'sr_latn',
         'tlh-Latn': 'tlh_latn',

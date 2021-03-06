@@ -113,6 +113,19 @@ def get_amazon_voice_list_awesometts():
         code = f"AmazonVoice(Language.{voice.audio_language.name}, Gender.{voice.gender.name}, '{voice.name}', '{voice.voice_id}', '{voice.engine}'),"
         print(code)
 
+def print_all_languages():
+    languages = [language for language in cloudlanguagetools.constants.Language]
+    languages = sorted(languages, key = lambda x: x.lang_name)
+    for entry in languages:
+        print(f'{entry.name},{entry.lang_name}')
+
+def print_all_audio_languages():
+    languages = [language for language in cloudlanguagetools.constants.AudioLanguage]
+    languages = sorted(languages, key = lambda x: x.audio_lang_name)
+    for entry in languages:
+        print(f'{entry.lang.name},{entry.name},{entry.audio_lang_name}')
+
+
 def get_voice_list():
     manager = get_manager()
     tts_voice_list_json = manager.get_tts_voice_list_json()
@@ -304,7 +317,7 @@ if __name__ == '__main__':
     # get_voice_list()
     # get_watson_voice_list()
     # get_amazon_voice_list()
-    get_amazon_voice_list_awesometts()
+    # get_amazon_voice_list_awesometts()
     # get_azure_translation_languages()
     # get_google_translation_languages()
     # get_watson_translation_languages()
@@ -319,3 +332,5 @@ if __name__ == '__main__':
     # end_to_end_test()
     # transliterate_azure()
     # get_transliteration_language_list()
+    print_all_languages()
+    # print_all_audio_languages()

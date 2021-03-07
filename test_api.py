@@ -381,6 +381,28 @@ class ApiTests(unittest.TestCase):
 
         self.assertTrue(expected_filetype in filetype)
 
+    def test_audio_yomichan_incorrect_api_key(self):
+        # pytest test_api.py -rPP -k test_audio_yomichan_incorrect_api_key
+        
+        # get one azure voice for japanese
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)        
+        service = 'Azure'
+        japanese_voices = [x for x in voice_list if x['language_code'] == 'ja' and x['service'] == service]
+        first_voice = japanese_voices[0]
+
+        source_text = 'おはようございます'
+        voice_key_str = urllib.parse.quote_plus(json.dumps(first_voice['voice_key']))
+        url_params = f'api_key=incorrectapikey&service={service}&voice_key={voice_key_str}&text={source_text}'
+        url = f'/yomichan_audio?{url_params}'
+
+        print(f'url: {url}')
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 401)
+
+
     def test_audio_overquota(self):
         # pytest test_api.py -rPP -k test_audio_overquota
 

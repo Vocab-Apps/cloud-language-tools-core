@@ -7,6 +7,7 @@ import logging
 import pytest
 import quotas
 import redisdb
+import urllib.parse
 from app import app, redis_connection
 import cloudlanguagetools.constants
 
@@ -332,6 +333,39 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'options': {}
         }, headers={'api_key': self.api_key})
+
+        self.assertEqual(response.status_code, 200)
+
+        output_temp_file = tempfile.NamedTemporaryFile()
+        with open(output_temp_file.name, 'wb') as f:
+            f.write(response.data)
+        f.close()
+
+        # verify file type
+        filetype = magic.from_file(output_temp_file.name)
+        # should be an MP3 file
+        expected_filetype = 'MPEG ADTS, layer III'
+
+        self.assertTrue(expected_filetype in filetype)
+
+    def test_audio_yomichan(self):
+        # pytest test_api.py -rPP -k test_audio_yomichan
+        
+        # get one azure voice for japanese
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)        
+        service = 'Azure'
+        japanese_voices = [x for x in voice_list if x['language_code'] == 'ja' and x['service'] == service]
+        first_voice = japanese_voices[0]
+
+        source_text = 'おはようございます'
+        voice_key_str = urllib.parse.quote_plus(json.dumps(first_voice['voice_key']))
+        url_params = f'api_key={self.api_key}&service={service}&voice_key={voice_key_str}&text={source_text}'
+        url = f'/yomichan_audio?{url_params}'
+
+        print(f'url: {url}')
+
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
 

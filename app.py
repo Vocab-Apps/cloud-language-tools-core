@@ -7,6 +7,7 @@ import functools
 import os
 import sys
 import logging
+import urllib.parse
 import cloudlanguagetools.constants
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.errors
@@ -30,6 +31,18 @@ def authenticate(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         api_key = request.headers.get('api_key', None)
+        # is this API key valid ?
+        result = redis_connection.api_key_valid(api_key)
+        if result['key_valid']:
+            # authentication successful
+            return func(*args, **kwargs)
+        return {'error': result['msg']}, 401
+    return wrapper
+
+def authenticate_get(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        api_key = request.args.get('api_key', None)
         # is this API key valid ?
         result = redis_connection.api_key_valid(api_key)
         if result['key_valid']:
@@ -69,6 +82,24 @@ def track_usage_audio(func):
     def wrapper(*args, **kwargs):
         return track_usage(cloudlanguagetools.constants.RequestType.audio, request, func, *args, **kwargs)
     return wrapper            
+
+def track_usage_audio_yomichan(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        api_key = request.args.get('api_key', None)
+        if api_key != None:
+            text = request.args.get('text', None)
+            service_str = request.args.get('service', None)
+            if text != None and service_str != None:
+                service = cloudlanguagetools.constants.Service[service_str]
+                characters = len(text)
+                try:
+                    redis_connection.track_usage(api_key, service, cloudlanguagetools.constants.RequestType.audio, characters)
+                except cloudlanguagetools.errors.OverQuotaError as err:
+                    return {'error': str(err)}, 429
+        return func(*args, **kwargs)
+    return wrapper
+
 
 class LanguageList(flask_restful.Resource):
     def get(self):
@@ -132,31 +163,21 @@ class Audio(flask_restful.Resource):
             return {'error': str(err)}, 400
 
 class YomichanAudio(flask_restful.Resource):
+    method_decorators = [authenticate_get, track_usage_audio_yomichan]
     def get(self):
-        # hardcode one voice for now, for testing purposes
-        expression = request.args.get('expression')
         try:
-            data = request.json
-            source_text = expression
-            service = 'Azure'
-            voice_key = {
-                "name": "Microsoft Server Speech Text to Speech Voice (ja-JP, NanamiNeural)"
-            }
+            source_text = request.args.get('text')
+            service = request.args.get('service')
+            voice_key_urlencode_str = request.args.get('voice_key')
+            if source_text == None or service == None or voice_key_urlencode_str == None:
+                return {'error': 'missing arguments'}, 400
+            voice_key_json_str = urllib.parse.unquote_plus(voice_key_urlencode_str)
+            voice_key = json.loads(voice_key_json_str)
             options = {}
             audio_temp_file = manager.get_tts_audio(source_text, service, voice_key, options)
             return send_file(audio_temp_file.name, mimetype='audio/mpeg')
         except cloudlanguagetools.errors.RequestError as err:
             return {'error': str(err)}, 400        
-
-        # return {
-        #     'type': 'audioSourceList',
-        #     'audioSources': [
-        #         {'name': 'audio1',
-        #         'url': 'http://localhost:5000/yomichan_audio_2/audio1.mp3'},
-        #         {'name': 'audio2',
-        #         'url': 'http://localhost:5000/yomichan_audio_2/audio2.mp3'}
-        #     ]
-        # }
 
 
 class VerifyApiKey(flask_restful.Resource):

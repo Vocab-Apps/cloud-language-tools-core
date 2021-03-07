@@ -95,7 +95,7 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue('Google' in result)
         self.assertTrue('Watson' in result)
         self.assertEqual(result['Azure'], 'Le coût est faible')
-        self.assertEqual(result['Google'], 'Coût très bas')
+        self.assertEqual(result['Google'], 'À bas prix')
         self.assertEqual(result['Watson'], 'Le coût est très bas.')
 
     def test_transliteration(self):

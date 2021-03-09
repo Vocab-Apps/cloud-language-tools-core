@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-RUN apt-get update -y && apt-get install -y libasound2 python3-pip git git-crypt gnupg
+RUN apt-get update -y && apt-get install -y libasound2 python3-pip git gnupg
 RUN echo $GIT_CRYPT_KEY | base64 -d > git-crypt-key
 RUN git-crypt unlock git-crypt-key
 

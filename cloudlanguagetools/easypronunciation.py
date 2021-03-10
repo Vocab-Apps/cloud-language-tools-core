@@ -56,6 +56,22 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'french_liaison_styling': 'one_by_one',
                 'spell_numbers':1
             }, 'french'),
+
+            EasyPronunciationTransliterationLanguage('/english-api.php', cloudlanguagetools.constants.Language.en,
+            {
+                'version': 1,
+                'english_phonetics_algorithm': 'american_miscellaneous_sources',
+                'Convert_to_english':'ipa',
+                'add_aspiration_symbol': 1,
+                'narrow_transcription':1,
+                'r_replacement':1,
+                'cot_caught_merger':1,
+                'er_replacement':1,
+                'elongation_symbol_after_i_and_u':'always',
+                'only_i_for_es_ed_endings':0,
+                'show_rare_pronunciations':1,
+                'spell_numbers':1
+            }, 'english'),
         ]
         return result
 

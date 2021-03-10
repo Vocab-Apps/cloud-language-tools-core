@@ -72,6 +72,12 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'show_rare_pronunciations':1,
                 'spell_numbers':1
             }, 'english'),
+
+            EasyPronunciationTransliterationLanguage('/italian-api.php', cloudlanguagetools.constants.Language.it,
+            {
+                'version':1,
+                'spell_numbers':1
+            }, 'italian'),
         ]
         return result
 

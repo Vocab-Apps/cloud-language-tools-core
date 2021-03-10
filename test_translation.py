@@ -128,17 +128,44 @@ class TestTranslation(unittest.TestCase):
     def test_transliteration_easypronunciation(self):
         # pytest test_translation.py -k test_transliteration_easypronunciation
 
-        # french IPA
+        # easypronunciation IPA test
         test_easy_pronunciation = True
         if not test_easy_pronunciation:
             return
-            
+
+        service = cloudlanguagetools.constants.Service.EasyPronunciation.name
+
+        # french
         source_text = 'l’herbe est plus verte ailleurs'
         from_language = Language.fr.name
-        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language]
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
         self.assertTrue(len(transliteration_candidates) == 1)
         transliteration_option = transliteration_candidates[0]
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('lɛʁb‿ ɛ ply vɛʁt‿ ajœʁ', result)
+
+        # english
+        source_text = 'do you have a boyfriend'
+        from_language = Language.en.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ˈduː ˈjuː ˈhæv ə ˈbɔɪˌfɹɛnd', result)        
+
+        # italian
+        source_text = 'Piacere di conoscerla.'
+        from_language = Language.it.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('pjatʃere di konoʃʃerla', result)
+
+                

@@ -40,8 +40,7 @@ class ServiceManager():
         self.configure_google(google_key_filename)
 
         # easypronunciation
-        easypronunciation_key = os.environ['EASYPRONUNCIATION_KEY']
-        self.configure_easypronunciation(easypronunciation_key)
+        self.configure_easypronunciation()
 
         # watson
         watson_translator_api_key = os.environ['WATSON_TRANSLATOR_API_KEY']
@@ -66,8 +65,8 @@ class ServiceManager():
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
         self.services[cloudlanguagetools.constants.Service.Google.name].configure()
 
-    def configure_easypronunciation(self, access_token):
-        self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name].configure(access_token)
+    def configure_easypronunciation(self):
+        self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name].configure()
 
     def configure_watson(self, translator_api_key, translator_url, speech_api_key, speech_url):
         self.services[cloudlanguagetools.constants.Service.Watson.name].configure(translator_api_key, translator_url, speech_api_key, speech_url)

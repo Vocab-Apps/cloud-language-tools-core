@@ -99,6 +99,7 @@ class TestTranslation(unittest.TestCase):
         self.assertEqual(result['Watson'], 'Le coût est très bas.')
 
     def test_transliteration(self):
+        # pytest test_translation.py -k test_transliteration
         
         # chinese
         source_text = '成本很低'

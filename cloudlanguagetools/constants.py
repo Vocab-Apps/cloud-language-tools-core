@@ -167,6 +167,7 @@ class Language(enum.Enum):
         self.lang_name = lang_name        
 
 class AudioLanguage(enum.Enum):
+    af_ZA = (Language.af, "Afrikaans (South Africa)")
     ar_EG = (Language.ar, "Arabic (Egypt)")
     ar_SA = (Language.ar, "Arabic (Saudi Arabia)")
     ar_XA = (Language.ar, "Arabic")
@@ -223,6 +224,7 @@ class AudioLanguage(enum.Enum):
     ru_RU = (Language.ru, "Russian")
     sk_SK = (Language.sk, "Slovak")
     sl_SI = (Language.sl, "Slovenian")
+    sr_RS = (Language.sr_cyrl, "Serbian (Serbia)")
     sv_SE = (Language.sv, "Swedish")
     ta_IN = (Language.ta, "Tamil (India)")
     te_IN = (Language.te, "Telugu (India)")

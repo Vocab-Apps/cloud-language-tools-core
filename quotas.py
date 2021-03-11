@@ -2,8 +2,8 @@ import datetime
 import cloudlanguagetools.constants
 
 
-DEFAULT_USER_DAILY_CHAR_LIMIT = 100000
-NAVER_USER_DAILY_CHAR_LIMIT = 20000
+DEFAULT_USER_DAILY_CHAR_LIMIT = 80000
+NAVER_USER_DAILY_CHAR_LIMIT = 30000
 
 class UsageSlice():
     def __init__(self, 

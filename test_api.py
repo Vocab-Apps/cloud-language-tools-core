@@ -413,7 +413,7 @@ class ApiTests(unittest.TestCase):
                             cloudlanguagetools.constants.Service.Naver, 
                             self.api_key_over_quota)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
-        redis_connection.r.hincrby(usage_redis_key, 'characters', 19985)
+        redis_connection.r.hincrby(usage_redis_key, 'characters', 29985)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
 
         response = self.client.get('/voice_list')

@@ -168,4 +168,26 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('pjatʃere di konoʃʃerla', result)
 
-                
+        # japanese - Kana
+        source_text = 'おはようございます'
+        from_language = Language.ja.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service and 'Kana' in x['transliteration_name']]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('おはよー ございます', result)
+
+        # japanese - romaji
+        source_text = 'おはようございます'
+        from_language = Language.ja.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service and 'Romaji' in x['transliteration_name']]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ohayo– gozaimasu', result)
+
+        

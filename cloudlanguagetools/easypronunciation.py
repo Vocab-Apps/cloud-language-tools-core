@@ -6,24 +6,33 @@ import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.transliterationlanguage
 
+VARIANT_JAPANESE_ROMAJI = 'Romaji'
+VARIANT_JAPANESE_KANA = 'Kana'
+
 class EasyPronunciationTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
-    def __init__(self, url_path, language, api_params, api_key):
+    def __init__(self, url_path, language, api_params, api_key, variant = None):
         self.service = cloudlanguagetools.constants.Service.EasyPronunciation
         self.url_path = url_path
         self.language = language
         self.api_params = api_params
         self.api_key = api_key
+        self.variant = variant
 
     def get_transliteration_name(self):
         result = f'{self.language.lang_name} (IPA Pronunciation), {self.service.name}'
+        if self.variant != None:
+            result = f'{self.language.lang_name} ({self.variant}), {self.service.name}'
         return result
 
     def get_transliteration_key(self):
-        return {
+        key = {
             'url_path': self.url_path,
             'api_params': self.api_params,
-            'api_key': self.api_key
+            'api_key': self.api_key,
         }
+        if self.variant != None:
+            key['variant'] = self.variant
+        return key
 
 class EasyPronunciationService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -78,6 +87,22 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'version':1,
                 'spell_numbers':1
             }, 'italian'),
+
+            EasyPronunciationTransliterationLanguage('/japanese-api.php', cloudlanguagetools.constants.Language.ja,
+            {
+                'version':1,
+                'style':'slash',
+                'devoicing':1,
+                'weakening':1
+            }, 'japanese', VARIANT_JAPANESE_ROMAJI),
+
+            EasyPronunciationTransliterationLanguage('/japanese-api.php', cloudlanguagetools.constants.Language.ja,
+            {
+                'version':1,
+                'style':'slash',
+                'devoicing':1,
+                'weakening':1
+            }, 'japanese', VARIANT_JAPANESE_KANA),
         ]
         return result
 
@@ -104,6 +129,13 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
             for entry in phonetic_transcription:
                 result_components.append(entry['transcriptions'][0])
 
+            if 'variant' in transliteration_key:
+                if transliteration_key['variant'] == VARIANT_JAPANESE_ROMAJI:
+                    result_components = [x['romaji'] for x in result_components]
+                if transliteration_key['variant'] == VARIANT_JAPANESE_KANA:
+                    result_components = [x['kana'] for x in result_components]
+
+            # print(result_components)
             return ' '.join(result_components)
 
         # an error occured

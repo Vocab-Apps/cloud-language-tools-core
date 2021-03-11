@@ -118,6 +118,17 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'spell_numbers':1,
             }, 'portuguese'),
 
+            EasyPronunciationTransliterationLanguage('/spanish-api.php', cloudlanguagetools.constants.Language.es,
+            {
+                'version':1,
+                'split_into_syllables':0,
+                'caza_casa_merger':1,
+                'callo_cayo_merger':1,
+                'allophones_for_l_m_n':1,
+                'x_before_consonants':'s',
+                'spell_numbers':1
+            }, 'spanish'),
+
 
         ]
         return result

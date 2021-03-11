@@ -103,6 +103,22 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'devoicing':1,
                 'weakening':1
             }, 'japanese', VARIANT_JAPANESE_KANA),
+
+            EasyPronunciationTransliterationLanguage('/portuguese-api.php', cloudlanguagetools.constants.Language.pt_pt,
+            {
+                'version':1,
+                'portuguese_dialect':'EP',
+                'spell_numbers':1,
+            }, 'portuguese'),
+
+            EasyPronunciationTransliterationLanguage('/portuguese-api.php', cloudlanguagetools.constants.Language.pt_br,
+            {
+                'version':1,
+                'portuguese_dialect':'BP',
+                'spell_numbers':1,
+            }, 'portuguese'),
+
+
         ]
         return result
 

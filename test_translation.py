@@ -190,4 +190,13 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('ohayo– gozaimasu', result)
 
-        
+        # portuguese - brazil
+        source_text = 'Perdi a minha carteira.'
+        from_language = Language.pt_pt.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('pɨɾdˈi ɐ mˈiɲɐ kɐɾtˈɐjɾɐ', result)

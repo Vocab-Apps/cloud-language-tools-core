@@ -89,3 +89,28 @@ class TestApiKeys(unittest.TestCase):
         # this request will throw an exception
         self.assertRaises(cloudlanguagetools.errors.OverQuotaError, self.redis_connection.track_usage, api_key, service, request_type, 150)
 
+    def test_track_usage_trial(self):
+        email = 'trial_user_42@gmail.com'
+        api_key = self.redis_connection.get_trial_user_key(email)
+
+        service = cloudlanguagetools.constants.Service.Azure
+        request_type = cloudlanguagetools.constants.RequestType.audio
+
+        # this request should go through
+        self.redis_connection.track_usage(api_key, service, request_type, 100)
+
+        # this request will also go through but put us right under the limit
+        self.redis_connection.track_usage(api_key, service, request_type, 9899)
+
+        # this request will throw an exception
+        self.assertRaises(cloudlanguagetools.errors.OverQuotaError, self.redis_connection.track_usage, api_key, service, request_type, 150)
+
+        # increase this user's limit
+        self.redis_connection.increase_trial_key_limit(email, 100000)
+        # this request should go through
+        self.redis_connection.track_usage(api_key, service, request_type, 5200)
+
+        
+
+
+

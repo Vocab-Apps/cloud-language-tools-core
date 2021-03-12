@@ -19,6 +19,9 @@ class UsageSlice():
         self.api_key = api_key
 
     def build_key_suffix(self) -> str:
+        if self.usage_scope == cloudlanguagetools.constants.UsageScope.User and self.usage_period == cloudlanguagetools.constants.UsagePeriod.lifetime:
+            return f'{self.usage_scope.key_str}:{self.usage_period.name}:{self.api_key}'
+
         date_str = datetime.datetime.today().strftime('%Y%m')
         if self.usage_period == cloudlanguagetools.constants.UsagePeriod.daily:
             date_str = datetime.datetime.today().strftime('%Y%m%d')

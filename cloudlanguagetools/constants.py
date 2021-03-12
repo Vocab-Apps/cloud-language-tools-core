@@ -24,6 +24,7 @@ class UsageScope(enum.Enum):
 class UsagePeriod(enum.Enum):
     daily = enum.auto()
     monthly = enum.auto()
+    lifetime = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()

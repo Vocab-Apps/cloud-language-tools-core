@@ -34,18 +34,45 @@ def tag_subscriber():
     #             "api_key": "<your_public_api_key>",\
     #             "email": "jonsnow@example.com"\
     #          }'    
-    url = f'https://api.convertkit.com/v3/tags/{2248152}/subscribe'
+
+    # 2248152 - trial_api_key_ready
+    # 2248154 - trial_api_key_requested
+    url = f'https://api.convertkit.com/v3/tags/{2248154}/subscribe'
     response = requests.post(url, json={
             "api_key": api_key,
-            "email": "dustpuppy4@airpost.net"
+            "email": "bear@mailc.net",
+            'fields' : {
+                'trial_api_key': "api_key_1"
+            }
     })
     print(response)
     print(response.content)
     data = response.json()
     pprint.pprint(data)    
 
+def set_subscriber_field():
+    url = f'https://api.convertkit.com/v3/subscribers/1215674041'
+
+    response = requests.post(url, json={
+        'api_secret': api_secret,
+        'fields': {
+            'trial_api_key': "api_key_1"
+        } 
+        })
+    print(url)
+    print(response)
+    data = response.json()
+    pprint.pprint(data)        
+
+
 def list_tags():
     url = f'https://api.convertkit.com/v3/tags?api_key={api_key}'
+    response = requests.get(url)
+    data = response.json()
+    pprint.pprint(data)
+
+def list_fields():
+    url = f'https://api.convertkit.com/v3/custom_fields?api_key={api_key}'
     response = requests.get(url)
     data = response.json()
     pprint.pprint(data)
@@ -71,9 +98,11 @@ def configure_addtag_webhook():
 
 
 if __name__ == '__main__':
-    configure_addtag_webhook()
-    # list_tags()
+    # configure_addtag_webhook()
+    list_tags()
+    # list_fields()
     # list_subscribers()
     # view_subscribers()
     # list_tags_subscriber()
     # tag_subscriber()
+    # set_subscriber_field()

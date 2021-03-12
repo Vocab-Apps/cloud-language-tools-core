@@ -13,6 +13,7 @@ import cloudlanguagetools.servicemanager
 import cloudlanguagetools.errors
 import redisdb
 import patreon_utils
+import convertkit
 
 #logging.basicConfig()
 logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -26,6 +27,7 @@ manager = cloudlanguagetools.servicemanager.ServiceManager()
 manager.configure()
 
 redis_connection = redisdb.RedisDb()
+convertkit_client = convertkit.ConvertKit()
 
 def authenticate(func):
     @functools.wraps(func)
@@ -220,9 +222,15 @@ class ConvertKitRequestTrialKey(flask_restful.Resource):
         # 'email_address': 'bear@mailc.net', 'state': 'active', 
         # 'created_at': '2021-03-12T12:53:01.000Z', 'fields': {'trial_api_key': None}}}
         data = request.json
+        subscriber_id = data['subscriber']['id']
         email_address = data['subscriber']['email_address']
-        logging.info(f'trial')
-        print(data)
+
+        # create api key for this subscriber
+        api_key = redis_connection.get_trial_user_key(email_address)
+
+        convertkit_client.tag_user_api_ready(email_address, api_key)
+
+        logging.info(f'trial key created for {email_address}')
 
 
 api.add_resource(LanguageList, '/language_list')

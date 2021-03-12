@@ -91,7 +91,20 @@ class RedisDb():
         self.r.set(redis_trial_user_key, api_key)
         logging.info(f'added mapping: trial user: email: {email} ({redis_trial_user_key})')
 
-        return api_key        
+        return api_key
+    
+    def increase_trial_key_limit(self, email, character_limit):
+        redis_trial_user_key = self.build_key(KEY_TYPE_TRIAL_USER, email)
+        if self.r.exists(redis_trial_user_key):
+            api_key = self.r.get(redis_trial_user_key)
+            redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+
+            # set character limit
+            self.r.hset(redis_api_key, 'character_limit', character_limit)
+
+            logging.info(f'increased character limit to {character_limit} for {email} {api_key}')
+
+
 
     def get_patreon_user_key(self, user_id, email):
         logging.info(f'patreon user: {user_id}, email: {email}')

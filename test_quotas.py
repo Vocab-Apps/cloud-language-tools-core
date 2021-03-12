@@ -5,6 +5,20 @@ import datetime
 import cloudlanguagetools.constants
 
 class TestQuotas(unittest.TestCase):
+
+    def test_quotas_trial(self):
+        usage_slice_monthly_global = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.lifetime,
+            cloudlanguagetools.constants.Service.Azure,
+            'trial_key_1',
+            cloudlanguagetools.constants.ApiKeyType.trial,
+            10000)
+        self.assertEqual(usage_slice_monthly_global.over_quota(9985, 200), False)
+
+        self.assertEqual(usage_slice_monthly_global.over_quota(10005, 200), True)
+
     def test_quotas_global(self):
         usage_slice_monthly_global = quotas.UsageSlice(
             cloudlanguagetools.constants.RequestType.audio,

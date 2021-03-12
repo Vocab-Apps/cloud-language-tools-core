@@ -17,6 +17,10 @@ KEY_TYPE_USAGE ='usage'
 
 KEY_PREFIX = 'clt'
 
+API_KEY_TYPE_TEST = 'test'
+API_KEY_TYPE_PATREON = 'patreon'
+API_KEY_TYPE_TRIAL = 'trial'
+
 class RedisDb():
     def __init__(self):
         self.connect()
@@ -39,7 +43,7 @@ class RedisDb():
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
             'expiration': int(expiration_datetime.timestamp()),
-            'type': 'test'
+            'type': API_KEY_TYPE_TEST
         }
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')
@@ -50,10 +54,20 @@ class RedisDb():
             'user_id': user_id,
             'email': email,
             'expiration': self.get_api_key_expiration_timestamp(),
-            'type': 'patreon'
+            'type': API_KEY_TYPE_PATREON
         }
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')
+
+    def add_trial_api_key(self, api_key, email):
+        redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+        hash_value = {
+            'email': email,
+            'expiration': self.get_api_key_expiration_timestamp(),
+            'type': API_KEY_TYPE_TRIAL
+        }
+        self.r.hset(redis_key, mapping=hash_value)
+        logging.info(f'added {redis_key}: {hash_value}')        
         
     def get_patreon_user_key(self, user_id, email):
         logging.info(f'patreon user: {user_id}, email: {email}')

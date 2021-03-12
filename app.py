@@ -213,6 +213,18 @@ class PatreonKeyRequest(flask_restful.Resource):
         result_html = f'Click here to request your AwesomeTTS Plus / Language Tools API Key: <a href="{oauth_request_link}">Connect with Patreon</a>'
         return make_response(result_html, 200, headers)
 
+class ConvertKitRequestTrialKey(flask_restful.Resource):
+    def post(self):
+        # {'subscriber': 
+        # {'id': 1215674041, 'first_name': 'bear', 
+        # 'email_address': 'bear@mailc.net', 'state': 'active', 
+        # 'created_at': '2021-03-12T12:53:01.000Z', 'fields': {'trial_api_key': None}}}
+        data = request.json
+        email_address = data['subscriber']['email_address']
+        logging.info(f'trial')
+        print(data)
+
+
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
 api.add_resource(TranslationLanguageList, '/translation_language_list')
@@ -226,6 +238,9 @@ api.add_resource(YomichanAudio, '/yomichan_audio')
 api.add_resource(VerifyApiKey, '/verify_api_key')
 api.add_resource(PatreonKey, '/patreon_key')
 api.add_resource(PatreonKeyRequest, '/request_patreon_key')
+
+# convertkit webhooks
+api.add_resource(ConvertKitRequestTrialKey, '/convertkit_subscriber_request_trial_key')
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')

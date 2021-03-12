@@ -32,6 +32,11 @@ class ApiTests(unittest.TestCase):
         cls.api_key_over_quota='test_key_03_over_quota'
         redis_connection.add_test_api_key(cls.api_key_over_quota)        
 
+        # trial user
+        cls.api_key_trial_user = 'trial_user_42'
+        cls.trial_user_email = 'trial_user_42@gmail.com'
+        redis_connection.add_trial_api_key(cls.api_key_trial_user, cls.trial_user_email, 10000)
+
 
     @classmethod
     def tearDownClass(cls):
@@ -446,6 +451,44 @@ class ApiTests(unittest.TestCase):
         }, headers={'api_key': self.api_key_over_quota})
         self.assertEqual(response.status_code, 429)
 
+
+    def test_audio_trial_user(self):
+        # pytest test_api.py -rPP -k test_audio_trial_user
+
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)        
+        service = 'Azure'
+        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        first_voice = french_voices[0]
+
+        response = self.client.post('/audio', json={
+            'text': 'Je ne suis pas intéressé.',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.api_key_trial_user})
+        self.assertEqual(response.status_code, 200)
+
+        # increase the usage of that API key
+        usage_slice = quotas.UsageSlice(cloudlanguagetools.constants.RequestType.audio,
+                            cloudlanguagetools.constants.UsageScope.User, 
+                            cloudlanguagetools.constants.UsagePeriod.lifetime, 
+                            cloudlanguagetools.constants.Service.Azure, 
+                            self.api_key_trial_user, 
+                            cloudlanguagetools.constants.ApiKeyType.trial,
+                            10000)
+        usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
+        redis_connection.r.hincrby(usage_redis_key, 'characters', 9985)
+        redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
+
+        # this request should get rejected
+        response = self.client.post('/audio', json={
+            'text': 'Je ne suis pas intéressé.',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.api_key_trial_user})
+        self.assertEqual(response.status_code, 429)
 
 
     @pytest.mark.skip(reason="only succeeds when quota is exceeded")

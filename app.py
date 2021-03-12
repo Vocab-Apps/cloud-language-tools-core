@@ -118,7 +118,7 @@ class TransliterationLanguageList(flask_restful.Resource):
         return manager.get_transliteration_language_list_json()
 
 class Translate(flask_restful.Resource):
-    method_decorators = [authenticate, track_usage_translation]
+    method_decorators = [track_usage_translation, authenticate]
     def post(self):
         try:
             data = request.json
@@ -136,7 +136,7 @@ class TranslateAll(flask_restful.Resource):
             return {'error': str(err)}, 400
 
 class Transliterate(flask_restful.Resource):
-    method_decorators = [authenticate, track_usage_transliteration]
+    method_decorators = [track_usage_transliteration, authenticate]
     def post(self):
         try:
             data = request.json
@@ -153,7 +153,7 @@ class Detect(flask_restful.Resource):
         return {'detected_language': result.name}
 
 class Audio(flask_restful.Resource):
-    method_decorators = [authenticate, track_usage_audio]
+    method_decorators = [track_usage_audio, authenticate] # authenticate is the first step
     def post(self):
         try:
             data = request.json
@@ -163,7 +163,7 @@ class Audio(flask_restful.Resource):
             return {'error': str(err)}, 400
 
 class YomichanAudio(flask_restful.Resource):
-    method_decorators = [authenticate_get, track_usage_audio_yomichan]
+    method_decorators = [track_usage_audio_yomichan, authenticate_get]
     def get(self):
         try:
             source_text = request.args.get('text')

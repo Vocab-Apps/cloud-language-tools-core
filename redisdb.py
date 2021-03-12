@@ -180,28 +180,36 @@ class RedisDb():
 
     def track_usage(self, api_key, service, request_type, characters: int):
         expire_time_seconds = 30*3*24*3600 # 3 months
+
+        redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+        key_type_str = self.r.hget(redis_api_key, 'type')
+        key_type = cloudlanguagetools.constants.ApiKeyType[key_type_str]
         
         usage_slice_list = [
             quotas.UsageSlice(request_type, 
                               cloudlanguagetools.constants.UsageScope.User, 
                               cloudlanguagetools.constants.UsagePeriod.daily, 
                               service, 
-                              api_key),
+                              api_key,
+                              key_type),
             quotas.UsageSlice(request_type, 
                               cloudlanguagetools.constants.UsageScope.User, 
                               cloudlanguagetools.constants.UsagePeriod.monthly, 
                               service, 
-                              api_key),
+                              api_key,
+                              key_type),
             quotas.UsageSlice(request_type, 
                               cloudlanguagetools.constants.UsageScope.Global, 
                               cloudlanguagetools.constants.UsagePeriod.daily, 
                               service, 
-                              api_key),
+                              api_key,
+                              key_type),
             quotas.UsageSlice(request_type, 
                               cloudlanguagetools.constants.UsageScope.Global, 
                               cloudlanguagetools.constants.UsagePeriod.monthly, 
                               service, 
-                              api_key)
+                              api_key,
+                              key_type)
         ]
 
         def convert_usage(usage_output):

@@ -13,12 +13,14 @@ class UsageSlice():
                 usage_scope: cloudlanguagetools.constants.UsageScope, 
                 usage_period: cloudlanguagetools.constants.UsagePeriod, 
                 service: cloudlanguagetools.constants.Service, 
-                api_key: str):
+                api_key: str,
+                api_key_type: cloudlanguagetools.constants.ApiKeyType):
         self.request_type = request_type
         self.usage_scope = usage_scope
         self.usage_period = usage_period
         self.service = service
         self.api_key = api_key
+        self.api_key_type = api_key_type
 
     def build_key_suffix(self) -> str:
         if self.usage_scope == cloudlanguagetools.constants.UsageScope.User and self.usage_period == cloudlanguagetools.constants.UsagePeriod.lifetime:

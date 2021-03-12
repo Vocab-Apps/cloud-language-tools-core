@@ -39,10 +39,10 @@ class RedisDb():
         key_expiration_timestamp = int(expiration_date.timestamp())
         return key_expiration_timestamp
 
-    def add_test_api_key(self, api_key, expiration_datetime):
+    def add_test_api_key(self, api_key):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
-            'expiration': int(expiration_datetime.timestamp()),
+            'expiration': self.get_api_key_expiration_timestamp(),
             'type': API_KEY_TYPE_TEST
         }
         self.r.hset(redis_key, mapping=hash_value)

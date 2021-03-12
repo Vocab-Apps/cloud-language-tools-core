@@ -25,3 +25,20 @@ class TestApiKeys(unittest.TestCase):
         result = self.redis_connection.api_key_valid(api_key)
         self.assertEqual(result['key_valid'], True)
 
+    def test_add_trial_key(self):
+        api_key = self.redis_connection.password_generator()
+        email = 'trialuser@gmail.com'
+        self.redis_connection.add_trial_api_key(api_key, email)
+
+        result = self.redis_connection.api_key_valid(api_key)
+        self.assertEqual(result['key_valid'], True)        
+
+
+    def test_add_test_key(self):
+        api_key = self.redis_connection.password_generator()
+        email = 'testuser@gmail.com'
+        self.redis_connection.add_test_api_key(api_key)
+
+        result = self.redis_connection.api_key_valid(api_key)
+        self.assertEqual(result['key_valid'], True)                
+

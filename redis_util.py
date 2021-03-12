@@ -49,8 +49,7 @@ def main():
 
     if args.action == 'add_api_key':
         api_key = password_generator()
-        api_key_validity = 30
-        connection.add_test_api_key(api_key, datetime.datetime.now() + datetime.timedelta(days=api_key_validity))
+        connection.add_test_api_key(api_key)
     elif args.action == 'list_api_keys':
         connection.list_api_keys()
     elif args.action == 'api_key_valid':

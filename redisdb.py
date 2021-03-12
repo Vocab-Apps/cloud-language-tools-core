@@ -18,10 +18,6 @@ KEY_TYPE_USAGE ='usage'
 
 KEY_PREFIX = 'clt'
 
-API_KEY_TYPE_TEST = 'test'
-API_KEY_TYPE_PATREON = 'patreon'
-API_KEY_TYPE_TRIAL = 'trial'
-
 class RedisDb():
     def __init__(self):
         self.connect()
@@ -44,7 +40,7 @@ class RedisDb():
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
             'expiration': self.get_api_key_expiration_timestamp(),
-            'type': API_KEY_TYPE_TEST
+            'type': cloudlanguagetools.constants.ApiKeyType.test.name
         }
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')
@@ -55,7 +51,7 @@ class RedisDb():
             'user_id': user_id,
             'email': email,
             'expiration': self.get_api_key_expiration_timestamp(),
-            'type': API_KEY_TYPE_PATREON
+            'type': cloudlanguagetools.constants.ApiKeyType.patreon.name
         }
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')
@@ -65,7 +61,7 @@ class RedisDb():
         hash_value = {
             'email': email,
             'expiration': self.get_api_key_expiration_timestamp(),
-            'type': API_KEY_TYPE_TRIAL,
+            'type': cloudlanguagetools.constants.ApiKeyType.trial.name,
             'character_limit': character_limit
         }
         self.r.hset(redis_key, mapping=hash_value)

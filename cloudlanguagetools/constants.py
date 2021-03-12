@@ -1,14 +1,8 @@
 
 import enum
 
-class Service(enum.Enum):
-    Azure = enum.auto()
-    Google = enum.auto()
-    MandarinCantonese = enum.auto()
-    EasyPronunciation = enum.auto()
-    Watson = enum.auto()
-    Naver = enum.auto()
-    Amazon = enum.auto()
+# usage/account related constants 
+# ===============================
 
 class RequestType(enum.Enum):
     translation = enum.auto()
@@ -25,6 +19,23 @@ class UsagePeriod(enum.Enum):
     daily = enum.auto()
     monthly = enum.auto()
     lifetime = enum.auto()
+
+class ApiKeyType(enum.Enum):
+    test = enum.auto()
+    patreon = enum.auto()
+    trial = enum.auto()
+
+# service and language related constants
+# ======================================
+
+class Service(enum.Enum):
+    Azure = enum.auto()
+    Google = enum.auto()
+    MandarinCantonese = enum.auto()
+    EasyPronunciation = enum.auto()
+    Watson = enum.auto()
+    Naver = enum.auto()
+    Amazon = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()

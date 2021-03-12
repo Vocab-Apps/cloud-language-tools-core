@@ -90,16 +90,6 @@ class TestAudio(unittest.TestCase):
         source_text = '你好'
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_CN, 'zh-CN') 
 
-    def test_german_colon_azure(self):
-        # pytest test_audio.py -k test_german_colon_azure
-        source_text = 'anders: es hängt von jemandem oder etwas ab'
-        self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.de_DE, 'de-DE')
-
-    def test_german_colon_google(self):
-        # pytest test_audio.py -k test_german_colon_google
-        source_text = 'anders: es hängt von jemandem oder etwas ab'
-        self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.de_DE, 'de-DE')        
-
     def test_mandarin_watson(self):
         source_text = '老人家'
         self.verify_service_audio_language(source_text, Service.Watson, AudioLanguage.zh_CN, 'zh-CN')

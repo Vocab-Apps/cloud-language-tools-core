@@ -59,12 +59,13 @@ class RedisDb():
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')
 
-    def add_trial_api_key(self, api_key, email):
+    def add_trial_api_key(self, api_key, email, character_limit):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
             'email': email,
             'expiration': self.get_api_key_expiration_timestamp(),
-            'type': API_KEY_TYPE_TRIAL
+            'type': API_KEY_TYPE_TRIAL,
+            'character_limit': character_limit
         }
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')        

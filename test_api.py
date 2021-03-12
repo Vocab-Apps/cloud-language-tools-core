@@ -33,9 +33,8 @@ class ApiTests(unittest.TestCase):
         redis_connection.add_test_api_key(cls.api_key_over_quota)        
 
         # trial user
-        cls.api_key_trial_user = 'trial_user_42'
         cls.trial_user_email = 'trial_user_42@gmail.com'
-        redis_connection.add_trial_api_key(cls.api_key_trial_user, cls.trial_user_email, 10000)
+        cls.trial_user_api_key = redis_connection.get_trial_user_key(cls.trial_user_email)
 
 
     @classmethod
@@ -466,7 +465,7 @@ class ApiTests(unittest.TestCase):
             'service': service,
             'voice_key': first_voice['voice_key'],
             'options': {}
-        }, headers={'api_key': self.api_key_trial_user})
+        }, headers={'api_key': self.trial_user_api_key})
         self.assertEqual(response.status_code, 200)
 
         # increase the usage of that API key
@@ -474,7 +473,7 @@ class ApiTests(unittest.TestCase):
                             cloudlanguagetools.constants.UsageScope.User, 
                             cloudlanguagetools.constants.UsagePeriod.lifetime, 
                             cloudlanguagetools.constants.Service.Azure, 
-                            self.api_key_trial_user, 
+                            self.trial_user_api_key, 
                             cloudlanguagetools.constants.ApiKeyType.trial,
                             10000)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
@@ -487,8 +486,20 @@ class ApiTests(unittest.TestCase):
             'service': service,
             'voice_key': first_voice['voice_key'],
             'options': {}
-        }, headers={'api_key': self.api_key_trial_user})
+        }, headers={'api_key': self.trial_user_api_key})
         self.assertEqual(response.status_code, 429)
+
+        # now increase character limit for this trial user
+        redis_connection.increase_trial_key_limit(self.trial_user_email, 100000)
+
+        # this request should go through now
+        response = self.client.post('/audio', json={
+            'text': 'Je ne suis pas intéressé.',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.trial_user_api_key})
+        self.assertEqual(response.status_code, 200)
 
 
     @pytest.mark.skip(reason="only succeeds when quota is exceeded")

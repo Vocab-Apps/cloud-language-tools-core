@@ -126,7 +126,7 @@ class TestTranslation(unittest.TestCase):
 
 
     def test_transliteration_easypronunciation(self):
-        # pytest test_translation.py -k test_transliteration_easypronunciation
+        # pytest test_translation.py -rPP -k test_transliteration_easypronunciation
 
         # easypronunciation IPA test
         test_easy_pronunciation = True

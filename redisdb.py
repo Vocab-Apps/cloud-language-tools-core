@@ -74,8 +74,6 @@ class RedisDb():
     def get_trial_user_key(self, email):
         redis_trial_user_key = self.build_key(KEY_TYPE_TRIAL_USER, email)
         if self.r.exists(redis_trial_user_key):
-            # logging.info(f'mapping exists: patreon email: {email} mapping: {redis_trial_user_key}')
-            
             # user already requested a key
             api_key = self.r.get(redis_trial_user_key)
             redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)

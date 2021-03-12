@@ -184,6 +184,7 @@ class RedisDb():
         redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         key_type_str = self.r.hget(redis_api_key, 'type')
         key_type = cloudlanguagetools.constants.ApiKeyType[key_type_str]
+        character_limit = self.r.hget(redis_api_key, 'character_limit')
         
         usage_slice_list = [
             quotas.UsageSlice(request_type, 
@@ -191,25 +192,29 @@ class RedisDb():
                               cloudlanguagetools.constants.UsagePeriod.daily, 
                               service, 
                               api_key,
-                              key_type),
+                              key_type,
+                              character_limit),
             quotas.UsageSlice(request_type, 
                               cloudlanguagetools.constants.UsageScope.User, 
                               cloudlanguagetools.constants.UsagePeriod.monthly, 
                               service, 
                               api_key,
-                              key_type),
+                              key_type,
+                              character_limit),
             quotas.UsageSlice(request_type, 
                               cloudlanguagetools.constants.UsageScope.Global, 
                               cloudlanguagetools.constants.UsagePeriod.daily, 
                               service, 
                               api_key,
-                              key_type),
+                              key_type,
+                              character_limit),
             quotas.UsageSlice(request_type, 
                               cloudlanguagetools.constants.UsageScope.Global, 
                               cloudlanguagetools.constants.UsagePeriod.monthly, 
                               service, 
                               api_key,
-                              key_type)
+                              key_type,
+                              character_limit)
         ]
 
         def convert_usage(usage_output):

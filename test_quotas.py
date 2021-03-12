@@ -12,7 +12,8 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.monthly, 
             cloudlanguagetools.constants.Service.Azure,
             'api_key_1',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
         self.assertEqual(usage_slice_monthly_global.over_quota(200000, 30000), False)
 
         usage_slice_daily_global = quotas.UsageSlice(
@@ -21,7 +22,8 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.daily, 
             cloudlanguagetools.constants.Service.Azure,
             'api_key_2',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
         self.assertEqual(usage_slice_monthly_global.over_quota(200000, 30000), False)
 
 
@@ -33,7 +35,8 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.monthly, 
             cloudlanguagetools.constants.Service.Azure,
             'api_key_1',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
         self.assertEqual(usage_slice_monthly_user.over_quota(300000, 30000), False)
 
         usage_slice_daily_user = quotas.UsageSlice(
@@ -42,7 +45,8 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.daily, 
             cloudlanguagetools.constants.Service.Azure,
             'api_key_2',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
         self.assertEqual(usage_slice_daily_user.over_quota(50000, 30000), False)
         self.assertEqual(usage_slice_daily_user.over_quota(200000, 30000), True)
 
@@ -53,7 +57,8 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.daily, 
             cloudlanguagetools.constants.Service.Naver,
             'api_key_3',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
         self.assertEqual(usage_slice_daily_user.over_quota(29900, 30000), False)
         self.assertEqual(usage_slice_daily_user.over_quota(30100, 30000), True)
 
@@ -66,7 +71,8 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.daily, 
             cloudlanguagetools.constants.Service.Naver,
             'zrrVDK3svzDOLzI6',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
         
         date_str = datetime.datetime.today().strftime('%Y%m%d')
         self.assertEqual(usage_slice_daily_user.build_key_suffix(), f'user:daily:{date_str}:Naver:audio:zrrVDK3svzDOLzI6')
@@ -78,7 +84,8 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.monthly, 
             cloudlanguagetools.constants.Service.Azure,
             'zrrVDK3svzDOLzI6',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
         
         date_str = datetime.datetime.today().strftime('%Y%m')
         self.assertEqual(usage_slice_monthly_user.build_key_suffix(), f'user:monthly:{date_str}:Azure:audio:zrrVDK3svzDOLzI6')
@@ -90,7 +97,8 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.monthly, 
             cloudlanguagetools.constants.Service.Amazon,
             'zrrVDK3svzDOLzI6',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
         
         date_str = datetime.datetime.today().strftime('%Y%m')
         self.assertEqual(usage_slice_monthly_global.build_key_suffix(), f'global:monthly:{date_str}:Amazon:audio')
@@ -102,7 +110,8 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.daily, 
             cloudlanguagetools.constants.Service.MandarinCantonese,
             'zrrVDK3svzDOLzI6',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
         
         date_str = datetime.datetime.today().strftime('%Y%m%d')
         self.assertEqual(usage_slice_monthly_user.build_key_suffix(), f'global:daily:{date_str}:MandarinCantonese:transliteration')
@@ -114,6 +123,7 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.UsagePeriod.lifetime, 
             cloudlanguagetools.constants.Service.Azure,
             'zrrVDK3svzDOLzI6',
-            cloudlanguagetools.constants.ApiKeyType.patreon)
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            None)
 
         self.assertEqual(usage_slice_lifetime_user.build_key_suffix(), f'user:lifetime:zrrVDK3svzDOLzI6')

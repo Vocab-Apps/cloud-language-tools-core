@@ -31,6 +31,11 @@ class RedisDb():
     def build_key(self, key_type, key):
         return f'{KEY_PREFIX}:{key_type}:{key}'
 
+    def get_specific_api_key_expiration_timestamp(self, delta_days):
+        expiration_date = datetime.datetime.now() + datetime.timedelta(days=delta_days)
+        key_expiration_timestamp = int(expiration_date.timestamp())
+        return key_expiration_timestamp    
+
     def get_api_key_expiration_timestamp(self):
         expiration_date = datetime.datetime.now() + datetime.timedelta(days=60)
         key_expiration_timestamp = int(expiration_date.timestamp())

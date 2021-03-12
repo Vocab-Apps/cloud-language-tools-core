@@ -20,13 +20,17 @@ class ApiTests(unittest.TestCase):
         
         # create new API key
         cls.api_key='test_key_01'
-        redis_connection.add_test_api_key(cls.api_key, datetime.datetime.now() + datetime.timedelta(days=2))
+        redis_connection.add_test_api_key(cls.api_key)
 
         cls.api_key_expired='test_key_02_expired'
-        redis_connection.add_test_api_key(cls.api_key_expired, datetime.datetime.now() + datetime.timedelta(days=-2))
+        redis_connection.add_test_api_key(cls.api_key_expired)
+        # add expiration, 2 days ago
+        expiration_timestamp = redis_connection.get_specific_api_key_expiration_timestamp(-2)
+        redis_api_key_expired = redis_connection.build_key('api_key', cls.api_key_expired)
+        redis_connection.r.hset(redis_api_key_expired, 'expiration', expiration_timestamp)
 
         cls.api_key_over_quota='test_key_03_over_quota'
-        redis_connection.add_test_api_key(cls.api_key_over_quota, datetime.datetime.now() + datetime.timedelta(days=2))        
+        redis_connection.add_test_api_key(cls.api_key_over_quota)        
 
 
     @classmethod
@@ -36,7 +40,7 @@ class ApiTests(unittest.TestCase):
     def test_verify_api_key(self):
         response = self.client.post('/verify_api_key', json={'api_key': self.api_key})
         data = json.loads(response.data)
-        self.assertEqual({'key_valid': True, 'msg': 'API Key expires in 1 days'}, data)
+        self.assertEqual({'key_valid': True, 'msg': 'API Key expires in 59 days'}, data)
 
         response = self.client.post('/verify_api_key', json={'api_key': self.api_key_expired})
         data = json.loads(response.data)
@@ -411,7 +415,9 @@ class ApiTests(unittest.TestCase):
                             cloudlanguagetools.constants.UsageScope.User, 
                             cloudlanguagetools.constants.UsagePeriod.daily, 
                             cloudlanguagetools.constants.Service.Naver, 
-                            self.api_key_over_quota)
+                            self.api_key_over_quota, 
+                            cloudlanguagetools.constants.ApiKeyType.test,
+                            None)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
         redis_connection.r.hincrby(usage_redis_key, 'characters', 29985)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)

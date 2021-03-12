@@ -88,7 +88,8 @@ def configure_addtag_webhook():
     url = 'https://api.convertkit.com/v3/automations/hooks'
     response = requests.post(url, json={
         'api_secret': api_secret,
-        'target_url': 'https://bfa7c6b87809.ngrok.io/convertkit_subscriber_request_trial_key',
+        # 'target_url': 'https://bfa7c6b87809.ngrok.io/convertkit_subscriber_request_trial_key',
+        'target_url': 'https://cloud-language-tools-dev.anki.study/convertkit_subscriber_request_trial_key',
         'event': {  'name': 'subscriber.tag_add', 'tag_id': int(os.environ['CONVERTKIT_TRIAL_API_KEY_REQUESTED_TAG']) }
     })
     print(response)

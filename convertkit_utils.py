@@ -89,7 +89,7 @@ def configure_addtag_webhook():
     response = requests.post(url, json={
         'api_secret': api_secret,
         'target_url': 'https://bfa7c6b87809.ngrok.io/convertkit_subscriber_request_trial_key',
-        'event': {  'name': 'subscriber.tag_add', 'tag_id': 2248152 }
+        'event': {  'name': 'subscriber.tag_add', 'tag_id': int(os.environ['CONVERTKIT_TRIAL_API_KEY_REQUESTED_TAG']) }
     })
     print(response)
     print(response.content)
@@ -98,8 +98,8 @@ def configure_addtag_webhook():
 
 
 if __name__ == '__main__':
-    # configure_addtag_webhook()
-    list_tags()
+    configure_addtag_webhook()
+    # list_tags()
     # list_fields()
     # list_subscribers()
     # view_subscribers()

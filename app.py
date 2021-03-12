@@ -217,10 +217,6 @@ class PatreonKeyRequest(flask_restful.Resource):
 
 class ConvertKitRequestTrialKey(flask_restful.Resource):
     def post(self):
-        # {'subscriber': 
-        # {'id': 1215674041, 'first_name': 'bear', 
-        # 'email_address': 'bear@mailc.net', 'state': 'active', 
-        # 'created_at': '2021-03-12T12:53:01.000Z', 'fields': {'trial_api_key': None}}}
         data = request.json
         subscriber_id = data['subscriber']['id']
         email_address = data['subscriber']['email_address']

@@ -13,6 +13,7 @@ ENV_VAR_REDIS_URL = 'REDIS_URL'
 
 KEY_TYPE_API_KEY = 'api_key'
 KEY_TYPE_PATREON_USER ='patreon_user'
+KEY_TYPE_TRIAL_USER = 'trial_user'
 KEY_TYPE_USAGE ='usage'
 
 KEY_PREFIX = 'clt'

@@ -6,15 +6,12 @@ import redisdb
 import cloudlanguagetools.constants
 
 class TestApiKeys(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(TestApiKeys, cls).setUpClass()
-        cls.redis_connection = redisdb.RedisDb()
-        cls.redis_connection.clear_db(wait=False)
+    def setUp(self):
+        self.redis_connection = redisdb.RedisDb()
+        self.redis_connection.clear_db(wait=False)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.redis_connection.clear_db(wait=False)
+    def tearDown(self):
+        self.redis_connection.clear_db(wait=False)
 
     def test_add_patreon_key(self):
         api_key = self.redis_connection.password_generator()
@@ -42,6 +39,19 @@ class TestApiKeys(unittest.TestCase):
         result = self.redis_connection.api_key_valid(api_key)
         self.assertEqual(result['key_valid'], True)
 
+    def test_get_patreon_user_key(self):
+        user_id = 53
+        email = 'user53@gmail.com'
+        api_key_1 = self.redis_connection.get_patreon_user_key(user_id, email)
+
+        # request api key for the same user, should be the same
+        api_key_2 = self.redis_connection.get_patreon_user_key(user_id, email)
+        self.assertEqual(api_key_1, api_key_2)
+
+        user_id = 54
+        email = 'user54@gmail.com'
+        api_key_3 = self.redis_connection.get_patreon_user_key(user_id, email)
+        self.assertNotEqual(api_key_2, api_key_3)
 
     def test_track_usage(self):
         api_key = self.redis_connection.password_generator()

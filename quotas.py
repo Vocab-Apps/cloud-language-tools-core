@@ -5,6 +5,8 @@ import cloudlanguagetools.constants
 DEFAULT_USER_DAILY_CHAR_LIMIT = 80000
 NAVER_USER_DAILY_CHAR_LIMIT = 30000
 
+TRIAL_USER_CHARACTER_LIMIT = 10000
+
 class UsageSlice():
     def __init__(self, 
                 request_type: cloudlanguagetools.constants.RequestType, 

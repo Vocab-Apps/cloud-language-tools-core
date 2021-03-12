@@ -56,11 +56,26 @@ class TestApiKeys(unittest.TestCase):
         api_key_3 = self.redis_connection.get_patreon_user_key(user_id, email)
         self.assertNotEqual(api_key_2, api_key_3)
 
+    def test_get_trial_user_key(self):
+        email = 'user55@gmail.com'
+        api_key_1 = self.redis_connection.get_trial_user_key(email)
+
+        result = self.redis_connection.api_key_valid(api_key_1)
+        self.assertEqual(result['key_valid'], True)
+
+        api_key_2 = self.redis_connection.get_trial_user_key(email)
+
+        self.assertEqual(api_key_1, api_key_2)
+
+        email = 'user56@gmail.com'
+        api_key_3 = self.redis_connection.get_trial_user_key(email)        
+
+        self.assertNotEqual(api_key_2, api_key_3)
+
     def test_track_usage(self):
-        api_key = self.redis_connection.password_generator()
         user_id = 43
         email = 'test43@gmail.com'
-        self.redis_connection.add_patreon_api_key(api_key, user_id, email)
+        api_key = self.redis_connection.get_patreon_user_key(user_id, email)
 
         service = cloudlanguagetools.constants.Service.Azure
         request_type = cloudlanguagetools.constants.RequestType.audio

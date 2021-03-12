@@ -71,6 +71,29 @@ class RedisDb():
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')        
         
+    def get_trial_user_key(self, email):
+        redis_trial_user_key = self.build_key(KEY_TYPE_TRIAL_USER, email)
+        if self.r.exists(redis_trial_user_key):
+            # logging.info(f'mapping exists: patreon email: {email} mapping: {redis_trial_user_key}')
+            
+            # user already requested a key
+            api_key = self.r.get(redis_trial_user_key)
+            redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+            if not self.r.exists(redis_api_key):
+                # add the key back in
+                self.add_trial_api_key(api_key, email, quotas.TRIAL_USER_CHARACTER_LIMIT)
+            return api_key
+        
+        # need to create a new key
+        api_key = self.password_generator()
+        self.add_trial_api_key(api_key, email, quotas.TRIAL_USER_CHARACTER_LIMIT)
+
+        # map to the patreon user
+        self.r.set(redis_trial_user_key, api_key)
+        logging.info(f'added mapping: trial user: email: {email} ({redis_trial_user_key})')
+
+        return api_key        
+
     def get_patreon_user_key(self, user_id, email):
         logging.info(f'patreon user: {user_id}, email: {email}')
 

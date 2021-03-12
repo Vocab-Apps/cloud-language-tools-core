@@ -44,6 +44,9 @@ class TestApiKeys(unittest.TestCase):
         email = 'user53@gmail.com'
         api_key_1 = self.redis_connection.get_patreon_user_key(user_id, email)
 
+        result = self.redis_connection.api_key_valid(api_key_1)
+        self.assertEqual(result['key_valid'], True)
+
         # request api key for the same user, should be the same
         api_key_2 = self.redis_connection.get_patreon_user_key(user_id, email)
         self.assertEqual(api_key_1, api_key_2)

@@ -153,6 +153,11 @@ class RedisDb():
         random_password = ''.join(random_password)
         return random_password
 
+    def show_key_data(self, api_key):
+        redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+        key_data = self.r.hgetall(redis_key)
+        logging.info(key_data)
+
     def api_key_valid(self, api_key):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         if self.r.exists(redis_key) == 0:

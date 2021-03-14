@@ -40,7 +40,8 @@ def main():
                'clear_db', 
                'list_usage', 
                'create_trial_key', 
-               'increase_trial_limit']
+               'increase_trial_limit',
+               'list_trial_keys']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--api_key', help='Pass in API key to check validity')
     parser.add_argument('--trial_email', help='email address of trial user')
@@ -60,6 +61,8 @@ def main():
         connection.add_test_api_key(api_key)
     elif args.action == 'list_api_keys':
         connection.list_api_keys()
+    elif args.action == 'list_trial_keys':
+        connection.list_trial_users()
     elif args.action == 'api_key_valid':
         api_key = args.api_key
         connection.show_key_data(api_key)

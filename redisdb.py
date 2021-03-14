@@ -291,6 +291,37 @@ class RedisDb():
             for key, value in zip(keys, hashes):
                 print(f'{key}: {value}')
         
+    def list_trial_users(self):
+        pattern = self.build_key(KEY_TYPE_TRIAL_USER, '*')
+        api_key_list = []
+        cursor = '0'
+        while cursor != 0:
+            cursor, keys = self.r.scan(cursor=cursor, match=pattern, count=100)
+            pipe = self.r.pipeline()
+            for key in keys:
+                pipe.get(key)
+            key_values = pipe.execute()
+            for key, value in zip(keys, key_values):
+                api_key_list.append(value)
+
+        # get trial user data
+        pipe = self.r.pipeline()
+        for api_key in api_key_list:
+            redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+            pipe.hgetall(redis_api_key)
+        user_data = pipe.execute()
+
+        # get current usage
+        pipe = self.r.pipeline()
+        for api_key in api_key_list:
+            redis_usage = self.build_key(KEY_TYPE_USAGE, f'user:lifetime:{api_key}')
+            # print(redis_usage)
+            pipe.hgetall(redis_usage)
+        usage_data = pipe.execute()
+
+        for api_key, user, usage in zip(api_key_list, user_data, usage_data):
+            print(f'{api_key}: {user}, {usage}')
+
 
     def clear_db(self, wait=True):
         if wait:

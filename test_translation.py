@@ -74,6 +74,9 @@ class TestTranslation(unittest.TestCase):
         self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, "Changer de carte d'embarquement")
         self.translate_text(Service.Amazon, '换登机牌', Language.zh_cn, Language.fr, "Modifier la carte d'embarquement")
 
+    def test_translate_chinese_watson(self):
+        self.translate_text(Service.Watson, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
+
     def test_translate_naver(self):
         # pytest test_translation.py -k test_translate_naver
         self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.en, 'Please speak slowly.')

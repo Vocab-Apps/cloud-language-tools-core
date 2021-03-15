@@ -153,7 +153,7 @@ class WatsonService(cloudlanguagetools.service.Service):
             'source': from_language_key,
             'target': to_language_key
         }
-        response = requests.post(self.translator_url + '/v3/translate?version=2018-05-01', auth=('apikey', self.translator_key), json=body)
+        response = requests.post(self.translator_url + '/v3/translate?version=2018-05-01', auth=('apikey', self.translator_key), json=body, timeout=5)
 
         if response.status_code == 200:
             # {'translations': [{'translation': 'Le coût est très bas.'}], 'word_count': 2, 'character_count': 4}

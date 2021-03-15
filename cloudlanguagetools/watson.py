@@ -140,7 +140,7 @@ class WatsonService(cloudlanguagetools.service.Service):
             return output_temp_file
 
         # otherwise, an error occured
-        error_message = f"Status code: {response.status_code} reason: {response.reason} voice: [{voice_name}] api key: [{api_key}]]"
+        error_message = f"Status code: {response.status_code} reason: {response.reason} voice: [{voice_name}]]"
         raise cloudlanguagetools.errors.RequestError(error_message)
 
 

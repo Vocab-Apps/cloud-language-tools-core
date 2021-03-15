@@ -1,6 +1,7 @@
 import os
 import base64
 import tempfile
+import logging
 import cloudlanguagetools.constants
 import cloudlanguagetools.errors
 import cloudlanguagetools.azure
@@ -83,6 +84,7 @@ class ServiceManager():
     def get_tts_voice_list(self):
         result = []
         for key, service in self.services.items():
+            logging.info(f'retrieving voice list from {key}')
             result.extend(service.get_tts_voice_list())
         return result
 

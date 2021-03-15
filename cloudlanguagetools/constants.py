@@ -28,6 +28,8 @@ class ApiKeyType(enum.Enum):
 # service and language related constants
 # ======================================
 
+RequestTimeout = 5 # 5 seconds max
+
 class Service(enum.Enum):
     Azure = enum.auto()
     Google = enum.auto()

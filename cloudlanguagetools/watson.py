@@ -81,7 +81,7 @@ class WatsonService(cloudlanguagetools.service.Service):
         return []
 
     def get_translation_languages(self):
-        response = requests.get(self.translator_url + '/v3/languages?version=2018-05-01', auth=('apikey', self.translator_key))
+        response = requests.get(self.translator_url + '/v3/languages?version=2018-05-01', auth=('apikey', self.translator_key), timeout=cloudlanguagetools.constants.RequestTimeout)
         return response.json()
 
     def get_translation_language_list(self):
@@ -99,7 +99,7 @@ class WatsonService(cloudlanguagetools.service.Service):
         return result        
 
     def list_voices(self):
-        response = requests.get(self.speech_url + '/v1/voices', auth=('apikey', self.speech_key))
+        response = requests.get(self.speech_url + '/v1/voices', auth=('apikey', self.speech_key), timeout=cloudlanguagetools.constants.RequestTimeout)
         data = response.json()
         return data['voices']
 
@@ -132,7 +132,7 @@ class WatsonService(cloudlanguagetools.service.Service):
             'text': text
         }
 
-        response = requests.post(constructed_url, data=json.dumps(data), auth=('apikey', self.speech_key), headers=headers)
+        response = requests.post(constructed_url, data=json.dumps(data), auth=('apikey', self.speech_key), headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
 
         if response.status_code == 200:
             with open(output_temp_filename, 'wb') as audio:
@@ -153,7 +153,7 @@ class WatsonService(cloudlanguagetools.service.Service):
             'source': from_language_key,
             'target': to_language_key
         }
-        response = requests.post(self.translator_url + '/v3/translate?version=2018-05-01', auth=('apikey', self.translator_key), json=body, timeout=5)
+        response = requests.post(self.translator_url + '/v3/translate?version=2018-05-01', auth=('apikey', self.translator_key), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
 
         if response.status_code == 200:
             # {'translations': [{'translation': 'Le coût est très bas.'}], 'word_count': 2, 'character_count': 4}

@@ -79,7 +79,7 @@ class NaverService(cloudlanguagetools.service.Service):
         }
 
         # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
-        response = requests.post(url, json=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code == 200:
             response_data = response.json()
             return response_data['message']['result']['translatedText']
@@ -107,7 +107,7 @@ class NaverService(cloudlanguagetools.service.Service):
         }
 
         # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, data=data, headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code == 200:
             with open(output_temp_filename, 'wb') as audio:
                 audio.write(response.content)

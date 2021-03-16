@@ -128,7 +128,7 @@ class AzureService(cloudlanguagetools.service.Service):
         headers = {
             'Ocp-Apim-Subscription-Key': self.key
         }
-        response = requests.post(fetch_token_url, headers=headers)
+        response = requests.post(fetch_token_url, headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
         access_token = str(response.text)
         return access_token
 
@@ -200,7 +200,7 @@ class AzureService(cloudlanguagetools.service.Service):
         body = [{
             'text': text
         }]
-        request = requests.post(url, headers=self.get_translator_headers(), json=body)
+        request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
         response = request.json()
 
         if 'error' in response:
@@ -265,7 +265,7 @@ class AzureService(cloudlanguagetools.service.Service):
         url = f'{self.url_translator_base}/detect?api-version=3.0'
         body = [{'text': text} for text in text_list]
 
-        request = requests.post(url, headers=self.get_translator_headers(), json=body)
+        request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
         response = request.json()
 
         language_score = {}
@@ -287,7 +287,7 @@ class AzureService(cloudlanguagetools.service.Service):
         body = [{
             'text': text
         }]
-        request = requests.post(constructed_url, headers=self.get_translator_headers(), json=body)
+        request = requests.post(constructed_url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
         response = request.json()
 
         assert(len(response) == 1)
@@ -338,7 +338,7 @@ class AzureService(cloudlanguagetools.service.Service):
         body = [{
             'text': input_text
         }]
-        request = requests.post(url, headers=self.get_translator_headers(), json=body)
+        request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
         response = request.json()
 
         print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
@@ -358,7 +358,7 @@ class AzureService(cloudlanguagetools.service.Service):
             'text': input_text,
             'translation': translation
         }]
-        request = requests.post(url, headers=self.get_translator_headers(), json=body)
+        request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
         response = request.json()
 
         print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))

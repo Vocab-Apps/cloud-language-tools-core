@@ -53,6 +53,6 @@ class MandarinCantoneseService(cloudlanguagetools.service.Service):
             'conversion_type': transliteration_key['conversion_type'],
             'tone_numbers': transliteration_key['tone_numbers'],
             'spaces': transliteration_key['spaces']
-        })
+        }, timeout=cloudlanguagetools.constants.RequestTimeout)
         data = json.loads(response.content)
         return data['romanization']

@@ -1,6 +1,7 @@
 import os
 import requests
 import logging
+import cloudlanguagetools.constants
 
 class ConvertKit():
     def __init__(self):
@@ -18,6 +19,6 @@ class ConvertKit():
                 'fields' : {
                     'trial_api_key': api_key
                 }
-        })
+        }, timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code != 200:
             logging.error(f'could not tag user: {response.content}')

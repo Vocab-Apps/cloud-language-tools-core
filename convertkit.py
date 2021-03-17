@@ -32,6 +32,8 @@ class ConvertKit():
         }, timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code != 200:
             logging.error(f'could not tag user: {response.content}')            
+        else:
+            logging.info(f'tagged user with trial_extended: {email}')
 
     def list_subscribers(self):
         # curl https://api.convertkit.com/v3/subscribers?api_secret=<your_secret_api_key>&from=2016-02-01&to=2015-02-28

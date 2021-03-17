@@ -322,6 +322,18 @@ class RedisDb():
         for api_key, user, usage in zip(api_key_list, user_data, usage_data):
             print(f'{api_key}: {user}, {usage}')
 
+    def get_trial_user_usage(self, api_key_list):
+        pipe = self.r.pipeline()
+        for api_key in api_key_list:
+            redis_usage = self.build_key(KEY_TYPE_USAGE, f'user:lifetime:{api_key}')
+            # print(redis_usage)
+            pipe.hget(redis_usage, 'characters')
+        usage_data = pipe.execute()
+        entries = []
+        for api_key, characters in zip(api_key_list, usage_data):
+            # print(f'api_key: {api_key} characters: {characters}')
+            entries.append({'api_key': api_key, 'characters': characters})
+        return entries
 
     def clear_db(self, wait=True):
         if wait:

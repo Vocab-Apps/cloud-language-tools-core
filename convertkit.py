@@ -22,3 +22,17 @@ class ConvertKit():
         }, timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code != 200:
             logging.error(f'could not tag user: {response.content}')
+
+    def list_subscribers(self):
+        # curl https://api.convertkit.com/v3/subscribers?api_secret=<your_secret_api_key>&from=2016-02-01&to=2015-02-28
+        url = f'https://api.convertkit.com/v3/subscribers?api_secret={self.api_secret}'
+        response = requests.get(url)
+        data = response.json()
+        assert(data['total_pages'] == 1)
+        return data['subscribers']
+
+    def list_tags(self, subscriber_id):
+        url = f'https://api.convertkit.com/v3/subscribers/{subscriber_id}/tags?api_secret={self.api_secret}'
+        response = requests.get(url)
+        data = response.json()
+        return data['tags']

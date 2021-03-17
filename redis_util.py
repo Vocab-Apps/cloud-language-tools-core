@@ -6,6 +6,7 @@ import string
 import random
 import datetime
 import logging
+import quotas
 
 import cloudlanguagetools.constants
 
@@ -40,6 +41,7 @@ def main():
                'clear_db', 
                'list_usage', 
                'create_trial_key', 
+               'create_extended_trial_key',
                'increase_trial_limit',
                'list_trial_keys']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
@@ -78,7 +80,11 @@ def main():
         connection.get_trial_user_key(email)
     elif args.action == 'increase_trial_limit':
         email = args.trial_email
-        connection.increase_trial_key_limit(email, 100000)
+        connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
+    elif args.action == 'create_extended_trial_key':
+        email = args.trial_email
+        connection.get_trial_user_key(email)
+        connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
     elif args.action == 'clear_db':
         connection.clear_db()
     else:

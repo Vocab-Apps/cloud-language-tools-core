@@ -31,6 +31,38 @@ def test_azure_audio():
     shutil.copyfile(result.name, permanent_file_name)
     print(f'tts result: {permanent_file_name}')
 
+def generate_video_audio():
+    manager = get_manager()
+
+    service = 'Azure'
+    text = """Language Tools is an new Anki add-on designed to help you build language learning flashcards.
+    It understands which languages you're studying and provides intelligent defaults. You can choose your favorite text to speech voice for each language,
+    from a list of over 600 premium voices which cover more than 50 languages. <break time="2s"/> Once you're done, you can try translation. Language Tools offers high quality translation
+    from neural network services such as Google, Microsoft, Amazon. It's really easy to use ! <break time="3s"/> You can also add text to speech audio to many cards at once. 
+    Just pick the source field, the target field, and click apply. Your audio is now getting added. <break time="2s"/> You will see the sound tag in your notes, and you will hear the sounds when reviewing.
+    <break time="3s"/>
+    Now, let's add a transliteration. This means going from one alphabet to another, for example for Chinese or Japanese to Latin alphabet. In this case, we're adding French IPA, or international phonetic alphabet pronunciations.
+    <break time="2s"/>
+    And now, let's add some new cards. All of the transformation you've added previously are memorized, and they'll be added to new cards too. Notice how the French to English translation, the sound, and the IPA pronunciation is added automatically.
+    This is a huge time saver for people who create a lot of flashcards. You'll have more time to review your cards instead of spending most of your time creating them. No more excuses now !
+    <break time="3s"/>
+    You can see which transformations you've setup for your decks and remove them if needed.
+    <break time="2s"/>
+    And you can add those transformations all at once. That's right, add audio text to speech, translation and transliteration in one step. Again, a huge time saver for those who create a lot of cards
+    Are you interested in trying it out ? Download Language Tools for Anki using the link below.
+    <break time="1s"/>
+    By the way, this is Microsoft Azure voice Aria, available on Language Tools.
+    """
+    voice_key = {
+        'name': 'Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)' 
+    }
+
+    result = manager.get_tts_audio(text, service, voice_key, {})
+    permanent_file_name = 'languagetools_video.mp3'
+    shutil.copyfile(result.name, permanent_file_name)
+    print(f'tts result: {permanent_file_name}')
+
+
 def test_google_audio():
     manager = get_manager()
 
@@ -315,11 +347,12 @@ if __name__ == '__main__':
                         datefmt='%Y%m%d-%H:%M:%S',
                         level=logging.INFO)    
 
+    generate_video_audio()
     # test_azure_audio()
     # test_google_audio()
     # play_google_audio()
     # play_azure_audio()
-    get_voice_list()
+    # get_voice_list()
     # get_watson_voice_list()
     # get_amazon_voice_list()
     # get_amazon_voice_list_awesometts()

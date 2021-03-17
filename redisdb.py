@@ -322,6 +322,17 @@ class RedisDb():
         for api_key, user, usage in zip(api_key_list, user_data, usage_data):
             print(f'{api_key}: {user}, {usage}')
 
+    def get_trial_user_entitlement(self, api_key_list):
+        pipe = self.r.pipeline()
+        for api_key in api_key_list:
+            redis_usage = self.build_key(KEY_TYPE_API_KEY, api_key)
+            pipe.hget(redis_usage, 'character_limit')
+        usage_data = pipe.execute()
+        entries = []
+        for api_key, characters in zip(api_key_list, usage_data):
+            entries.append({'api_key': api_key, 'character_limit': characters})
+        return entries
+
     def get_trial_user_usage(self, api_key_list):
         pipe = self.r.pipeline()
         for api_key in api_key_list:

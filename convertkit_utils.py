@@ -26,6 +26,25 @@ def list_tags_subscriber():
     data = response.json()
     pprint.pprint(data)        
 
+def list_sequences():
+    # curl https://api.convertkit.com/v3/subscribers/<subscriber_id>/tags?api_key=<your_public_api_key>
+    url = f'https://api.convertkit.com/v3/sequences?api_key={api_key}'
+    response = requests.get(url)
+    data = response.json()
+    pprint.pprint(data)        
+
+def add_subscriber_sequence():
+    email = 'lemoselioliveira@gmail.com'
+    sequence_id = 826851 # extend_trial
+    url = f'https://api.convertkit.com/v3/sequences/{sequence_id}/subscribe'
+    response = requests.post(url, json={
+            "api_key": api_key,
+            "email": email
+    })
+    print(response)
+    print(response.content)
+    data = response.json()
+    pprint.pprint(data)        
 
 def tag_subscriber():
     # curl -X POST https://api.convertkit.com/v3/tags/<tag_id>/subscribe\
@@ -101,10 +120,12 @@ def configure_addtag_webhook():
 
 if __name__ == '__main__':
     # configure_addtag_webhook()
-    list_tags()
+    # list_tags()
     # list_fields()
     # list_subscribers()
     # view_subscribers()
     # list_tags_subscriber()
     # tag_subscriber()
     # set_subscriber_field()
+    # list_sequences()
+    add_subscriber_sequence()

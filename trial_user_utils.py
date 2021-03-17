@@ -13,9 +13,11 @@ def build_trial_user_list(convertkit_client, redis_connection):
     api_key_list = []
     users = []
     for subscriber in subscribers:
+        # print(subscriber)
         api_key = subscriber['fields']['trial_api_key']
         email = subscriber['email_address']
         users.append({
+            'subscriber_id': subscriber['id'],
             'api_key': api_key,
             'email': email
         })

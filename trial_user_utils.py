@@ -44,7 +44,20 @@ def get_upgrade_eligible_users(convertkit_client, redis_connection):
 
     eligible_users = user_list_df[(user_list_df['character_limit'] == quotas.TRIAL_USER_CHARACTER_LIMIT) & (user_list_df['characters'] > (quotas.TRIAL_USER_CHARACTER_LIMIT - 300))]
 
-    print(eligible_users)
+    return eligible_users
+
+def perform_upgrade_eligible_users(convertkit_client, redis_connection):
+    eligible_users_df = get_upgrade_eligible_users(convertkit_client, redis_connection)
+
+    for index, row in eligible_users_df.iterrows():
+        email = row['email']
+        logging.info(f'eligible user: {email}')
+
+        # increase API key character limit
+        redis_connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
+        # tag user on convertkit
+        convertkit_client.tag_user_trial_extended(email)
+
 
 def main():
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -52,7 +65,7 @@ def main():
                         level=logging.INFO)
 
     parser = argparse.ArgumentParser(description='Utilities to manager trial users')
-    choices = ['list_trial_users', 'list_eligible_upgrade_users']
+    choices = ['list_trial_users', 'list_eligible_upgrade_users', 'perform_eligible_upgrade_users']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--trial_email', help='email address of trial user')
 
@@ -68,6 +81,8 @@ def main():
     elif args.action == 'list_eligible_upgrade_users':
         eligible_df = get_upgrade_eligible_users(convertkit_client, redis_connection)
         print(eligible_df)
+    elif args.action == 'perform_eligible_upgrade_users':
+        perform_upgrade_eligible_users(convertkit_client, redis_connection)
     else:
         print(f'not recognized: {args.action}')
 

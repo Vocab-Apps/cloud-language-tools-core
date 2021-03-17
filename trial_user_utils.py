@@ -39,6 +39,8 @@ def build_trial_user_list(convertkit_client, redis_connection):
     combined_df['characters'] =  combined_df['characters'].astype(int)
     combined_df['character_limit'] =  combined_df['character_limit'].astype(int)
 
+    combined_df = combined_df.sort_values(by='characters', ascending=False)
+
     return combined_df
 
 def get_upgrade_eligible_users(convertkit_client, redis_connection):

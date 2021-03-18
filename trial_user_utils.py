@@ -42,7 +42,7 @@ def build_trial_user_list(convertkit_client, redis_connection):
     combined_df['character_limit'] = combined_df['character_limit'].astype(int)
     combined_df['subscribe_time'] = combined_df['subscribe_time'].astype('datetime64')
 
-    combined_df = combined_df.sort_values(by='characters', ascending=False).reset_index()
+    # combined_df = combined_df.sort_values(by='characters', ascending=False).reset_index()
 
     return combined_df
 

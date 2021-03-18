@@ -1,6 +1,7 @@
 import os
 import requests
 import logging
+import pprint
 import cloudlanguagetools.constants
 
 class ConvertKit():
@@ -44,11 +45,26 @@ class ConvertKit():
 
     def list_subscribers(self):
         # curl https://api.convertkit.com/v3/subscribers?api_secret=<your_secret_api_key>&from=2016-02-01&to=2015-02-28
-        url = f'https://api.convertkit.com/v3/subscribers?api_secret={self.api_secret}'
+        subscriber_list = []
+
+        
+        url = f'https://api.convertkit.com/v3/subscribers?api_secret={self.api_secret}&page=1'
         response = requests.get(url)
         data = response.json()
-        assert(data['total_pages'] == 1)
-        return data['subscribers']
+        current_page = data['page']
+        total_pages = data['total_pages']
+
+        subscriber_list.extend(data['subscribers'])
+
+        while current_page < total_pages:
+            next_page = current_page + 1
+            url = f'https://api.convertkit.com/v3/subscribers?api_secret={self.api_secret}&page={next_page}'
+            response = requests.get(url)
+            data = response.json()
+            current_page = data['page']
+            subscriber_list.extend(data['subscribers'])
+
+        return subscriber_list
 
     def list_tags(self, subscriber_id):
         url = f'https://api.convertkit.com/v3/subscribers/{subscriber_id}/tags?api_secret={self.api_secret}'

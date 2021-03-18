@@ -5,6 +5,7 @@ import quotas
 import logging
 import pprint
 import pandas
+import datetime
 
 import cloudlanguagetools.constants
 
@@ -17,6 +18,7 @@ def build_trial_user_list(convertkit_client, redis_connection):
         api_key = subscriber['fields']['trial_api_key']
         email = subscriber['email_address']
         users.append({
+            'subscribe_time': subscriber['created_at'],
             'subscriber_id': subscriber['id'],
             'api_key': api_key,
             'email': email
@@ -37,9 +39,10 @@ def build_trial_user_list(convertkit_client, redis_connection):
     combined_df = combined_df.fillna(0)
 
     combined_df['characters'] =  combined_df['characters'].astype(int)
-    combined_df['character_limit'] =  combined_df['character_limit'].astype(int)
+    combined_df['character_limit'] = combined_df['character_limit'].astype(int)
+    combined_df['subscribe_time'] = combined_df['subscribe_time'].astype('datetime64')
 
-    combined_df = combined_df.sort_values(by='characters', ascending=False)
+    combined_df = combined_df.sort_values(by='characters', ascending=False).reset_index()
 
     return combined_df
 
@@ -49,6 +52,14 @@ def get_upgrade_eligible_users(convertkit_client, redis_connection):
     eligible_users = user_list_df[(user_list_df['character_limit'] == quotas.TRIAL_USER_CHARACTER_LIMIT) & (user_list_df['characters'] > (quotas.TRIAL_USER_CHARACTER_LIMIT - 300))]
 
     return eligible_users
+
+def get_inactive_users(convertkit_client, redis_connection):
+    user_list_df = build_trial_user_list(convertkit_client, redis_connection)
+
+    cutoff_time = datetime.datetime.now() - datetime.timedelta(days=3)
+    inactive_users = user_list_df[(user_list_df['characters'] == 0) & (user_list_df['subscribe_time'] < cutoff_time)]
+
+    return inactive_users    
 
 def perform_upgrade_eligible_users(convertkit_client, redis_connection):
     eligible_users_df = get_upgrade_eligible_users(convertkit_client, redis_connection)
@@ -69,7 +80,7 @@ def main():
                         level=logging.INFO)
 
     parser = argparse.ArgumentParser(description='Utilities to manager trial users')
-    choices = ['list_trial_users', 'list_eligible_upgrade_users', 'perform_eligible_upgrade_users']
+    choices = ['list_trial_users', 'list_eligible_upgrade_users', 'perform_eligible_upgrade_users', 'list_inactive_users']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--trial_email', help='email address of trial user')
 
@@ -85,6 +96,9 @@ def main():
     elif args.action == 'list_eligible_upgrade_users':
         eligible_df = get_upgrade_eligible_users(convertkit_client, redis_connection)
         print(eligible_df)
+    elif args.action == 'list_inactive_users':
+        inactive_df = get_inactive_users(convertkit_client, redis_connection)
+        print(inactive_df)
     elif args.action == 'perform_eligible_upgrade_users':
         perform_upgrade_eligible_users(convertkit_client, redis_connection)
     else:

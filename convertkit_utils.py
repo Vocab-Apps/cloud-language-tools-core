@@ -120,7 +120,7 @@ def configure_addtag_webhook():
 
 if __name__ == '__main__':
     # configure_addtag_webhook()
-    # list_tags()
+    list_tags()
     # list_fields()
     # list_subscribers()
     # view_subscribers()
@@ -128,4 +128,4 @@ if __name__ == '__main__':
     # tag_subscriber()
     # set_subscriber_field()
     # list_sequences()
-    add_subscriber_sequence()
+    # add_subscriber_sequence()

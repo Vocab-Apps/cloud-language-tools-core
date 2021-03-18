@@ -11,6 +11,7 @@ class ConvertKit():
         self.tag_id_api_requested = int(os.environ['CONVERTKIT_TRIAL_API_KEY_REQUESTED_TAG'])
         self.tag_id_api_ready = int(os.environ['CONVERTKIT_TRIAL_API_KEY_READY_TAG'])
         self.tag_id_trial_extended = int(os.environ['CONVERTKIT_TRIAL_EXTENDED_TAG'])
+        self.tag_id_trial_inactive = int(os.environ['CONVERTKIT_TRIAL_INACTIVE_TAG'])
 
     def tag_user_api_ready(self, email, api_key):
         url = f'https://api.convertkit.com/v3/tags/{self.tag_id_api_ready}/subscribe'

@@ -59,7 +59,24 @@ def get_inactive_users(convertkit_client, redis_connection):
     cutoff_time = datetime.datetime.now() - datetime.timedelta(days=3)
     inactive_users = user_list_df[(user_list_df['characters'] == 0) & (user_list_df['subscribe_time'] < cutoff_time)]
 
-    return inactive_users    
+    subscriber_id_list = list(inactive_users['subscriber_id'])
+    tag_entries = []
+    for subscriber_id in subscriber_id_list:
+        tag_list = convertkit_client.list_tags(subscriber_id)
+        for tag_entry in tag_list:
+            tag_entry['subscriber_id'] = subscriber_id
+            tag_entries.append(tag_entry)
+    tag_entries_df = pandas.DataFrame(tag_entries)
+
+    tag_entries_inactive_df = tag_entries_df[tag_entries_df['id'] == convertkit_client.tag_id_trial_inactive]
+    tag_entries_inactive_df = tag_entries_inactive_df.rename(columns={'id': 'tag_id', 'name': 'tag_name'})
+    tag_entries_inactive_df['tagged_inactive'] = True
+    tag_entries_inactive_df = tag_entries_inactive_df[['subscriber_id', 'tagged_inactive']]
+
+    combined_df = pandas.merge(inactive_users, tag_entries_inactive_df, how='left', on='subscriber_id')
+    combined_df['tagged_inactive'] = combined_df['tagged_inactive'].fillna(False)
+
+    return combined_df
 
 def perform_upgrade_eligible_users(convertkit_client, redis_connection):
     eligible_users_df = get_upgrade_eligible_users(convertkit_client, redis_connection)
@@ -72,6 +89,7 @@ def perform_upgrade_eligible_users(convertkit_client, redis_connection):
         redis_connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
         # tag user on convertkit
         convertkit_client.tag_user_trial_extended(email)
+
 
 
 def main():

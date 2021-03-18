@@ -90,7 +90,16 @@ def perform_upgrade_eligible_users(convertkit_client, redis_connection):
         # tag user on convertkit
         convertkit_client.tag_user_trial_extended(email)
 
+def process_inactive_users(convertkit_client, redis_connection):
+    inactive_users = get_inactive_users(convertkit_client, redis_connection)
 
+    not_tagged_df = inactive_users[inactive_users['tagged_inactive'] == False]
+    for index, row in not_tagged_df.iterrows():
+        email = row['email']
+        logging.info(f'tagging {email} inactive')
+        convertkit_client.tag_user_trial_inactive(email)
+
+    logging.info('done processing inactive users')
 
 def main():
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -98,7 +107,12 @@ def main():
                         level=logging.INFO)
 
     parser = argparse.ArgumentParser(description='Utilities to manager trial users')
-    choices = ['list_trial_users', 'list_eligible_upgrade_users', 'perform_eligible_upgrade_users', 'list_inactive_users']
+    choices = ['list_trial_users', 
+    'list_eligible_upgrade_users', 
+    'perform_eligible_upgrade_users', 
+    'list_inactive_users',
+    'process_inactive_users'
+    ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--trial_email', help='email address of trial user')
 
@@ -119,6 +133,8 @@ def main():
         print(inactive_df)
     elif args.action == 'perform_eligible_upgrade_users':
         perform_upgrade_eligible_users(convertkit_client, redis_connection)
+    elif args.action == 'process_inactive_users':
+        process_inactive_users(convertkit_client, redis_connection)
     else:
         print(f'not recognized: {args.action}')
 

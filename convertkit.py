@@ -25,8 +25,8 @@ class ConvertKit():
         if response.status_code != 200:
             logging.error(f'could not tag user: {response.content}')
 
-    def tag_user_trial_extended(self, email):
-        url = f'https://api.convertkit.com/v3/tags/{self.tag_id_trial_extended}/subscribe'
+    def tag_user(self, email, tag_id):
+        url = f'https://api.convertkit.com/v3/tags/{tag_id}/subscribe'
         response = requests.post(url, json={
                 "api_key": self.api_key,
                 "email": email
@@ -34,7 +34,13 @@ class ConvertKit():
         if response.status_code != 200:
             logging.error(f'could not tag user: {response.content}')            
         else:
-            logging.info(f'tagged user with trial_extended: {email}')
+            logging.info(f'tagged user with tag_id {tag_id}: {email}')
+
+    def tag_user_trial_extended(self, email):
+        self.tag_user(email, self.tag_id_trial_extended)
+
+    def tag_user_trial_inactive(self, email):
+        self.tag_user(email, self.tag_id_trial_inactive)
 
     def list_subscribers(self):
         # curl https://api.convertkit.com/v3/subscribers?api_secret=<your_secret_api_key>&from=2016-02-01&to=2015-02-28

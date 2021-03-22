@@ -67,12 +67,19 @@ def generate_video_audio():
     By the way, this is the Aria voice, available in Awesome TTS.
     """    
 
+    text = """etes vous vraiment malade ?"""
+
     voice_key = {
         'name': 'Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)' 
     }
 
+    voice_key = {
+            "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, HenriNeural)"
+    }
+
     result = manager.get_tts_audio(text, service, voice_key, {})
     permanent_file_name = 'languagetools_video.mp3'
+    permanent_file_name = 'french.mp3'
     shutil.copyfile(result.name, permanent_file_name)
     print(f'tts result: {permanent_file_name}')
 

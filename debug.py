@@ -53,6 +53,20 @@ def generate_video_audio():
     <break time="1s"/>
     By the way, this is Microsoft Azure voice Aria, available on Language Tools.
     """
+
+    text = """In this tutorial, we'll see how to add audio to your flashcards using batch generation. This means we will create some audio files which will be stored in your collection and will be played back when you review your cards.
+    Let's first make sure our installation of Awesome TTS is working. Go to the Awesome TTS configuration, advanced, managed presets. Let's pick the Microsoft Azure service. Pick a french voice, type in some French text, then hit preview.
+    <break time="1s"/>
+    Now, let's go to the card browser. Select your deck, then select a few notes. Go to the Awesome TTS menu, then select add audio to selected notes.
+    Make sure to pick a French voice from the Azure service. The source field should be front, that's the one which contains french text. The destination field should also be front, and the sound tag will be added alongside the french text.
+    Note that we have the append option checked, as well as removing existing sound tag.
+    Press Generate to start creating the audio files. 
+    Wait a little bit, it should be done soon.
+    Let's look at our notes. You can see we now have a sound tag on the front field, after the french text. Let's hit preview for this note. The sound plays automatically, and we can play again using this play icon.
+    The other cards should also have a sound tag.
+    By the way, this is the Aria voice, available in Awesome TTS.
+    """    
+
     voice_key = {
         'name': 'Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)' 
     }

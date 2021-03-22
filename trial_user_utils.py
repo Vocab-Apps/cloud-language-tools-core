@@ -134,7 +134,7 @@ def main():
 
     if args.action == 'list_trial_users':
         user_list_df = build_trial_user_list(convertkit_client, redis_connection)
-        print(user_list_df)
+        print(user_list_df.tail(50))
     elif args.action == 'list_eligible_upgrade_users':
         eligible_df = get_upgrade_eligible_users(convertkit_client, redis_connection)
         print(eligible_df)

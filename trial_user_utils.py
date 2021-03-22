@@ -46,6 +46,11 @@ def build_trial_user_list(convertkit_client, redis_connection):
 
     return combined_df
 
+def search_trial_users(convertkit_client, redis_connection, trial_email):
+    user_list_df = build_trial_user_list(convertkit_client, redis_connection)
+    subset_df = user_list_df[user_list_df['email'] == trial_email]
+    print(subset_df)
+
 def get_upgrade_eligible_users(convertkit_client, redis_connection):
     user_list_df = build_trial_user_list(convertkit_client, redis_connection)
 
@@ -117,6 +122,7 @@ def main():
 
     parser = argparse.ArgumentParser(description='Utilities to manager trial users')
     choices = ['list_trial_users', 
+    'search_trial_user',
     'list_eligible_upgrade_users', 
     'perform_eligible_upgrade_users', 
     'list_inactive_users',
@@ -135,6 +141,8 @@ def main():
     if args.action == 'list_trial_users':
         user_list_df = build_trial_user_list(convertkit_client, redis_connection)
         print(user_list_df.tail(50))
+    elif args.action == 'search_trial_user':
+        search_trial_users(convertkit_client, redis_connection, args.trial_email)
     elif args.action == 'list_eligible_upgrade_users':
         eligible_df = get_upgrade_eligible_users(convertkit_client, redis_connection)
         print(eligible_df)

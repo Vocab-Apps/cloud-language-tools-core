@@ -78,6 +78,15 @@ def get_inactive_users(convertkit_client, redis_connection):
 
     return combined_df
 
+def get_upgrade_users_inactive(convertkit_client, redis_connection):
+    # users who didn't take advantage of their upgraded quota
+
+    user_list_df = build_trial_user_list(convertkit_client, redis_connection)
+    subset = user_list_df[(user_list_df['characters'] < quotas.TRIAL_USER_CHARACTER_LIMIT) & (user_list_df['character_limit'] == quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)]
+
+    print(subset)
+
+
 def perform_upgrade_eligible_users(convertkit_client, redis_connection):
     eligible_users_df = get_upgrade_eligible_users(convertkit_client, redis_connection)
 
@@ -111,7 +120,8 @@ def main():
     'list_eligible_upgrade_users', 
     'perform_eligible_upgrade_users', 
     'list_inactive_users',
-    'process_inactive_users'
+    'process_inactive_users',
+    'list_upgrade_users_inactive'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--trial_email', help='email address of trial user')
@@ -135,6 +145,8 @@ def main():
         perform_upgrade_eligible_users(convertkit_client, redis_connection)
     elif args.action == 'process_inactive_users':
         process_inactive_users(convertkit_client, redis_connection)
+    elif args.action == 'list_upgrade_users_inactive':
+        get_upgrade_users_inactive(convertkit_client, redis_connection)
     else:
         print(f'not recognized: {args.action}')
 

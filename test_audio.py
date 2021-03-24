@@ -135,6 +135,15 @@ class TestAudio(unittest.TestCase):
         source_text = 'hello <break time="200ms"/>world'
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.en_US, 'en-US')
 
+    def test_ssml_english_amazon(self):
+        # pytest test_audio.py -k test_ssml_english_amazon
+        source_text = 'hello <break time="200ms"/>world'
+        self.verify_service_audio_language(source_text, Service.Amazon, AudioLanguage.en_US, 'en-US')
+
+    def test_ssml_english_watson(self):
+        # pytest test_audio.py -k test_ssml_english_watson
+        source_text = 'hello <break time="200ms"/>world'
+        self.verify_service_audio_language(source_text, Service.Watson, AudioLanguage.en_US, 'en-US')
 
 
     def test_azure_options(self):

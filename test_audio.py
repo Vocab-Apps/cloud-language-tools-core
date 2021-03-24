@@ -1,6 +1,7 @@
 import unittest
 import logging
 import random
+import re
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 from cloudlanguagetools.constants import Language
@@ -42,6 +43,7 @@ class TestAudio(unittest.TestCase):
         return result
     
     def sanitize_recognized_text(self, recognized_text):
+        recognized_text = re.sub('<[^<]+?>', '', recognized_text)
         result_text = recognized_text.replace('.', '').replace('。', '').replace('?', '').replace('？', '').replace(':', '').lower()
         return result_text
 
@@ -121,6 +123,18 @@ class TestAudio(unittest.TestCase):
         source_text = 'this is the first sentence'
         # source_text = 'hello'
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.en_US, 'en-US')
+
+
+    def test_ssml_english_google(self):
+        # pytest test_audio.py -k test_ssml_english_google
+        pass
+
+    def test_ssml_english_azure(self):
+        # pytest test_audio.py -k test_ssml_english_azure
+        source_text = 'hello <break time="200ms"/>world'
+        self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.en_US, 'en-US')
+
+
 
     def test_azure_options(self):
         service = 'Azure'

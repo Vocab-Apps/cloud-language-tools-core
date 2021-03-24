@@ -106,7 +106,7 @@ class GoogleService(cloudlanguagetools.service.Service):
     def get_tts_audio(self, text, voice_key, options):
         client = self.get_client()
 
-        input_text = google.cloud.texttospeech.SynthesisInput(text=text)
+        input_text = google.cloud.texttospeech.SynthesisInput(ssml=text)
 
         # Note: the voice can also be specified by name.
         # Names of voices can be retrieved with client.list_voices().

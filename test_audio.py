@@ -127,7 +127,8 @@ class TestAudio(unittest.TestCase):
 
     def test_ssml_english_google(self):
         # pytest test_audio.py -k test_ssml_english_google
-        pass
+        source_text = 'hello <break time="200ms"/>world'
+        self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.en_US, 'en-US')
 
     def test_ssml_english_azure(self):
         # pytest test_audio.py -k test_ssml_english_azure

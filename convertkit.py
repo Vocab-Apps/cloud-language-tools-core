@@ -14,6 +14,7 @@ class ConvertKit():
         self.tag_id_trial_extended = int(os.environ['CONVERTKIT_TRIAL_EXTENDED_TAG'])
         self.tag_id_trial_inactive = int(os.environ['CONVERTKIT_TRIAL_INACTIVE_TAG'])
         self.tag_id_trial_user = int(os.environ['CONVERTKIT_TRIAL_USER_TAG'])
+        self.tag_id_trial_end_reach_out = int(os.environ['CONVERTKIT_TRIAL_END_REACH_OUT_TAG'])
 
     def tag_user_api_ready(self, email, api_key):
         url = f'https://api.convertkit.com/v3/tags/{self.tag_id_api_ready}/subscribe'
@@ -44,10 +45,10 @@ class ConvertKit():
     def tag_user_trial_inactive(self, email):
         self.tag_user(email, self.tag_id_trial_inactive)
 
-    def list_subscribers(self):
+    def list_subscribers_tag(self, tag_id):
         subscriber_list = []
 
-        url = f'https://api.convertkit.com/v3/tags/{self.tag_id_trial_user}/subscriptions?api_secret={self.api_secret}&page=1'
+        url = f'https://api.convertkit.com/v3/tags/{tag_id}/subscriptions?api_secret={self.api_secret}&page=1'
         response = requests.get(url)
         data = response.json()
         current_page = data['page']
@@ -60,7 +61,7 @@ class ConvertKit():
 
         while current_page < total_pages:
             next_page = current_page + 1
-            url = f'https://api.convertkit.com/v3/tags/{self.tag_id_trial_user}/subscriptions?api_secret={self.api_secret}&page={next_page}'
+            url = f'https://api.convertkit.com/v3/tags/{tag_id}/subscriptions?api_secret={self.api_secret}&page={next_page}'
             response = requests.get(url)
             data = response.json()
             current_page = data['page']
@@ -70,6 +71,10 @@ class ConvertKit():
                 subscriber_list.append(subscriber)
 
         return subscriber_list
+
+    def list_trial_users(self):
+        return self.list_subscribers_tag(self.tag_id_trial_user)
+
 
     def list_tags(self, subscriber_id):
         url = f'https://api.convertkit.com/v3/subscribers/{subscriber_id}/tags?api_secret={self.api_secret}'

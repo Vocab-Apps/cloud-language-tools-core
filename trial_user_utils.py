@@ -12,8 +12,39 @@ import requests
 
 import cloudlanguagetools.constants
 
+class TrialUserUtils():
+    def __init__(self):
+        self.redis_connection = redisdb.RedisDb()
+        self.convertkit_client = convertkit.ConvertKit()
+
+    def get_dataframe_from_subscriber_list(self, subscribers):
+        users = []
+        for subscriber in subscribers:
+            # print(subscriber)
+            api_key = subscriber['fields']['trial_api_key']
+            email = subscriber['email_address']
+            users.append({
+                'subscribe_time': subscriber['created_at'],
+                'subscriber_id': subscriber['id'],
+                'api_key': api_key,
+                'email': email
+            })
+        users_df = pandas.DataFrame(users)
+        return users_df
+
+    def get_dataframe_for_tag(self, tag_id, tag_name, tag_column):
+        subscribers = self.convertkit_client.list_subscribers_tag(tag_id)
+        data_df = self.get_dataframe_from_subscriber_list(subscribers)
+        data_df[tag_column] = tag_name
+        data_df = data_df[['subscriber_id', tag_column]]
+        return data_df
+
+
+
 def build_trial_user_list(convertkit_client, redis_connection):
-    subscribers = convertkit_client.list_subscribers()
+    subscribers = convertkit_client.list_trial_users()
+
+   
     api_key_list = []
     users = []
     for subscriber in subscribers:
@@ -28,7 +59,17 @@ def build_trial_user_list(convertkit_client, redis_connection):
         })
         api_key_list.append(api_key)
     users_df = pandas.DataFrame(users)
-    
+
+    trial_user_utils = TrialUserUtils()
+    subscribers_trial_extended = trial_user_utils.get_dataframe_for_tag(convertkit_client.tag_id_trial_extended, 'trial_extended', 'tag_1')
+    subscribers_trial_inactive = trial_user_utils.get_dataframe_for_tag(convertkit_client.tag_id_trial_inactive, 'trial_user_inactive', 'tag_2')
+    subscribers_trial_end = trial_user_utils.get_dataframe_for_tag(convertkit_client.tag_id_trial_end_reach_out, 'trial_end_reach_out', 'tag_3')
+    combined_df = pandas.merge(users_df, subscribers_trial_extended, how='left', on='subscriber_id')
+    combined_df = pandas.merge(combined_df, subscribers_trial_inactive, how='left', on='subscriber_id')
+    combined_df = pandas.merge(combined_df, subscribers_trial_end, how='left', on='subscriber_id')
+    combined_df = combined_df.fillna('')
+    # print(combined_df)
+
     # get character entitlement
     entitlement = redis_connection.get_trial_user_entitlement(api_key_list)
     entitlement_df = pandas.DataFrame(entitlement)
@@ -36,7 +77,7 @@ def build_trial_user_list(convertkit_client, redis_connection):
     api_key_usage = redis_connection.get_trial_user_usage(api_key_list)
     api_key_usage_df = pandas.DataFrame(api_key_usage)
 
-    combined_df = pandas.merge(users_df, api_key_usage_df, how='left', on='api_key')
+    combined_df = pandas.merge(combined_df, api_key_usage_df, how='left', on='api_key')
     combined_df = pandas.merge(combined_df, entitlement_df, how='left', on='api_key')
 
     combined_df = combined_df.fillna(0)
@@ -127,6 +168,7 @@ def process_inactive_users(convertkit_client, redis_connection):
 
 def update_trial_users_airtable(convertkit_client, redis_connection):
     user_list_df = build_trial_user_list(convertkit_client, redis_connection)
+    # print(user_list_df)
 
     airtable_api_key = os.environ['AIRTABLE_API_KEY']
     airtable_trial_users_url = os.environ['AIRTABLE_TRIAL_USERS_URL']
@@ -140,10 +182,10 @@ def update_trial_users_airtable(convertkit_client, redis_connection):
     airtable_records_df = pandas.DataFrame(airtable_records)
 
     combined_df = pandas.merge(airtable_records_df, user_list_df, how='inner', on='email')
-    # print(combined_df)
-    print(combined_df[combined_df['email'] == 'xodid060218@gmail.com'])
 
     records = combined_df.to_dict(orient='records')
+
+    print(records)
 
     update_instructions = [
         {'id': x['id'], 
@@ -151,7 +193,8 @@ def update_trial_users_airtable(convertkit_client, redis_connection):
             {
                 'characters': x['characters'], 
                 'character_limit': x['character_limit'],
-                'trial_api_key': x['api_key']
+                'trial_api_key': x['api_key'],
+                'tags': [x for x in [x['tag_1'], x['tag_2'], x['tag_3']] if x != '']
             }
         } for x in records]
     # pprint.pprint(update_instructions)
@@ -163,12 +206,15 @@ def update_trial_users_airtable(convertkit_client, redis_connection):
         slice_length = min(10, len(update_instructions))
         update_slice = update_instructions[0:slice_length]
         del update_instructions[0:slice_length]
+        
         pprint.pprint(update_slice)
         logging.info(f'updating records')
         response = requests.patch(airtable_trial_users_url, json={
             'records': update_slice
         }, headers=headers)
-        logging.info(f'response.status_code: {response.status_code}')
+        if response.status_code != 200:
+            logging.error(response.content)
+        # logging.info(f'response.status_code: {response.status_code}')
 
 
 

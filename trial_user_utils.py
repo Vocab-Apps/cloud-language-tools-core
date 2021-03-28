@@ -20,6 +20,8 @@ class TrialUserUtils():
         self.airtable_api_key = os.environ['AIRTABLE_API_KEY']
         self.airtable_trial_users_url = os.environ['AIRTABLE_TRIAL_USERS_URL']
 
+        self.tag_columns_list = ['tag_1', 'tag_2', 'tag_3']
+
     def get_dataframe_from_subscriber_list(self, subscribers):
         users = []
         for subscriber in subscribers:
@@ -61,9 +63,9 @@ class TrialUserUtils():
             api_key_list.append(api_key)
         users_df = pandas.DataFrame(users)
 
-        subscribers_trial_extended = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_extended, 'trial_extended', 'tag_1')
-        subscribers_trial_inactive = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_inactive, 'trial_user_inactive', 'tag_2')
-        subscribers_trial_end = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_end_reach_out, 'trial_end_reach_out', 'tag_3')
+        subscribers_trial_extended = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_extended, 'trial_extended', self.tag_columns_list[0])
+        subscribers_trial_inactive = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_inactive, 'trial_user_inactive', self.tag_columns_list[1])
+        subscribers_trial_end = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_end_reach_out, 'trial_end_reach_out', self.tag_columns_list[2])
         combined_df = pandas.merge(users_df, subscribers_trial_extended, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, subscribers_trial_inactive, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, subscribers_trial_end, how='left', on='subscriber_id')
@@ -172,7 +174,7 @@ class TrialUserUtils():
                     'characters': x['characters'], 
                     'character_limit': x['character_limit'],
                     'trial_api_key': x['api_key'],
-                    'tags': [x for x in [x['tag_1'], x['tag_2'], x['tag_3']] if x != '']
+                    'tags': [x for x in [x[tag_column] for tag_column in self.tag_columns_list] if x != '']
                 }
             } for x in records]
         # pprint.pprint(update_instructions)

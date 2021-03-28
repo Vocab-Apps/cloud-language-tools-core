@@ -13,6 +13,7 @@ class ConvertKit():
         self.tag_id_api_ready = int(os.environ['CONVERTKIT_TRIAL_API_KEY_READY_TAG'])
         self.tag_id_trial_extended = int(os.environ['CONVERTKIT_TRIAL_EXTENDED_TAG'])
         self.tag_id_trial_inactive = int(os.environ['CONVERTKIT_TRIAL_INACTIVE_TAG'])
+        self.tag_id_trial_user = int(os.environ['CONVERTKIT_TRIAL_USER_TAG'])
 
     def tag_user_api_ready(self, email, api_key):
         url = f'https://api.convertkit.com/v3/tags/{self.tag_id_api_ready}/subscribe'
@@ -44,25 +45,29 @@ class ConvertKit():
         self.tag_user(email, self.tag_id_trial_inactive)
 
     def list_subscribers(self):
-        # curl https://api.convertkit.com/v3/subscribers?api_secret=<your_secret_api_key>&from=2016-02-01&to=2015-02-28
         subscriber_list = []
 
-        
-        url = f'https://api.convertkit.com/v3/subscribers?api_secret={self.api_secret}&page=1'
+        url = f'https://api.convertkit.com/v3/tags/{self.tag_id_trial_user}/subscriptions?api_secret={self.api_secret}&page=1'
         response = requests.get(url)
         data = response.json()
         current_page = data['page']
         total_pages = data['total_pages']
 
-        subscriber_list.extend(data['subscribers'])
+
+        for data in data['subscriptions']:
+            subscriber = data['subscriber']
+            subscriber_list.append(subscriber)
 
         while current_page < total_pages:
             next_page = current_page + 1
-            url = f'https://api.convertkit.com/v3/subscribers?api_secret={self.api_secret}&page={next_page}'
+            url = f'https://api.convertkit.com/v3/tags/{self.tag_id_trial_user}/subscriptions?api_secret={self.api_secret}&page={next_page}'
             response = requests.get(url)
             data = response.json()
             current_page = data['page']
-            subscriber_list.extend(data['subscribers'])
+
+            for data in data['subscriptions']:
+                subscriber = data['subscriber']
+                subscriber_list.append(subscriber)
 
         return subscriber_list
 

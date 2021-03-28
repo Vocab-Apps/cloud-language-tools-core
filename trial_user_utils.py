@@ -149,6 +149,12 @@ class TrialUserUtils():
 
         logging.info('done processing inactive users')
 
+    def get_airtable_update_headers(self):
+        headers = {
+            'Authorization': f'Bearer {self.airtable_api_key}',
+            'Content-Type': 'application/json' }
+        return headers
+
     def update_trial_users_airtable(self):
         user_list_df = self.build_trial_user_list()
         # print(user_list_df)
@@ -198,7 +204,40 @@ class TrialUserUtils():
 
 
     def perform_airtable_tag_requests(self):
-        pass
+        url = f'{self.airtable_trial_users_url}?view=tag%20requests'
+        response = requests.get(url, headers={'Authorization': f'Bearer {self.airtable_api_key}'})
+        data = response.json()
+        airtable_records = []
+        for record in data['records']:
+            airtable_records.append({'id': record['id'], 'email': record['fields']['email'], 'tag_request': record['fields']['tag_request']})
+        airtable_records_df = pandas.DataFrame(airtable_records)
+        print(airtable_records_df)
+
+        for index, row in airtable_records_df.iterrows():
+            record_id = row['id']
+            email = row['email']
+            tag_request = row['tag_request']
+            tag_id = self.convertkit_client.tag_name_map[tag_request]
+            logging.info(f'tagging {email} with {tag_request} / {tag_id}')
+            self.convertkit_client.tag_user(email, tag_id)
+            # blank out tag_request field
+            update_instructions = [
+                {'id': record_id, 
+                'fields': 
+                    {
+                        'tag_request': None
+                    }
+                }
+            ]
+            # upload to airtable
+            response = requests.patch(self.airtable_trial_users_url, json={
+                'records': update_instructions
+            }, headers=self.get_airtable_update_headers())
+            if response.status_code != 200:
+                logging.error(response.content)
+
+
+
 
 
 def main():
@@ -214,7 +253,8 @@ def main():
     'process_inactive_users',
     'list_upgrade_users_inactive',
     'list_extended_users_maxed_out',
-    'update_trial_users_airtable'
+    'update_trial_users_airtable',
+    'perform_airtable_tag_requests'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--trial_email', help='email address of trial user')
@@ -244,6 +284,8 @@ def main():
         print(users_df)
     elif args.action == 'update_trial_users_airtable':
         trial_users_utils.update_trial_users_airtable()
+    elif args.action == 'perform_airtable_tag_requests':
+        trial_users_utils.perform_airtable_tag_requests()
     else:
         print(f'not recognized: {args.action}')
 

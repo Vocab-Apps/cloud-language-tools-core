@@ -6,6 +6,9 @@ import logging
 import pprint
 import pandas
 import datetime
+import os
+import requests
+
 
 import cloudlanguagetools.constants
 
@@ -122,6 +125,44 @@ def process_inactive_users(convertkit_client, redis_connection):
 
     logging.info('done processing inactive users')
 
+def update_trial_users_airtable(convertkit_client, redis_connection):
+    user_list_df = build_trial_user_list(convertkit_client, redis_connection)
+
+    airtable_api_key = os.environ['AIRTABLE_API_KEY']
+    airtable_trial_users_url = os.environ['AIRTABLE_TRIAL_USERS_URL']
+
+    # first, list records
+    response = requests.get(airtable_trial_users_url, headers={'Authorization': f'Bearer {airtable_api_key}'})
+    data = response.json()
+    airtable_records = []
+    for record in data['records']:
+        airtable_records.append({'id': record['id'], 'email': record['fields']['email']})
+    airtable_records_df = pandas.DataFrame(airtable_records)
+
+    combined_df = pandas.merge(airtable_records_df, user_list_df, how='inner', on='email')
+
+    for index, row in combined_df.iterrows():
+        record_id = row['id']
+        email = row['email']
+        characters = row['characters']
+        character_limit = row['character_limit']
+        headers = {
+            'Authorization': f'Bearer {airtable_api_key}',
+            'Content-Type': 'application/json' }
+        logging.info(f'updating record {record_id} / {email}')
+        requests.patch(airtable_trial_users_url, json={
+            'records': [
+                {
+                    'id': record_id,
+                    'fields': {
+                        'characters': characters,
+                        'character_limit': character_limit
+                    }
+                }
+            ]
+        }, headers=headers)
+
+
 def main():
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
@@ -135,7 +176,8 @@ def main():
     'list_inactive_users',
     'process_inactive_users',
     'list_upgrade_users_inactive',
-    'list_extended_users_maxed_out'
+    'list_extended_users_maxed_out',
+    'update_trial_users_airtable'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--trial_email', help='email address of trial user')
@@ -166,6 +208,8 @@ def main():
     elif args.action == 'list_extended_users_maxed_out':
         users_df = get_extended_users_maxed_out(convertkit_client, redis_connection)
         print(users_df)
+    elif args.action == 'update_trial_users_airtable':
+        update_trial_users_airtable(convertkit_client, redis_connection)
     else:
         print(f'not recognized: {args.action}')
 

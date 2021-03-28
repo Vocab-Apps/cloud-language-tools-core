@@ -141,26 +141,25 @@ def update_trial_users_airtable(convertkit_client, redis_connection):
 
     combined_df = pandas.merge(airtable_records_df, user_list_df, how='inner', on='email')
 
-    for index, row in combined_df.iterrows():
-        record_id = row['id']
-        email = row['email']
-        characters = row['characters']
-        character_limit = row['character_limit']
-        headers = {
-            'Authorization': f'Bearer {airtable_api_key}',
-            'Content-Type': 'application/json' }
-        logging.info(f'updating record {record_id} / {email}')
+    records = combined_df.to_dict(orient='records')
+
+    update_instructions = [{'id': x['id'], 'fields': {'characters': x['characters'], 'character_limit': x['character_limit']}} for x in records]
+    # pprint.pprint(update_instructions)
+
+    headers = {
+        'Authorization': f'Bearer {airtable_api_key}',
+        'Content-Type': 'application/json' }
+    while len(update_instructions) > 0:
+        slice_length = min(10, len(update_instructions))
+        update_slice = update_instructions[0:slice_length]
+        del update_instructions[0:slice_length]
+        # pprint.pprint(update_slice)
+        logging.info(f'updating records')
         requests.patch(airtable_trial_users_url, json={
-            'records': [
-                {
-                    'id': record_id,
-                    'fields': {
-                        'characters': characters,
-                        'character_limit': character_limit
-                    }
-                }
-            ]
+            'records': update_slice
         }, headers=headers)
+
+
 
 
 def main():

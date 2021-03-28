@@ -151,11 +151,8 @@ class TrialUserUtils():
         user_list_df = self.build_trial_user_list()
         # print(user_list_df)
 
-        airtable_api_key = os.environ['AIRTABLE_API_KEY']
-        airtable_trial_users_url = os.environ['AIRTABLE_TRIAL_USERS_URL']
-
         # first, list records
-        response = requests.get(airtable_trial_users_url, headers={'Authorization': f'Bearer {airtable_api_key}'})
+        response = requests.get(self.airtable_trial_users_url, headers={'Authorization': f'Bearer {self.airtable_api_key}'})
         data = response.json()
         airtable_records = []
         for record in data['records']:
@@ -166,7 +163,7 @@ class TrialUserUtils():
 
         records = combined_df.to_dict(orient='records')
 
-        print(records)
+        # print(records)
 
         update_instructions = [
             {'id': x['id'], 
@@ -181,16 +178,16 @@ class TrialUserUtils():
         # pprint.pprint(update_instructions)
 
         headers = {
-            'Authorization': f'Bearer {airtable_api_key}',
+            'Authorization': f'Bearer {self.airtable_api_key}',
             'Content-Type': 'application/json' }
         while len(update_instructions) > 0:
             slice_length = min(10, len(update_instructions))
             update_slice = update_instructions[0:slice_length]
             del update_instructions[0:slice_length]
             
-            pprint.pprint(update_slice)
+            # pprint.pprint(update_slice)
             logging.info(f'updating records')
-            response = requests.patch(airtable_trial_users_url, json={
+            response = requests.patch(self.airtable_trial_users_url, json={
                 'records': update_slice
             }, headers=headers)
             if response.status_code != 200:
@@ -209,7 +206,6 @@ def main():
 
     parser = argparse.ArgumentParser(description='Utilities to manager trial users')
     choices = ['list_trial_users', 
-    'search_trial_user',
     'list_eligible_upgrade_users', 
     'perform_eligible_upgrade_users', 
     'list_inactive_users',

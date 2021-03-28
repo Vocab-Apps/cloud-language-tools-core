@@ -20,7 +20,7 @@ class TrialUserUtils():
         self.airtable_api_key = os.environ['AIRTABLE_API_KEY']
         self.airtable_trial_users_url = os.environ['AIRTABLE_TRIAL_USERS_URL']
 
-        self.tag_columns_list = ['tag_1', 'tag_2', 'tag_3']
+        self.tag_columns_list = ['tag_1', 'tag_2', 'tag_3', 'tag_4']
 
     def get_dataframe_from_subscriber_list(self, subscribers):
         users = []
@@ -66,9 +66,11 @@ class TrialUserUtils():
         subscribers_trial_extended = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_extended, 'trial_extended', self.tag_columns_list[0])
         subscribers_trial_inactive = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_inactive, 'trial_user_inactive', self.tag_columns_list[1])
         subscribers_trial_end = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_end_reach_out, 'trial_end_reach_out', self.tag_columns_list[2])
+        subscribers_trial_patreon_convert = self.get_dataframe_for_tag(self.convertkit_client.tag_id_trial_patreon_convert, 'trial_patreon_convert', self.tag_columns_list[3])
         combined_df = pandas.merge(users_df, subscribers_trial_extended, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, subscribers_trial_inactive, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, subscribers_trial_end, how='left', on='subscriber_id')
+        combined_df = pandas.merge(combined_df, subscribers_trial_patreon_convert, how='left', on='subscriber_id')
         combined_df = combined_df.fillna('')
         # print(combined_df)
 

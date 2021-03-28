@@ -140,10 +140,20 @@ def update_trial_users_airtable(convertkit_client, redis_connection):
     airtable_records_df = pandas.DataFrame(airtable_records)
 
     combined_df = pandas.merge(airtable_records_df, user_list_df, how='inner', on='email')
+    # print(combined_df)
+    print(combined_df[combined_df['email'] == 'xodid060218@gmail.com'])
 
     records = combined_df.to_dict(orient='records')
 
-    update_instructions = [{'id': x['id'], 'fields': {'characters': x['characters'], 'character_limit': x['character_limit']}} for x in records]
+    update_instructions = [
+        {'id': x['id'], 
+        'fields': 
+            {
+                'characters': x['characters'], 
+                'character_limit': x['character_limit'],
+                'trial_api_key': x['api_key']
+            }
+        } for x in records]
     # pprint.pprint(update_instructions)
 
     headers = {
@@ -153,11 +163,12 @@ def update_trial_users_airtable(convertkit_client, redis_connection):
         slice_length = min(10, len(update_instructions))
         update_slice = update_instructions[0:slice_length]
         del update_instructions[0:slice_length]
-        # pprint.pprint(update_slice)
+        pprint.pprint(update_slice)
         logging.info(f'updating records')
-        requests.patch(airtable_trial_users_url, json={
+        response = requests.patch(airtable_trial_users_url, json={
             'records': update_slice
         }, headers=headers)
+        logging.info(f'response.status_code: {response.status_code}')
 
 
 

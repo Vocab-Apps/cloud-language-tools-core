@@ -256,7 +256,8 @@ def main():
     'list_upgrade_users_inactive',
     'list_extended_users_maxed_out',
     'update_trial_users_airtable',
-    'perform_airtable_tag_requests'
+    'perform_airtable_tag_requests',
+    'update_airtable'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--trial_email', help='email address of trial user')
@@ -288,6 +289,9 @@ def main():
         trial_users_utils.update_trial_users_airtable()
     elif args.action == 'perform_airtable_tag_requests':
         trial_users_utils.perform_airtable_tag_requests()
+    elif args.action == 'update_airtable':
+        trial_users_utils.perform_airtable_tag_requests()
+        trial_users_utils.update_trial_users_airtable()
     else:
         print(f'not recognized: {args.action}')
 

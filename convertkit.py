@@ -19,7 +19,8 @@ class ConvertKit():
 
         self.tag_name_map = {
             'trial_patreon_convert': self.tag_id_trial_patreon_convert,
-            'trial_end_reach_out': self.tag_id_trial_end_reach_out
+            'trial_end_reach_out': self.tag_id_trial_end_reach_out,
+            'trial_user_inactive': self.tag_id_trial_inactive 
         }
 
     def tag_user_api_ready(self, email, api_key):

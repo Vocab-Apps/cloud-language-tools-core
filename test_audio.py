@@ -2,6 +2,7 @@ import unittest
 import logging
 import random
 import re
+import sys
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 from cloudlanguagetools.constants import Language
@@ -21,12 +22,13 @@ class TestAudio(unittest.TestCase):
 
         logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                             datefmt='%Y%m%d-%H:%M:%S',
+                            stream=sys.stdout,
                             level=logging.DEBUG)
         import http.client as http_client                            
         http_client.HTTPConnection.debuglevel = 1
         requests_log = logging.getLogger("requests.packages.urllib3")
         requests_log.setLevel(logging.DEBUG)
-        requests_log.propagate = True        
+        requests_log.propagate = True
 
 
 
@@ -149,6 +151,20 @@ class TestAudio(unittest.TestCase):
         # pytest test_audio.py -k test_english_forvo
         source_text = 'absolutely'
         self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.en_US, 'en-US')
+
+    def test_english_forvo_preferred_user(self):
+        # pytest test_audio.py -rPP -k test_english_forvo_preferred_user
+        source_text = 'vehicle'
+        service = 'Forvo'
+        voice_key = {
+            "country_code": "ANY",
+            "language_code": "en",
+            'preferred_user': 'lizchiu'
+        }        
+        options = {}
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+        audio_text = self.speech_to_text(audio_temp_file, 'en-GB')
+        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
 
     def test_french_forvo(self):
         # pytest test_audio.py -k test_french_forvo

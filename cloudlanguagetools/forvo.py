@@ -85,7 +85,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             items = data['items']
             if len(items) == 0:
                 error_message = f"Pronunciation not found in Forvo for word [{text}], language={language}, country={voice_key['country_code']}"
-                cloudlanguagetools.errors.RequestError(error_message)
+                raise cloudlanguagetools.errors.NotFoundError(error_message)
             audio_url = items[0]['pathmp3']
             output_temp_file = tempfile.NamedTemporaryFile()
             output_temp_filename = output_temp_file.name
@@ -159,7 +159,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             return voices
 
         except KeyError:
-            logging.error(f'forvo language mapping not found: {language}')
+            logging.warn(f'forvo language mapping not found: {language}')
 
         return []
 

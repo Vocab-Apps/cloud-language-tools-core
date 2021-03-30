@@ -129,6 +129,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.constants.AudioLanguage.en_IE: 'IRL',
             cloudlanguagetools.constants.AudioLanguage.en_IN: 'IND',
             cloudlanguagetools.constants.AudioLanguage.en_US: 'USA',
+            cloudlanguagetools.constants.AudioLanguage.en_PH: 'PHL',
             cloudlanguagetools.constants.AudioLanguage.es_ES: 'ESP',
             cloudlanguagetools.constants.AudioLanguage.es_MX: 'MEX',
             cloudlanguagetools.constants.AudioLanguage.es_LA: 'ANY', # any country

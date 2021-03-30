@@ -219,9 +219,17 @@ class TrialUserUtils():
             record_id = row['id']
             email = row['email']
             tag_request = row['tag_request']
-            tag_id = self.convertkit_client.tag_name_map[tag_request]
-            logging.info(f'tagging {email} with {tag_request} / {tag_id}')
-            self.convertkit_client.tag_user(email, tag_id)
+
+            if tag_request == 'trial_extended':
+                logging.info(f'extending trial for {email}')
+                # increase API key character limit
+                self.redis_connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
+                # tag user on convertkit
+                self.convertkit_client.tag_user_trial_extended(email)
+            else:
+                tag_id = self.convertkit_client.tag_name_map[tag_request]                
+                logging.info(f'tagging {email} with {tag_request} / {tag_id}')
+                self.convertkit_client.tag_user(email, tag_id)
             # blank out tag_request field
             update_instructions = [
                 {'id': record_id, 

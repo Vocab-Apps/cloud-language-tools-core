@@ -145,6 +145,11 @@ class TestAudio(unittest.TestCase):
         source_text = 'hello <break time="200ms"/>world'
         self.verify_service_audio_language(source_text, Service.Watson, AudioLanguage.en_US, 'en-US')
 
+    def test_english_forvo(self):
+        # pytest test_audio.py -k test_english_forvo
+        source_text = 'absolutely'
+        self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.en_US, 'en-US')
+
 
     def test_azure_options(self):
         service = 'Azure'

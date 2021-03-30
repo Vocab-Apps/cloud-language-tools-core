@@ -1,5 +1,6 @@
 import json
 import requests
+import urllib
 import tempfile
 import logging
 import os
@@ -16,6 +17,8 @@ GENDER_MAP = {
     cloudlanguagetools.constants.Gender.Male: 'm',
     cloudlanguagetools.constants.Gender.Female: 'f'
 }
+
+COUNTRY_ANY = 'ANY'
 
 class ForvoVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, language_code, country_code, audio_language, gender):
@@ -56,31 +59,43 @@ class ForvoService(cloudlanguagetools.service.Service):
         return {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'}
 
     def get_tts_audio(self, text, voice_key, options):
-        output_temp_file = tempfile.NamedTemporaryFile()
-        output_temp_filename = output_temp_file.name
-        speech_config = Forvo.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
-        speech_config.set_speech_synthesis_output_format(Forvo.cognitiveservices.speech.SpeechSynthesisOutputFormat["Audio24Khz96KBitRateMonoMp3"])
-        audio_config = Forvo.cognitiveservices.speech.audio.AudioOutputConfig(filename=output_temp_filename)
-        synthesizer = Forvo.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
 
-        pitch = options.get('pitch', 0)
-        pitch_str = f'{pitch:+.0f}Hz'
-        rate = options.get('rate', 1.0)
-        rate_str = f'{rate:0.1f}'
+        language = voice_key['language_code']
 
-        ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-  <voice name="{voice_key['name']}">
-    <prosody pitch="{pitch_str}" rate="{rate_str}" >
-        {text}
-    </prosody>
-  </voice>
-</speak>"""
+        sex_param = ''
+        if 'gender' in voice_key:
+            sex_param = f"/sex/{voice_key['gender']}"
+        
+        country_code = ''
+        if voice_key['country_code'] != COUNTRY_ANY:
+            # user selected a particular country
+            country_code = f"/country/{voice_key['country_code']}"
 
-        # print(ssml_str)
+        username_param = ''
+        if 'preferred_user' in voice_key:
+            username_param = f"/username/{voice_key['preferred_user']}"
 
-        result = synthesizer.start_speaking_ssml(ssml_str)
+        encoded_text = urllib.parse.quote(text)
 
-        return output_temp_file
+        url = f'{self.url_base}/key/{self.key}/format/json/action/word-pronunciations/word/{encoded_text}/language/{language}{sex_param}{username_param}/order/rate-desc/limit/1{country_code}'
+
+        response = requests.get(url, headers=self.get_headers())
+        if response.status_code == 200:
+            data = response.json()
+            items = data['items']
+            if len(items) == 0:
+                error_message = f"Pronunciation not found in Forvo for word [{text}], language={language}, country={voice_key['country_code']}"
+                cloudlanguagetools.errors.RequestError(error_message)
+            audio_url = items[0]['pathmp3']
+            output_temp_file = tempfile.NamedTemporaryFile()
+            output_temp_filename = output_temp_file.name
+            audio_request = requests.get(audio_url, headers=self.get_headers())
+            open(output_temp_filename, 'wb').write(audio_request.content)
+            return output_temp_file
+        else:
+            error_message = f'status_code: {response.status_code} response: {response.content}'
+            raise cloudlanguagetools.errors.RequestError(error_message)
+
 
     def get_language_enum(self, language_id):
         forvo_language_id_map = {
@@ -133,7 +148,7 @@ class ForvoService(cloudlanguagetools.service.Service):
 
             for gender in cloudlanguagetools.constants.Gender:
                 if len(audio_language_list) == 1:
-                    country_code = 'ANY'
+                    country_code = COUNTRY_ANY
                     voices.append(ForvoVoice(language_code, country_code, audio_language_list[0], gender))
                 else:
                     # logging.info(f'multiple audio languages found: {audio_language_list}')

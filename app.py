@@ -161,6 +161,8 @@ class Audio(flask_restful.Resource):
             data = request.json
             audio_temp_file = manager.get_tts_audio(data['text'], data['service'], data['voice_key'], data['options'])
             return send_file(audio_temp_file.name, mimetype='audio/mpeg')
+        except cloudlanguagetools.errors.NotFoundError as err:
+            return {'error': str(err)}, 404
         except cloudlanguagetools.errors.RequestError as err:
             return {'error': str(err)}, 400
 

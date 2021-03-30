@@ -38,6 +38,7 @@ class Service(enum.Enum):
     Watson = enum.auto()
     Naver = enum.auto()
     Amazon = enum.auto()
+    Forvo = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()

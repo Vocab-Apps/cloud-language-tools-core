@@ -11,6 +11,7 @@ import cloudlanguagetools.easypronunciation
 import cloudlanguagetools.watson
 import cloudlanguagetools.naver
 import cloudlanguagetools.amazon
+import cloudlanguagetools.forvo
 
 class ServiceManager():
     def  __init__(self):
@@ -22,6 +23,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.Watson.name] = cloudlanguagetools.watson.WatsonService()
         self.services[cloudlanguagetools.constants.Service.Naver.name] = cloudlanguagetools.naver.NaverService()
         self.services[cloudlanguagetools.constants.Service.Amazon.name] = cloudlanguagetools.amazon.AmazonService()
+        self.services[cloudlanguagetools.constants.Service.Forvo.name] = cloudlanguagetools.forvo.ForvoService()
 
     def configure(self):
         # azure
@@ -55,6 +57,9 @@ class ServiceManager():
         naver_client_secret = os.environ['NAVER_CLIENT_SECRET']
         self.configure_naver(naver_client_id, naver_client_secret)
 
+        # forvo
+        self.configure_forvo()
+
         # for AWS, the boto3 library will read environment variables itself
 
         self.translation_language_list = self.get_translation_language_list()
@@ -74,6 +79,9 @@ class ServiceManager():
 
     def configure_naver(self, naver_client_id, naver_client_secret):
         self.services[cloudlanguagetools.constants.Service.Naver.name].configure(naver_client_id, naver_client_secret)
+
+    def configure_forvo(self):
+        self.services[cloudlanguagetools.constants.Service.Forvo.name].configure()
 
     def get_language_list(self):
         result_dict = {}

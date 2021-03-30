@@ -155,6 +155,11 @@ class TestAudio(unittest.TestCase):
         source_text = 'absolument'
         self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.fr_FR, 'fr-FR')
 
+    def test_french_forvo_not_found(self):
+        # pytest test_audio.py -k test_french_forvo_not_found
+        source_text = 'wordnotfound'
+        self.assertRaises(cloudlanguagetools.errors.NotFoundError, self.verify_service_audio_language, source_text, Service.Forvo, AudioLanguage.fr_FR, 'fr-FR')
+
 
     def test_azure_options(self):
         service = 'Azure'

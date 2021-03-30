@@ -79,7 +79,7 @@ class ForvoService(cloudlanguagetools.service.Service):
 
         url = f'{self.url_base}/key/{self.key}/format/json/action/word-pronunciations/word/{encoded_text}/language/{language}{sex_param}{username_param}/order/rate-desc/limit/1{country_code}'
 
-        response = requests.get(url, headers=self.get_headers())
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code == 200:
             data = response.json()
             items = data['items']
@@ -89,7 +89,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             audio_url = items[0]['pathmp3']
             output_temp_file = tempfile.NamedTemporaryFile()
             output_temp_filename = output_temp_file.name
-            audio_request = requests.get(audio_url, headers=self.get_headers())
+            audio_request = requests.get(audio_url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
             open(output_temp_filename, 'wb').write(audio_request.content)
             return output_temp_file
         else:
@@ -178,7 +178,7 @@ class ForvoService(cloudlanguagetools.service.Service):
         voice_list = []
 
         url = f'{self.url_base}/key/{self.key}/format/json/action/language-list/min-pronunciations/5000'
-        response = requests.get(url, headers=self.get_headers())
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code == 200:
             data = response.json()
             languages = data['items']

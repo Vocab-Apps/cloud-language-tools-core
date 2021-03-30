@@ -114,6 +114,9 @@ class ForvoService(cloudlanguagetools.service.Service):
         country_code_map = {
             cloudlanguagetools.constants.AudioLanguage.fr_FR: 'FRA',
             cloudlanguagetools.constants.AudioLanguage.fr_CH: 'CHE',
+            cloudlanguagetools.constants.AudioLanguage.fr_BE: 'BEL',
+            cloudlanguagetools.constants.AudioLanguage.nl_BE: 'BEL',
+            cloudlanguagetools.constants.AudioLanguage.nl_NL: 'NLD',
             cloudlanguagetools.constants.AudioLanguage.ar_EG: 'EGY',
             cloudlanguagetools.constants.AudioLanguage.ar_SA: 'SAU',
             cloudlanguagetools.constants.AudioLanguage.ar_XA: 'ANY', # any country

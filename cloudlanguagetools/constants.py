@@ -43,6 +43,7 @@ class Service(enum.Enum):
 class Gender(enum.Enum):
     Male = enum.auto()
     Female = enum.auto()
+    Any = enum.auto()
 
 class Language(enum.Enum):
     af = ("Afrikaans")

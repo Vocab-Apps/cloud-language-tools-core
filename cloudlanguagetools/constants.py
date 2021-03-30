@@ -251,6 +251,7 @@ class AudioLanguage(enum.Enum):
     zh_CN = (Language.zh_cn, "Chinese (Mandarin, Simplified)")
     zh_HK = (Language.yue, "Chinese (Cantonese, Traditional)")
     zh_TW = (Language.zh_tw, "Chinese (Taiwanese Mandarin)")
+    fa_IR = (Language.fa, "Persian (Iran)")
 
     def __init__(self, lang, audio_lang_name):
         self.lang = lang

@@ -95,6 +95,32 @@ class ForvoService(cloudlanguagetools.service.Service):
     def get_audio_language_enum(self, language_id):
         pass
 
+    def get_country_code(self, audio_language):
+        country_code_map = {
+            cloudlanguagetools.constants.AudioLanguage.fr_FR: 'FRA',
+            cloudlanguagetools.constants.AudioLanguage.fr_CH: 'CHE',
+            cloudlanguagetools.constants.AudioLanguage.ar_EG: 'EGY',
+            cloudlanguagetools.constants.AudioLanguage.ar_SA: 'SAU',
+            cloudlanguagetools.constants.AudioLanguage.ar_XA: 'ANY', # any country
+            cloudlanguagetools.constants.AudioLanguage.de_AT: 'AUT',
+            cloudlanguagetools.constants.AudioLanguage.de_DE: 'DEU',
+            cloudlanguagetools.constants.AudioLanguage.de_CH: 'CHE',
+            cloudlanguagetools.constants.AudioLanguage.en_AU: 'AUS',
+            cloudlanguagetools.constants.AudioLanguage.en_CA: 'CAN',
+            cloudlanguagetools.constants.AudioLanguage.en_GB: 'GBR',
+            cloudlanguagetools.constants.AudioLanguage.en_IE: 'IRL',
+            cloudlanguagetools.constants.AudioLanguage.en_IN: 'IND',
+            cloudlanguagetools.constants.AudioLanguage.en_US: 'USA',
+            cloudlanguagetools.constants.AudioLanguage.es_ES: 'ESP',
+            cloudlanguagetools.constants.AudioLanguage.es_MX: 'MEX',
+            cloudlanguagetools.constants.AudioLanguage.es_LA: 'ANY', # any country
+            cloudlanguagetools.constants.AudioLanguage.es_US: 'USA', 
+            cloudlanguagetools.constants.AudioLanguage.en_GB_WLS: 'GBR', 
+        }
+        if audio_language not in country_code_map:
+            logging.error(f'no country code found for {audio_language}')
+        return country_code_map[audio_language]
+
     def get_voices_for_language_entry(self, language):
         try:
             language_code = language['code']
@@ -102,7 +128,6 @@ class ForvoService(cloudlanguagetools.service.Service):
             # create as many voices as there are audio languages available
 
             audio_language_list = self.audio_language_map[language_enum]
-            logging.info(f'language: {language_enum} audio_language: {audio_language_list}')
             
             voices = []
 
@@ -110,6 +135,11 @@ class ForvoService(cloudlanguagetools.service.Service):
                 if len(audio_language_list) == 1:
                     country_code = 'ANY'
                     voices.append(ForvoVoice(language_code, country_code, audio_language_list[0], gender))
+                else:
+                    # logging.info(f'multiple audio languages found: {audio_language_list}')
+                    for audio_language in audio_language_list:
+                        country_code = self.get_country_code(audio_language)
+                        voices.append(ForvoVoice(language_code, country_code, audio_language, gender))
 
             return voices
 

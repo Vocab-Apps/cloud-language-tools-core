@@ -159,17 +159,32 @@ class TrialUserUtils():
 
     def update_trial_users_airtable(self):
         user_list_df = self.build_trial_user_list()
-        # print(user_list_df)
+        # print(user_list_df.tail(20))
 
         # first, list records
-        response = requests.get(self.airtable_trial_users_url, headers={'Authorization': f'Bearer {self.airtable_api_key}'})
-        data = response.json()
+        data_available = True
         airtable_records = []
-        for record in data['records']:
-            airtable_records.append({'id': record['id'], 'email': record['fields']['email']})
+        offset = None
+        while data_available:
+            url = self.airtable_trial_users_url
+            if offset != None:
+                url += '?offset=' + offset
+            logging.info(f'querying airtable url {url}')
+            response = requests.get(url, headers={'Authorization': f'Bearer {self.airtable_api_key}'})
+            data = response.json()
+            if 'offset' in data:
+                offset = data['offset']
+            else:
+                data_available = False
+            for record in data['records']:
+                airtable_records.append({'id': record['id'], 'email': record['fields']['email']})
         airtable_records_df = pandas.DataFrame(airtable_records)
 
+        # print(airtable_records_df.sort_values(by='id', ascending=True).tail(20))
+
         combined_df = pandas.merge(airtable_records_df, user_list_df, how='inner', on='email')
+
+        # print(combined_df.sort_values(by='subscribe_time', ascending=True).tail(20))
 
         records = combined_df.to_dict(orient='records')
 

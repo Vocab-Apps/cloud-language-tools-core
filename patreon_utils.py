@@ -2,6 +2,7 @@ import os
 import patreon
 import redisdb
 import argparse
+import logging
 
 def user_authorized(oauth_code):
     client_id = os.environ['PATREON_CLIENT_ID']
@@ -79,24 +80,22 @@ def get_entitled_users(creator_access_token, campaign_id):
     
 
 def list_patreon_user_ids(creator_access_token, campaign_id):
+    logging.info('getting list of patreon entitled users')
     entitled_user_ids = get_entitled_users(creator_access_token, campaign_id)
     redis_connection = redisdb.RedisDb()
+    logging.info('listing all API keys')
     api_key_list = redis_connection.list_api_keys()
-    # retain patreon keys
-    # print(api_key_list[0])
-    # print(entitled_user_ids)
+    
     api_key_list = [x for x in api_key_list if 'type' in x['key_data'] and x['key_data']['type'] == 'patreon']
-    print('keys for entitled users:')
     result = []
     for api_key_entry in api_key_list:
         patreon_user_id = api_key_entry['key_data']['user_id']
         email = api_key_entry['key_data']['email']
-        key_valid = api_key_entry['validity']
         user_entitled = patreon_user_id in entitled_user_ids
-        print(f'user_id: {patreon_user_id} email: {email} key_valid: {key_valid} user_entitled: {user_entitled}')
         if user_entitled:
             result.append(api_key_entry)
-    # print(api_key_list)
+
+    logging.info(f'found {len(result)} entitled patreon users')
 
     return result
 
@@ -106,7 +105,7 @@ def extend_user_key_validity(creator_access_token, campaign_id):
     for api_key_entry in api_key_list:
         patreon_user_id = api_key_entry['key_data']['user_id']
         email = api_key_entry['key_data']['email']
-        print(f'extending validity for {patreon_user_id}, {email}')
+        logging.info(f'extending validity for {patreon_user_id}, {email}')
         redis_connection.get_patreon_user_key(patreon_user_id, email)
 
 
@@ -119,6 +118,10 @@ def list_campaigns(access_token, campaign_id):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                        datefmt='%Y%m%d-%H:%M:%S',
+                        level=logging.INFO)
+
     access_token = os.environ['PATREON_ACCESS_TOKEN']
     campaign_id = os.environ['PATREON_CAMPAIGN_ID']
 

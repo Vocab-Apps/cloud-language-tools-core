@@ -176,18 +176,28 @@ class RedisDb():
     def list_api_keys(self):
         result = []
         pattern = self.build_key(KEY_TYPE_API_KEY, '*')
-        for key in self.r.scan_iter(pattern):
-            key_str = key
-            api_key = key_str.split(':')[-1]
-            validity = self.api_key_valid(api_key)
-            # print(key)
-            key_data = self.r.hgetall(key)
+        redis_api_key_list = []
+
+        logging.info('scanning list of API keys from redis')
+        cursor = '0'
+        while cursor != 0:
+            cursor, keys = self.r.scan(cursor=cursor, match=pattern, count=100)
+            for key in keys:
+                redis_api_key_list.append(key)
+
+        # get key data for all keys
+        logging.info('getting data for all API keys')
+        pipe = self.r.pipeline()
+        for redis_api_key in redis_api_key_list:
+            pipe.hgetall(redis_api_key)
+        hashes = pipe.execute()
+        for redis_api_key, value in zip(redis_api_key_list, hashes):
+            api_key = redis_api_key.split(':')[-1]
             result.append({
                 'api_key': api_key,
-                'key_data': key_data,
-                'validity': validity
+                'key_data': value
             })
-            print(f'{api_key} {key_data}, {validity}')
+
         return result
 
     def list_all_keys(self):

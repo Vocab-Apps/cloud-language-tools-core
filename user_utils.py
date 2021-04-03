@@ -113,6 +113,22 @@ class UserUtils():
                 'request_type': 'translation',
                 'character_cost': (1.0/1000000) * 15
             },            
+            {
+                'service': 'Watson',
+                'request_type': 'translation',
+                'character_cost': (1.0/1000) * 0.02
+            },            
+            {
+                'service': 'Naver',
+                'request_type': 'translation',
+                'character_cost': (1.0/1000000) * 17.70
+            },            
+            # transliteration
+            {
+                'service': 'Azure',
+                'request_type': 'transliteration',
+                'character_cost': (1.0/1000000) * 10
+            },            
 
         ]
 
@@ -120,6 +136,9 @@ class UserUtils():
 
         combined_df = pandas.merge(records_df, cost_table_df, how='left', on=['service', 'request_type'])
         combined_df['cost'] = combined_df['character_cost'] * combined_df['characters']
+
+        # show nas
+        print(combined_df[combined_df['character_cost'].isnull()])
 
         print(combined_df.sort_values(by='cost', ascending=False))
 

@@ -76,7 +76,7 @@ class PatreonUtils():
                     currently_entitled = True
                 user_list.append({
                     'user_id': user_id,
-                    'currently_entitled': currently_entitled
+                    'entitled': currently_entitled
                 })
             try:
                 cursor = api_client.extract_cursor(members_response)

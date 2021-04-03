@@ -34,11 +34,12 @@ class UserUtils():
                 records.append(data)
         data_df = pandas.DataFrame(records)
         data_df['expiration_dt'] = pandas.to_datetime(data_df['expiration'], unit='s')
+        data_df['expiration_str'] = data_df['expiration_dt'].dt.strftime('%Y-%m-%d')
         data_df['key_valid'] = data_df['expiration_dt'] > datetime.datetime.now()
-        data_df = data_df.rename(columns={'user_id': 'patreon_user_id'})
+        data_df = data_df.rename(columns={'user_id': 'patreon_user_id', 'expiration_str': 'api_key_expiration', 'key_valid': 'api_key_valid'})
 
         field_list_map = {
-            'patreon': ['api_key', 'email', 'patreon_user_id', 'expiration_dt', 'key_valid']
+            'patreon': ['api_key', 'email', 'patreon_user_id', 'api_key_valid', 'api_key_expiration']
         }
 
         return data_df[field_list_map[key_type]]
@@ -51,9 +52,9 @@ class UserUtils():
 
     def build_user_data_patreon(self):
         api_key_list_df = self.get_api_key_list_df('patreon')
-        print(api_key_list_df)
+        # print(api_key_list_df)
         patreon_user_df = self.get_patreon_users_df()
-        print(patreon_user_df)
+        # print(patreon_user_df)
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='left', on='patreon_user_id')
 
         return combined_df
@@ -63,7 +64,21 @@ class UserUtils():
 
         # get airtable patreon users table
         airtable_patreon_df = self.airtable_utils.get_patreon_users()
-        print(airtable_patreon_df)
+        airtable_patreon_df = airtable_patreon_df[['record_id', 'User ID']]
+
+        joined_df = pandas.merge(airtable_patreon_df, user_data_df, how='left', left_on='User ID', right_on='patreon_user_id')
+
+        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration']]
+        update_df = update_df.fillna({
+            'api_key': '',
+            'api_key_valid': False,
+            'entitled': False
+        })
+
+        self.airtable_utils.update_patreon_users(update_df)
+
+
+
 
     
 

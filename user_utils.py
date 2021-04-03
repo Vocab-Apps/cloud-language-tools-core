@@ -71,6 +71,7 @@ class UserUtils():
         records_df = pandas.DataFrame(records)
 
         cost_table = [
+            # audio
             {
                 'service': 'Azure',
                 'request_type': 'audio',
@@ -80,7 +81,39 @@ class UserUtils():
                 'service': 'Google',
                 'request_type': 'audio',
                 'character_cost': (1.0/1000000) * 16
+            },
+            {
+                'service': 'Amazon',
+                'request_type': 'audio',
+                'character_cost': (1.0/1000000) * 16
+            },                        
+            {
+                'service': 'Watson',
+                'request_type': 'audio',
+                'character_cost': (1.0/1000) * 0.02
+            },
+            {
+                'service': 'Naver',
+                'request_type': 'audio',
+                'character_cost': (1.0/1000) * 0.089
+            },
+            # translation
+            {
+                'service': 'Azure',
+                'request_type': 'translation',
+                'character_cost': (1.0/1000000) * 10
+            },
+            {
+                'service': 'Google',
+                'request_type': 'translation',
+                'character_cost': (1.0/1000000) * 20
+            },
+            {
+                'service': 'Amazon',
+                'request_type': 'translation',
+                'character_cost': (1.0/1000000) * 15
             },            
+
         ]
 
         cost_table_df = pandas.DataFrame(cost_table)
@@ -88,7 +121,7 @@ class UserUtils():
         combined_df = pandas.merge(records_df, cost_table_df, how='left', on=['service', 'request_type'])
         combined_df['cost'] = combined_df['character_cost'] * combined_df['characters']
 
-        print(combined_df)
+        print(combined_df.sort_values(by='cost', ascending=False))
 
 
     def build_user_data_patreon(self):

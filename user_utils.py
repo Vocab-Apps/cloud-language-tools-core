@@ -84,7 +84,6 @@ class UserUtils():
             'entitled': False
         })
 
-
         self.airtable_utils.update_patreon_users(update_df)
 
 

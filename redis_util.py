@@ -44,7 +44,8 @@ def main():
                'create_extended_trial_key',
                'increase_trial_limit',
                'list_trial_keys',
-               'remove_key']
+               'remove_key',
+               'modify_key_expiration']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--api_key', help='Pass in API key to check validity')
     parser.add_argument('--trial_email', help='email address of trial user')
@@ -92,6 +93,12 @@ def main():
     elif args.action == 'remove_key':
         redis_key = args.redis_key
         connection.remove_key(redis_key)
+    elif args.action == 'modify_key_expiration':
+        # to modify the expiration timestamp of an api key
+        api_key = args.api_key
+        redis_api_key = connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
+        print(f'redis_api_key: {redis_api_key}')
+        connection.r.hset(redis_api_key, 'expiration', 1614785533)
     else:
         print(f'not recognized: {args.action}')
 

@@ -44,26 +44,65 @@ class UserUtils():
 
         return data_df[field_list_map[key_type]]
 
-    def list_patreon_api_key_list(self):
-        api_key_list_df = self.get_api_key_list_df('patreon')
-        # print(api_key_list_df[api_key_list_df['patreon_user_id'] == '64484602'])
-        print(api_key_list_df[api_key_list_df['email'] == 'Dword345@gmail.com'])
-        # pandas.options.display.max_rows = 999
-        # pandas.options.display.max_columns = 12
-        # print(api_key_list_df)
-
-
     def get_patreon_users_df(self):
         user_list = self.patreon_utils.get_patreon_user_ids()
         user_list_df = pandas.DataFrame(user_list)
         user_list_df = user_list_df.rename(columns={'user_id': 'patreon_user_id'})
         return user_list_df
 
+    def get_usage_data(self):
+        scan_pattern = 'usage:user:monthly:202103'
+        usage_entries = self.redis_connection.list_usage(scan_pattern)
+        # clt:usage:user:monthly:202103:Amazon:translation:2m0xzH92tgxb0pk9
+        records = []
+        for entry in usage_entries:
+            usage_key = entry['usage_key']
+            components = usage_key.split(':')
+            api_key = components[-1]
+            service = components[5]
+            request_type = components[6]
+            records.append({
+                'api_key': api_key,
+                'service': service,
+                'request_type': request_type,
+                'characters': int(entry['characters'])
+            })
+
+        records_df = pandas.DataFrame(records)
+
+        cost_table = [
+            {
+                'service': 'Azure',
+                'request_type': 'audio',
+                'character_cost': (1.0/1000000) * 16
+            },
+            {
+                'service': 'Google',
+                'request_type': 'audio',
+                'character_cost': (1.0/1000000) * 16
+            },            
+        ]
+
+        cost_table_df = pandas.DataFrame(cost_table)
+
+        combined_df = pandas.merge(records_df, cost_table_df, how='left', on=['service', 'request_type'])
+        combined_df['cost'] = combined_df['character_cost'] * combined_df['characters']
+
+        print(combined_df)
+
+
     def build_user_data_patreon(self):
+        # api keys
         api_key_list_df = self.get_api_key_list_df('patreon')
         # print(api_key_list_df)
+        
+        # patreon data
         patreon_user_df = self.get_patreon_users_df()
         # print(patreon_user_df)
+
+        # usage data
+        usage_data_df = self.get_usage_data()
+
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
 
         return combined_df
@@ -99,13 +138,13 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='User Utils')
     choices = [
-        'list_patreon_api_key_list',
-        'update_airtable_patreon'
+        'update_airtable_patreon',
+        'usage_data'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     args = parser.parse_args()
 
     if args.action == 'update_airtable_patreon':
         user_utils.update_airtable_patreon()
-    elif args.action == 'list_patreon_api_key_list':
-        user_utils.list_patreon_api_key_list()
+    elif args.action == 'usage_data':
+        user_utils.get_usage_data()

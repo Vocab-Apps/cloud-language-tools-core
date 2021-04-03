@@ -291,17 +291,24 @@ class RedisDb():
             pattern = self.build_key(KEY_TYPE_USAGE, '*')
         else:
             pattern = self.build_key(scan_pattern, '*')
-        # print(pattern)
+        
         key_list = []
         cursor = '0'
         while cursor != 0:
             cursor, keys = self.r.scan(cursor=cursor, match=pattern, count=100)
-            pipe = self.r.pipeline()
-            for key in keys:
-                pipe.hgetall(key)
-            hashes = pipe.execute()
-            for key, value in zip(keys, hashes):
-                print(f'{key}: {value}')
+            key_list.extend(keys)
+        pipe = self.r.pipeline()
+        for key in key_list:
+            pipe.hgetall(key)
+        hashes = pipe.execute()
+        usage_entries = []
+        for key, hash_data in zip(key_list, hashes):
+            usage_entry = {
+                'usage_key': key
+            }
+            usage_entry.update(hash_data)
+            usage_entries.append(usage_entry)
+        return usage_entries
         
     def list_trial_users(self):
         pattern = self.build_key(KEY_TYPE_TRIAL_USER, '*')

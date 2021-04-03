@@ -3,6 +3,7 @@ import logging
 import datetime
 import argparse
 
+import quotas
 import redisdb
 import airtable_utils
 import patreon_utils
@@ -70,77 +71,18 @@ class UserUtils():
 
         records_df = pandas.DataFrame(records)
 
-        cost_table = [
-            # audio
-            {
-                'service': 'Azure',
-                'request_type': 'audio',
-                'character_cost': (1.0/1000000) * 16
-            },
-            {
-                'service': 'Google',
-                'request_type': 'audio',
-                'character_cost': (1.0/1000000) * 16
-            },
-            {
-                'service': 'Amazon',
-                'request_type': 'audio',
-                'character_cost': (1.0/1000000) * 16
-            },                        
-            {
-                'service': 'Watson',
-                'request_type': 'audio',
-                'character_cost': (1.0/1000) * 0.02
-            },
-            {
-                'service': 'Naver',
-                'request_type': 'audio',
-                'character_cost': (1.0/1000) * 0.089
-            },
-            # translation
-            {
-                'service': 'Azure',
-                'request_type': 'translation',
-                'character_cost': (1.0/1000000) * 10
-            },
-            {
-                'service': 'Google',
-                'request_type': 'translation',
-                'character_cost': (1.0/1000000) * 20
-            },
-            {
-                'service': 'Amazon',
-                'request_type': 'translation',
-                'character_cost': (1.0/1000000) * 15
-            },            
-            {
-                'service': 'Watson',
-                'request_type': 'translation',
-                'character_cost': (1.0/1000) * 0.02
-            },            
-            {
-                'service': 'Naver',
-                'request_type': 'translation',
-                'character_cost': (1.0/1000000) * 17.70
-            },            
-            # transliteration
-            {
-                'service': 'Azure',
-                'request_type': 'transliteration',
-                'character_cost': (1.0/1000000) * 10
-            },            
-
-        ]
-
-        cost_table_df = pandas.DataFrame(cost_table)
+        cost_table_df = pandas.DataFrame(quotas.COST_TABLE)
 
         combined_df = pandas.merge(records_df, cost_table_df, how='left', on=['service', 'request_type'])
         combined_df['cost'] = combined_df['character_cost'] * combined_df['characters']
 
         # show nas
-        print(combined_df[combined_df['character_cost'].isnull()])
+        # print(combined_df[combined_df['character_cost'].isnull()])
 
-        print(combined_df.sort_values(by='cost', ascending=False))
+        # print(combined_df.sort_values(by='cost', ascending=False))
+
+        grouped_df = combined_df.groupby('api_key').agg({'cost': 'sum'}).reset_index()
+        return grouped_df
 
 
     def build_user_data_patreon(self):
@@ -154,8 +96,10 @@ class UserUtils():
 
         # usage data
         usage_data_df = self.get_usage_data()
+        usage_data_df = usage_data_df.rename(columns={'cost': 'monthly_cost'})
 
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
+        combined_df = pandas.merge(combined_df, usage_data_df, how='left', on='api_key')
 
         return combined_df
 
@@ -168,7 +112,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_patreon_df, user_data_df, how='left', left_on='User ID', right_on='patreon_user_id')
 
-        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration']]
+        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost']]
         update_df = update_df.fillna({
             'api_key': '',
             'api_key_valid': False,

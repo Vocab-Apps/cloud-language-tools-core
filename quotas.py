@@ -8,6 +8,68 @@ NAVER_USER_DAILY_CHAR_LIMIT = 30000
 TRIAL_USER_CHARACTER_LIMIT = 10000
 TRIAL_EXTENDED_USER_CHARACTER_LIMIT = 100000
 
+COST_TABLE = [
+    # audio
+    {
+        'service': 'Azure',
+        'request_type': 'audio',
+        'character_cost': (1.0/1000000) * 16
+    },
+    {
+        'service': 'Google',
+        'request_type': 'audio',
+        'character_cost': (1.0/1000000) * 16
+    },
+    {
+        'service': 'Amazon',
+        'request_type': 'audio',
+        'character_cost': (1.0/1000000) * 16
+    },                        
+    {
+        'service': 'Watson',
+        'request_type': 'audio',
+        'character_cost': (1.0/1000) * 0.02
+    },
+    {
+        'service': 'Naver',
+        'request_type': 'audio',
+        'character_cost': (1.0/1000) * 0.089
+    },
+    # translation
+    {
+        'service': 'Azure',
+        'request_type': 'translation',
+        'character_cost': (1.0/1000000) * 10
+    },
+    {
+        'service': 'Google',
+        'request_type': 'translation',
+        'character_cost': (1.0/1000000) * 20
+    },
+    {
+        'service': 'Amazon',
+        'request_type': 'translation',
+        'character_cost': (1.0/1000000) * 15
+    },            
+    {
+        'service': 'Watson',
+        'request_type': 'translation',
+        'character_cost': (1.0/1000) * 0.02
+    },            
+    {
+        'service': 'Naver',
+        'request_type': 'translation',
+        'character_cost': (1.0/1000000) * 17.70
+    },            
+    # transliteration
+    {
+        'service': 'Azure',
+        'request_type': 'transliteration',
+        'character_cost': (1.0/1000000) * 10
+    },            
+
+]
+
 class UsageSlice():
     def __init__(self, 
                 request_type: cloudlanguagetools.constants.RequestType, 

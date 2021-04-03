@@ -44,6 +44,15 @@ class UserUtils():
 
         return data_df[field_list_map[key_type]]
 
+    def list_patreon_api_key_list(self):
+        api_key_list_df = self.get_api_key_list_df('patreon')
+        # print(api_key_list_df[api_key_list_df['patreon_user_id'] == '64484602'])
+        print(api_key_list_df[api_key_list_df['email'] == 'Dword345@gmail.com'])
+        # pandas.options.display.max_rows = 999
+        # pandas.options.display.max_columns = 12
+        # print(api_key_list_df)
+
+
     def get_patreon_users_df(self):
         user_list = self.patreon_utils.get_patreon_user_ids()
         user_list_df = pandas.DataFrame(user_list)
@@ -55,7 +64,7 @@ class UserUtils():
         # print(api_key_list_df)
         patreon_user_df = self.get_patreon_users_df()
         # print(patreon_user_df)
-        combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='left', on='patreon_user_id')
+        combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
 
         return combined_df
 
@@ -89,9 +98,14 @@ if __name__ == '__main__':
     user_utils = UserUtils()
 
     parser = argparse.ArgumentParser(description='User Utils')
-    choices = ['update_airtable_patreon']
+    choices = [
+        'list_patreon_api_key_list',
+        'update_airtable_patreon'
+    ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     args = parser.parse_args()
 
     if args.action == 'update_airtable_patreon':
         user_utils.update_airtable_patreon()
+    elif args.action == 'list_patreon_api_key_list':
+        user_utils.list_patreon_api_key_list()

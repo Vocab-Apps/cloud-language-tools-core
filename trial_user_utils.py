@@ -94,63 +94,6 @@ class TrialUserUtils():
 
         return combined_df
 
-    def get_inactive_users(self):
-        user_list_df = self.build_trial_user_list()
-
-        cutoff_time = datetime.datetime.now() - datetime.timedelta(days=3)
-        inactive_users = user_list_df[(user_list_df['characters'] == 0) & (user_list_df['subscribe_time'] < cutoff_time)]
-
-        subscriber_id_list = list(inactive_users['subscriber_id'])
-        tag_entries = []
-        for subscriber_id in subscriber_id_list:
-            tag_list = convertkit_client.list_tags(subscriber_id)
-            for tag_entry in tag_list:
-                tag_entry['subscriber_id'] = subscriber_id
-                tag_entries.append(tag_entry)
-        tag_entries_df = pandas.DataFrame(tag_entries)
-
-        tag_entries_inactive_df = tag_entries_df[tag_entries_df['id'] == convertkit_client.tag_id_trial_inactive]
-        tag_entries_inactive_df = tag_entries_inactive_df.rename(columns={'id': 'tag_id', 'name': 'tag_name'})
-        tag_entries_inactive_df['tagged_inactive'] = True
-        tag_entries_inactive_df = tag_entries_inactive_df[['subscriber_id', 'tagged_inactive']]
-
-        combined_df = pandas.merge(inactive_users, tag_entries_inactive_df, how='left', on='subscriber_id')
-        combined_df['tagged_inactive'] = combined_df['tagged_inactive'].fillna(False)
-
-        return combined_df
-
-    def get_upgrade_users_inactive(self):
-        # users who didn't take advantage of their upgraded quota
-
-        user_list_df = self.build_trial_user_list()
-        subset = user_list_df[(user_list_df['characters'] < quotas.TRIAL_USER_CHARACTER_LIMIT) & (user_list_df['character_limit'] == quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)]
-
-        print(subset)
-
-
-    def perform_upgrade_eligible_users(convertkit_client, redis_connection):
-        eligible_users_df = get_upgrade_eligible_users(convertkit_client, redis_connection)
-
-        for index, row in eligible_users_df.iterrows():
-            email = row['email']
-            logging.info(f'eligible user: {email}')
-
-            # increase API key character limit
-            redis_connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
-            # tag user on convertkit
-            convertkit_client.tag_user_trial_extended(email)
-
-    def process_inactive_users(convertkit_client, redis_connection):
-        inactive_users = get_inactive_users(convertkit_client, redis_connection)
-
-        not_tagged_df = inactive_users[inactive_users['tagged_inactive'] == False]
-        for index, row in not_tagged_df.iterrows():
-            email = row['email']
-            logging.info(f'tagging {email} inactive')
-            convertkit_client.tag_user_trial_inactive(email)
-
-        logging.info('done processing inactive users')
-
     def get_airtable_update_headers(self):
         headers = {
             'Authorization': f'Bearer {self.airtable_api_key}',
@@ -159,7 +102,6 @@ class TrialUserUtils():
 
     def update_trial_users_airtable(self):
         user_list_df = self.build_trial_user_list()
-        # print(user_list_df.tail(20))
 
         # first, list records
         data_available = True
@@ -180,15 +122,9 @@ class TrialUserUtils():
                 airtable_records.append({'id': record['id'], 'email': record['fields']['email']})
         airtable_records_df = pandas.DataFrame(airtable_records)
 
-        # print(airtable_records_df.sort_values(by='id', ascending=True).tail(20))
-
         combined_df = pandas.merge(airtable_records_df, user_list_df, how='inner', on='email')
 
-        # print(combined_df.sort_values(by='subscribe_time', ascending=True).tail(20))
-
         records = combined_df.to_dict(orient='records')
-
-        # print(records)
 
         update_instructions = [
             {'id': x['id'], 
@@ -271,13 +207,7 @@ def main():
                         level=logging.INFO)
 
     parser = argparse.ArgumentParser(description='Utilities to manager trial users')
-    choices = ['list_trial_users', 
-    'list_eligible_upgrade_users', 
-    'perform_eligible_upgrade_users', 
-    'list_inactive_users',
-    'process_inactive_users',
-    'list_upgrade_users_inactive',
-    'list_extended_users_maxed_out',
+    choices = [
     'update_trial_users_airtable',
     'perform_airtable_tag_requests',
     'update_airtable'
@@ -290,25 +220,7 @@ def main():
     
     trial_users_utils = TrialUserUtils()
 
-    if args.action == 'list_trial_users':
-        user_list_df = trial_users_utils.build_trial_user_list()
-        print(user_list_df.tail(50))
-    elif args.action == 'list_eligible_upgrade_users':
-        eligible_df = trial_users_utils.get_upgrade_eligible_users()
-        print(eligible_df)
-    elif args.action == 'list_inactive_users':
-        inactive_df = trial_users_utils.get_inactive_users()
-        print(inactive_df)
-    elif args.action == 'perform_eligible_upgrade_users':
-        trial_users_utils.perform_upgrade_eligible_users()
-    elif args.action == 'process_inactive_users':
-        trial_users_utils.process_inactive_users()
-    elif args.action == 'list_upgrade_users_inactive':
-        trial_users_utils.get_upgrade_users_inactive()
-    elif args.action == 'list_extended_users_maxed_out':
-        users_df = trial_users_utils.get_extended_users_maxed_out()
-        print(users_df)
-    elif args.action == 'update_trial_users_airtable':
+    if args.action == 'update_trial_users_airtable':
         trial_users_utils.update_trial_users_airtable()
     elif args.action == 'perform_airtable_tag_requests':
         trial_users_utils.perform_airtable_tag_requests()

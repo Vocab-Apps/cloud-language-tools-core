@@ -50,6 +50,7 @@ class RedisDb():
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')
 
+    # prod workflow (app.py/patreon_key)
     def add_patreon_api_key(self, api_key, user_id, email):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
@@ -105,7 +106,7 @@ class RedisDb():
             logging.info(f'increased character limit to {character_limit} for {email} {api_key}')
 
 
-
+    # prod workflow (app.py/patreon_key)
     def get_patreon_user_key(self, user_id, email):
         logging.info(f'patreon user: {user_id}, email: {email}')
 

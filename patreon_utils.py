@@ -3,7 +3,9 @@ import patreon
 import redisdb
 import argparse
 import logging
+import pprint
 
+# prod workflow (app.py/PatreonKey)
 def user_authorized(oauth_code):
     client_id = os.environ['PATREON_CLIENT_ID']
     client_secret = os.environ['PATREON_CLIENT_SECRET']
@@ -54,66 +56,99 @@ def user_authorized(oauth_code):
 
     return {'authorized': user_authorized, 'user_id': user_id, 'email': user_email}
 
-def get_entitled_users(creator_access_token, campaign_id):
-    api_client = patreon.API(creator_access_token)
-    memberships = []
-    entitled_members = []
-    cursor = None
-    while True:
-        members_response = api_client.get_campaigns_by_id_members(campaign_id, 900, cursor=cursor, includes=['user', 'currently_entitled_tiers'], fields={'user': ['email', 'full_name']})
-        # print(members_response.json_data)
-        for member in members_response.json_data['data']:
-            if len(member['relationships']['currently_entitled_tiers']['data']) > 0:
-                entitled_members.append(member)
-        try:
-            cursor = api_client.extract_cursor(members_response)
-            if not cursor:
+class PatreonUtils():
+    def __init__(self):
+        self.creator_access_token = os.environ['PATREON_ACCESS_TOKEN']
+        self.campaign_id = os.environ['PATREON_CAMPAIGN_ID']
+
+    def get_patreon_user_ids(self):
+        api_client = patreon.API(self.creator_access_token)
+        cursor = None
+        user_list = []
+        while True:
+            members_response = api_client.get_campaigns_by_id_members(self.campaign_id, 900, cursor=cursor, includes=['user', 'currently_entitled_tiers'], fields={'user': ['email', 'full_name']})
+            # pprint.pprint(members_response.json_data)
+            for member in members_response.json_data['data']:
+                # pprint.pprint(member)
+                user_id = member['relationships']['user']['data']['id']
+                currently_entitled = False
+                if len(member['relationships']['currently_entitled_tiers']['data']) > 0:
+                    currently_entitled = True
+                user_list.append({
+                    'user_id': user_id,
+                    'currently_entitled': currently_entitled
+                })
+            try:
+                cursor = api_client.extract_cursor(members_response)
+                if not cursor:
+                    break
+            except:
+                # no more data
                 break
-        except:
-            # no more data
-            break
 
-    # print(entitled_members[0])
-    entitled_user_ids = [x['relationships']['user']['data']['id'] for x in entitled_members]
-    print(f'number of currently entitled users: {len(entitled_user_ids)}')    
-    return entitled_user_ids
-    
+        return user_list
 
-def list_patreon_user_ids(creator_access_token, campaign_id):
-    logging.info('getting list of patreon entitled users')
-    entitled_user_ids = get_entitled_users(creator_access_token, campaign_id)
-    redis_connection = redisdb.RedisDb()
-    logging.info('listing all API keys')
-    api_key_list = redis_connection.list_api_keys()
-    
-    api_key_list = [x for x in api_key_list if 'type' in x['key_data'] and x['key_data']['type'] == 'patreon']
-    result = []
-    for api_key_entry in api_key_list:
-        patreon_user_id = api_key_entry['key_data']['user_id']
-        email = api_key_entry['key_data']['email']
-        user_entitled = patreon_user_id in entitled_user_ids
-        if user_entitled:
-            result.append(api_key_entry)
+    def get_entitled_users(self):
+        api_client = patreon.API(self.creator_access_token)
+        memberships = []
+        entitled_members = []
+        cursor = None
+        while True:
+            members_response = api_client.get_campaigns_by_id_members(campaign_id, 900, cursor=cursor, includes=['user', 'currently_entitled_tiers'], fields={'user': ['email', 'full_name']})
+            # print(members_response.json_data)
+            for member in members_response.json_data['data']:
+                if len(member['relationships']['currently_entitled_tiers']['data']) > 0:
+                    entitled_members.append(member)
+            try:
+                cursor = api_client.extract_cursor(members_response)
+                if not cursor:
+                    break
+            except:
+                # no more data
+                break
 
-    logging.info(f'found {len(result)} entitled patreon users')
+        # print(entitled_members[0])
+        entitled_user_ids = [x['relationships']['user']['data']['id'] for x in entitled_members]
+        print(f'number of currently entitled users: {len(entitled_user_ids)}')    
+        return entitled_user_ids
+        
 
-    return result
+    def list_patreon_user_ids(creator_access_token, campaign_id):
+        logging.info('getting list of patreon entitled users')
+        entitled_user_ids = get_entitled_users(creator_access_token, campaign_id)
+        redis_connection = redisdb.RedisDb()
+        logging.info('listing all API keys')
+        api_key_list = redis_connection.list_api_keys()
+        
+        api_key_list = [x for x in api_key_list if 'type' in x['key_data'] and x['key_data']['type'] == 'patreon']
+        result = []
+        for api_key_entry in api_key_list:
+            patreon_user_id = api_key_entry['key_data']['user_id']
+            email = api_key_entry['key_data']['email']
+            user_entitled = patreon_user_id in entitled_user_ids
+            if user_entitled:
+                result.append(api_key_entry)
 
-def extend_user_key_validity(creator_access_token, campaign_id):
-    api_key_list = list_patreon_user_ids(creator_access_token, campaign_id)
-    redis_connection = redisdb.RedisDb()
-    for api_key_entry in api_key_list:
-        patreon_user_id = api_key_entry['key_data']['user_id']
-        email = api_key_entry['key_data']['email']
-        logging.info(f'extending validity for {patreon_user_id}, {email}')
-        redis_connection.get_patreon_user_key(patreon_user_id, email)
+        logging.info(f'found {len(result)} entitled patreon users')
+
+        return result
+
+    def extend_user_key_validity(creator_access_token, campaign_id):
+        api_key_list = list_patreon_user_ids(creator_access_token, campaign_id)
+        redis_connection = redisdb.RedisDb()
+        for api_key_entry in api_key_list:
+            patreon_user_id = api_key_entry['key_data']['user_id']
+            email = api_key_entry['key_data']['email']
+            logging.info(f'extending validity for {patreon_user_id}, {email}')
+            redis_connection.get_patreon_user_key(patreon_user_id, email)
 
 
-def list_campaigns(access_token, campaign_id):
-    api_client = patreon.API(access_token)
-    # data = api_client.get_campaigns(10)
-    data = api_client.get_campaigns_by_id_members(campaign_id, 10, includes=['user', 'currently_entitled_tiers'])
-    print(data.json_data)
+
+    def list_campaigns(access_token, campaign_id):
+        api_client = patreon.API(access_token)
+        # data = api_client.get_campaigns(10)
+        data = api_client.get_campaigns_by_id_members(campaign_id, 10, includes=['user', 'currently_entitled_tiers'])
+        print(data.json_data)
 
 
 
@@ -126,7 +161,7 @@ if __name__ == '__main__':
     campaign_id = os.environ['PATREON_CAMPAIGN_ID']
 
     parser = argparse.ArgumentParser(description='Patreon Utils')
-    choices = ['list_patreon_entitled_users', 'extend_key_validity']
+    choices = ['list_patreon_entitled_users', 'extend_key_validity', 'find_cancelations']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     args = parser.parse_args()
 
@@ -134,6 +169,8 @@ if __name__ == '__main__':
         list_patreon_user_ids(access_token, campaign_id)
     elif args.action == 'extend_key_validity':
         extend_user_key_validity(access_token, campaign_id)
+    elif args.action == 'find_cancelations':
+        find_cancelations(access_token, campaign_id)
 
     
 

@@ -43,12 +43,14 @@ def main():
                'create_trial_key', 
                'create_extended_trial_key',
                'increase_trial_limit',
-               'list_trial_keys']
+               'list_trial_keys',
+               'remove_key']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--api_key', help='Pass in API key to check validity')
     parser.add_argument('--trial_email', help='email address of trial user')
     parser.add_argument('--pattern', help='Use a special pattern for key iteration')
     parser.add_argument('--dbnum', help='connect to a different db number', type=int)
+    parser.add_argument('--redis_key', help='redis key to operate on')
 
 
     args = parser.parse_args()
@@ -87,6 +89,9 @@ def main():
         connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
     elif args.action == 'clear_db':
         connection.clear_db()
+    elif args.action == 'remove_key':
+        redis_key = args.redis_key
+        connection.remove_key(redis_key)
     else:
         print(f'not recognized: {args.action}')
 

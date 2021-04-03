@@ -356,6 +356,12 @@ class RedisDb():
             # print(f'api_key: {api_key} characters: {characters}')
             entries.append({'api_key': api_key, 'characters': characters})
         return entries
+    
+    def remove_key(self, redis_key):
+        logging.warn(f'WARNING about to remove key: {redis_key}')
+        time.sleep(15)
+        self.r.delete(redis_key)
+
 
     def clear_db(self, wait=True):
         if wait:

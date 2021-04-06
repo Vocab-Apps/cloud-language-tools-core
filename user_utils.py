@@ -53,13 +53,13 @@ class UserUtils():
 
     def get_monthly_usage_data(self):
         pattern = 'usage:user:monthly:' + datetime.datetime.now().strftime("%Y%m")
-        return self.get_usage_data(pattern, 'monthly_cost')
+        return self.get_usage_data(pattern, 'monthly_cost', 'monthly_chars')
 
     def get_daily_usage_data(self):
         pattern = 'usage:user:daily:' + datetime.datetime.now().strftime("%Y%m%d")
-        return self.get_usage_data(pattern, 'daily_cost')
+        return self.get_usage_data(pattern, 'daily_cost', 'daily_chars')
 
-    def get_usage_data(self, usage_key_pattern, cost_field_name):
+    def get_usage_data(self, usage_key_pattern, cost_field_name, characters_field_name):
         usage_entries = self.redis_connection.list_usage(usage_key_pattern)
         # clt:usage:user:monthly:202103:Amazon:translation:2m0xzH92tgxb0pk9
         records = []
@@ -82,8 +82,9 @@ class UserUtils():
 
         combined_df = pandas.merge(records_df, cost_table_df, how='left', on=['service', 'request_type'])
         combined_df[cost_field_name] = combined_df['character_cost'] * combined_df['characters']
+        combined_df = combined_df.rename(columns={'characters': characters_field_name})
 
-        grouped_df = combined_df.groupby('api_key').agg({cost_field_name: 'sum'}).reset_index()
+        grouped_df = combined_df.groupby('api_key').agg({cost_field_name: 'sum', characters_field_name: 'sum'}).reset_index()
         return grouped_df
 
 
@@ -98,11 +99,9 @@ class UserUtils():
 
         # usage data
         monthly_usage_data_df = self.get_monthly_usage_data()
-        daily_usage_data_df = self.get_daily_usage_data()
 
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
         combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
-        combined_df = pandas.merge(combined_df, daily_usage_data_df, how='left', on='api_key')
 
         return combined_df
 
@@ -115,7 +114,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_patreon_df, user_data_df, how='left', left_on='User ID', right_on='patreon_user_id')
 
-        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'daily_cost']]
+        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars']]
         update_df = update_df.fillna({
             'api_key': '',
             'api_key_valid': False,

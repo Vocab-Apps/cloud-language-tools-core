@@ -55,6 +55,11 @@ class UserUtils():
         pattern = 'usage:user:monthly:' + datetime.datetime.now().strftime("%Y%m")
         return self.get_usage_data(pattern, 'monthly_cost', 'monthly_chars')
 
+    def get_prev_monthly_usage_data(self):
+        prev_month_datetime = datetime.datetime.now() + datetime.timedelta(days=-31)
+        pattern = 'usage:user:monthly:' + prev_month_datetime.strftime("%Y%m")
+        return self.get_usage_data(pattern, 'prev_monthly_cost', 'prev_monthly_chars')
+
     def get_daily_usage_data(self):
         pattern = 'usage:user:daily:' + datetime.datetime.now().strftime("%Y%m%d")
         return self.get_usage_data(pattern, 'daily_cost', 'daily_chars')
@@ -99,9 +104,11 @@ class UserUtils():
 
         # usage data
         monthly_usage_data_df = self.get_monthly_usage_data()
+        prev_monthly_usage_data_df = self.get_prev_monthly_usage_data()
 
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
         combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
+        combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
 
         return combined_df
 
@@ -114,7 +121,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_patreon_df, user_data_df, how='left', left_on='User ID', right_on='patreon_user_id')
 
-        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars']]
+        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars']]
         update_df = update_df.fillna({
             'api_key': '',
             'api_key_valid': False,

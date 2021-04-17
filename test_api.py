@@ -170,6 +170,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(data['error'], 'API Key expired')
 
     def test_translate_all(self):
+        # pytest test_api.py -k test_translate_all
         source_text = '成本很低'
         response = self.client.post('/translate_all', json={
             'text': source_text,
@@ -178,12 +179,10 @@ class ApiTests(unittest.TestCase):
         }, headers={'api_key': self.api_key})
 
         data = json.loads(response.data)
-        self.assertEqual({
-            'Amazon': 'Très faible coût',
-            'Google': 'À bas prix',
-            'Azure': 'Le coût est faible',
-            'Watson': 'Le coût est très bas.'
-        }, data)
+        self.assertTrue(data['Azure'] == 'Le coût est faible' or data['Azure'] == 'Le coût est très faible')
+        self.assertEqual(data['Amazon'], 'Très faible coût')
+        self.assertEqual(data['Google'], 'À bas prix')
+        self.assertEqual(data['Watson'], 'Le coût est très bas.')
 
     def test_translate_error(self):
         source_text = 'Je ne suis pas intéressé.'

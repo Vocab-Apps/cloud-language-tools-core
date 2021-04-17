@@ -1,3 +1,5 @@
+import sys
+import logging
 import unittest
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
@@ -12,6 +14,11 @@ def get_manager():
 
 class TestTranslation(unittest.TestCase):
     def setUp(self):
+        logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                            datefmt='%Y%m%d-%H:%M:%S',
+                            stream=sys.stdout,
+                            level=logging.DEBUG)
+
         self.manager = get_manager()
         self.language_list = self.manager.get_language_list()
         self.translation_language_list = self.manager.get_translation_language_list_json()
@@ -90,6 +97,9 @@ class TestTranslation(unittest.TestCase):
         self.assertRaises(cloudlanguagetools.errors.RequestError, self.translate_text, Service.Naver, 'Veuillez parler lentement.', Language.fr, Language.th, 'Please speak slowly.')
 
     def test_translate_all(self):
+        # pytest test_translation.py -rPP -k test_translate_all
+        # pytest test_translation.py --capture=no --log-cli-level=INFO -k test_translate_all
+
         source_text = '成本很低'
         from_language = Language.zh_cn.name
         to_language =  Language.fr.name
@@ -97,7 +107,7 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue('Azure' in result)
         self.assertTrue('Google' in result)
         self.assertTrue('Watson' in result)
-        self.assertEqual(result['Azure'], 'Le coût est faible')
+        self.assertTrue(result['Azure'] == 'Le coût est faible' or result['Azure'] == 'Le coût est très faible')
         self.assertEqual(result['Google'], 'À bas prix')
         self.assertEqual(result['Watson'], 'Le coût est très bas.')
 

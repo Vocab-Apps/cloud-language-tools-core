@@ -2,6 +2,7 @@ import os
 import base64
 import tempfile
 import logging
+import timeit
 import cloudlanguagetools.constants
 import cloudlanguagetools.errors
 import cloudlanguagetools.azure
@@ -132,11 +133,13 @@ class ServiceManager():
         return service.get_translation(text, from_language_key, to_language_key)
 
     def get_all_translations(self, text, from_language, to_language):
+        global_starttime = timeit.default_timer()
         result = {}
         for service_name, service in self.services.items():
             # locate from language key
             from_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == from_language]
             if len(from_language_entries) == 1:
+                starttime = timeit.default_timer()
                 # this service provides the "from" language in translation list
                 from_language_id = from_language_entries[0].get_language_id()
                 # locate to language key
@@ -147,6 +150,10 @@ class ServiceManager():
                     result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
                 except cloudlanguagetools.errors.RequestError:
                     pass # don't do anything
+                time_diff = timeit.default_timer() - starttime
+                logging.info(f'get_all_translation processing time for {service_name}: {time_diff:.1f}')
+        global_time_diff = timeit.default_timer() - global_starttime
+        logging.info(f'get_all_translation total processing time: {global_time_diff:.1f}')
         return result
 
     def get_transliteration(self, text, service, transliteration_key):

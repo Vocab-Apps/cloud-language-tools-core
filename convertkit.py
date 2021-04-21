@@ -37,7 +37,7 @@ class ConvertKit():
             logging.error(f'could not tag user: {response.content}')
 
     def tag_user_patreon_api_ready(self, email, api_key):
-        url = f'https://api.convertkit.com/v3/tags/{self.self.tag_id_patreon_api_ready}/subscribe'
+        url = f'https://api.convertkit.com/v3/tags/{self.tag_id_patreon_api_ready}/subscribe'
         response = requests.post(url, json={
                 "api_key": self.api_key,
                 "email": email,

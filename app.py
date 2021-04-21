@@ -230,6 +230,20 @@ class ConvertKitRequestTrialKey(flask_restful.Resource):
 
         logging.info(f'trial key created for {email_address}')
 
+class ConvertKitRequestPatreonKey(flask_restful.Resource):
+    def post(self):
+        data = request.json
+        email_address = data['subscriber']['email_address']
+        patreon_id = data['subscriber']['fields']['patreon_user_id']
+        logging.info(f'ConvertKitRequestPatreonKey, email: {email_address}, patreon_id: {patreon_id}')
+
+        # create api key for this subscriber
+        api_key = redis_connection.get_patreon_user_key(patreon_id, email_address)
+
+        convertkit_client.tag_user_patreon_api_ready(email_address, api_key)
+
+        logging.info(f'patreon key created for {email_address}: {api_key}')
+
 
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
@@ -247,6 +261,7 @@ api.add_resource(PatreonKeyRequest, '/request_patreon_key')
 
 # convertkit webhooks
 api.add_resource(ConvertKitRequestTrialKey, '/convertkit_subscriber_request_trial_key')
+api.add_resource(ConvertKitRequestPatreonKey, '/convertkit_subscriber_request_patreon_key')
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')

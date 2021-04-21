@@ -11,6 +11,7 @@ class ConvertKit():
 
         self.tag_id_api_requested = int(os.environ['CONVERTKIT_TRIAL_API_KEY_REQUESTED_TAG'])
         self.tag_id_api_ready = int(os.environ['CONVERTKIT_TRIAL_API_KEY_READY_TAG'])
+        self.tag_id_patreon_api_ready = int(os.environ['CONVERTKIT_PATREON_API_KEY_READY_TAG'])
         self.tag_id_trial_extended = int(os.environ['CONVERTKIT_TRIAL_EXTENDED_TAG'])
         self.tag_id_trial_inactive = int(os.environ['CONVERTKIT_TRIAL_INACTIVE_TAG'])
         self.tag_id_trial_user = int(os.environ['CONVERTKIT_TRIAL_USER_TAG'])
@@ -34,6 +35,20 @@ class ConvertKit():
         }, timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code != 200:
             logging.error(f'could not tag user: {response.content}')
+
+    def tag_user_patreon_api_ready(self, email, api_key):
+        url = f'https://api.convertkit.com/v3/tags/{self.self.tag_id_patreon_api_ready}/subscribe'
+        response = requests.post(url, json={
+                "api_key": self.api_key,
+                "email": email,
+                'fields' : {
+                    'patreon_api_key': api_key
+                }
+        }, timeout=cloudlanguagetools.constants.RequestTimeout)
+        if response.status_code != 200:
+            logging.error(f'could not tag user: {response.content}')
+
+
 
     def tag_user(self, email, tag_id):
         url = f'https://api.convertkit.com/v3/tags/{tag_id}/subscribe'

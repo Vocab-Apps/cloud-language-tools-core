@@ -6,6 +6,19 @@ import cloudlanguagetools.constants
 
 class TestQuotas(unittest.TestCase):
 
+    def test_adjust_character_count(self):
+        services = cloudlanguagetools.constants.Service
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        languages = cloudlanguagetools.constants.Language
+        self.assertEqual(quotas.adjust_character_count(services.Google, request_type, languages.en, 42), 42)
+        self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.fr, 42), 42)
+        self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, None, 42), 42)
+        self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.ja, 42), 84)
+        self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.ko, 42), 84)
+        self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.zh_cn, 42), 84)
+        self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.zh_tw, 42), 84)
+        self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.yue, 42), 84)
+
     def test_quotas_trial(self):
         usage_slice_monthly_global = quotas.UsageSlice(
             cloudlanguagetools.constants.RequestType.audio,

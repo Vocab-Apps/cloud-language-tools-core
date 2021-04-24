@@ -70,6 +70,27 @@ COST_TABLE = [
 
 ]
 
+def adjust_character_count(
+    service: cloudlanguagetools.constants.Service, 
+    request_type: cloudlanguagetools.constants.RequestType,
+    language: cloudlanguagetools.constants.Language,
+    characters: int):
+    
+    azure_double_count_languages = [
+            cloudlanguagetools.constants.Language.ja,
+            cloudlanguagetools.constants.Language.ko,
+            cloudlanguagetools.constants.Language.yue,
+            cloudlanguagetools.constants.Language.zh_cn,
+            cloudlanguagetools.constants.Language.zh_tw
+        ]
+
+    if language != None:
+        if language in azure_double_count_languages:
+            if service == cloudlanguagetools.constants.Service.Azure:
+                if request_type == cloudlanguagetools.constants.RequestType.audio:
+                    return characters * 2
+    return characters
+
 class UsageSlice():
     def __init__(self, 
                 request_type: cloudlanguagetools.constants.RequestType, 

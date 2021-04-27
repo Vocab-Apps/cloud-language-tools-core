@@ -16,8 +16,9 @@ KEY_TYPE_API_KEY = 'api_key'
 KEY_TYPE_PATREON_USER ='patreon_user'
 KEY_TYPE_TRIAL_USER = 'trial_user'
 KEY_TYPE_USAGE ='usage'
-KEY_TYPE_CLIENT ='client'
-KEY_TYPE_AUDIO_LANGUAGE ='audio_language'
+KEY_TYPE_USER_CLIENT ='user_client'
+KEY_TYPE_USER_SERVICE ='user_service'
+KEY_TYPE_USER_AUDIO_LANGUAGE ='user_audio_language'
 KEY_TYPE_AUDIO_LOG ='audio_log'
 
 KEY_PREFIX = 'clt'
@@ -231,14 +232,19 @@ class RedisDb():
         self.r.expire(redis_key, self.get_expire_time_usage())
 
     def track_audio_language(self, api_key, language_code):
-        redis_key = self.build_key(KEY_TYPE_AUDIO_LANGUAGE, api_key)
+        redis_key = self.build_key(KEY_TYPE_USER_AUDIO_LANGUAGE, api_key)
         self.r.hincrby(redis_key, language_code.name, 1)
         self.r.expire(redis_key, self.get_expire_time_usage())
+
+    def track_service(self, api_key, service):
+        redis_key = self.build_key(KEY_TYPE_USER_SERVICE, api_key)
+        self.r.hincrby(redis_key, service.name, 1)
+        self.r.expire(redis_key, self.get_expire_time_usage())        
 
     def track_client(self, api_key, client_str):
         # keep track of the client used
         client = cloudlanguagetools.constants.Client[client_str]
-        redis_key = self.build_key(KEY_TYPE_CLIENT, api_key)
+        redis_key = self.build_key(KEY_TYPE_USER_CLIENT, api_key)
         self.r.hincrby(redis_key, client.name, 1)
         self.r.expire(redis_key, self.get_expire_time_usage())
 

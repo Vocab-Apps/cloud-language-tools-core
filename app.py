@@ -184,6 +184,7 @@ class AudioV2(flask_restful.Resource):
             text = data['text']
             service_str = data['service']
             language = data['language_code']
+            deck_name = data['deck_name']
             voice_key = data['voice_key']
             options = data['options']
 

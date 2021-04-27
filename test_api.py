@@ -590,7 +590,7 @@ class ApiTests(unittest.TestCase):
                             cloudlanguagetools.constants.ApiKeyType.test,
                             None)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
-        redis_connection.r.hincrby(usage_redis_key, 'characters', 29985)
+        redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.NAVER_USER_DAILY_CHAR_LIMIT - 15)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
 
         response = self.client.get('/voice_list')
@@ -631,7 +631,7 @@ class ApiTests(unittest.TestCase):
                             cloudlanguagetools.constants.ApiKeyType.test,
                             None)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
-        redis_connection.r.hincrby(usage_redis_key, 'characters', 29985)
+        redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.NAVER_USER_DAILY_CHAR_LIMIT - 15)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
 
         response = self.client.get('/voice_list')

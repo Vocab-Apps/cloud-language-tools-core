@@ -84,7 +84,7 @@ class TestApiKeys(unittest.TestCase):
         self.redis_connection.track_usage(api_key, service, request_type, 100)
 
         # this request will also go through but put us right under the limit
-        self.redis_connection.track_usage(api_key, service, request_type, 79899)
+        self.redis_connection.track_usage(api_key, service, request_type, quotas.DEFAULT_USER_DAILY_CHAR_LIMIT - 101)
 
         # this request will throw an exception
         self.assertRaises(cloudlanguagetools.errors.OverQuotaError, self.redis_connection.track_usage, api_key, service, request_type, 150)

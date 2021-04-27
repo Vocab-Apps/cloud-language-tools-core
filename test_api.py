@@ -21,6 +21,8 @@ class ApiTests(unittest.TestCase):
         # create new API key
         cls.api_key='test_key_01'
         redis_connection.add_test_api_key(cls.api_key)
+        cls.api_key_v2='test_key_01_v2'
+        redis_connection.add_test_api_key(cls.api_key_v2)
 
         cls.api_key_expired='test_key_02_expired'
         redis_connection.add_test_api_key(cls.api_key_expired)
@@ -371,7 +373,7 @@ class ApiTests(unittest.TestCase):
             'language_code': first_voice['language_code'],
             'voice_key': first_voice['voice_key'],
             'options': {}
-        }, headers={'api_key': self.api_key, 'client': 'test'})
+        }, headers={'api_key': self.api_key_v2, 'client': 'test'})
 
         self.assertEqual(response.status_code, 200)
 
@@ -395,15 +397,15 @@ class ApiTests(unittest.TestCase):
         # =====================
 
         # client
-        tracking_client_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_CLIENT, self.api_key)
+        tracking_client_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_CLIENT, self.api_key_v2)
         self.assertEqual(1, int(redis_connection.r.hget(tracking_client_redis_key, 'test')))
         
         # service
-        tracking_service_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_SERVICE, self.api_key)
+        tracking_service_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_SERVICE, self.api_key_v2)
         self.assertEqual(1, int(redis_connection.r.hget(tracking_service_redis_key, 'Azure')))
 
         # audio language
-        tracking_audio_language_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE, self.api_key)
+        tracking_audio_language_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE, self.api_key_v2)
         self.assertEqual(1, int(redis_connection.r.hget(tracking_audio_language_redis_key, 'fr')))
 
         # logging of audio request
@@ -415,7 +417,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual('Azure', first_request_data['service'])
         self.assertEqual('Je ne suis pas intéressé.', first_request_data['text'])
         self.assertEqual('fr', first_request_data['language_code'])
-        self.assertEqual(self.api_key, first_request_data['api_key'])
+        self.assertEqual(self.api_key_v2, first_request_data['api_key'])
 
         # make two more requests
         # ======================
@@ -429,7 +431,7 @@ class ApiTests(unittest.TestCase):
             'language_code': voice['language_code'],
             'voice_key': voice['voice_key'],
             'options': {}
-        }, headers={'api_key': self.api_key, 'client': 'test'})
+        }, headers={'api_key': self.api_key_v2, 'client': 'test'})
         self.assertEqual(response.status_code, 200)
 
         service = 'Azure'
@@ -441,7 +443,7 @@ class ApiTests(unittest.TestCase):
             'language_code': voice['language_code'],
             'voice_key': voice['voice_key'],
             'options': {}
-        }, headers={'api_key': self.api_key, 'client': 'test'})
+        }, headers={'api_key': self.api_key_v2, 'client': 'test'})
         self.assertEqual(response.status_code, 200)
 
         # assert usage logging

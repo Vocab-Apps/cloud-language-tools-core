@@ -103,7 +103,7 @@ def track_usage_audio_yomichan(func):
                 service = cloudlanguagetools.constants.Service[service_str]
                 characters = len(text)
                 try:
-                    redis_connection.track_usage(api_key, service, cloudlanguagetools.constants.RequestType.audio, characters)
+                    redis_connection.track_usage(api_key, service, cloudlanguagetools.constants.RequestType.audio, characters, cloudlanguagetools.constants.Language.ja)
                 except cloudlanguagetools.errors.OverQuotaError as err:
                     return {'error': str(err)}, 429
         return func(*args, **kwargs)

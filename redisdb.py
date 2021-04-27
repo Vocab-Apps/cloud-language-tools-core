@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 import redis
+import json
 import string
 import random
 import logging
@@ -16,6 +17,8 @@ KEY_TYPE_PATREON_USER ='patreon_user'
 KEY_TYPE_TRIAL_USER = 'trial_user'
 KEY_TYPE_USAGE ='usage'
 KEY_TYPE_CLIENT ='client'
+KEY_TYPE_AUDIO_LANGUAGE ='audio_language'
+KEY_TYPE_AUDIO_LOG ='audio_log'
 
 KEY_PREFIX = 'clt'
 
@@ -220,7 +223,17 @@ class RedisDb():
         return expire_time_seconds
 
     def log_audio_request(self, api_key, data):
-        pass
+        date_str = datetime.datetime.today().strftime('%Y%m')
+        redis_key = self.build_key(KEY_TYPE_AUDIO_LOG, date_str)
+        data['api_key'] = api_key
+        value_str = json.dumps(data)
+        self.r.rpush(redis_key, value_str)
+        self.r.expire(redis_key, self.get_expire_time_usage())
+
+    def track_audio_language(self, api_key, language_code):
+        redis_key = self.build_key(KEY_TYPE_AUDIO_LANGUAGE, api_key)
+        self.r.hincrby(redis_key, language_code.name, 1)
+        self.r.expire(redis_key, self.get_expire_time_usage())
 
     def track_client(self, api_key, client_str):
         # keep track of the client used

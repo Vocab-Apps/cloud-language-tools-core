@@ -355,6 +355,39 @@ class ApiTests(unittest.TestCase):
 
         self.assertTrue(expected_filetype in filetype)
 
+    def test_audio_v2(self):
+        # pytest test_api.py -k test_audio_v2
+
+        # get one azure voice for french
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)
+
+        service = 'Azure'
+        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        first_voice = french_voices[0]
+
+        response = self.client.post('/audio_v2', json={
+            'text': 'Je ne suis pas intéressé.',
+            'service': service,
+            'language_code': first_voice['language_code'],
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.api_key, 'client': 'test'})
+
+        self.assertEqual(response.status_code, 200)
+
+        output_temp_file = tempfile.NamedTemporaryFile()
+        with open(output_temp_file.name, 'wb') as f:
+            f.write(response.data)
+        f.close()
+
+        # verify file type
+        filetype = magic.from_file(output_temp_file.name)
+        # should be an MP3 file
+        expected_filetype = 'MPEG ADTS, layer III'
+
+        self.assertTrue(expected_filetype in filetype)        
+
     def test_audio_forvo_not_found(self):
         # pytest test_api.py -k test_audio_forvo_not_found
         

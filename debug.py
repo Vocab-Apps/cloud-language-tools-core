@@ -203,7 +203,7 @@ def get_voice_list():
         f.close()
     print(f'wrote {output_filename}')
 
-def get_voice_list_python():
+def get_voice_list_awesometts():
     # for awesometts
     manager = get_manager()
     tts_voice_list = manager.get_tts_voice_list_json()
@@ -401,7 +401,7 @@ if __name__ == '__main__':
     # play_google_audio()
     # play_azure_audio()
     # get_voice_list()
-    get_voice_list_python()
+    get_voice_list_awesometts()
     # get_watson_voice_list()
     # get_amazon_voice_list()
     # get_forvo_voice_list()

@@ -25,6 +25,12 @@ class ApiKeyType(enum.Enum):
     patreon = enum.auto()
     trial = enum.auto()
 
+class Client(enum.Enum):
+    awesometts = enum.auto()
+    awesometts2 = enum.auto()
+    languagetools = enum.auto()
+    test = enum.auto()
+
 # service and language related constants
 # ======================================
 

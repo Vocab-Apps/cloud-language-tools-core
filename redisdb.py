@@ -15,6 +15,7 @@ KEY_TYPE_API_KEY = 'api_key'
 KEY_TYPE_PATREON_USER ='patreon_user'
 KEY_TYPE_TRIAL_USER = 'trial_user'
 KEY_TYPE_USAGE ='usage'
+KEY_TYPE_CLIENT ='client'
 
 KEY_PREFIX = 'clt'
 
@@ -213,8 +214,27 @@ class RedisDb():
             #     expiration = f'expire: {expire_distance.days} days ({expire_distance.seconds} seconds) [ttl: {key_ttl}]' 
             # print(f'key: [{key}] ({expiration})')
 
-    def track_usage(self, api_key, service, request_type, characters: int):
+    # default expire time for usage-style keys
+    def get_expire_time_usage(self):
         expire_time_seconds = 30*3*24*3600 # 3 months
+        return expire_time_seconds
+
+    def log_audio_request(self, api_key, data):
+        pass
+
+    def track_client(self, api_key, client_str):
+        # keep track of the client used
+        client = cloudlanguagetools.constants.Client[client_str]
+        redis_key = self.build_key(KEY_TYPE_CLIENT, api_key)
+        self.r.hincrby(redis_key, client.name, 1)
+        self.r.expire(redis_key, self.get_expire_time_usage())
+
+    def track_usage(self, api_key, service, request_type, characters: int, language_code=None):
+        expire_time_seconds = 30*3*24*3600 # 3 months
+
+        if language_code != None:
+            # azure has special character counting based on language
+            characters = quotas.adjust_character_count(service, request_type, language_code, characters)
 
         redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         key_type_str = self.r.hget(redis_api_key, 'type')

@@ -61,6 +61,13 @@ def track_usage(request_type, request, func, *args, **kwargs):
         if text != None and service_str != None:
             service = cloudlanguagetools.constants.Service[service_str]
             characters = len(text)
+
+            # try to get language_code
+            language_code = None
+            language_code_str = request.json.get('language_code', None)
+            if language_code_str != None:
+                language_code = cloudlanguagetools.constants.Language[language_code_str]
+
             try:
                 redis_connection.track_usage(api_key, service, request_type, characters)
             except cloudlanguagetools.errors.OverQuotaError as err:
@@ -166,6 +173,36 @@ class Audio(flask_restful.Resource):
         except cloudlanguagetools.errors.RequestError as err:
             return {'error': str(err)}, 400
 
+
+class AudioV2(flask_restful.Resource):
+    method_decorators = [track_usage_audio, authenticate] # authenticate is the first step
+    def post(self):
+        try:
+
+            # generate audio data
+            data = request.json
+            text = data['text']
+            service = data['service']
+            language = data['language_code']
+            voice_key = data['voice_key']
+            options = data['options']
+            audio_temp_file = manager.get_tts_audio(text, service, voice_key, options)
+
+            # track client
+            api_key = request.headers.get('api_key')
+            client = request.headers.get('client')
+            redis_connection.track_client(api_key, client)
+
+            # log audio request
+            redis_connection.log_audio_request(api_key, data)
+
+            # return data
+            return send_file(audio_temp_file.name, mimetype='audio/mpeg')
+        except cloudlanguagetools.errors.NotFoundError as err:
+            return {'error': str(err)}, 404
+        except cloudlanguagetools.errors.RequestError as err:
+            return {'error': str(err)}, 400            
+
 class YomichanAudio(flask_restful.Resource):
     method_decorators = [track_usage_audio_yomichan, authenticate_get]
     def get(self):
@@ -254,6 +291,7 @@ api.add_resource(TranslateAll, '/translate_all')
 api.add_resource(Transliterate, '/transliterate')
 api.add_resource(Detect, '/detect')
 api.add_resource(Audio, '/audio')
+api.add_resource(AudioV2, '/audio_v2')
 api.add_resource(YomichanAudio, '/yomichan_audio')
 api.add_resource(VerifyApiKey, '/verify_api_key')
 api.add_resource(PatreonKey, '/patreon_key')

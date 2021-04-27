@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import pprint
 import base64
 import json
 import tempfile
@@ -202,6 +203,19 @@ def get_voice_list():
         f.close()
     print(f'wrote {output_filename}')
 
+def get_voice_list_python():
+    # for awesometts
+    manager = get_manager()
+    tts_voice_list = manager.get_tts_voice_list_json()
+    output_filename = 'temp_data_files/voicelist.py'
+    #processed_voice_list = [x.python_obj() for x in tts_voice_list]
+    with open(output_filename, 'w', encoding='utf8') as f:
+        list_formatted = pprint.pformat(tts_voice_list, width=250)
+        f.write('VOICE_LIST = ')
+        f.write(list_formatted)
+        f.close()
+    print(f'wrote {output_filename}')    
+
 def get_translation_language_list():
     manager = get_manager()
     language_list_json = manager.get_translation_language_list_json()
@@ -386,7 +400,8 @@ if __name__ == '__main__':
     # test_google_audio()
     # play_google_audio()
     # play_azure_audio()
-    get_voice_list()
+    # get_voice_list()
+    get_voice_list_python()
     # get_watson_voice_list()
     # get_amazon_voice_list()
     # get_forvo_voice_list()

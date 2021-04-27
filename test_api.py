@@ -33,6 +33,8 @@ class ApiTests(unittest.TestCase):
 
         cls.api_key_over_quota='test_key_03_over_quota'
         redis_connection.add_test_api_key(cls.api_key_over_quota)        
+        cls.api_key_over_quota_v2='test_key_03_over_quota_v2'
+        redis_connection.add_test_api_key(cls.api_key_over_quota_v2)
 
         # trial user
         cls.trial_user_email = 'trial_user_42@gmail.com'
@@ -590,12 +592,14 @@ class ApiTests(unittest.TestCase):
     def test_audio_overquota_v2(self):
         # pytest test_api.py -rPP -k test_audio_overquota_v2
 
+        api_key = self.api_key_over_quota_v2
+
         # increase the usage of that API key
         usage_slice = quotas.UsageSlice(cloudlanguagetools.constants.RequestType.audio,
                             cloudlanguagetools.constants.UsageScope.User, 
                             cloudlanguagetools.constants.UsagePeriod.daily, 
                             cloudlanguagetools.constants.Service.Naver, 
-                            self.api_key_over_quota, 
+                            api_key, 
                             cloudlanguagetools.constants.ApiKeyType.test,
                             None)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
@@ -615,7 +619,7 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': self.api_key_over_quota, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test'})
         self.assertEqual(response.status_code, 200)
 
         # the second request should get blocked
@@ -625,7 +629,7 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': self.api_key_over_quota, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test'})
         self.assertEqual(response.status_code, 429)
 
     def test_audio_trial_user(self):

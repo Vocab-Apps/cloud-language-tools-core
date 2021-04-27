@@ -40,6 +40,9 @@ class ApiTests(unittest.TestCase):
         cls.trial_user_email = 'trial_user_42@gmail.com'
         cls.trial_user_api_key = redis_connection.get_trial_user_key(cls.trial_user_email)
 
+        cls.trial_user_email_v2 = 'trial_user_42_v2@gmail.com'
+        cls.trial_user_api_key_v2 = redis_connection.get_trial_user_key(cls.trial_user_email_v2)
+
 
     @classmethod
     def tearDownClass(cls):
@@ -362,6 +365,10 @@ class ApiTests(unittest.TestCase):
     def test_audio_v2(self):
         # pytest test_api.py -k test_audio_v2
 
+        # special case: clear the audio request log (we want to start from scratch)
+        log_audio_request_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_AUDIO_LOG, datetime.datetime.today().strftime('%Y%m'))
+        redis_connection.r.delete(log_audio_request_redis_key)
+
         # get one azure voice for french
         response = self.client.get('/voice_list')
         voice_list = json.loads(response.data)
@@ -411,7 +418,6 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(1, int(redis_connection.r.hget(tracking_audio_language_redis_key, 'fr')))
 
         # logging of audio request
-        log_audio_request_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_AUDIO_LOG, datetime.datetime.today().strftime('%Y%m'))
         self.assertEqual(1, redis_connection.r.llen(log_audio_request_redis_key))
         audio_requests = redis_connection.r.lrange(log_audio_request_redis_key, 0, 0)
         self.assertEqual(1, len(audio_requests))
@@ -685,6 +691,8 @@ class ApiTests(unittest.TestCase):
     def test_audio_trial_user_v2(self):
         # pytest test_api.py -rPP -k test_audio_trial_user_v2
 
+        api_key = self.trial_user_api_key_v2
+
         response = self.client.get('/voice_list')
         voice_list = json.loads(response.data)        
         service = 'Azure'
@@ -697,7 +705,7 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': self.trial_user_api_key, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test'})
         self.assertEqual(response.status_code, 200)
 
         # increase the usage of that API key
@@ -705,7 +713,7 @@ class ApiTests(unittest.TestCase):
                             cloudlanguagetools.constants.UsageScope.User, 
                             cloudlanguagetools.constants.UsagePeriod.lifetime, 
                             cloudlanguagetools.constants.Service.Azure, 
-                            self.trial_user_api_key, 
+                            api_key, 
                             cloudlanguagetools.constants.ApiKeyType.trial,
                             10000)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
@@ -719,11 +727,11 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': self.trial_user_api_key, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test'})
         self.assertEqual(response.status_code, 429)
 
         # now increase character limit for this trial user
-        redis_connection.increase_trial_key_limit(self.trial_user_email, 100000)
+        redis_connection.increase_trial_key_limit(self.trial_user_email_v2, 100000)
 
         # this request should go through now
         response = self.client.post('/audio_v2', json={
@@ -732,7 +740,7 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': self.trial_user_api_key, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test'})
         self.assertEqual(response.status_code, 200)
 
     @pytest.mark.skip(reason="only succeeds when quota is exceeded")

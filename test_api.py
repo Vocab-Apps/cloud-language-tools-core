@@ -365,9 +365,26 @@ class ApiTests(unittest.TestCase):
     def test_audio_v2(self):
         # pytest test_api.py -k test_audio_v2
 
+        # initial setup 
+        # =============
+        api_key = self.api_key_v2
+
         # special case: clear the audio request log (we want to start from scratch)
         log_audio_request_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_AUDIO_LOG, datetime.datetime.today().strftime('%Y%m'))
         redis_connection.r.delete(log_audio_request_redis_key)
+        # verify usage is at 0
+        usage_slice = quotas.UsageSlice(cloudlanguagetools.constants.RequestType.audio,
+                            cloudlanguagetools.constants.UsageScope.User, 
+                            cloudlanguagetools.constants.UsagePeriod.daily, 
+                            cloudlanguagetools.constants.Service.Azure, 
+                            api_key, 
+                            cloudlanguagetools.constants.ApiKeyType.test,
+                            None)
+        usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())        
+        self.assertEqual(None, redis_connection.r.hget(usage_redis_key, 'characters'))
+
+        source_text_french = 'Je ne suis pas intéressé.'
+        source_text_japanese = 'おはようございます'
 
         # get one azure voice for french
         response = self.client.get('/voice_list')
@@ -377,7 +394,7 @@ class ApiTests(unittest.TestCase):
         french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
         response = self.client.post('/audio_v2', json={
-            'text': 'Je ne suis pas intéressé.',
+            'text': source_text_french,
             'service': service,
             'language_code': first_voice['language_code'],
             'voice_key': first_voice['voice_key'],
@@ -434,7 +451,7 @@ class ApiTests(unittest.TestCase):
         french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
         voice = french_voices[0]
         response = self.client.post('/audio_v2', json={
-            'text': 'Je ne suis pas intéressé.',
+            'text': source_text_french,
             'service': service,
             'language_code': voice['language_code'],
             'voice_key': voice['voice_key'],
@@ -446,7 +463,7 @@ class ApiTests(unittest.TestCase):
         japanese_voices = [x for x in voice_list if x['language_code'] == 'ja' and x['service'] == service]
         voice = japanese_voices[0]
         response = self.client.post('/audio_v2', json={
-            'text': 'おはようございます',
+            'text': source_text_japanese,
             'service': service,
             'language_code': voice['language_code'],
             'voice_key': voice['voice_key'],
@@ -477,6 +494,11 @@ class ApiTests(unittest.TestCase):
         self.assertEqual('Azure', request_1['service'])
         self.assertEqual('Amazon', request_2['service'])
         self.assertEqual('Azure', request_3['service'])
+
+        # verify usage logic for japanese/azure
+        # =====================================
+
+        self.assertEqual(len(source_text_french) + 2 * len(source_text_japanese), int(redis_connection.r.hget(usage_redis_key, 'characters')))
 
 
 

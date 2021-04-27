@@ -69,7 +69,7 @@ def track_usage(request_type, request, func, *args, **kwargs):
                 language_code = cloudlanguagetools.constants.Language[language_code_str]
 
             try:
-                redis_connection.track_usage(api_key, service, request_type, characters)
+                redis_connection.track_usage(api_key, service, request_type, characters, language_code)
             except cloudlanguagetools.errors.OverQuotaError as err:
                 return {'error': str(err)}, 429
     return func(*args, **kwargs)

@@ -365,7 +365,6 @@ class ApiTests(unittest.TestCase):
         service = 'Azure'
         french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
-
         response = self.client.post('/audio_v2', json={
             'text': 'Je ne suis pas intéressé.',
             'service': service,
@@ -418,6 +417,56 @@ class ApiTests(unittest.TestCase):
         self.assertEqual('fr', first_request_data['language_code'])
         self.assertEqual(self.api_key, first_request_data['api_key'])
 
+        # make two more requests
+        # ======================
+
+        service = 'Amazon'
+        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        voice = french_voices[0]
+        response = self.client.post('/audio_v2', json={
+            'text': 'Je ne suis pas intéressé.',
+            'service': service,
+            'language_code': voice['language_code'],
+            'voice_key': voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.api_key, 'client': 'test'})
+        self.assertEqual(response.status_code, 200)
+
+        service = 'Azure'
+        japanese_voices = [x for x in voice_list if x['language_code'] == 'ja' and x['service'] == service]
+        voice = japanese_voices[0]
+        response = self.client.post('/audio_v2', json={
+            'text': 'おはようございます',
+            'service': service,
+            'language_code': voice['language_code'],
+            'voice_key': voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.api_key, 'client': 'test'})
+        self.assertEqual(response.status_code, 200)
+
+        # assert usage logging
+        # ====================
+
+        # client
+        self.assertEqual(3, int(redis_connection.r.hget(tracking_client_redis_key, 'test')))
+        # service
+        self.assertEqual(2, int(redis_connection.r.hget(tracking_service_redis_key, 'Azure')))
+        self.assertEqual(1, int(redis_connection.r.hget(tracking_service_redis_key, 'Amazon')))
+        # audio language
+        self.assertEqual(2, int(redis_connection.r.hget(tracking_audio_language_redis_key, 'fr')))
+        self.assertEqual(1, int(redis_connection.r.hget(tracking_audio_language_redis_key, 'ja')))
+        # audio requests
+        audio_requests = redis_connection.r.lrange(log_audio_request_redis_key, 0, 2)
+        self.assertEqual(3, len(audio_requests))
+        request_1 = json.loads(audio_requests[0])
+        request_2 = json.loads(audio_requests[1])
+        request_3 = json.loads(audio_requests[2])
+        self.assertEqual('fr', request_1['language_code'])
+        self.assertEqual('fr', request_2['language_code'])
+        self.assertEqual('ja', request_3['language_code'])
+        self.assertEqual('Azure', request_1['service'])
+        self.assertEqual('Amazon', request_2['service'])
+        self.assertEqual('Azure', request_3['service'])
 
 
 

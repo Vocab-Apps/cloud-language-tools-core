@@ -376,17 +376,28 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+        # retrieve file
         output_temp_file = tempfile.NamedTemporaryFile()
         with open(output_temp_file.name, 'wb') as f:
             f.write(response.data)
         f.close()
+
+        # perform checks on file
+        # ----------------------
 
         # verify file type
         filetype = magic.from_file(output_temp_file.name)
         # should be an MP3 file
         expected_filetype = 'MPEG ADTS, layer III'
 
-        self.assertTrue(expected_filetype in filetype)        
+        self.assertTrue(expected_filetype in filetype)
+
+        # verify usage tracking
+        # =====================
+
+        # 
+
+
 
     def test_audio_forvo_not_found(self):
         # pytest test_api.py -k test_audio_forvo_not_found
@@ -502,6 +513,46 @@ class ApiTests(unittest.TestCase):
         }, headers={'api_key': self.api_key_over_quota})
         self.assertEqual(response.status_code, 429)
 
+    def test_audio_overquota_v2(self):
+        # pytest test_api.py -rPP -k test_audio_overquota_v2
+
+        # increase the usage of that API key
+        usage_slice = quotas.UsageSlice(cloudlanguagetools.constants.RequestType.audio,
+                            cloudlanguagetools.constants.UsageScope.User, 
+                            cloudlanguagetools.constants.UsagePeriod.daily, 
+                            cloudlanguagetools.constants.Service.Naver, 
+                            self.api_key_over_quota, 
+                            cloudlanguagetools.constants.ApiKeyType.test,
+                            None)
+        usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
+        redis_connection.r.hincrby(usage_redis_key, 'characters', 29985)
+        redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
+
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)
+        service = 'Naver'
+        english_voices = [x for x in voice_list if x['language_code'] == 'en' and x['service'] == service]
+        first_voice = english_voices[0]
+
+        # the first request should go through
+        response = self.client.post('/audio_v2', json={
+            'text': 'Hello World',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'language_code': first_voice['language_code'],
+            'options': {}
+        }, headers={'api_key': self.api_key_over_quota, 'client': 'test'})
+        self.assertEqual(response.status_code, 200)
+
+        # the second request should get blocked
+        response = self.client.post('/audio_v2', json={
+            'text': 'Hello World 2',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'language_code': first_voice['language_code'],
+            'options': {}
+        }, headers={'api_key': self.api_key_over_quota, 'client': 'test'})
+        self.assertEqual(response.status_code, 429)
 
     def test_audio_trial_user(self):
         # pytest test_api.py -rPP -k test_audio_trial_user

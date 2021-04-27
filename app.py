@@ -183,6 +183,7 @@ class AudioV2(flask_restful.Resource):
             data = request.json
             text = data['text']
             service_str = data['service']
+            request_mode_str = data['request_mode']
             language = data['language_code']
             deck_name = data['deck_name']
             voice_key = data['voice_key']
@@ -191,6 +192,7 @@ class AudioV2(flask_restful.Resource):
             # convert to enum
             language_code = cloudlanguagetools.constants.Language[language]
             service = cloudlanguagetools.constants.Service[service_str]
+            request_mode = cloudlanguagetools.constants.RequestMode[request_mode_str]
 
             audio_temp_file = manager.get_tts_audio(text, service.name, voice_key, options)
 
@@ -198,6 +200,9 @@ class AudioV2(flask_restful.Resource):
             api_key = request.headers.get('api_key')
             client = request.headers.get('client')
             redis_connection.track_client(api_key, client)
+
+            # track request mode
+            redis_connection.track_request_mode(api_key, request_mode)
 
             # track service
             redis_connection.track_service(api_key, service)

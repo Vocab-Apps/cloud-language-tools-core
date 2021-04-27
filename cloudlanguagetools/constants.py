@@ -31,6 +31,12 @@ class Client(enum.Enum):
     languagetools = enum.auto()
     test = enum.auto()
 
+# what triggered this request (batch / on the fly / editor)
+class RequestMode(enum.Enum):
+    batch = enum.auto()
+    dynamic = enum.auto()
+    edit = enum.auto()
+
 # service and language related constants
 # ======================================
 

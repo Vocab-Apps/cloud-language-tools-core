@@ -17,6 +17,7 @@ KEY_TYPE_PATREON_USER ='patreon_user'
 KEY_TYPE_TRIAL_USER = 'trial_user'
 KEY_TYPE_USAGE ='usage'
 KEY_TYPE_USER_CLIENT ='user_client'
+KEY_TYPE_USER_REQUEST_MODE ='user_request_mode'
 KEY_TYPE_USER_SERVICE ='user_service'
 KEY_TYPE_USER_AUDIO_LANGUAGE ='user_audio_language'
 KEY_TYPE_AUDIO_LOG ='audio_log'
@@ -247,6 +248,12 @@ class RedisDb():
         redis_key = self.build_key(KEY_TYPE_USER_CLIENT, api_key)
         self.r.hincrby(redis_key, client.name, 1)
         self.r.expire(redis_key, self.get_expire_time_usage())
+
+    def track_request_mode(self, api_key, request_mode):
+        # keep track of the client used
+        redis_key = self.build_key(KEY_TYPE_USER_REQUEST_MODE, api_key)
+        self.r.hincrby(redis_key, request_mode.name, 1)
+        self.r.expire(redis_key, self.get_expire_time_usage())    
 
     def track_usage(self, api_key, service, request_type, characters: int, language_code=None):
         expire_time_seconds = 30*3*24*3600 # 3 months

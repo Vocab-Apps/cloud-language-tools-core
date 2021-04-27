@@ -397,6 +397,7 @@ class ApiTests(unittest.TestCase):
             'text': source_text_french,
             'service': service,
             'deck_name': 'french_deck_1',
+            'request_mode': 'batch',
             'language_code': first_voice['language_code'],
             'voice_key': first_voice['voice_key'],
             'options': {}
@@ -455,6 +456,7 @@ class ApiTests(unittest.TestCase):
             'text': source_text_french,
             'service': service,
             'deck_name': 'french_deck_1',
+            'request_mode': 'batch',
             'language_code': voice['language_code'],
             'voice_key': voice['voice_key'],
             'options': {}
@@ -468,6 +470,7 @@ class ApiTests(unittest.TestCase):
             'text': source_text_japanese,
             'service': service,
             'deck_name': 'japanese_deck_1',
+            'request_mode': 'batch',
             'language_code': voice['language_code'],
             'voice_key': voice['voice_key'],
             'options': {}
@@ -648,6 +651,7 @@ class ApiTests(unittest.TestCase):
             'text': 'Hello World',
             'service': service,
             'deck_name': 'test_deck_1',
+            'request_mode': 'batch',
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
@@ -659,6 +663,7 @@ class ApiTests(unittest.TestCase):
             'text': 'Hello World 2',
             'service': service,
             'deck_name': 'test_deck_1',
+            'request_mode': 'batch',
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
@@ -730,6 +735,7 @@ class ApiTests(unittest.TestCase):
             'text': 'Je ne suis pas intéressé.',
             'service': service,
             'deck_name': 'test_deck_1',
+            'request_mode': 'batch',
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
@@ -753,6 +759,7 @@ class ApiTests(unittest.TestCase):
             'text': 'Je ne suis pas intéressé.',
             'service': service,
             'deck_name': 'test_deck_1',
+            'request_mode': 'batch',
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
@@ -767,6 +774,7 @@ class ApiTests(unittest.TestCase):
             'text': 'Je ne suis pas intéressé.',
             'service': service,
             'deck_name': 'test_deck_1',
+            'request_mode': 'batch',
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}

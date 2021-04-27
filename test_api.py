@@ -395,7 +395,30 @@ class ApiTests(unittest.TestCase):
         # verify usage tracking
         # =====================
 
-        # 
+        # client
+        tracking_client_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_CLIENT, self.api_key)
+        self.assertEqual(1, int(redis_connection.r.hget(tracking_client_redis_key, 'test')))
+        
+        # service
+        tracking_service_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_SERVICE, self.api_key)
+        self.assertEqual(1, int(redis_connection.r.hget(tracking_service_redis_key, 'Azure')))
+
+        # audio language
+        tracking_audio_language_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE, self.api_key)
+        self.assertEqual(1, int(redis_connection.r.hget(tracking_audio_language_redis_key, 'fr')))
+
+        # logging of audio request
+        log_audio_request_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_AUDIO_LOG, datetime.datetime.today().strftime('%Y%m'))
+        self.assertEqual(1, redis_connection.r.llen(log_audio_request_redis_key))
+        audio_requests = redis_connection.r.lrange(log_audio_request_redis_key, 0, 0)
+        self.assertEqual(1, len(audio_requests))
+        first_request_data = json.loads(audio_requests[0])
+        self.assertEqual('Azure', first_request_data['service'])
+        self.assertEqual('Je ne suis pas intéressé.', first_request_data['text'])
+        self.assertEqual('fr', first_request_data['language_code'])
+        self.assertEqual(self.api_key, first_request_data['api_key'])
+
+
 
 
 

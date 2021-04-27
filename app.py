@@ -199,7 +199,7 @@ class AudioV2(flask_restful.Resource):
             redis_connection.track_client(api_key, client)
 
             # track service
-            redis_connection.track_service(api, service)
+            redis_connection.track_service(api_key, service)
 
             # track audio language
             redis_connection.track_audio_language(api_key, language_code)

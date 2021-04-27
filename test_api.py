@@ -643,6 +643,25 @@ class ApiTests(unittest.TestCase):
         })
 
         self.assertEqual(response.status_code, 401)
+
+    def test_audio_not_authenticated_v2(self):
+        # pytest test_api.py -rPP -k test_audio_not_authenticated_v2
+
+        response = self.client.get('/voice_list')
+        voice_list = json.loads(response.data)        
+        service = 'Azure'
+        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        first_voice = french_voices[0]
+
+        response = self.client.post('/audio_v2', json={
+            'text': 'Je ne suis pas intéressé.',
+            'service': service,
+            'voice_key': first_voice['voice_key'],
+            'language_code': first_voice['language_code'],
+            'options': {}
+        })
+
+        self.assertEqual(response.status_code, 401)        
         
 
 if __name__ == '__main__':

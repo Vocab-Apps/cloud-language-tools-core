@@ -17,7 +17,9 @@ class ApiTests(unittest.TestCase):
         super(ApiTests, cls).setUpClass()
         cls.client = app.test_client()
         redis_connection.clear_db(wait=False)
-        
+
+        cls.client_version = 'v0.01'
+
         # create new API key
         cls.api_key='test_key_01'
         redis_connection.add_test_api_key(cls.api_key)
@@ -401,7 +403,7 @@ class ApiTests(unittest.TestCase):
             'language_code': first_voice['language_code'],
             'voice_key': first_voice['voice_key'],
             'options': {}
-        }, headers={'api_key': self.api_key_v2, 'client': 'test'})
+        }, headers={'api_key': self.api_key_v2, 'client': 'test', 'client_version': self.client_version})
 
         self.assertEqual(response.status_code, 200)
 
@@ -425,15 +427,15 @@ class ApiTests(unittest.TestCase):
         # =====================
 
         # client
-        tracking_client_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_CLIENT, self.api_key_v2)
+        tracking_client_redis_key = redis_connection.build_monthly_user_key(redisdb.KEY_TYPE_USER_CLIENT, self.api_key_v2)
         self.assertEqual(1, int(redis_connection.r.hget(tracking_client_redis_key, 'test')))
         
         # service
-        tracking_service_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_SERVICE, self.api_key_v2)
+        tracking_service_redis_key = redis_connection.build_monthly_user_key(redisdb.KEY_TYPE_USER_SERVICE, self.api_key_v2)
         self.assertEqual(1, int(redis_connection.r.hget(tracking_service_redis_key, 'Azure')))
 
         # audio language
-        tracking_audio_language_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE, self.api_key_v2)
+        tracking_audio_language_redis_key = redis_connection.build_monthly_user_key(redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE, self.api_key_v2)
         self.assertEqual(1, int(redis_connection.r.hget(tracking_audio_language_redis_key, 'fr')))
 
         # logging of audio request
@@ -460,7 +462,7 @@ class ApiTests(unittest.TestCase):
             'language_code': voice['language_code'],
             'voice_key': voice['voice_key'],
             'options': {}
-        }, headers={'api_key': self.api_key_v2, 'client': 'test'})
+        }, headers={'api_key': self.api_key_v2, 'client': 'test', 'client_version': self.client_version})
         self.assertEqual(response.status_code, 200)
 
         service = 'Azure'
@@ -474,7 +476,7 @@ class ApiTests(unittest.TestCase):
             'language_code': voice['language_code'],
             'voice_key': voice['voice_key'],
             'options': {}
-        }, headers={'api_key': self.api_key_v2, 'client': 'test'})
+        }, headers={'api_key': self.api_key_v2, 'client': 'test', 'client_version': self.client_version})
         self.assertEqual(response.status_code, 200)
 
         # assert usage logging
@@ -655,7 +657,7 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': api_key, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test', 'client_version': self.client_version})
         self.assertEqual(response.status_code, 200)
 
         # the second request should get blocked
@@ -667,7 +669,7 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': api_key, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test', 'client_version': self.client_version})
         self.assertEqual(response.status_code, 429)
 
     def test_audio_trial_user(self):
@@ -739,7 +741,7 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': api_key, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test', 'client_version': self.client_version})
         self.assertEqual(response.status_code, 200)
 
         # increase the usage of that API key
@@ -763,7 +765,7 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': api_key, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test', 'client_version': self.client_version})
         self.assertEqual(response.status_code, 429)
 
         # now increase character limit for this trial user
@@ -778,7 +780,7 @@ class ApiTests(unittest.TestCase):
             'voice_key': first_voice['voice_key'],
             'language_code': first_voice['language_code'],
             'options': {}
-        }, headers={'api_key': api_key, 'client': 'test'})
+        }, headers={'api_key': api_key, 'client': 'test', 'client_version': self.client_version})
         self.assertEqual(response.status_code, 200)
 
     @pytest.mark.skip(reason="only succeeds when quota is exceeded")

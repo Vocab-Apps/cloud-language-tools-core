@@ -17,6 +17,7 @@ KEY_TYPE_PATREON_USER ='patreon_user'
 KEY_TYPE_TRIAL_USER = 'trial_user'
 KEY_TYPE_USAGE ='usage'
 KEY_TYPE_USER_CLIENT ='user_client'
+KEY_TYPE_USER_CLIENT_VERSION ='user_client_version'
 KEY_TYPE_USER_REQUEST_MODE ='user_request_mode'
 KEY_TYPE_USER_SERVICE ='user_service'
 KEY_TYPE_USER_AUDIO_LANGUAGE ='user_audio_language'
@@ -36,6 +37,11 @@ class RedisDb():
 
     def build_key(self, key_type, key):
         return f'{KEY_PREFIX}:{key_type}:{key}'
+
+    def build_monthly_user_key(self, key_type, api_key):
+        date_str = datetime.datetime.today().strftime('%Y%m')
+        redis_key = self.build_key(key_type, f'{date_str}:{api_key}')
+        return redis_key
 
     def get_specific_api_key_expiration_timestamp(self, delta_days):
         expiration_date = datetime.datetime.now() + datetime.timedelta(days=delta_days)
@@ -233,25 +239,30 @@ class RedisDb():
         self.r.expire(redis_key, self.get_expire_time_usage())
 
     def track_audio_language(self, api_key, language_code):
-        redis_key = self.build_key(KEY_TYPE_USER_AUDIO_LANGUAGE, api_key)
+        redis_key = self.build_monthly_user_key(KEY_TYPE_USER_AUDIO_LANGUAGE, api_key)
         self.r.hincrby(redis_key, language_code.name, 1)
         self.r.expire(redis_key, self.get_expire_time_usage())
 
     def track_service(self, api_key, service):
-        redis_key = self.build_key(KEY_TYPE_USER_SERVICE, api_key)
+        redis_key = self.build_monthly_user_key(KEY_TYPE_USER_SERVICE, api_key)
         self.r.hincrby(redis_key, service.name, 1)
         self.r.expire(redis_key, self.get_expire_time_usage())        
 
-    def track_client(self, api_key, client_str):
+    def track_client(self, api_key, client_str, version):
         # keep track of the client used
         client = cloudlanguagetools.constants.Client[client_str]
-        redis_key = self.build_key(KEY_TYPE_USER_CLIENT, api_key)
+        redis_key = self.build_monthly_user_key(KEY_TYPE_USER_CLIENT, api_key)
         self.r.hincrby(redis_key, client.name, 1)
+        self.r.expire(redis_key, self.get_expire_time_usage())
+        # keep track of version used
+        client_version = f'{client_str}_{version}'
+        redis_key = self.build_monthly_user_key(KEY_TYPE_USER_CLIENT_VERSION, api_key)
+        self.r.hincrby(redis_key, client_version, 1)
         self.r.expire(redis_key, self.get_expire_time_usage())
 
     def track_request_mode(self, api_key, request_mode):
         # keep track of the client used
-        redis_key = self.build_key(KEY_TYPE_USER_REQUEST_MODE, api_key)
+        redis_key = self.build_monthly_user_key(KEY_TYPE_USER_REQUEST_MODE, api_key)
         self.r.hincrby(redis_key, request_mode.name, 1)
         self.r.expire(redis_key, self.get_expire_time_usage())    
 

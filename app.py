@@ -199,7 +199,8 @@ class AudioV2(flask_restful.Resource):
             # track client
             api_key = request.headers.get('api_key')
             client = request.headers.get('client')
-            redis_connection.track_client(api_key, client)
+            version = request.headers.get('client_version')
+            redis_connection.track_client(api_key, client, version)
 
             # track request mode
             redis_connection.track_request_mode(api_key, request_mode)

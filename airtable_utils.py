@@ -56,7 +56,9 @@ class AirtableUtils():
             }
             for column in column_list:
                 value = record[column]
-                if pandas.isnull(value):
+                if isinstance(record[column], list):
+                    pass # don't do anything
+                elif pandas.isnull(value):
                     value = None
                 update_instruction['fields'][column] = value
             update_instructions.append(update_instruction)
@@ -74,7 +76,8 @@ class AirtableUtils():
             # pprint.pprint(update_slice)
             logging.info(f'updating records')
             response = requests.patch(base_url, json={
-                'records': update_slice
+                'records': update_slice,
+                'typecast': True
             }, headers=headers)
             if response.status_code != 200:
                 logging.error(response.content)        

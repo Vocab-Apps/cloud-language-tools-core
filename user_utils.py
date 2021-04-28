@@ -9,6 +9,7 @@ import airtable_utils
 import patreon_utils
 import convertkit
 import redisdb
+import cloudlanguagetools.constants
 
 
 class UserUtils():
@@ -101,7 +102,19 @@ class UserUtils():
         return grouped_df
 
     def get_user_tracking_data(self, api_key_list):
-        self.redis_connection.list_user_tracking_data(api_key_list)
+        record_lists = self.redis_connection.list_user_tracking_data(api_key_list)
+        processed_records = []
+        for key, records in record_lists.items():
+            if key == redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE:
+                for record in records:
+                    language_list = record['data'].keys()
+                    language_name_list = [cloudlanguagetools.constants.Language[x].lang_name for x in language_list]
+                    processed_records.append({
+                        'api_key': record['api_key'],
+                        'detected_languages': language_name_list
+                    })
+
+        return pandas.DataFrame(processed_records)
 
     def build_user_data_patreon(self):
         # api keys
@@ -111,7 +124,7 @@ class UserUtils():
         # print(api_key_list_df)
         
         # get user tracking data
-        self.get_user_tracking_data(api_key_list)
+        tracking_data_df = self.get_user_tracking_data(api_key_list)
 
         # patreon data
         patreon_user_df = self.get_patreon_users_df()
@@ -124,6 +137,7 @@ class UserUtils():
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
         combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
+        combined_df = pandas.merge(combined_df, tracking_data_df, how='left', on='api_key')
 
         return combined_df
 
@@ -136,7 +150,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_patreon_df, user_data_df, how='left', left_on='User ID', right_on='patreon_user_id')
 
-        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars']]
+        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages']]
         update_df = update_df.fillna({
             'api_key': '',
             'api_key_valid': False,

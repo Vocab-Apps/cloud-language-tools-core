@@ -346,23 +346,41 @@ class RedisDb():
         # process api key list
         api_key_list = [x['api_key'] for x in api_key_entry_list]
 
+        monthly_user_key_types = [
+            KEY_TYPE_USER_AUDIO_LANGUAGE,
+            KEY_TYPE_USER_SERVICE,
+            KEY_TYPE_USER_CLIENT
+        ]
+
+        record_lists = {}
+
         i = 0
-        batch_size = 20
+        batch_size = 40
         total_length = len(api_key_list)
         while len(api_key_list) > 0:
             # logging.info(f'requesting batch {i} (total length {total_length})')
             split_len = min(len(api_key_list), batch_size)
             current_batch = api_key_list[:split_len]
             api_key_list = api_key_list[split_len:]
-            pipe = self.r.pipeline()
-            for api_key in current_batch:
-                redis_key = self.build_key(KEY_TYPE_USER_AUDIO_LANGUAGE, api_key)
-                pipe.hgetall(redis_key)
-            hashes = pipe.execute()
-            for key, hash_data in zip(current_batch, hashes):
-                if len(hash_data) > 0:
-                    logging.info(f'key: {key} hash_data: {hash_data}')
+
+            for key_type in monthly_user_key_types:
+                if key_type not in record_lists:
+                    record_lists[key_type] = []
+                pipe = self.r.pipeline()
+                for api_key in current_batch:
+                    redis_key = self.build_monthly_user_key(key_type, api_key)
+                    pipe.hgetall(redis_key)
+                hashes = pipe.execute()
+                for key, hash_data in zip(current_batch, hashes):
+                    if len(hash_data) > 0:
+                        logging.info(f'key: {key} hash_data: {hash_data}')
+                        record_lists[key_type].append({
+                            'api_key': key,
+                            'data': hash_data
+                        })
             i += 1
+        
+        return record_lists
 
 
     def list_usage(self, scan_pattern):

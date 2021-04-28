@@ -355,7 +355,7 @@ class RedisDb():
         record_lists = {}
 
         i = 0
-        batch_size = 40
+        batch_size = 80
         total_length = len(api_key_list)
         while len(api_key_list) > 0:
             # logging.info(f'requesting batch {i} (total length {total_length})')
@@ -373,7 +373,7 @@ class RedisDb():
                 hashes = pipe.execute()
                 for key, hash_data in zip(current_batch, hashes):
                     if len(hash_data) > 0:
-                        logging.info(f'key: {key} hash_data: {hash_data}')
+                        # logging.info(f'key: {key} hash_data: {hash_data}')
                         record_lists[key_type].append({
                             'api_key': key,
                             'data': hash_data

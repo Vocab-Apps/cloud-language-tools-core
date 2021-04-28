@@ -102,19 +102,43 @@ class UserUtils():
         return grouped_df
 
     def get_user_tracking_data(self, api_key_list):
-        record_lists = self.redis_connection.list_user_tracking_data(api_key_list)
-        processed_records = []
-        for key, records in record_lists.items():
-            if key == redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE:
-                for record in records:
-                    language_list = record['data'].keys()
-                    language_name_list = [cloudlanguagetools.constants.Language[x].lang_name for x in language_list]
-                    processed_records.append({
-                        'api_key': record['api_key'],
-                        'detected_languages': language_name_list
-                    })
 
-        return pandas.DataFrame(processed_records)
+        def process_languages(hash_data):
+            language_list = hash_data.keys()
+            language_name_list = [cloudlanguagetools.constants.Language[x].lang_name for x in language_list]            
+            return language_name_list
+
+        def process_tag(hash_data):
+            return list(hash_data.keys())
+
+        processing_map = {
+            redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE: process_languages,
+            redisdb.KEY_TYPE_USER_SERVICE: process_tag,
+            redisdb.KEY_TYPE_USER_CLIENT: process_tag
+        }
+
+        field_name_map = {
+            redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE: 'detected_languages',
+            redisdb.KEY_TYPE_USER_SERVICE: 'services',
+            redisdb.KEY_TYPE_USER_CLIENT: 'clients'
+        }
+
+        record_lists = self.redis_connection.list_user_tracking_data(api_key_list)
+        processed_records_dict = {}
+
+        for key, records in record_lists.items():
+            field_name = field_name_map[key]
+            processing_fn = processing_map[key]
+            for record in records:
+                api_key = record['api_key']
+                if api_key not in processed_records_dict:
+                    processed_records_dict[api_key] = {
+                        'api_key': api_key
+                    }
+                processed_records_dict[api_key][field_name] = processing_fn(record['data'])
+
+        record_list = list(processed_records_dict.values())
+        return pandas.DataFrame(record_list)
 
     def build_user_data_patreon(self):
         # api keys
@@ -150,7 +174,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_patreon_df, user_data_df, how='left', left_on='User ID', right_on='patreon_user_id')
 
-        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages']]
+        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients']]
         update_df = update_df.fillna({
             'api_key': '',
             'api_key_valid': False,

@@ -44,6 +44,7 @@ def main():
                'create_extended_trial_key',
                'increase_trial_limit',
                'list_trial_keys',
+               'show_hash_key',
                'remove_key',
                'modify_key_expiration']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
@@ -88,6 +89,9 @@ def main():
         email = args.trial_email
         connection.get_trial_user_key(email)
         connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
+    elif args.action == 'show_hash_key':
+        redis_key = args.redis_key
+        connection.show_hash_key(redis_key)
     elif args.action == 'clear_db':
         connection.clear_db()
     elif args.action == 'remove_key':

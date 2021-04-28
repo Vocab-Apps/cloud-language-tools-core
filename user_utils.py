@@ -18,10 +18,13 @@ class UserUtils():
         self.convertkit_client = convertkit.ConvertKit()
         self.redis_connection = redisdb.RedisDb()
 
-
-    def get_api_key_list_df(self, key_type):
-        logging.info('listing API keys')
+    def get_full_api_key_list(self):
+        logging.info('getting full API key list')
         api_key_list = self.redis_connection.list_api_keys()
+        return api_key_list        
+
+
+    def get_api_key_list_df(self, api_key_list, key_type):
 
         records = []
         for api_key_entry in api_key_list:
@@ -45,17 +48,22 @@ class UserUtils():
 
         return data_df[field_list_map[key_type]]
 
+    
+
     def get_patreon_users_df(self):
+        logging.info(f'getting patreon user data')
         user_list = self.patreon_utils.get_patreon_user_ids()
         user_list_df = pandas.DataFrame(user_list)
         user_list_df = user_list_df.rename(columns={'user_id': 'patreon_user_id'})
         return user_list_df
 
     def get_monthly_usage_data(self):
+        logging.info('getting current month usage data')
         pattern = 'usage:user:monthly:' + datetime.datetime.now().strftime("%Y%m")
         return self.get_usage_data(pattern, 'monthly_cost', 'monthly_chars')
 
     def get_prev_monthly_usage_data(self):
+        logging.info('getting previous month usage data')
         prev_month_datetime = datetime.datetime.now() + datetime.timedelta(days=-31)
         pattern = 'usage:user:monthly:' + prev_month_datetime.strftime("%Y%m")
         return self.get_usage_data(pattern, 'prev_monthly_cost', 'prev_monthly_chars')
@@ -92,12 +100,19 @@ class UserUtils():
         grouped_df = combined_df.groupby('api_key').agg({cost_field_name: 'sum', characters_field_name: 'sum'}).reset_index()
         return grouped_df
 
+    def get_user_tracking_data(self, api_key_list):
+        self.redis_connection.list_user_tracking_data(api_key_list)
 
     def build_user_data_patreon(self):
         # api keys
-        api_key_list_df = self.get_api_key_list_df('patreon')
+        api_key_list = self.get_full_api_key_list()
+
+        api_key_list_df = self.get_api_key_list_df(api_key_list, 'patreon')
         # print(api_key_list_df)
         
+        # get user tracking data
+        self.get_user_tracking_data(api_key_list)
+
         # patreon data
         patreon_user_df = self.get_patreon_users_df()
         # print(patreon_user_df)
@@ -144,12 +159,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='User Utils')
     choices = [
         'update_airtable_patreon',
-        'usage_data'
+        'usage_data',
+        'show_patreon_user_data'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     args = parser.parse_args()
 
     if args.action == 'update_airtable_patreon':
         user_utils.update_airtable_patreon()
+    elif args.action == 'show_patreon_user_data':
+        user_data_df = user_utils.build_user_data_patreon()
+        print(user_data_df)
     elif args.action == 'usage_data':
         user_utils.get_usage_data()

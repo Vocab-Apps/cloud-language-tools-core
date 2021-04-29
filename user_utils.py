@@ -279,8 +279,9 @@ class UserUtils():
                 'tag_request': None
             })
         
-        airtable_update_df = pandas.DataFrame(airtable_update_records)
-        self.airtable_utils.update_trial_users(airtable_update_df)
+        if len(airtable_update_records) > 0:
+            airtable_update_df = pandas.DataFrame(airtable_update_records)
+            self.airtable_utils.update_trial_users(airtable_update_df)
 
 
     def update_airtable_patreon(self):

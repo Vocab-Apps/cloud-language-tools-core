@@ -169,13 +169,29 @@ class UserUtils():
     def build_user_data_trial(self):
         # api keys
         api_key_list = self.get_full_api_key_list()
+        flat_api_key_list = [x['api_key'] for x in api_key_list]
 
         api_key_list_df = self.get_api_key_list_df(api_key_list, 'trial')
 
         # get user tracking data
         tracking_data_df = self.get_user_tracking_data(api_key_list)
         
+        # get character entitlement
+        entitlement = self.redis_connection.get_trial_user_entitlement(flat_api_key_list)
+        entitlement_df = pandas.DataFrame(entitlement)
+        # get usage
+        api_key_usage = self.redis_connection.get_trial_user_usage(flat_api_key_list)
+        api_key_usage_df = pandas.DataFrame(api_key_usage)
+
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='outer', on='api_key')
+        combined_df = pandas.merge(combined_df, api_key_usage_df, how='left', on='api_key')
+        combined_df = pandas.merge(combined_df, entitlement_df, how='left', on='api_key')
+
+        combined_df['characters'] = combined_df['characters'].fillna(0)
+        combined_df['character_limit'] = combined_df['character_limit'].fillna(0)
+
+        combined_df['characters'] =  combined_df['characters'].astype(int)
+        combined_df['character_limit'] = combined_df['character_limit'].astype(int)
 
         return combined_df
 
@@ -201,15 +217,15 @@ class UserUtils():
     def update_airtable_trial(self):
         user_data_df = self.build_user_data_trial()
 
-        # get airtable patreon users table
+        # get airtable trial users table
         airtable_trial_df = self.airtable_utils.get_trial_users()
         airtable_trial_df = airtable_trial_df[['record_id', 'email']]
 
         joined_df = pandas.merge(airtable_trial_df, user_data_df, how='left', left_on='email', right_on='email')
 
-        update_df = joined_df[['record_id', 'detected_languages', 'services', 'clients']]
+        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'detected_languages', 'services', 'clients']]
 
-        print(update_df)
+        # print(update_df)
 
         self.airtable_utils.update_trial_users(update_df)
 

@@ -44,7 +44,8 @@ class UserUtils():
         data_df = data_df.rename(columns={'user_id': 'patreon_user_id', 'expiration_str': 'api_key_expiration', 'key_valid': 'api_key_valid'})
 
         field_list_map = {
-            'patreon': ['api_key', 'email', 'patreon_user_id', 'api_key_valid', 'api_key_expiration']
+            'patreon': ['api_key', 'email', 'patreon_user_id', 'api_key_valid', 'api_key_expiration'],
+            'trial': ['api_key', 'email', 'api_key_valid', 'api_key_expiration']
         }
 
         return data_df[field_list_map[key_type]]
@@ -165,6 +166,20 @@ class UserUtils():
 
         return combined_df
 
+    def build_user_data_trial(self):
+        # api keys
+        api_key_list = self.get_full_api_key_list()
+
+        api_key_list_df = self.get_api_key_list_df(api_key_list, 'trial')
+
+        # get user tracking data
+        tracking_data_df = self.get_user_tracking_data(api_key_list)
+        
+        combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='outer', on='api_key')
+
+        return combined_df
+
+
     def update_airtable_patreon(self):
         user_data_df = self.build_user_data_patreon()
 
@@ -183,7 +198,20 @@ class UserUtils():
 
         self.airtable_utils.update_patreon_users(update_df)
 
+    def update_airtable_trial(self):
+        user_data_df = self.build_user_data_trial()
 
+        # get airtable patreon users table
+        airtable_trial_df = self.airtable_utils.get_trial_users()
+        airtable_trial_df = airtable_trial_df[['record_id', 'email']]
+
+        joined_df = pandas.merge(airtable_trial_df, user_data_df, how='left', left_on='email', right_on='email')
+
+        update_df = joined_df[['record_id', 'detected_languages', 'services', 'clients']]
+
+        print(update_df)
+
+        self.airtable_utils.update_trial_users(update_df)
 
 
     
@@ -197,16 +225,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='User Utils')
     choices = [
         'update_airtable_patreon',
+        'update_airtable_trial',
         'usage_data',
-        'show_patreon_user_data'
+        'show_patreon_user_data',
+        'show_trial_user_data'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     args = parser.parse_args()
 
     if args.action == 'update_airtable_patreon':
         user_utils.update_airtable_patreon()
+    if args.action == 'update_airtable_trial':
+        user_utils.update_airtable_trial()
     elif args.action == 'show_patreon_user_data':
         user_data_df = user_utils.build_user_data_patreon()
+        print(user_data_df)
+    elif args.action == 'show_trial_user_data':
+        user_data_df = user_utils.build_user_data_trial()
         print(user_data_df)
     elif args.action == 'usage_data':
         user_utils.get_usage_data()

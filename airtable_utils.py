@@ -43,6 +43,9 @@ class AirtableUtils():
     def update_patreon_users(self, data_df):
         self.update_airtable_records(self.airtable_patreon_users_url, data_df)
 
+    def update_trial_users(self, data_df):
+        self.update_airtable_records(self.airtable_trial_users_url, data_df)
+
     def update_airtable_records(self, base_url, update_df):
 
         update_instructions = []

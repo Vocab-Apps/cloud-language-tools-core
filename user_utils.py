@@ -169,17 +169,52 @@ class UserUtils():
 
     def get_convertkit_trial_users(self):
         subscribers = self.convertkit_client.list_trial_users()
+        return self.get_dataframe_from_subscriber_list(subscribers)
 
-        api_key_list = []
+    def get_dataframe_from_subscriber_list(self, subscribers):
         users = []
         for subscriber in subscribers:
-            email = subscriber['email_address']
             users.append({
                 'subscriber_id': subscriber['id'],
-                'email': email
+                'email': subscriber['email_address']
             })
         users_df = pandas.DataFrame(users)
         return users_df
+
+    def get_convertkit_dataframe_for_tag(self, tag_id, tag_name):
+        subscribers = self.convertkit_client.list_subscribers_tag(tag_id)
+        data_df = self.get_dataframe_from_subscriber_list(subscribers)
+        data_df[tag_name] = tag_name
+        data_df = data_df[['subscriber_id', tag_name]]
+        return data_df
+
+    def get_convertkit_tag_data(self):
+        subscribers_trial_extended = self.get_convertkit_dataframe_for_tag(self.convertkit_client.tag_id_trial_extended, 'trial_extended')
+        subscribers_trial_inactive = self.get_convertkit_dataframe_for_tag(self.convertkit_client.tag_id_trial_inactive, 'trial_user_inactive')
+        subscribers_trial_end = self.get_convertkit_dataframe_for_tag(self.convertkit_client.tag_id_trial_end_reach_out, 'trial_end_reach_out')
+        subscribers_trial_patreon_convert = self.get_convertkit_dataframe_for_tag(self.convertkit_client.tag_id_trial_patreon_convert, 'trial_patreon_convert')
+
+        # join together
+        combined_df = subscribers_trial_extended
+        combined_df = pandas.merge(combined_df, subscribers_trial_inactive, how='outer', on='subscriber_id')
+        combined_df = pandas.merge(combined_df, subscribers_trial_end, how='outer', on='subscriber_id')
+        combined_df = pandas.merge(combined_df, subscribers_trial_patreon_convert, how='outer', on='subscriber_id')
+        combined_df = combined_df.fillna('')
+
+        combined_records = []
+
+        for index, row in combined_df.iterrows():
+            tags = [row['trial_extended'], row['trial_user_inactive'], row['trial_end_reach_out'], row['trial_patreon_convert']]
+            tags = [x for x in tags if len(x) > 0]
+            combined_records.append({
+                'subscriber_id': row['subscriber_id'],
+                'tags': tags
+            })
+
+        final_df = pandas.DataFrame(combined_records)
+        print(final_df)
+
+        return final_df
 
     def build_user_data_trial(self):
         # api keys
@@ -190,6 +225,9 @@ class UserUtils():
 
         # get convertkit subscriber ids
         convertkit_trial_users_df = self.get_convertkit_trial_users()
+
+        # get tag data from convertkit
+        tag_data_df = self.get_convertkit_tag_data()
 
         # get user tracking data
         tracking_data_df = self.get_user_tracking_data(api_key_list)

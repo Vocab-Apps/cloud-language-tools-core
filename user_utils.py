@@ -212,7 +212,7 @@ class UserUtils():
             })
 
         final_df = pandas.DataFrame(combined_records)
-        print(final_df)
+        # print(final_df)
 
         return final_df
 
@@ -241,6 +241,7 @@ class UserUtils():
 
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, convertkit_trial_users_df, how='left', on='email')
+        combined_df = pandas.merge(combined_df, tag_data_df, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, api_key_usage_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, entitlement_df, how='left', on='api_key')
 
@@ -262,7 +263,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_patreon_df, user_data_df, how='left', left_on='User ID', right_on='patreon_user_id')
 
-        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients']]
+        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'tags']]
         update_df = update_df.fillna({
             'api_key': '',
             'api_key_valid': False,

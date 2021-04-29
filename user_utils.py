@@ -116,13 +116,15 @@ class UserUtils():
         processing_map = {
             redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE: process_languages,
             redisdb.KEY_TYPE_USER_SERVICE: process_tag,
-            redisdb.KEY_TYPE_USER_CLIENT: process_tag
+            redisdb.KEY_TYPE_USER_CLIENT: process_tag,
+            redisdb.KEY_TYPE_USER_CLIENT_VERSION: process_tag
         }
 
         field_name_map = {
             redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE: 'detected_languages',
             redisdb.KEY_TYPE_USER_SERVICE: 'services',
-            redisdb.KEY_TYPE_USER_CLIENT: 'clients'
+            redisdb.KEY_TYPE_USER_CLIENT: 'clients',
+            redisdb.KEY_TYPE_USER_CLIENT_VERSION: 'versions',
         }
 
         record_lists = self.redis_connection.list_user_tracking_data(api_key_list)
@@ -295,7 +297,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_patreon_df, user_data_df, how='left', left_on='User ID', right_on='patreon_user_id')
 
-        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients']]
+        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions']]
         update_df = update_df.fillna({
             'api_key': '',
             'api_key_valid': False,
@@ -317,7 +319,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_trial_df, user_data_df, how='left', left_on='email', right_on='email')
 
-        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'detected_languages', 'services', 'clients', 'tags']]
+        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'detected_languages', 'services', 'clients', 'versions', 'tags']]
 
         # print(update_df)
 

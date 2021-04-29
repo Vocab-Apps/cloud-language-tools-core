@@ -349,7 +349,8 @@ class RedisDb():
         monthly_user_key_types = [
             KEY_TYPE_USER_AUDIO_LANGUAGE,
             KEY_TYPE_USER_SERVICE,
-            KEY_TYPE_USER_CLIENT
+            KEY_TYPE_USER_CLIENT,
+            KEY_TYPE_USER_CLIENT_VERSION
         ]
 
         record_lists = {}

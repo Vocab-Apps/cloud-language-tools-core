@@ -37,6 +37,7 @@ class UserUtils():
                 }
                 data.update(key_data)
                 records.append(data)
+
         data_df = pandas.DataFrame(records)
         data_df['expiration_dt'] = pandas.to_datetime(data_df['expiration'], unit='s')
         data_df['expiration_str'] = data_df['expiration_dt'].dt.strftime('%Y-%m-%d')
@@ -166,12 +167,29 @@ class UserUtils():
 
         return combined_df
 
+    def get_convertkit_trial_users(self):
+        subscribers = self.convertkit_client.list_trial_users()
+
+        api_key_list = []
+        users = []
+        for subscriber in subscribers:
+            email = subscriber['email_address']
+            users.append({
+                'subscriber_id': subscriber['id'],
+                'email': email
+            })
+        users_df = pandas.DataFrame(users)
+        return users_df
+
     def build_user_data_trial(self):
         # api keys
         api_key_list = self.get_full_api_key_list()
         flat_api_key_list = [x['api_key'] for x in api_key_list]
 
         api_key_list_df = self.get_api_key_list_df(api_key_list, 'trial')
+
+        # get convertkit subscriber ids
+        convertkit_trial_users_df = self.get_convertkit_trial_users()
 
         # get user tracking data
         tracking_data_df = self.get_user_tracking_data(api_key_list)
@@ -183,7 +201,8 @@ class UserUtils():
         api_key_usage = self.redis_connection.get_trial_user_usage(flat_api_key_list)
         api_key_usage_df = pandas.DataFrame(api_key_usage)
 
-        combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='outer', on='api_key')
+        combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
+        combined_df = pandas.merge(combined_df, convertkit_trial_users_df, how='left', on='email')
         combined_df = pandas.merge(combined_df, api_key_usage_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, entitlement_df, how='left', on='api_key')
 

@@ -253,6 +253,35 @@ class UserUtils():
 
         return combined_df
 
+    def perform_airtable_trial_tag_requests(self):
+        airtable_records_df = self.airtable_utils.get_trial_tag_requests()
+
+        airtable_update_records = []
+
+        for index, row in airtable_records_df.iterrows():
+            record_id = row['id']
+            email = row['email']
+            tag_request = row['tag_request']
+
+            if tag_request == 'trial_extended':
+                logging.info(f'extending trial for {email}')
+                # increase API key character limit
+                self.redis_connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
+                # tag user on convertkit
+                self.convertkit_client.tag_user_trial_extended(email)
+            else:
+                tag_id = self.convertkit_client.tag_name_map[tag_request]                
+                logging.info(f'tagging {email} with {tag_request} / {tag_id}')
+                self.convertkit_client.tag_user(email, tag_id)
+            # blank out tag_request field
+            airtable_update_records.append({
+                'record_id': record_id,
+                'tag_request': None
+            })
+        
+        airtable_update_df = pandas.DataFrame(airtable_update_records)
+        self.airtable_utils.update_trial_users(airtable_update_df)
+
 
     def update_airtable_patreon(self):
         user_data_df = self.build_user_data_patreon()
@@ -273,6 +302,8 @@ class UserUtils():
         self.airtable_utils.update_patreon_users(update_df)
 
     def update_airtable_trial(self):
+        self.perform_airtable_trial_tag_requests()
+
         user_data_df = self.build_user_data_trial()
 
         # get airtable trial users table

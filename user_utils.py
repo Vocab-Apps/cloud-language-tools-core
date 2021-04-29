@@ -285,6 +285,8 @@ class UserUtils():
 
 
     def update_airtable_patreon(self):
+        logging.info('updating airtable for patreon users')
+
         user_data_df = self.build_user_data_patreon()
 
         # get airtable patreon users table
@@ -303,6 +305,8 @@ class UserUtils():
         self.airtable_utils.update_patreon_users(update_df)
 
     def update_airtable_trial(self):
+        logging.info('updating airtable for trial users')
+
         self.perform_airtable_trial_tag_requests()
 
         user_data_df = self.build_user_data_trial()
@@ -319,7 +323,9 @@ class UserUtils():
 
         self.airtable_utils.update_trial_users(update_df)
 
-
+    def update_airtable_all(self):
+        self.update_airtable_patreon()
+        self.update_airtable_trial()
     
 
 if __name__ == '__main__':
@@ -330,6 +336,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='User Utils')
     choices = [
+        'update_airtable_all',
         'update_airtable_patreon',
         'update_airtable_trial',
         'usage_data',
@@ -339,7 +346,9 @@ if __name__ == '__main__':
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     args = parser.parse_args()
 
-    if args.action == 'update_airtable_patreon':
+    if args.action == 'update_airtable_all':
+        user_utils.update_airtable_all()
+    elif args.action == 'update_airtable_patreon':
         user_utils.update_airtable_patreon()
     if args.action == 'update_airtable_trial':
         user_utils.update_airtable_trial()

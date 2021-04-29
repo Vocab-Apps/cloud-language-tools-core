@@ -293,7 +293,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_patreon_df, user_data_df, how='left', left_on='User ID', right_on='patreon_user_id')
 
-        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'tags']]
+        update_df = joined_df[['record_id', 'entitled', 'api_key', 'api_key_valid', 'api_key_expiration', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients']]
         update_df = update_df.fillna({
             'api_key': '',
             'api_key_valid': False,
@@ -313,7 +313,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_trial_df, user_data_df, how='left', left_on='email', right_on='email')
 
-        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'detected_languages', 'services', 'clients']]
+        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'detected_languages', 'services', 'clients', 'tags']]
 
         # print(update_df)
 

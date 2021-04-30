@@ -341,6 +341,30 @@ class RedisDb():
             self.r.hincrby(key, 'requests', 1)
             self.r.expire(key, expire_time_seconds)
 
+    def list_audio_requests(self):
+        date_str = datetime.datetime.today().strftime('%Y%m')
+        redis_key = self.build_key(KEY_TYPE_AUDIO_LOG, date_str)
+
+        total_count = self.r.llen(redis_key)
+        logging.info(f'audio request list: {total_count}')
+
+        batch_size = 1000
+
+        continue_loop = True
+        current_index = 0
+        audio_requests = []
+        while continue_loop:
+            logging.info(f'retrieving from {current_index}, length {batch_size} continue: {continue_loop}')
+            current_batch = self.r.lrange(redis_key, current_index, current_index + batch_size - 1)
+            audio_requests.extend(current_batch)
+
+            if len(current_batch) < batch_size:
+                continue_loop = False
+            
+            current_index += batch_size
+
+        logging.info(f'final count: {len(audio_requests)}')
+
     def list_user_tracking_data(self, api_key_entry_list):
 
         # process api key list

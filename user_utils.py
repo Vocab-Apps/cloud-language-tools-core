@@ -329,6 +329,8 @@ class UserUtils():
         self.update_airtable_patreon()
         self.update_airtable_trial()
     
+    def show_audio_requests(self):
+        self.redis_connection.list_audio_requests()
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -343,7 +345,8 @@ if __name__ == '__main__':
         'update_airtable_trial',
         'usage_data',
         'show_patreon_user_data',
-        'show_trial_user_data'
+        'show_trial_user_data',
+        'show_audio_requests'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     args = parser.parse_args()
@@ -362,3 +365,5 @@ if __name__ == '__main__':
         print(user_data_df)
     elif args.action == 'usage_data':
         user_utils.get_usage_data()
+    elif args.action == 'show_audio_requests':
+        user_utils.show_audio_requests()

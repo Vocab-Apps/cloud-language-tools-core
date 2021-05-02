@@ -426,6 +426,8 @@ class RedisDb():
             pattern = self.build_key(KEY_TYPE_USAGE, '*')
         else:
             pattern = self.build_key(scan_pattern, '*')
+
+        logging.info(f'listing usage with pattern {pattern}')
         
         key_list = []
         cursor = '0'

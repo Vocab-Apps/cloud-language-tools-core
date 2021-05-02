@@ -11,6 +11,7 @@ class AirtableUtils():
         self.airtable_trial_users_url = os.environ['AIRTABLE_TRIAL_USERS_URL']
         self.airtable_patreon_users_url = os.environ['AIRTABLE_PATREON_USERS_URL']
         self.airtable_usage_url = os.environ['AIRTABLE_USAGE_URL']
+        self.airtable_usage_daily_url = os.environ['AIRTABLE_USAGE_DAILY_URL']
 
     def get_trial_users(self):
         return self.get_airtable_records(self.airtable_trial_users_url)
@@ -62,6 +63,11 @@ class AirtableUtils():
         # self.airtable_usage_url
         self.delete_all_airtable_records(self.airtable_usage_url)
         self.create_airtable_records(self.airtable_usage_url, usage_df)
+
+    def update_usage_daily(self, usage_df):
+        # self.airtable_usage_url
+        self.delete_all_airtable_records(self.airtable_usage_daily_url)
+        self.create_airtable_records(self.airtable_usage_daily_url, usage_df)        
 
     def update_airtable_records(self, base_url, update_df):
 

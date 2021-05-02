@@ -61,6 +61,9 @@ class UserUtils():
         user_list_df = user_list_df.rename(columns={'user_id': 'patreon_user_id'})
         return user_list_df
 
+    # get monthly usage data per user
+    # -------------------------------
+
     def get_monthly_usage_data(self):
         logging.info('getting current month usage data')
         pattern = 'usage:user:monthly:' + datetime.datetime.now().strftime("%Y%m")
@@ -72,6 +75,9 @@ class UserUtils():
         pattern = 'usage:user:monthly:' + prev_month_datetime.strftime("%Y%m")
         return self.get_usage_data(pattern, 'prev_monthly_cost', 'prev_monthly_chars')
 
+    # get global monthly usage data
+    # -----------------------------
+
     def get_global_monthly_usage_data(self):
         logging.info('getting current global month usage data')
         pattern = 'usage:global:monthly:' + datetime.datetime.now().strftime("%Y%m")
@@ -82,6 +88,14 @@ class UserUtils():
         prev_month_datetime = datetime.datetime.now() + datetime.timedelta(days=-31)
         pattern = 'usage:global:monthly:' + prev_month_datetime.strftime("%Y%m")
         return self.get_global_usage_data(pattern, 'prev_monthly_cost', 'prev_monthly_chars')
+
+    # get global daily usage data
+    # ---------------------------
+
+    def get_global_daily_usage_data(self):
+        logging.info('getting previous global daily usage data')
+        pattern = 'usage:global:daily'
+        return self.get_global_usage_data(pattern, 'cost', 'characters')
 
     def get_daily_usage_data(self):
         pattern = 'usage:user:daily:' + datetime.datetime.now().strftime("%Y%m%d")
@@ -117,20 +131,24 @@ class UserUtils():
 
     def get_global_usage_data(self, usage_key_pattern, cost_field_name, characters_field_name):
         usage_entries = self.redis_connection.list_usage(usage_key_pattern)
+        print(usage_entries)
         # clt:usage:global:monthly:202103:Amazon:translation
         records = []
         for entry in usage_entries:
             usage_key = entry['usage_key']
             components = usage_key.split(':')
+            period = components[4]
             service = components[5]
             request_type = components[6]
             records.append({
+                'period': period,
                 'service': service,
                 'request_type': request_type,
                 'characters': int(entry['characters'])
             })
 
         records_df = pandas.DataFrame(records)
+        print(records_df)
 
         cost_table_df = pandas.DataFrame(quotas.COST_TABLE)
 
@@ -139,7 +157,7 @@ class UserUtils():
         combined_df = combined_df.rename(columns={'characters': characters_field_name})
 
         # retain certain columns
-        combined_df = combined_df[['service', 'request_type', cost_field_name, characters_field_name]]
+        combined_df = combined_df[['period', 'service', 'request_type', cost_field_name, characters_field_name]]
 
         return combined_df
 
@@ -217,6 +235,10 @@ class UserUtils():
         combined_df = pandas.merge(monthly_usage_data_df, prev_monthly_usage_data_df, how='outer', on=['service', 'request_type'])
 
         return combined_df
+
+    def build_global_daily_usage_data(self):
+        usage_df = self.get_global_daily_usage_data()
+        return usage_df
 
     def get_convertkit_trial_users(self):
         subscribers = self.convertkit_client.list_trial_users()
@@ -375,8 +397,10 @@ class UserUtils():
         self.airtable_utils.update_trial_users(update_df)
 
     def update_airtable_usage(self):
-        usage_df = self.build_global_usage_data()
-        self.airtable_utils.update_usage(usage_df)
+        # usage_df = self.build_global_usage_data()
+        # self.airtable_utils.update_usage(usage_df)
+        usage_df = self.build_global_daily_usage_data()
+        self.airtable_utils.update_usage_daily(usage_df)
 
     def update_airtable_all(self):
         self.update_airtable_patreon()
@@ -451,6 +475,8 @@ if __name__ == '__main__':
     elif args.action == 'extend_patreon_key_validity':
         user_utils.extend_patreon_key_validity()    
     elif args.action == 'usage_data':
-        user_utils.build_global_usage_data()
+        # user_utils.build_global_usage_data()
+        data_df = user_utils.build_global_daily_usage_data()
+        print(data_df)
     elif args.action == 'show_audio_requests':
         user_utils.show_audio_requests()

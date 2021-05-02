@@ -149,20 +149,31 @@ class AzureService(cloudlanguagetools.service.Service):
         audio_config = azure.cognitiveservices.speech.audio.AudioOutputConfig(filename=output_temp_filename)
         synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
 
-        pitch = options.get('pitch', 0)
+        default_pitch = 0
+        default_rate = 1.0
+
+        pitch = options.get('pitch', default_pitch)
         pitch_str = f'{pitch:+.0f}Hz'
-        rate = options.get('rate', 1.0)
+        rate = options.get('rate', default_rate)
         rate_str = f'{rate:0.1f}'
 
-        ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-  <voice name="{voice_key['name']}">
-    <prosody pitch="{pitch_str}" rate="{rate_str}" >
-        {text}
-    </prosody>
-  </voice>
-</speak>"""
 
-        # print(ssml_str)
+        prosody_start_str = ''
+        prosody_end_str = ''
+
+        if pitch != default_pitch or rate != default_rate:
+            prosody_start_str = f"""<prosody pitch="{pitch_str}" rate="{rate_str}" >"""
+            prosody_end_str = """</prosody>"""
+
+        # the ssml str must be super optimized to have no whitespace, no extra characters
+        ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+<voice name="{voice_key['name']}">
+{prosody_start_str}""".replace('\n', '') + text + f"""
+{prosody_end_str}
+</voice>
+</speak>""".replace('\n', '')
+
+        print(f'[{ssml_str}] len: {len(ssml_str)}')
 
         result = synthesizer.start_speaking_ssml(ssml_str)
 

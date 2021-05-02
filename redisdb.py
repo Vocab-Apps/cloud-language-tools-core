@@ -49,7 +49,7 @@ class RedisDb():
         return key_expiration_timestamp    
 
     def get_api_key_expiration_timestamp(self):
-        expiration_date = datetime.datetime.now() + datetime.timedelta(days=60)
+        expiration_date = datetime.datetime.now() + datetime.timedelta(days=45)
         key_expiration_timestamp = int(expiration_date.timestamp())
         return key_expiration_timestamp
 
@@ -184,7 +184,7 @@ class RedisDb():
         expiration_dt = datetime.datetime.fromtimestamp(expiration_timestamp)
         if expiration_timestamp > current_timestamp:
             expire_time_delta = expiration_dt - current_dt
-            return {'key_valid': True, 'msg': f'API Key expires in {expire_time_delta.days} days'}
+            return {'key_valid': True, 'msg': f'API Key is valid'}
         return {'key_valid': False, 'msg':f'API Key expired'}
         
     def list_api_keys(self):

@@ -53,7 +53,7 @@ class ApiTests(unittest.TestCase):
     def test_verify_api_key(self):
         response = self.client.post('/verify_api_key', json={'api_key': self.api_key})
         data = json.loads(response.data)
-        self.assertEqual({'key_valid': True, 'msg': 'API Key expires in 59 days'}, data)
+        self.assertEqual({'key_valid': True, 'msg': 'API Key is valid'}, data)
 
         response = self.client.post('/verify_api_key', json={'api_key': self.api_key_expired})
         data = json.loads(response.data)

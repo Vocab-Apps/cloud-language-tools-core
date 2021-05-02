@@ -105,6 +105,7 @@ class UserUtils():
         return grouped_df
 
     def get_user_tracking_data(self, api_key_list):
+        logging.info('getting user tracking data')
 
         def process_languages(hash_data):
             language_list = hash_data.keys()

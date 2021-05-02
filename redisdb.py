@@ -38,8 +38,12 @@ class RedisDb():
     def build_key(self, key_type, key):
         return f'{KEY_PREFIX}:{key_type}:{key}'
 
-    def build_monthly_user_key(self, key_type, api_key):
-        date_str = datetime.datetime.today().strftime('%Y%m')
+    def build_monthly_user_key(self, key_type, api_key, prev_month=False):
+        if prev_month:
+            date = datetime.datetime.now() + datetime.timedelta(days=-28)
+        else:
+            date = datetime.datetime.now()
+        date_str = date.strftime('%Y%m')
         redis_key = self.build_key(key_type, f'{date_str}:{api_key}')
         return redis_key
 
@@ -392,17 +396,24 @@ class RedisDb():
             for key_type in monthly_user_key_types:
                 if key_type not in record_lists:
                     record_lists[key_type] = []
-                pipe = self.r.pipeline()
+                pipe_1 = self.r.pipeline()
+                pipe_2 = self.r.pipeline()
                 for api_key in current_batch:
                     redis_key = self.build_monthly_user_key(key_type, api_key)
-                    pipe.hgetall(redis_key)
-                hashes = pipe.execute()
-                for key, hash_data in zip(current_batch, hashes):
-                    if len(hash_data) > 0:
+                    pipe_1.hgetall(redis_key)
+                    redis_key = self.build_monthly_user_key(key_type, api_key, prev_month=True)
+                    pipe_2.hgetall(redis_key)
+                hashes_1 = pipe_1.execute()
+                hashes_2 = pipe_2.execute()
+                for key, hash_data_1, hash_data_2 in zip(current_batch, hashes_1, hashes_2):
+                    user_hash_data = {}
+                    user_hash_data.update(hash_data_1)
+                    user_hash_data.update(hash_data_2)
+                    if len(user_hash_data) > 0:
                         # logging.info(f'key: {key} hash_data: {hash_data}')
                         record_lists[key_type].append({
                             'api_key': key,
-                            'data': hash_data
+                            'data': user_hash_data
                         })
             i += 1
         

@@ -110,7 +110,7 @@ class AirtableUtils():
 
     def delete_all_airtable_records(self, base_url):
         logging.info(f'deleting all records from {base_url}')
-        records_df = self.get_airtable_records(self.airtable_usage_url)
+        records_df = self.get_airtable_records(base_url)
         record_ids = list(records_df['record_id'])
         headers = {
             'Authorization': f'Bearer {self.airtable_api_key}',
@@ -121,6 +121,7 @@ class AirtableUtils():
             record_selection = record_ids[0:subset_length]
             record_ids = record_ids[subset_length:]
             params = {'records[]': record_selection}
+            # logging.info(f'deleting records {record_selection}')
             params_encoded = urllib.parse.urlencode(params, True)
             url = base_url + '?' + params_encoded
             logging.info(f'delete URL: {url}')

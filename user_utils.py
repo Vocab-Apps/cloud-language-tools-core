@@ -125,7 +125,7 @@ class UserUtils():
 
     def get_global_usage_data(self, usage_key_pattern):
         usage_entries = self.redis_connection.list_usage(usage_key_pattern)
-        print(usage_entries)
+        # print(usage_entries)
         # clt:usage:global:monthly:202103:Amazon:translation
         records = []
         for entry in usage_entries:
@@ -143,7 +143,7 @@ class UserUtils():
             })
 
         records_df = pandas.DataFrame(records)
-        print(records_df)
+        # print(records_df)
 
         cost_table_df = pandas.DataFrame(quotas.COST_TABLE)
 

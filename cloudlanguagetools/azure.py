@@ -167,7 +167,6 @@ class AzureService(cloudlanguagetools.service.Service):
 
         # the ssml str must be super optimized to have no whitespace, no extra characters
         ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-<<<<<<< HEAD
 <voice name="{voice_key['name']}">
 {prosody_start_str}""".replace('\n', '') + text + f"""
 {prosody_end_str}
@@ -175,16 +174,6 @@ class AzureService(cloudlanguagetools.service.Service):
 </speak>""".replace('\n', '')
 
         # print(f'[{ssml_str}] len: {len(ssml_str)}')
-=======
-  <voice name="{voice_key['name']}">
-    <prosody pitch="{pitch_str}" rate="{rate_str}" >
-        {text}
-    </prosody>
-  </voice>
-</speak>"""
-
-        print(f'[{ssml_str}] len: {len(ssml_str)}')
->>>>>>> show daily usage
 
         result = synthesizer.start_speaking_ssml(ssml_str)
 

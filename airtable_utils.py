@@ -9,6 +9,7 @@ class AirtableUtils():
         self.airtable_api_key = os.environ['AIRTABLE_API_KEY']
         self.airtable_trial_users_url = os.environ['AIRTABLE_TRIAL_USERS_URL']
         self.airtable_patreon_users_url = os.environ['AIRTABLE_PATREON_USERS_URL']
+        self.airtable_usage_url = os.environ['AIRTABLE_USAGE_URL']
 
     def get_trial_users(self):
         return self.get_airtable_records(self.airtable_trial_users_url)
@@ -56,6 +57,10 @@ class AirtableUtils():
     def update_trial_users(self, data_df):
         self.update_airtable_records(self.airtable_trial_users_url, data_df)
 
+    def update_usage(self, usage_df):
+        # self.airtable_usage_url
+        self.create_airtable_records(self.airtable_usage_url, usage_df)
+
     def update_airtable_records(self, base_url, update_df):
 
         update_instructions = []
@@ -94,3 +99,43 @@ class AirtableUtils():
             }, headers=headers)
             if response.status_code != 200:
                 logging.error(response.content)        
+
+    def delete_all_airtable_records(records, base_url):
+
+
+    def create_airtable_records(self, base_url, records_df):
+
+        update_instructions = []
+        column_list = records_df.columns.values.tolist()
+
+        for index, record in records_df.iterrows():
+            create_instruction = {
+                'fields': {}
+            }
+            for column in column_list:
+                value = record[column]
+                if isinstance(record[column], list):
+                    pass # don't do anything
+                elif pandas.isnull(value):
+                    value = None
+                create_instruction['fields'][column] = value
+            update_instructions.append(create_instruction)
+
+        logging.info(f'starting to update {base_url}')
+
+        headers = {
+            'Authorization': f'Bearer {self.airtable_api_key}',
+            'Content-Type': 'application/json' }
+        while len(update_instructions) > 0:
+            slice_length = min(10, len(update_instructions))
+            update_slice = update_instructions[0:slice_length]
+            del update_instructions[0:slice_length]
+            
+            # pprint.pprint(update_slice)
+            logging.info(f'creating records')
+            response = requests.post(base_url, json={
+                'records': update_slice,
+                'typecast': True
+            }, headers=headers)
+            if response.status_code != 200:
+                logging.error(response.content)            

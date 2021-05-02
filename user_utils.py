@@ -72,6 +72,17 @@ class UserUtils():
         pattern = 'usage:user:monthly:' + prev_month_datetime.strftime("%Y%m")
         return self.get_usage_data(pattern, 'prev_monthly_cost', 'prev_monthly_chars')
 
+    def get_global_monthly_usage_data(self):
+        logging.info('getting current global month usage data')
+        pattern = 'usage:global:monthly:' + datetime.datetime.now().strftime("%Y%m")
+        return self.get_global_usage_data(pattern, 'monthly_cost', 'monthly_chars')
+
+    def get_global_prev_monthly_usage_data(self):
+        logging.info('getting previous global month usage data')
+        prev_month_datetime = datetime.datetime.now() + datetime.timedelta(days=-31)
+        pattern = 'usage:global:monthly:' + prev_month_datetime.strftime("%Y%m")
+        return self.get_global_usage_data(pattern, 'prev_monthly_cost', 'prev_monthly_chars')
+
     def get_daily_usage_data(self):
         pattern = 'usage:user:daily:' + datetime.datetime.now().strftime("%Y%m%d")
         return self.get_usage_data(pattern, 'daily_cost', 'daily_chars')
@@ -103,6 +114,34 @@ class UserUtils():
 
         grouped_df = combined_df.groupby('api_key').agg({cost_field_name: 'sum', characters_field_name: 'sum'}).reset_index()
         return grouped_df
+
+    def get_global_usage_data(self, usage_key_pattern, cost_field_name, characters_field_name):
+        usage_entries = self.redis_connection.list_usage(usage_key_pattern)
+        # clt:usage:global:monthly:202103:Amazon:translation
+        records = []
+        for entry in usage_entries:
+            usage_key = entry['usage_key']
+            components = usage_key.split(':')
+            service = components[5]
+            request_type = components[6]
+            records.append({
+                'service': service,
+                'request_type': request_type,
+                'characters': int(entry['characters'])
+            })
+
+        records_df = pandas.DataFrame(records)
+
+        cost_table_df = pandas.DataFrame(quotas.COST_TABLE)
+
+        combined_df = pandas.merge(records_df, cost_table_df, how='left', on=['service', 'request_type'])
+        combined_df[cost_field_name] = combined_df['character_cost'] * combined_df['characters']
+        combined_df = combined_df.rename(columns={'characters': characters_field_name})
+
+        # retain certain columns
+        combined_df = combined_df[['service', 'request_type', cost_field_name, characters_field_name]]
+
+        return combined_df
 
     def get_user_tracking_data(self, api_key_list):
         logging.info('getting user tracking data')
@@ -168,6 +207,14 @@ class UserUtils():
         combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, tracking_data_df, how='left', on='api_key')
+
+        return combined_df
+
+    def build_global_usage_data(self):
+        monthly_usage_data_df = self.get_global_monthly_usage_data()
+        prev_monthly_usage_data_df = self.get_global_prev_monthly_usage_data()
+
+        combined_df = pandas.merge(monthly_usage_data_df, prev_monthly_usage_data_df, how='outer', on=['service', 'request_type'])
 
         return combined_df
 
@@ -327,6 +374,10 @@ class UserUtils():
 
         self.airtable_utils.update_trial_users(update_df)
 
+    def update_airtable_usage(self):
+        usage_df = self.build_global_usage_data()
+        self.airtable_utils.update_usage(usage_df)
+
     def update_airtable_all(self):
         self.update_airtable_patreon()
         self.update_airtable_trial()
@@ -373,6 +424,7 @@ if __name__ == '__main__':
         'update_airtable_all',
         'update_airtable_patreon',
         'update_airtable_trial',
+        'update_airtable_usage',
         'extend_patreon_key_validity',
         'usage_data',
         'show_patreon_user_data',
@@ -388,6 +440,8 @@ if __name__ == '__main__':
         user_utils.update_airtable_patreon()
     if args.action == 'update_airtable_trial':
         user_utils.update_airtable_trial()
+    if args.action == 'update_airtable_usage':
+        user_utils.update_airtable_usage()
     elif args.action == 'show_patreon_user_data':
         user_data_df = user_utils.build_user_data_patreon()
         print(user_data_df)
@@ -397,6 +451,6 @@ if __name__ == '__main__':
     elif args.action == 'extend_patreon_key_validity':
         user_utils.extend_patreon_key_validity()    
     elif args.action == 'usage_data':
-        user_utils.get_usage_data()
+        user_utils.build_global_usage_data()
     elif args.action == 'show_audio_requests':
         user_utils.show_audio_requests()

@@ -80,14 +80,8 @@ class UserUtils():
 
     def get_global_monthly_usage_data(self):
         logging.info('getting current global month usage data')
-        pattern = 'usage:global:monthly:' + datetime.datetime.now().strftime("%Y%m")
-        return self.get_global_usage_data(pattern, 'monthly_cost', 'monthly_chars')
-
-    def get_global_prev_monthly_usage_data(self):
-        logging.info('getting previous global month usage data')
-        prev_month_datetime = datetime.datetime.now() + datetime.timedelta(days=-31)
-        pattern = 'usage:global:monthly:' + prev_month_datetime.strftime("%Y%m")
-        return self.get_global_usage_data(pattern, 'prev_monthly_cost', 'prev_monthly_chars')
+        pattern = 'usage:global:monthly'
+        return self.get_global_usage_data(pattern)
 
     # get global daily usage data
     # ---------------------------
@@ -95,7 +89,7 @@ class UserUtils():
     def get_global_daily_usage_data(self):
         logging.info('getting previous global daily usage data')
         pattern = 'usage:global:daily'
-        return self.get_global_usage_data(pattern, 'cost', 'characters')
+        return self.get_global_usage_data(pattern)
 
     def get_daily_usage_data(self):
         pattern = 'usage:user:daily:' + datetime.datetime.now().strftime("%Y%m%d")
@@ -129,7 +123,7 @@ class UserUtils():
         grouped_df = combined_df.groupby('api_key').agg({cost_field_name: 'sum', characters_field_name: 'sum'}).reset_index()
         return grouped_df
 
-    def get_global_usage_data(self, usage_key_pattern, cost_field_name, characters_field_name):
+    def get_global_usage_data(self, usage_key_pattern):
         usage_entries = self.redis_connection.list_usage(usage_key_pattern)
         print(usage_entries)
         # clt:usage:global:monthly:202103:Amazon:translation
@@ -144,7 +138,8 @@ class UserUtils():
                 'period': period,
                 'service': service,
                 'request_type': request_type,
-                'characters': int(entry['characters'])
+                'characters': int(entry['characters']),
+                'requests': int(entry['requests'])
             })
 
         records_df = pandas.DataFrame(records)
@@ -153,11 +148,10 @@ class UserUtils():
         cost_table_df = pandas.DataFrame(quotas.COST_TABLE)
 
         combined_df = pandas.merge(records_df, cost_table_df, how='left', on=['service', 'request_type'])
-        combined_df[cost_field_name] = combined_df['character_cost'] * combined_df['characters']
-        combined_df = combined_df.rename(columns={'characters': characters_field_name})
+        combined_df['cost'] = combined_df['character_cost'] * combined_df['characters']
 
         # retain certain columns
-        combined_df = combined_df[['period', 'service', 'request_type', cost_field_name, characters_field_name]]
+        combined_df = combined_df[['period', 'service', 'request_type', 'cost', 'characters',  'requests']]
 
         return combined_df
 
@@ -230,11 +224,7 @@ class UserUtils():
 
     def build_global_usage_data(self):
         monthly_usage_data_df = self.get_global_monthly_usage_data()
-        prev_monthly_usage_data_df = self.get_global_prev_monthly_usage_data()
-
-        combined_df = pandas.merge(monthly_usage_data_df, prev_monthly_usage_data_df, how='outer', on=['service', 'request_type'])
-
-        return combined_df
+        return monthly_usage_data_df
 
     def build_global_daily_usage_data(self):
         usage_df = self.get_global_daily_usage_data()
@@ -397,8 +387,8 @@ class UserUtils():
         self.airtable_utils.update_trial_users(update_df)
 
     def update_airtable_usage(self):
-        # usage_df = self.build_global_usage_data()
-        # self.airtable_utils.update_usage(usage_df)
+        usage_df = self.build_global_usage_data()
+        self.airtable_utils.update_usage(usage_df)
         usage_df = self.build_global_daily_usage_data()
         self.airtable_utils.update_usage_daily(usage_df)
 

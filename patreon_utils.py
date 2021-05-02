@@ -113,7 +113,7 @@ class PatreonUtils():
         return entitled_user_ids
         
 
-    def list_patreon_user_ids(self, creator_access_token, campaign_id):
+    def list_patreon_user_ids(self):
         logging.info('getting list of patreon entitled users')
         entitled_user_ids = self.get_entitled_users()
         redis_connection = redisdb.RedisDb()
@@ -133,8 +133,8 @@ class PatreonUtils():
 
         return result
 
-    def extend_user_key_validity(self, creator_access_token, campaign_id):
-        api_key_list = self.list_patreon_user_ids(creator_access_token, campaign_id)
+    def extend_user_key_validity(self):
+        api_key_list = self.list_patreon_user_ids()
         redis_connection = redisdb.RedisDb()
         for api_key_entry in api_key_list:
             patreon_user_id = api_key_entry['key_data']['user_id']
@@ -170,7 +170,7 @@ if __name__ == '__main__':
     if args.action == 'list_patreon_entitled_users':
         utils.list_patreon_user_ids(access_token, campaign_id)
     elif args.action == 'extend_key_validity':
-        utils.extend_user_key_validity(access_token, campaign_id)
+        utils.extend_user_key_validity()
     elif args.action == 'find_cancelations':
         utils.find_cancelations(access_token, campaign_id)
 

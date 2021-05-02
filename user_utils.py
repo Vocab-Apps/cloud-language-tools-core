@@ -330,6 +330,10 @@ class UserUtils():
         self.update_airtable_patreon()
         self.update_airtable_trial()
     
+    def extend_patreon_key_validity(self):
+        logging.info('extending patreon key validity')
+        self.patreon_utils.extend_user_key_validity()
+
     def show_audio_requests(self):
         audio_request_list = self.redis_connection.list_audio_requests()
         audio_requests = [json.loads(x) for x in audio_request_list]
@@ -368,6 +372,7 @@ if __name__ == '__main__':
         'update_airtable_all',
         'update_airtable_patreon',
         'update_airtable_trial',
+        'extend_patreon_key_validity',
         'usage_data',
         'show_patreon_user_data',
         'show_trial_user_data',
@@ -388,6 +393,8 @@ if __name__ == '__main__':
     elif args.action == 'show_trial_user_data':
         user_data_df = user_utils.build_user_data_trial()
         print(user_data_df)
+    elif args.action == 'extend_patreon_key_validity':
+        user_utils.extend_patreon_key_validity()    
     elif args.action == 'usage_data':
         user_utils.get_usage_data()
     elif args.action == 'show_audio_requests':

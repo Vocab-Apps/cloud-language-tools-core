@@ -2,6 +2,7 @@ import os
 import pandas
 import logging
 import requests
+import urllib
 import pprint
 
 class AirtableUtils():
@@ -59,6 +60,7 @@ class AirtableUtils():
 
     def update_usage(self, usage_df):
         # self.airtable_usage_url
+        self.delete_all_airtable_records(self.airtable_usage_url)
         self.create_airtable_records(self.airtable_usage_url, usage_df)
 
     def update_airtable_records(self, base_url, update_df):
@@ -100,8 +102,26 @@ class AirtableUtils():
             if response.status_code != 200:
                 logging.error(response.content)        
 
-    def delete_all_airtable_records(records, base_url):
+    def delete_all_airtable_records(self, base_url):
+        logging.info(f'deleting all records from {base_url}')
+        records_df = self.get_airtable_records(self.airtable_usage_url)
+        record_ids = list(records_df['record_id'])
+        headers = {
+            'Authorization': f'Bearer {self.airtable_api_key}',
+            'Content-Type': 'application/json' }        
 
+        while len(record_ids) > 0:
+            subset_length = min(10, len(record_ids))
+            record_selection = record_ids[0:subset_length]
+            record_ids = record_ids[subset_length:]
+            params = {'records[]': record_selection}
+            params_encoded = urllib.parse.urlencode(params, True)
+            url = base_url + '?' + params_encoded
+            logging.info(f'delete URL: {url}')
+            response = requests.delete(url, headers=headers)
+            if response.status_code != 200:
+                logging.error(response.content)
+        
 
     def create_airtable_records(self, base_url, records_df):
 

@@ -94,7 +94,7 @@ class PatreonUtils():
         entitled_members = []
         cursor = None
         while True:
-            members_response = api_client.get_campaigns_by_id_members(campaign_id, 900, cursor=cursor, includes=['user', 'currently_entitled_tiers'], fields={'user': ['email', 'full_name']})
+            members_response = api_client.get_campaigns_by_id_members(self.campaign_id, 900, cursor=cursor, includes=['user', 'currently_entitled_tiers'], fields={'user': ['email', 'full_name']})
             # print(members_response.json_data)
             for member in members_response.json_data['data']:
                 if len(member['relationships']['currently_entitled_tiers']['data']) > 0:
@@ -113,9 +113,9 @@ class PatreonUtils():
         return entitled_user_ids
         
 
-    def list_patreon_user_ids(creator_access_token, campaign_id):
+    def list_patreon_user_ids(self, creator_access_token, campaign_id):
         logging.info('getting list of patreon entitled users')
-        entitled_user_ids = get_entitled_users(creator_access_token, campaign_id)
+        entitled_user_ids = self.get_entitled_users()
         redis_connection = redisdb.RedisDb()
         logging.info('listing all API keys')
         api_key_list = redis_connection.list_api_keys()
@@ -133,8 +133,8 @@ class PatreonUtils():
 
         return result
 
-    def extend_user_key_validity(creator_access_token, campaign_id):
-        api_key_list = list_patreon_user_ids(creator_access_token, campaign_id)
+    def extend_user_key_validity(self, creator_access_token, campaign_id):
+        api_key_list = self.list_patreon_user_ids(creator_access_token, campaign_id)
         redis_connection = redisdb.RedisDb()
         for api_key_entry in api_key_list:
             patreon_user_id = api_key_entry['key_data']['user_id']
@@ -144,7 +144,7 @@ class PatreonUtils():
 
 
 
-    def list_campaigns(access_token, campaign_id):
+    def list_campaigns(self, access_token, campaign_id):
         api_client = patreon.API(access_token)
         # data = api_client.get_campaigns(10)
         data = api_client.get_campaigns_by_id_members(campaign_id, 10, includes=['user', 'currently_entitled_tiers'])
@@ -165,12 +165,14 @@ if __name__ == '__main__':
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     args = parser.parse_args()
 
+    utils = PatreonUtils()
+
     if args.action == 'list_patreon_entitled_users':
-        list_patreon_user_ids(access_token, campaign_id)
+        utils.list_patreon_user_ids(access_token, campaign_id)
     elif args.action == 'extend_key_validity':
-        extend_user_key_validity(access_token, campaign_id)
+        utils.extend_user_key_validity(access_token, campaign_id)
     elif args.action == 'find_cancelations':
-        find_cancelations(access_token, campaign_id)
+        utils.find_cancelations(access_token, campaign_id)
 
     
 

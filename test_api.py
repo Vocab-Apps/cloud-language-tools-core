@@ -446,6 +446,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual('Azure', first_request_data['service'])
         self.assertEqual('Je ne suis pas intéressé.', first_request_data['text'])
         self.assertEqual('fr', first_request_data['language_code'])
+        self.assertTrue(abs(first_request_data['timestamp'] - datetime.datetime.now().timestamp()) < 5) # less than 5 seconds apart
         self.assertEqual(self.api_key_v2, first_request_data['api_key'])
 
         # make two more requests

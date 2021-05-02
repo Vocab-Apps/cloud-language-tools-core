@@ -234,6 +234,7 @@ class RedisDb():
         date_str = datetime.datetime.today().strftime('%Y%m')
         redis_key = self.build_key(KEY_TYPE_AUDIO_LOG, date_str)
         data['api_key'] = api_key
+        data['timestamp'] = int(datetime.datetime.now().timestamp())
         value_str = json.dumps(data)
         self.r.rpush(redis_key, value_str)
         self.r.expire(redis_key, self.get_expire_time_usage())

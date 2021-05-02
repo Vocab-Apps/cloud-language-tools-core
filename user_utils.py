@@ -2,6 +2,7 @@ import pandas
 import logging
 import datetime
 import argparse
+import json
 
 import quotas
 import redisdb
@@ -330,7 +331,31 @@ class UserUtils():
         self.update_airtable_trial()
     
     def show_audio_requests(self):
-        self.redis_connection.list_audio_requests()
+        audio_request_list = self.redis_connection.list_audio_requests()
+        audio_requests = [json.loads(x) for x in audio_request_list]
+        # voice_key should be a string
+        for request in audio_requests:
+            request['voice'] = json.dumps(request['voice_key'])
+
+        audio_requests_df = pandas.DataFrame(audio_requests)
+        # print(audio_requests_df)
+
+        # find duplicate requests
+        # duplicate_df = audio_requests_df[audio_requests_df.duplicated(['text'])]
+        # print(duplicate_df)
+
+        # grouped_df = duplicate_df.groupby(['text']).agg({'language_code': 'count'}).reset_index()
+        # print(grouped_df)
+
+        grouped_df = audio_requests_df.groupby(['text', 'language_code', 'service', 'voice', 'api_key']).agg({'request_mode':'count'}).reset_index()
+        grouped_df = grouped_df.sort_values(by='request_mode', ascending=False)
+        print(grouped_df.head(50))
+
+        if False:
+            grouped_df = audio_requests_df.groupby(['text', 'language_code']).agg({'request_mode':'count'}).reset_index()
+            grouped_df = grouped_df.sort_values(by='request_mode', ascending=False)
+            print(grouped_df.head(50))        
+
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 

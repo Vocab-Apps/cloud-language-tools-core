@@ -173,7 +173,7 @@ class AzureService(cloudlanguagetools.service.Service):
 </voice>
 </speak>""".replace('\n', '')
 
-        print(f'[{ssml_str}] len: {len(ssml_str)}')
+        # print(f'[{ssml_str}] len: {len(ssml_str)}')
 
         result = synthesizer.start_speaking_ssml(ssml_str)
 

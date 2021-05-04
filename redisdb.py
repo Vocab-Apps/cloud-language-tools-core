@@ -346,10 +346,7 @@ class RedisDb():
             self.r.hincrby(key, 'requests', 1)
             self.r.expire(key, expire_time_seconds)
 
-    def list_audio_requests(self):
-        date_str = datetime.datetime.today().strftime('%Y%m')
-        redis_key = self.build_key(KEY_TYPE_AUDIO_LOG, date_str)
-
+    def retrieve_audio_requests_for_key(self, redis_key):
         total_count = self.r.llen(redis_key)
         logging.info(f'audio request list: {total_count}')
 
@@ -369,6 +366,23 @@ class RedisDb():
             current_index += batch_size
 
         logging.info(f'final count: {len(audio_requests)}')
+
+        return audio_requests
+
+    def retrieve_audio_requests(self):
+        logging.info('retrieving current month audio requests')
+        date_str = datetime.datetime.today().strftime('%Y%m')
+        redis_key = self.build_key(KEY_TYPE_AUDIO_LOG, date_str)
+        current_month_requests = self.retrieve_audio_requests_for_key(redis_key)
+
+        logging.info('retrieving prev month audio requests')
+        date_str = (datetime.datetime.now() + datetime.timedelta(days=-28)).strftime('%Y%m')
+        redis_key = self.build_key(KEY_TYPE_AUDIO_LOG, date_str)
+        prev_month_requests = self.retrieve_audio_requests_for_key(redis_key)        
+
+        return current_month_requests + prev_month_requests
+
+
 
     def list_user_tracking_data(self, api_key_entry_list):
 

@@ -401,14 +401,20 @@ class UserUtils():
         logging.info('extending patreon key validity')
         self.patreon_utils.extend_user_key_validity()
 
-    def show_audio_requests(self):
-        audio_request_list = self.redis_connection.list_audio_requests()
+    def download_audio_requests(self):
+        audio_request_list = self.redis_connection.retrieve_audio_requests()
         audio_requests = [json.loads(x) for x in audio_request_list]
         # voice_key should be a string
         for request in audio_requests:
             request['voice'] = json.dumps(request['voice_key'])
 
         audio_requests_df = pandas.DataFrame(audio_requests)
+        filename = 'temp_data_files/audio_requests.csv'
+        audio_requests_df.to_csv(filename)
+
+        logging.info(f'wrote audio requests to {filename}')
+        return
+
         # print(audio_requests_df)
 
         # find duplicate requests
@@ -444,7 +450,7 @@ if __name__ == '__main__':
         'usage_data',
         'show_patreon_user_data',
         'show_trial_user_data',
-        'show_audio_requests'
+        'download_audio_requests'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     args = parser.parse_args()
@@ -469,5 +475,7 @@ if __name__ == '__main__':
         # user_utils.build_global_usage_data()
         data_df = user_utils.build_global_daily_usage_data()
         print(data_df)
-    elif args.action == 'show_audio_requests':
-        user_utils.show_audio_requests()
+    elif args.action == 'download_audio_requests':
+        user_utils.download_audio_requests()
+    else:
+        raise Exception(f'action not supported: {args.action}')

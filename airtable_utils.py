@@ -66,6 +66,8 @@ class AirtableUtils():
 
     def update_usage_daily(self, usage_df):
         # self.airtable_usage_url
+        usage_df = usage_df.sort_values('period', ascending=False)
+        usage_df = usage_df.head(120)
         self.delete_all_airtable_records(self.airtable_usage_daily_url)
         self.create_airtable_records(self.airtable_usage_daily_url, usage_df)        
 

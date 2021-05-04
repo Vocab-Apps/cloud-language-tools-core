@@ -395,6 +395,7 @@ class UserUtils():
     def update_airtable_all(self):
         self.update_airtable_patreon()
         self.update_airtable_trial()
+        self.update_airtable_usage()
     
     def extend_patreon_key_validity(self):
         logging.info('extending patreon key validity')

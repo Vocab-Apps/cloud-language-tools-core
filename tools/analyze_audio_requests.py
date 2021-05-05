@@ -7,6 +7,12 @@ def top_languages(requests_df):
     print(grouped_df)
     
 
+def top_voices(requests_df):
+    requests_df['count'] = 1
+    grouped_df = requests_df.groupby(['service', 'language_code', 'voice_key']).agg({'count': 'sum'}).reset_index()
+    grouped_df = grouped_df.sort_values('count', ascending=False)
+    print(grouped_df.head(50))    
+
 def find_duplicates(requests_df):
     requests_df['count'] = 1
     
@@ -31,9 +37,10 @@ def find_request(requests_df):
 def load_requests():
     requests_df = pandas.read_csv('temp_data_files/audio_requests.csv')
     # print(requests_df)
-    # top_languages(requests_df)
+    top_languages(requests_df)
+    # top_voices(requests_df)
     # find_duplicates(requests_df)
-    find_request(requests_df)
+    # find_request(requests_df)
 
 
 

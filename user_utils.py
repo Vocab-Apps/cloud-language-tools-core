@@ -477,5 +477,3 @@ if __name__ == '__main__':
         print(data_df)
     elif args.action == 'download_audio_requests':
         user_utils.download_audio_requests()
-    else:
-        raise Exception(f'action not supported: {args.action}')

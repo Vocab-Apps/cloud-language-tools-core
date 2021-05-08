@@ -9,6 +9,7 @@ import shutil
 import unittest
 import pydub
 import pydub.playback
+import requests
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
@@ -387,6 +388,18 @@ def end_to_end_test():
         print(f'source: {text} translated: {translated_text}')
     
 
+def cereproc_authentication():
+    url = 'https://api.cerevoice.com/v2/auth'
+    username = os.environ['CEREPROC_USERNAME']
+    password = os.environ['CEREPROC_PASSWORD']
+    combined = f'{username}:{password}'
+    auth_string = base64.b64encode(combined.encode('utf-8')).decode('utf-8')
+    headers = {'authorization': f'Basic {auth_string}'}
+
+    response = requests.get(url, headers=headers)
+
+    print(response.json())
+
 
 
 if __name__ == '__main__':
@@ -401,7 +414,7 @@ if __name__ == '__main__':
     # play_google_audio()
     # play_azure_audio()
     # get_voice_list()
-    get_voice_list_awesometts()
+    # get_voice_list_awesometts()
     # get_watson_voice_list()
     # get_amazon_voice_list()
     # get_forvo_voice_list()
@@ -422,3 +435,4 @@ if __name__ == '__main__':
     # get_transliteration_language_list()
     # print_all_languages()
     # print_all_audio_languages()
+    cereproc_authentication()

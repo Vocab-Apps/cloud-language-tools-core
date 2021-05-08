@@ -13,7 +13,7 @@ COST_TABLE = [
     {
         'service': 'Azure',
         'request_type': 'audio',
-        'character_cost': (1.0/1000000) * 16
+        'character_cost': (1.0/1000000) * 16 * 1.255
     },
     {
         'service': 'Google',

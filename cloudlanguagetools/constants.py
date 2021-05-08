@@ -230,6 +230,7 @@ class AudioLanguage(enum.Enum):
     fr_CH = (Language.fr, "French (Switzerland)")
     fr_FR = (Language.fr, "French (France)")
     ga_IE = (Language.ga, "Irish (Ireland)")
+    gd_GB = (Language.gd, "Gaelic (UK)")
     gu_IN = (Language.gu, "Gujarati (India)")
     he_IL = (Language.he, "Hebrew (Israel)")
     hi_IN = (Language.hi, "Hindi (India)")

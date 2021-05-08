@@ -15,10 +15,11 @@ def get_manager():
     return manager
 
 class TestAudio(unittest.TestCase):
-    def setUp(self):
-        self.manager = get_manager()
-        self.language_list = self.manager.get_language_list()
-        self.voice_list = self.manager.get_tts_voice_list_json()
+    @classmethod
+    def setUpClass(cls):
+        cls.manager = get_manager()
+        cls.language_list = cls.manager.get_language_list()
+        cls.voice_list = cls.manager.get_tts_voice_list_json()
 
         logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                             datefmt='%Y%m%d-%H:%M:%S',
@@ -154,7 +155,7 @@ class TestAudio(unittest.TestCase):
 
     def test_ssml_english_cereproc(self):
         # pytest test_audio.py -k test_ssml_english_cereproc
-        source_text = 'hello <break time="200ms"/>world'
+        source_text = 'hello <break time="200ms"/>my friends'
         self.verify_service_audio_language(source_text, Service.CereProc, AudioLanguage.en_GB, 'en-GB')
 
     def test_english_forvo(self):

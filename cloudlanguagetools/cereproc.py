@@ -13,22 +13,20 @@ import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
 
 
-def get_audio_language_enum(voice_language):
-    CereProc_audio_id_map = {
-        'ar-MS': 'ar_XA'
+def get_audio_language_enum(language_iso, country_iso):
+    cereproc_audio_id_map = {
     }
-    language_enum_name = voice_language.replace('-', '_')
-    if voice_language in CereProc_audio_id_map:
-        language_enum_name = CereProc_audio_id_map[voice_language]
+    language_enum_name = f'{language_iso}_{country_iso}'
+    if language_enum_name in cereproc_audio_id_map:
+        language_enum_name = cereproc_audio_id_map[language_enum_name]
     return cloudlanguagetools.constants.AudioLanguage[language_enum_name]
 
 class CereProcVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         self.service = cloudlanguagetools.constants.Service.CereProc
-        self.audio_language = get_audio_language_enum(voice_data['language'])
+        self.audio_language = get_audio_language_enum(voice_data['language_iso'], voice_data['country_iso'])
         self.name = voice_data['name']
-        self.description = voice_data['description']
-        self.description = voice_data['description']
+        self.region = voice_data['region']
         self.gender = cloudlanguagetools.constants.Gender[voice_data['gender'].capitalize()]
 
 
@@ -36,12 +34,6 @@ class CereProcVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         return {
             'name': self.name
         }
-
-    def get_voice_shortname(self):
-        is_dnn = ''
-        if 'Dnn' in self.description:
-            is_dnn = ' (Dnn)'
-        return self.description.split(':')[0] + is_dnn
 
     def get_options(self):
         return {}
@@ -85,11 +77,10 @@ class CereProcService(cloudlanguagetools.service.Service):
 
         voice_list = self.list_voices()
         for voice in voice_list:
-            print(voice)
-            # try:
-            #     result.append(CereProcVoice(voice))
-            # except KeyError:
-            #     logging.error(f'could not process voice for {voice}', exc_info=True)
+            try:
+                result.append(CereProcVoice(voice))
+            except KeyError:
+                logging.error(f'could not process voice for {voice}', exc_info=True)
 
         return result
 

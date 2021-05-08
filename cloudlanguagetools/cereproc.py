@@ -31,6 +31,8 @@ class CereProcVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.accent = voice_data['accent']
         self.gender = cloudlanguagetools.constants.Gender[voice_data['gender'].capitalize()]
 
+    def get_voice_shortname(self):
+        return self.name
 
     def get_voice_key(self):
         return {
@@ -90,20 +92,18 @@ class CereProcService(cloudlanguagetools.service.Service):
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
 
-        base_url = self.speech_url
-        url_path = '/v1/synthesize'
-        voice_name = voice_key["name"]
-        constructed_url = base_url + url_path + f'?voice={voice_name}'
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'audio/mp3'
-        }
+        voice_name = voice_key['name']
+        url = 'https://api.cerevoice.com/v2/speak?voice={voice_name}&audio_format=mp3'
+
+
+        ssml_text = f"""<?xml version="1.0" encoding="UTF-8"?>
+<speak xmlns="http://www.w3.org/2001/10/synthesis">{text}</speak>"""
 
         data = {
-            'text': text
+            'file': ssml_text
         }
 
-        response = requests.post(constructed_url, data=json.dumps(data), auth=('apikey', self.speech_key), headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
+        response = requests.post(url, json=data, headers=self.get_auth_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
 
         if response.status_code == 200:
             with open(output_temp_filename, 'wb') as audio:

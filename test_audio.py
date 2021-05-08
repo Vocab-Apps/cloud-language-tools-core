@@ -152,6 +152,11 @@ class TestAudio(unittest.TestCase):
         source_text = 'absolutely'
         self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.en_US, 'en-US')
 
+    def test_english_cereproc(self):
+        # pytest test_audio.py -k test_english_cereproc
+        source_text = 'absolutely'
+        self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.en_GB, 'en-GB')
+
     def test_english_forvo_preferred_user(self):
         # pytest test_audio.py -rPP -k test_english_forvo_preferred_user
         source_text = 'vehicle'

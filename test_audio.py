@@ -150,7 +150,7 @@ class TestAudio(unittest.TestCase):
     def test_ssml_english_cereproc(self):
         # pytest test_audio.py -k test_ssml_english_cereproc
         source_text = 'hello <break time="200ms"/>world'
-        self.verify_service_audio_language(source_text, Service.Watson, AudioLanguage.en_US, 'en-US')        
+        self.verify_service_audio_language(source_text, Service.CereProc, AudioLanguage.en_GB, 'en-GB')
 
     def test_english_forvo(self):
         # pytest test_audio.py -k test_english_forvo

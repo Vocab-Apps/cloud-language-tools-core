@@ -99,7 +99,7 @@ class CereProcService(cloudlanguagetools.service.Service):
         ssml_text = f"""<?xml version="1.0" encoding="UTF-8"?>
 <speak xmlns="http://www.w3.org/2001/10/synthesis">{text}</speak>"""
 
-        logging.debug(f'querying url: {url}')
+        # logging.debug(f'querying url: {url}')
         response = requests.post(url, data=ssml_text, headers=self.get_auth_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
 
         if response.status_code == 200:

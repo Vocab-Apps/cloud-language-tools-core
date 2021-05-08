@@ -400,6 +400,13 @@ def cereproc_authentication():
 
     print(response.json())
 
+    access_token = response.json()['access_token']
+
+    voices_url = 'https://api.cerevoice.com/v2/voices'
+
+    response = requests.get(voices_url, headers={'Authorization': f'Bearer {access_token}'})
+    print(response.json())
+
 
 
 if __name__ == '__main__':

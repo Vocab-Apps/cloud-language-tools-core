@@ -28,6 +28,7 @@ class CereProcVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.audio_language = get_audio_language_enum(voice_data['language_iso'], voice_data['country_iso'])
         self.name = voice_data['name']
         self.region = voice_data['region']
+        self.accent = voice_data['accent']
         self.gender = cloudlanguagetools.constants.Gender[voice_data['gender'].capitalize()]
 
 

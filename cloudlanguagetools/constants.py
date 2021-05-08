@@ -51,6 +51,7 @@ class Service(enum.Enum):
     Naver = enum.auto()
     Amazon = enum.auto()
     Forvo = enum.auto()
+    CereProc = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()

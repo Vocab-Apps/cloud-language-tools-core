@@ -408,6 +408,10 @@ def cereproc_authentication():
     print(response.json())
 
 
+def cereproc_tts_voice_list():
+    manager = get_manager()
+    manager.services[cloudlanguagetools.constants.Service.CereProc.name].get_tts_voice_list()
+
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -442,4 +446,5 @@ if __name__ == '__main__':
     # get_transliteration_language_list()
     # print_all_languages()
     # print_all_audio_languages()
-    cereproc_authentication()
+    # cereproc_authentication()
+    cereproc_tts_voice_list()

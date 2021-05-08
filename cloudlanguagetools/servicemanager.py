@@ -13,6 +13,7 @@ import cloudlanguagetools.watson
 import cloudlanguagetools.naver
 import cloudlanguagetools.amazon
 import cloudlanguagetools.forvo
+import cloudlanguagetools.cereproc
 
 class ServiceManager():
     def  __init__(self):
@@ -25,6 +26,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.Naver.name] = cloudlanguagetools.naver.NaverService()
         self.services[cloudlanguagetools.constants.Service.Amazon.name] = cloudlanguagetools.amazon.AmazonService()
         self.services[cloudlanguagetools.constants.Service.Forvo.name] = cloudlanguagetools.forvo.ForvoService()
+        self.services[cloudlanguagetools.constants.Service.CereProc.name] = cloudlanguagetools.cereproc.CereProcService()
 
     def configure(self):
         # azure
@@ -60,6 +62,9 @@ class ServiceManager():
 
         # forvo
         self.configure_forvo()
+
+        # cereproc
+        self.services[cloudlanguagetools.constants.Service.CereProc.name].configure()
 
         # for AWS, the boto3 library will read environment variables itself
 

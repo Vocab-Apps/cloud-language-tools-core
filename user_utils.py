@@ -245,29 +245,54 @@ class UserUtils():
         return users_df
 
     def get_convertkit_dataframe_for_tag(self, tag_id, tag_name):
+        logging.info(f'getting dataframe for tag {tag_name}')
         subscribers = self.convertkit_client.list_subscribers_tag(tag_id)
+        if len(subscribers) == 0:
+            return pandas.DataFrame()
         data_df = self.get_dataframe_from_subscriber_list(subscribers)
         data_df[tag_name] = tag_name
         data_df = data_df[['subscriber_id', tag_name]]
         return data_df
 
     def get_convertkit_tag_data(self):
-        subscribers_trial_extended = self.get_convertkit_dataframe_for_tag(self.convertkit_client.tag_id_trial_extended, 'trial_extended')
-        subscribers_trial_inactive = self.get_convertkit_dataframe_for_tag(self.convertkit_client.tag_id_trial_inactive, 'trial_user_inactive')
-        subscribers_trial_end = self.get_convertkit_dataframe_for_tag(self.convertkit_client.tag_id_trial_end_reach_out, 'trial_end_reach_out')
-        subscribers_trial_patreon_convert = self.get_convertkit_dataframe_for_tag(self.convertkit_client.tag_id_trial_patreon_convert, 'trial_patreon_convert')
+        self.convertkit_client.populate_tag_map()
 
-        # join together
-        combined_df = subscribers_trial_extended
-        combined_df = pandas.merge(combined_df, subscribers_trial_inactive, how='outer', on='subscriber_id')
-        combined_df = pandas.merge(combined_df, subscribers_trial_end, how='outer', on='subscriber_id')
-        combined_df = pandas.merge(combined_df, subscribers_trial_patreon_convert, how='outer', on='subscriber_id')
+        # we are not interested in these tags
+        tag_ignore_list = ['patreon_api_key_ready', 
+        'patreon_canceled', 
+        'patreon_canceled',
+        'patreon_user',
+        'trial_api_key_ready',
+        'trial_api_key_requested',
+        'trial_user']
+
+        tag_id_map = {tag_name:tag_id for tag_name, tag_id in self.convertkit_client.full_tag_id_map.items() if tag_name not in tag_ignore_list}
+        present_tags = []
+
+        dataframe_list = []
+        for tag_name, tag_id in tag_id_map.items():
+            data_df = self.get_convertkit_dataframe_for_tag(tag_id, tag_name)
+            if len(data_df) > 0:
+                dataframe_list.append(data_df)
+                present_tags.append(tag_name)
+
+        first_dataframe = dataframe_list[0]
+        other_dataframes = dataframe_list[1:]
+        combined_df = first_dataframe
+        for data_df in other_dataframes:
+            combined_df = pandas.merge(combined_df, data_df, how='outer', on='subscriber_id')
         combined_df = combined_df.fillna('')
 
         combined_records = []
 
+        def get_row_tag_array(row, present_tags):
+            result = []
+            for tag_name in present_tags:
+                result.append(row[tag_name])
+            return result
+
         for index, row in combined_df.iterrows():
-            tags = [row['trial_extended'], row['trial_user_inactive'], row['trial_end_reach_out'], row['trial_patreon_convert']]
+            tags = get_row_tag_array(row, present_tags)
             tags = [x for x in tags if len(x) > 0]
             combined_records.append({
                 'subscriber_id': row['subscriber_id'],
@@ -275,7 +300,6 @@ class UserUtils():
             })
 
         final_df = pandas.DataFrame(combined_records)
-        # print(final_df)
 
         return final_df
 

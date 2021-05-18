@@ -24,6 +24,9 @@ class ConvertKit():
             'trial_user_inactive': self.tag_id_trial_inactive 
         }
 
+
+        self.full_tag_id_map = {} 
+
     def tag_user_api_ready(self, email, api_key):
         url = f'https://api.convertkit.com/v3/tags/{self.tag_id_api_ready}/subscribe'
         response = requests.post(url, json={
@@ -103,3 +106,15 @@ class ConvertKit():
         response = requests.get(url)
         data = response.json()
         return data['tags']
+
+    def populate_tag_map(self):
+        logging.info('populating tag map')
+        url = f'https://api.convertkit.com/v3/tags?api_key={self.api_key}'
+        response = requests.get(url)
+        assert response.status_code == 200
+        data = response.json()
+        tags = data['tags']
+        for tag_entry in tags:
+            tag_name = tag_entry['name']
+            tag_id = tag_entry['id']
+            self.full_tag_id_map[tag_name] = tag_id

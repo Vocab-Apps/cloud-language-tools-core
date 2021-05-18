@@ -338,7 +338,32 @@ class UserUtils():
         combined_df['characters'] =  combined_df['characters'].astype(int)
         combined_df['character_limit'] = combined_df['character_limit'].astype(int)
 
+        self.update_tags_trial_users(combined_df)
+
         return combined_df
+
+    def update_tags_trial_users(self, data_df):
+        # perform necessary taggings on convertkit
+        
+        for index, row in data_df.iterrows():
+            email = row['email']
+            tags = row['tags']
+            clients = row['clients']
+
+            if pandas.notna(clients):
+                for client in clients:
+                    tag_name = f'client_{client}'
+                    if tag_name in self.convertkit_client.full_tag_id_map:
+                        need_to_tag = False
+                        if pandas.isna(tags):
+                            need_to_tag = True
+                        else:
+                            if tag_name not in tags:
+                                need_to_tag = True
+                        if need_to_tag:
+                            logging.info(f'tagging {email} with {tag_name}')
+                            tag_id = self.convertkit_client.full_tag_id_map[tag_name]
+                            self.convertkit_client.tag_user(email, tag_id)
 
     def perform_airtable_trial_tag_requests(self):
         airtable_records_df = self.airtable_utils.get_trial_tag_requests()

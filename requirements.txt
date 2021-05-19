@@ -11,3 +11,4 @@ python-magic
 gunicorn
 redis
 boto3
+schedule

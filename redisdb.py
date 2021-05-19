@@ -525,7 +525,7 @@ class RedisDb():
         time.sleep(15)
         self.r.delete(redis_key)
 
-    def backup_db(self, backup_file_name):
+    def full_db_dump(self):
 
         hash_key_list = []
         string_key_list = []
@@ -552,30 +552,29 @@ class RedisDb():
                 string_key_list.append(redis_key)
         logging.info('finished getting key types')
 
-        with open(backup_file_name, 'w') as f:
-            logging.info(f'backing up redis db to {backup_file_name}')
+        logging.info(f'getting full key dump')
 
-            full_key_map = {}
+        full_key_map = {}
 
-            # get hash keys
-            logging.info('getting hash data')
-            pipe = self.r.pipeline(transaction=False)
-            for hash_key in hash_key_list:
-                pipe.hgetall(hash_key)
-            hash_values = pipe.execute()
-            for hash_key, hash_value in zip(hash_key_list, hash_values):            
-                full_key_map.update({hash_key: hash_value})
+        # get hash keys
+        logging.info('getting hash data')
+        pipe = self.r.pipeline(transaction=False)
+        for hash_key in hash_key_list:
+            pipe.hgetall(hash_key)
+        hash_values = pipe.execute()
+        for hash_key, hash_value in zip(hash_key_list, hash_values):            
+            full_key_map.update({hash_key: hash_value})
 
-            logging.info('getting string data')
-            pipe = self.r.pipeline(transaction=False)
-            for string_key in string_key_list:
-                pipe.get(string_key)
-            string_values = pipe.execute()
-            for string_key, string_value in zip(string_key_list, string_values):
-                full_key_map.update({string_key: string_value})
+        logging.info('getting string data')
+        pipe = self.r.pipeline(transaction=False)
+        for string_key in string_key_list:
+            pipe.get(string_key)
+        string_values = pipe.execute()
+        for string_key, string_value in zip(string_key_list, string_values):
+            full_key_map.update({string_key: string_value})
 
-            json.dump(full_key_map, f)
-            logging.info(f'wrote db backup to {backup_file_name}')
+        logging.info(f'finished getting full key dump')
+        return full_key_map
                 
 
     def clear_db(self, wait=True):

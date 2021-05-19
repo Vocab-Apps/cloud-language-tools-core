@@ -533,8 +533,11 @@ class RedisDb():
         key_list = []
 
         logging.info('obtaining full list of keys')
-        for key in self.r.scan_iter():
-            key_list.append(key)
+        cursor = '0'
+        while cursor != 0:
+            cursor, keys = self.r.scan(cursor=cursor, count=1000)
+            key_list.extend(keys)
+            logging.info(f'collected {len(key_list)} keys')
         logging.info('finished getting full list of keys')
 
         logging.info('getting key types')

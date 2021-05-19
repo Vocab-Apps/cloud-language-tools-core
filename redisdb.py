@@ -526,21 +526,53 @@ class RedisDb():
         self.r.delete(redis_key)
 
     def backup_db(self, backup_file_name):
+
+        hash_key_list = []
+        string_key_list = []
+
+        key_list = []
+
+        logging.info('obtaining full list of keys')
+        for key in self.r.scan_iter():
+            key_list.append(key)
+        logging.info('finished getting full list of keys')
+
+        logging.info('getting key types')
+        pipe = self.r.pipeline(transaction=False)
+        for redis_key in key_list:
+            pipe.type(redis_key)
+        key_types = pipe.execute()
+        for redis_key, key_type in zip(key_list, key_types):
+            if key_type == 'hash':
+                hash_key_list.append(redis_key)
+            elif key_type == 'string':
+                string_key_list.append(redis_key)
+        logging.info('finished getting key types')
+
         with open(backup_file_name, 'w') as f:
             logging.info(f'backing up redis db to {backup_file_name}')
+
             full_key_map = {}
-            for key in self.r.scan_iter():
-                logging.info(f'found key {key}')
-                if self.r.type(key) == 'hash':
-                    hash_key = key
-                    hash_data = self.r.hgetall(hash_key)
-                    full_key_map.update({hash_key: hash_data})
-                elif self.r.type(key) == 'string':
-                    data = self.r.get(key)
-                    full_key_map.update({key: data})
-            with open(backup_file_name, 'w') as outfile:
-                json.dump(full_key_map, outfile)
-                logging.info(f'wrote db backup to {backup_file_name}')
+
+            # get hash keys
+            logging.info('getting hash data')
+            pipe = self.r.pipeline(transaction=False)
+            for hash_key in hash_key_list:
+                pipe.hgetall(hash_key)
+            hash_values = pipe.execute()
+            for hash_key, hash_value in zip(hash_key_list, hash_values):            
+                full_key_map.update({hash_key: hash_value})
+
+            logging.info('getting string data')
+            pipe = self.r.pipeline(transaction=False)
+            for string_key in string_key_list:
+                pipe.get(string_key)
+            string_values = pipe.execute()
+            for string_key, string_value in zip(string_key_list, string_values):
+                full_key_map.update({string_key: string_value})
+
+            json.dump(full_key_map, f)
+            logging.info(f'wrote db backup to {backup_file_name}')
                 
 
     def clear_db(self, wait=True):

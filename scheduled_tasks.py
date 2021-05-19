@@ -39,7 +39,7 @@ def setup_tasks():
     update_airtable()
     logging.info('setting up tasks')
     schedule.every(1).hour.do(backup_redis_db)
-    schedule.every(6).hour.do(update_airtable)
+    schedule.every(6).hours.do(update_airtable)
 
 
 def run_scheduler():

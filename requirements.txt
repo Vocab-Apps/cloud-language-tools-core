@@ -1,4 +1,4 @@
-azure-cognitiveservices-speech=1.16.0
+azure-cognitiveservices-speech==1.16.0
 requests
 google-cloud-texttospeech
 google-cloud-translate

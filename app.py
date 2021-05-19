@@ -185,7 +185,6 @@ class AudioV2(flask_restful.Resource):
             service_str = data['service']
             request_mode_str = data['request_mode']
             language = data['language_code']
-            deck_name = data['deck_name']
             voice_key = data['voice_key']
             options = data['options']
 
@@ -210,9 +209,6 @@ class AudioV2(flask_restful.Resource):
 
             # track audio language
             redis_connection.track_audio_language(api_key, language_code)
-
-            # log audio request
-            redis_connection.log_audio_request(api_key, data)
 
             # return data
             return send_file(audio_temp_file.name, mimetype='audio/mpeg')

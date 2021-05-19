@@ -12,3 +12,4 @@ gunicorn
 redis
 boto3
 schedule
+pandas

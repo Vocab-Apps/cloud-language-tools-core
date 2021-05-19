@@ -46,13 +46,15 @@ def main():
                'list_trial_keys',
                'show_hash_key',
                'remove_key',
-               'modify_key_expiration']
+               'modify_key_expiration',
+               'backup_redis_db']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--api_key', help='Pass in API key to check validity')
     parser.add_argument('--trial_email', help='email address of trial user')
     parser.add_argument('--pattern', help='Use a special pattern for key iteration')
     parser.add_argument('--dbnum', help='connect to a different db number', type=int)
     parser.add_argument('--redis_key', help='redis key to operate on')
+    parser.add_argument('--redis_backup_file', help='backup file')
 
 
     args = parser.parse_args()
@@ -92,6 +94,9 @@ def main():
     elif args.action == 'show_hash_key':
         redis_key = args.redis_key
         connection.show_hash_key(redis_key)
+    elif args.action == 'backup_redis_db':
+        backup_file = args.redis_backup_file
+        connection.backup_db(backup_file)
     elif args.action == 'clear_db':
         connection.clear_db()
     elif args.action == 'remove_key':

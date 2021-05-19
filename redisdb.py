@@ -525,6 +525,23 @@ class RedisDb():
         time.sleep(15)
         self.r.delete(redis_key)
 
+    def backup_db(self, backup_file_name):
+        with open(backup_file_name, 'w') as f:
+            logging.info(f'backing up redis db to {backup_file_name}')
+            full_key_map = {}
+            for key in self.r.scan_iter():
+                logging.info(f'found key {key}')
+                if self.r.type(key) == 'hash':
+                    hash_key = key
+                    hash_data = self.r.hgetall(hash_key)
+                    full_key_map.update({hash_key: hash_data})
+                elif self.r.type(key) == 'string':
+                    data = self.r.get(key)
+                    full_key_map.update({key: data})
+            with open(backup_file_name, 'w') as outfile:
+                json.dump(full_key_map, outfile)
+                logging.info(f'wrote db backup to {backup_file_name}')
+                
 
     def clear_db(self, wait=True):
         if wait:

@@ -211,14 +211,22 @@ class UserUtils():
         patreon_user_df = self.get_patreon_users_df()
         # print(patreon_user_df)
 
+        # get tag data from convertkit
+        convertkit_users_df = self.get_convertkit_patreon_users()
+        tag_data_df = self.get_convertkit_tag_data()
+        convertkit_data_df = pandas.merge(convertkit_users_df, tag_data_df, how='left', on='subscriber_id')
+
         # usage data
         monthly_usage_data_df = self.get_monthly_usage_data()
         prev_monthly_usage_data_df = self.get_prev_monthly_usage_data()
 
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
+        combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', on='email')
         combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, tracking_data_df, how='left', on='api_key')
+
+        self.update_tags_convertkit_users(combined_df)
 
         return combined_df
 
@@ -232,6 +240,11 @@ class UserUtils():
 
     def get_convertkit_trial_users(self):
         subscribers = self.convertkit_client.list_trial_users()
+        return self.get_dataframe_from_subscriber_list(subscribers)
+
+    def get_convertkit_patreon_users(self):
+        logging.info(f'getting list of patreon users from convertkit')
+        subscribers = self.convertkit_client.list_patreon_users()
         return self.get_dataframe_from_subscriber_list(subscribers)
 
     def get_dataframe_from_subscriber_list(self, subscribers):
@@ -255,6 +268,7 @@ class UserUtils():
         return data_df
 
     def get_convertkit_tag_data(self):
+        logging.info(f'getting convertkit tag data')
         self.convertkit_client.populate_tag_map()
 
         # we are not interested in these tags
@@ -338,11 +352,11 @@ class UserUtils():
         combined_df['characters'] =  combined_df['characters'].astype(int)
         combined_df['character_limit'] = combined_df['character_limit'].astype(int)
 
-        self.update_tags_trial_users(combined_df)
+        self.update_tags_convertkit_users(combined_df)
 
         return combined_df
 
-    def update_tags_trial_users(self, data_df):
+    def update_tags_convertkit_users(self, data_df):
         # perform necessary taggings on convertkit
         
         # make the logic a bit easier by removing nans

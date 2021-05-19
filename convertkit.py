@@ -17,6 +17,7 @@ class ConvertKit():
         self.tag_id_trial_user = int(os.environ['CONVERTKIT_TRIAL_USER_TAG'])
         self.tag_id_trial_end_reach_out = int(os.environ['CONVERTKIT_TRIAL_END_REACH_OUT_TAG'])
         self.tag_id_trial_patreon_convert = int(os.environ['CONVERTKIT_TRIAL_PATREON_CONVERT_TAG'])
+        self.tag_id_patreon = int(os.environ['CONVERTKIT_PATREON_USER_TAG'])
 
         self.tag_name_map = {
             'trial_patreon_convert': self.tag_id_trial_patreon_convert,
@@ -100,6 +101,8 @@ class ConvertKit():
     def list_trial_users(self):
         return self.list_subscribers_tag(self.tag_id_trial_user)
 
+    def list_patreon_users(self):
+        return self.list_subscribers_tag(self.tag_id_patreon)
 
     def list_tags(self, subscriber_id):
         url = f'https://api.convertkit.com/v3/subscribers/{subscriber_id}/tags?api_secret={self.api_secret}'

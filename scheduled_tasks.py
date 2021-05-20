@@ -9,6 +9,9 @@ import redisdb
 import user_utils
 
 def backup_redis_db():
+    scp_username = os.environ['RSYNC_NET_USER']
+    scp_hostname = os.environ['RSYNC_NET_HOST']
+
     logging.info('backing up redis db')
     connection = redisdb.RedisDb()
 
@@ -32,8 +35,6 @@ def backup_redis_db():
     f.close()
     
     # scp to rsync.net
-    scp_username = os.environ['RSYNC_NET_USER']
-    scp_hostname = os.environ['RSYNC_NET_HOST']
     scp_commandline = f'scp -i ssh_id_rsync_redis_backup {file_name} {scp_username}@{scp_hostname}:backup/digitalocean_redis/'
     logging.info(f'scp commandline: [{scp_commandline}]')
     os.system(scp_commandline)

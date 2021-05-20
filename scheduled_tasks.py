@@ -26,6 +26,18 @@ def backup_redis_db():
     client.put_object(Body=str(json.dumps(full_db_dump)), Bucket=bucket_name, Key=file_name)
     logging.info(f'wrote {file_name} to {bucket_name}')
 
+    # write to disk
+    f = open(file_name, 'w')
+    f.write(json.dumps(full_db_dump))
+    f.close()
+    
+    # scp to rsync.net
+    scp_username = os.environ['RSYNC_NET_USER']
+    scp_hostname = os.environ['RSYNC_NET_HOST']
+    scp_commandline = f'scp -i ssh_id_rsync_redis_backup {file_name} {scp_username}@{scp_hostname}:backup/digitalocean_redis/'
+    logging.info(f'scp commandline: [{scp_commandline}]')
+    os.system(scp_commandline)
+
 
 
 def update_airtable():

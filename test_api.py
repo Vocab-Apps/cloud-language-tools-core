@@ -438,16 +438,6 @@ class ApiTests(unittest.TestCase):
         tracking_audio_language_redis_key = redis_connection.build_monthly_user_key(redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE, self.api_key_v2)
         self.assertEqual(1, int(redis_connection.r.hget(tracking_audio_language_redis_key, 'fr')))
 
-        # logging of audio request
-        self.assertEqual(1, redis_connection.r.llen(log_audio_request_redis_key))
-        audio_requests = redis_connection.r.lrange(log_audio_request_redis_key, 0, 0)
-        self.assertEqual(1, len(audio_requests))
-        first_request_data = json.loads(audio_requests[0])
-        self.assertEqual('Azure', first_request_data['service'])
-        self.assertEqual('Je ne suis pas intéressé.', first_request_data['text'])
-        self.assertEqual('fr', first_request_data['language_code'])
-        self.assertTrue(abs(first_request_data['timestamp'] - datetime.datetime.now().timestamp()) < 5) # less than 5 seconds apart
-        self.assertEqual(self.api_key_v2, first_request_data['api_key'])
 
         # make two more requests
         # ======================
@@ -491,18 +481,6 @@ class ApiTests(unittest.TestCase):
         # audio language
         self.assertEqual(2, int(redis_connection.r.hget(tracking_audio_language_redis_key, 'fr')))
         self.assertEqual(1, int(redis_connection.r.hget(tracking_audio_language_redis_key, 'ja')))
-        # audio requests
-        audio_requests = redis_connection.r.lrange(log_audio_request_redis_key, 0, 2)
-        self.assertEqual(3, len(audio_requests))
-        request_1 = json.loads(audio_requests[0])
-        request_2 = json.loads(audio_requests[1])
-        request_3 = json.loads(audio_requests[2])
-        self.assertEqual('fr', request_1['language_code'])
-        self.assertEqual('fr', request_2['language_code'])
-        self.assertEqual('ja', request_3['language_code'])
-        self.assertEqual('Azure', request_1['service'])
-        self.assertEqual('Amazon', request_2['service'])
-        self.assertEqual('Azure', request_3['service'])
 
         # verify usage logic for japanese/azure
         # =====================================

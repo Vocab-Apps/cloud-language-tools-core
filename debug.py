@@ -9,6 +9,7 @@ import shutil
 import unittest
 import pydub
 import pydub.playback
+import epitran
 import requests
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
@@ -414,6 +415,12 @@ def cereproc_tts_voice_list():
     print(f'voices: {len(voice_list)}')
 
 
+def test_epitran():
+    epi = epitran.Epitran('eng-Latn')
+    result = epi.transliterate('Hello my friends')
+    print(result)
+
+
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
@@ -425,7 +432,7 @@ if __name__ == '__main__':
     # test_google_audio()
     # play_google_audio()
     # play_azure_audio()
-    get_voice_list()
+    # get_voice_list()
     # get_voice_list_awesometts()
     # get_watson_voice_list()
     # get_amazon_voice_list()
@@ -449,3 +456,4 @@ if __name__ == '__main__':
     # print_all_audio_languages()
     # cereproc_authentication()
     # cereproc_tts_voice_list()
+    test_epitran()

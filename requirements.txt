@@ -13,3 +13,4 @@ redis
 boto3
 schedule
 pandas
+epitran

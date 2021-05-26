@@ -245,12 +245,21 @@ class TestTranslation(unittest.TestCase):
         self.assertEqual(expected_output, result)        
 
 
+    def verify_transliteration_single_option(self, from_language, source_text, service, expected_result):
+        from_language_name = from_language.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language_name and x['service'] == service]
+        self.assertEqual(len(transliteration_candidates), 1)
+        transliteration_option = transliteration_candidates[0]
+        self.verify_transliteration(source_text, transliteration_option, expected_result)
+
     def test_transliteration_epitran(self):
         # pytest test_translation.py -rPP -k test_transliteration_epitran
 
         service = cloudlanguagetools.constants.Service.Epitran.name
 
         # french
+        # ======
+
         source_text = 'l’herbe est plus verte ailleurs'
         from_language = Language.fr.name
         transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
@@ -262,3 +271,6 @@ class TestTranslation(unittest.TestCase):
         # french service 2
         transliteration_option = transliteration_candidates[1]
         self.verify_transliteration(source_text, transliteration_option, 'l’hɛrbɛ ɛst plys vɛrtɛ elœrs')
+
+        # english 
+        self.verify_transliteration_single_option(Language.en, 'do you have a boyfriend', service, 'du ju hæv ə bojfɹɛnd')

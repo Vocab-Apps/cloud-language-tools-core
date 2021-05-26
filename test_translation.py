@@ -131,7 +131,7 @@ class TestTranslation(unittest.TestCase):
         source_text = 'ประเทศไทย'
         from_language = Language.th.name
         transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language]
-        self.assertTrue(len(transliteration_candidates) == 1)
+        self.assertTrue(len(transliteration_candidates) == 2)
         transliteration_option = transliteration_candidates[0]
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']

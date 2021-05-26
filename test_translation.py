@@ -276,22 +276,14 @@ class TestTranslation(unittest.TestCase):
         service = cloudlanguagetools.constants.Service.Epitran.name
 
         # french
-        # ======
-
-        source_text = 'l’herbe est plus verte ailleurs'
-        from_language = Language.fr.name
-        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
-
-        # french service 1
-        transliteration_option = transliteration_candidates[0]
-        self.verify_transliteration(source_text, transliteration_option, 'l’ɛrbə ɛst plys vɛrtə ajlœr')
-
-        # french service 2
-        transliteration_option = transliteration_candidates[1]
-        self.verify_transliteration(source_text, transliteration_option, 'l’hɛrbɛ ɛst plys vɛrtɛ elœrs')
-
-        # french
         self.verify_transliteration_multiple_options(Language.fr, 'l’herbe est plus verte ailleurs', service, ['l’ɛrbə ɛst plys vɛrtə ajlœr', 'l’hɛrbɛ ɛst plys vɛrtɛ elœrs'])
 
         # english 
         self.verify_transliteration_single_option(Language.en, 'do you have a boyfriend', service, 'du ju hæv ə bojfɹɛnd')
+
+        # german
+        self.verify_transliteration_multiple_options(Language.de, 'Können Sie mir das auf der Karte zeigen?', 
+            service, 
+            ['kønnən siː mir das awf dər karte t͡sajeːɡən?',
+            'kønən siː mir das auf dər kaəte t͡saieɡən?',
+            'kønən siː miʁ das auf deʁ kaɐte t͡saieɡən?'])

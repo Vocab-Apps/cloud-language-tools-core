@@ -34,18 +34,19 @@ class PostDeployTests(unittest.TestCase):
 
 
     def test_language_list(self):
-        response = self.client.get('/language_list')
-        actual_language_list = json.loads(response.data) 
+        # pytest test_postdeploy.py -rPP -k test_language_list
+        response = requests.get(self.get_url('/language_list'))
+        actual_language_list = response.json()
         self.assertTrue('fr' in actual_language_list)
         self.assertEqual(actual_language_list['fr'], 'French')
         self.assertEqual(actual_language_list['yue'], 'Chinese (Cantonese, Traditional)')
         self.assertEqual(actual_language_list['zh_cn'], 'Chinese (Simplified)')
 
     def test_voice_list(self):
-        # pytest test_api.py -rPP -k 'test_voice_list'
+        # pytest test_postdeploy.py -rPP -k test_voice_list
 
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)
+        response = requests.get(self.get_url('/voice_list'))
+        voice_list = response.json()
         self.assertTrue(len(voice_list) > 100) # with google and azure, we already have 400 voices or so
         
         subset_1 = [x for x in voice_list if x['language_code'] == 'fr']
@@ -62,9 +63,10 @@ class PostDeployTests(unittest.TestCase):
         self.assertTrue('voice_key' in voice1)
 
     def test_translation_language_list(self):
-        # pytest test_api.py -rPP -k 'test_translation_language_list'
-        response = self.client.get('/translation_language_list')
-        translation_language_list = json.loads(response.data)
+        # pytest test_postdeploy.py -rPP -k 'test_translation_language_list'
+
+        response = requests.get(self.get_url('/translation_language_list'))
+        translation_language_list = response.json()
         self.assertTrue(len(translation_language_list) > 100) # with google and azure, we already have 400 voices or so
         
         subset_1 = [x for x in translation_language_list if x['language_code'] == 'fr']
@@ -78,9 +80,10 @@ class PostDeployTests(unittest.TestCase):
         self.assertTrue(len(language1['service']) > 0)
 
     def test_transliteration_language_list(self):
-        # pytest test_api.py -rPP -k 'test_transliteration_language_list'
-        response = self.client.get('/transliteration_language_list')
-        transliteration_language_list = json.loads(response.data)
+        # pytest test_postdeploy.py -rPP -k 'test_transliteration_language_list'
+
+        response = requests.get(self.get_url('/transliteration_language_list'))
+        transliteration_language_list = response.json()
         self.assertTrue(len(transliteration_language_list) > 30) # 
         
         subset_1 = [x for x in transliteration_language_list if x['language_code'] == 'zh_cn']

@@ -420,6 +420,89 @@ def test_epitran():
     result = epi.transliterate('Hello my friends')
     print(result)
 
+def create_epitran_mappings():
+    language_map = {'aar-Latn': 'Afar',
+        'amh-Ethi': 'Amharic',
+        'ara-Arab': 'Arabic',
+        'aze-Cyrl': 'Azerbaijani',
+        'aze-Latn': 'Azerbaijani',
+        'ben-Beng': 'Bengali',
+        'ben-Beng-red': 'Bengali',
+        'cat-Latn': 'Catalan',
+        'ceb-Latn': 'Cebuano',
+        'ckb-Arab': 'Sorani',
+        'deu-Latn': 'German',
+        'deu-Latn-np': 'German',
+        'deu-Latn-nar': 'German',
+        'eng-Latn': 'English',
+        'fas-Arab': 'Farsi',
+        'fra-Latn': 'French',
+        'fra-Latn-np': 'French',
+        'hau-Latn': 'Hausa',
+        'hin-Deva': 'Hindi',
+        'hun-Latn': 'Hungarian',
+        'ilo-Latn': 'Ilocano',
+        'ind-Latn': 'Indonesian',
+        'ita-Latn': 'Italian',
+        'jav-Latn': 'Javanese',
+        'kaz-Cyrl': 'Kazakh',
+        'kaz-Latn': 'Kazakh',
+        'kin-Latn': 'Kinyarwanda',
+        'kir-Arab': 'Kyrgyz',
+        'kir-Cyrl': 'Kyrgyz',
+        'kir-Latn': 'Kyrgyz',
+        'kmr-Latn': 'Kurmanji',
+        'lao-Laoo': 'Lao',
+        'mar-Deva': 'Marathi',
+        'mlt-Latn': 'Maltese',
+        'mya-Mymr': 'Burmese',
+        'msa-Latn': 'Malay',
+        'nld-Latn': 'Dutch',
+        'nya-Latn': 'Chichewa',
+        'orm-Latn': 'Oromo',
+        'pan-Guru': 'Punjabi',
+        'pol-Latn': 'Polish',
+        'por-Latn': 'Portuguese',
+        'ron-Latn': 'Romanian',
+        'rus-Cyrl': 'Russian',
+        'sna-Latn': 'Shona',
+        'som-Latn': 'Somali',
+        'spa-Latn': 'Spanish',
+        'swa-Latn': 'Swahili',
+        'swe-Latn': 'Swedish',
+        'tam-Taml': 'Tamil',
+        'tel-Telu': 'Telugu',
+        'tgk-Cyrl': 'Tajik',
+        'tgl-Latn': 'Tagalog',
+        'tha-Thai': 'Thai',
+        'tir-Ethi': 'Tigrinya',
+        'tpi-Latn': 'Tok Pisin',
+        'tuk-Cyrl': 'Turkmen',
+        'tuk-Latn': 'Turkmen',
+        'tur-Latn': 'Turkish',
+        'ukr-Cyrl': 'Ukrainian',
+        'uig-Arab': 'Uyghur',
+        'uzb-Cyrl': 'Uzbek',
+        'uzb-Latn': 'Uzbek',
+        'vie-Latn': 'Vietnamese',
+        'xho-Latn': 'Xhosa',
+        'yor-Latn': 'Yoruba',
+        'zul-Latn': 'Zulu'}
+    # print(language_map)
+
+    clt_reverse_language_map = {}
+    for language in cloudlanguagetools.constants.Language:
+        clt_reverse_language_map[language.lang_name] = language
+
+    print(clt_reverse_language_map)
+
+    for language_key, language_name in language_map.items():
+        if language_name in clt_reverse_language_map:
+            # print(f'found: {language_name}')
+            language_enum = clt_reverse_language_map[language_name]
+            assignment = f"""EpitranTransliterationLanguage(cloudlanguagetools.constants.{language_enum}, '{language_key}'),"""
+            print(assignment)
+
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -456,4 +539,5 @@ if __name__ == '__main__':
     # print_all_audio_languages()
     # cereproc_authentication()
     # cereproc_tts_voice_list()
-    test_epitran()
+    # test_epitran()
+    create_epitran_mappings()

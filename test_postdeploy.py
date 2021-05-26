@@ -98,8 +98,10 @@ class PostDeployTests(unittest.TestCase):
 
 
     def test_translate(self):
+        # pytest test_postdeploy.py -rPP -k test_translate
+
         source_text = 'Je ne suis pas intéressé.'
-        response = self.client.post('/translate', json={
+        response = requests.post(self.get_url('/translate'), json={
             'text': source_text,
             'service': 'Azure',
             'from_language_key': 'fr',
@@ -107,29 +109,31 @@ class PostDeployTests(unittest.TestCase):
         }, headers={'api_key': self.api_key})
 
         self.assertEqual(response.status_code, 200)
-        data = json.loads(response.data)
+        data = response.json()
         self.assertEqual(data['translated_text'], "I'm not interested.")
 
         # locate the azure language_id for simplified chinese
-        response = self.client.get('/translation_language_list')
-        translation_language_list = json.loads(response.data)
+        response = requests.get(self.get_url('/translation_language_list'))
+        translation_language_list = response.json()
         chinese_azure = [x for x in translation_language_list if x['language_code'] == 'zh_cn' and x['service'] == 'Azure']
         translation_azure_chinese = chinese_azure[0]
 
-        response = self.client.post('/translate', json={
+        response = requests.post(self.get_url('/translate'), json={
             'text': '中国有很多外国人',
             'service': 'Azure',
             'from_language_key': translation_azure_chinese['language_id'],
             'to_language_key': 'en'
         }, headers={'api_key': self.api_key})
 
-        data = json.loads(response.data)
+        data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['translated_text'], 'There are many foreigners in China')
 
     def test_translate_not_authenticated(self):
+        # pytest test_postdeploy.py -rPP -k test_translate_not_authenticated
+
         source_text = 'Je ne suis pas intéressé.'
-        response = self.client.post('/translate', json={
+        response = requests.post(self.get_url('/translate'), json={
             'text': source_text,
             'service': 'Azure',
             'from_language_key': 'fr',
@@ -137,19 +141,9 @@ class PostDeployTests(unittest.TestCase):
         })
 
         self.assertEqual(response.status_code, 401)
-        data = json.loads(response.data)
+        data = response.json()
         self.assertEqual(data['error'], "API Key not valid")
 
-        response = self.client.post('/translate', json={
-            'text': '中国有很多外国人',
-            'service': 'Azure',
-            'from_language_key': 'zh-Hans',
-            'to_language_key': 'en'
-        }, headers={'api_key': self.api_key_expired})
-
-        data = json.loads(response.data)
-        self.assertEqual(response.status_code, 401)
-        self.assertEqual(data['error'], 'API Key expired')
 
     def test_translate_all(self):
         # pytest test_api.py -k test_translate_all

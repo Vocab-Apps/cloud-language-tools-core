@@ -35,6 +35,7 @@ class EpitranService(cloudlanguagetools.service.Service):
     def get_transliteration_language_list(self):
         result = [
             EpitranTransliterationLanguage(cloudlanguagetools.constants.Language.fr, 'fra-Latn'),
+            EpitranTransliterationLanguage(cloudlanguagetools.constants.Language.fr, 'fra-Latn-np'),
         ]
         return result
 

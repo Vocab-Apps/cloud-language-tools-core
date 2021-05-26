@@ -238,6 +238,12 @@ class TestTranslation(unittest.TestCase):
         self.assertEqual('a ˈke ˈoɾa u̯sˈtɛð ˈsjɛra', result)
 
 
+    def verify_transliteration(self, source_text, transliteration_option, expected_output):
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual(expected_output, result)        
+
 
     def test_transliteration_epitran(self):
         # pytest test_translation.py -rPP -k test_transliteration_epitran
@@ -248,9 +254,11 @@ class TestTranslation(unittest.TestCase):
         source_text = 'l’herbe est plus verte ailleurs'
         from_language = Language.fr.name
         transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
-        self.assertTrue(len(transliteration_candidates) == 1)
+
+        # french service 1
         transliteration_option = transliteration_candidates[0]
-        service = transliteration_option['service']
-        transliteration_key = transliteration_option['transliteration_key']
-        result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('l’ɛrbə ɛst plys vɛrtə ajlœr', result)
+        self.verify_transliteration(source_text, transliteration_option, 'l’ɛrbə ɛst plys vɛrtə ajlœr')
+
+        # french service 2
+        transliteration_option = transliteration_candidates[1]
+        self.verify_transliteration(source_text, transliteration_option, 'l’hɛrbɛ ɛst plys vɛrtɛ elœrs')

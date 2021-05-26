@@ -45,6 +45,10 @@ class ApiTests(unittest.TestCase):
         cls.trial_user_email_v2 = 'trial_user_42_v2@gmail.com'
         cls.trial_user_api_key_v2 = redis_connection.get_trial_user_key(cls.trial_user_email_v2)
 
+        # cache voice list
+        response = cls.client.get('/voice_list')
+        cls.voice_list = json.loads(response.data)
+
 
     @classmethod
     def tearDownClass(cls):
@@ -337,10 +341,8 @@ class ApiTests(unittest.TestCase):
     def test_audio(self):
         # pytest test_api.py -k test_audio
         # get one azure voice for french
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
 
         response = self.client.post('/audio', json={
@@ -389,11 +391,9 @@ class ApiTests(unittest.TestCase):
         source_text_japanese = 'おはようございます'
 
         # get one azure voice for french
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)
 
         service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
         response = self.client.post('/audio_v2', json={
             'text': source_text_french,
@@ -443,7 +443,7 @@ class ApiTests(unittest.TestCase):
         # ======================
 
         service = 'Amazon'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         voice = french_voices[0]
         response = self.client.post('/audio_v2', json={
             'text': source_text_french,
@@ -457,7 +457,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         service = 'Azure'
-        japanese_voices = [x for x in voice_list if x['language_code'] == 'ja' and x['service'] == service]
+        japanese_voices = [x for x in self.voice_list if x['language_code'] == 'ja' and x['service'] == service]
         voice = japanese_voices[0]
         response = self.client.post('/audio_v2', json={
             'text': source_text_japanese,
@@ -494,10 +494,8 @@ class ApiTests(unittest.TestCase):
         # pytest test_api.py -k test_audio_forvo_not_found
         
         # get one azure voice for french
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Forvo'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
 
         response = self.client.post('/audio', json={
@@ -514,10 +512,8 @@ class ApiTests(unittest.TestCase):
         # pytest test_api.py -rPP -k test_audio_yomichan
         
         # get one azure voice for japanese
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Azure'
-        japanese_voices = [x for x in voice_list if x['language_code'] == 'ja' and x['service'] == service]
+        japanese_voices = [x for x in self.voice_list if x['language_code'] == 'ja' and x['service'] == service]
         first_voice = japanese_voices[0]
 
         source_text = 'おはようございます'
@@ -547,10 +543,8 @@ class ApiTests(unittest.TestCase):
         # pytest test_api.py -rPP -k test_audio_yomichan_incorrect_api_key
         
         # get one azure voice for japanese
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Azure'
-        japanese_voices = [x for x in voice_list if x['language_code'] == 'ja' and x['service'] == service]
+        japanese_voices = [x for x in self.voice_list if x['language_code'] == 'ja' and x['service'] == service]
         first_voice = japanese_voices[0]
 
         source_text = 'おはようございます'
@@ -580,10 +574,8 @@ class ApiTests(unittest.TestCase):
         redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.NAVER_USER_DAILY_CHAR_LIMIT - 15)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
 
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)
         service = 'Naver'
-        english_voices = [x for x in voice_list if x['language_code'] == 'en' and x['service'] == service]
+        english_voices = [x for x in self.voice_list if x['language_code'] == 'en' and x['service'] == service]
         first_voice = english_voices[0]
 
         # the first request should go through
@@ -621,10 +613,8 @@ class ApiTests(unittest.TestCase):
         redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.NAVER_USER_DAILY_CHAR_LIMIT - 15)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
 
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)
         service = 'Naver'
-        english_voices = [x for x in voice_list if x['language_code'] == 'en' and x['service'] == service]
+        english_voices = [x for x in self.voice_list if x['language_code'] == 'en' and x['service'] == service]
         first_voice = english_voices[0]
 
         # the first request should go through
@@ -654,10 +644,8 @@ class ApiTests(unittest.TestCase):
     def test_audio_trial_user(self):
         # pytest test_api.py -rPP -k test_audio_trial_user
 
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
 
         response = self.client.post('/audio', json={
@@ -706,10 +694,8 @@ class ApiTests(unittest.TestCase):
 
         api_key = self.trial_user_api_key_v2
 
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
 
         response = self.client.post('/audio_v2', json={
@@ -766,10 +752,8 @@ class ApiTests(unittest.TestCase):
     def test_audio_naver_quota_exceeded(self):
         # pytest test_api.py -k test_audio_naver_quota_exceeded
 
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Naver'
-        french_voices = [x for x in voice_list if x['language_code'] == 'en' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'en' and x['service'] == service]
         first_voice = french_voices[0]
 
         response = self.client.post('/audio', json={
@@ -786,10 +770,8 @@ class ApiTests(unittest.TestCase):
 
     def test_audio_not_authenticated(self):
         # get one azure voice for french
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
 
         response = self.client.post('/audio', json={
@@ -804,10 +786,8 @@ class ApiTests(unittest.TestCase):
     def test_audio_not_authenticated_v2(self):
         # pytest test_api.py -rPP -k test_audio_not_authenticated_v2
 
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
 
         response = self.client.post('/audio_v2', json={

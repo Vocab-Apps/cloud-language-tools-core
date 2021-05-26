@@ -252,6 +252,24 @@ class TestTranslation(unittest.TestCase):
         transliteration_option = transliteration_candidates[0]
         self.verify_transliteration(source_text, transliteration_option, expected_result)
 
+
+    def verify_transliteration_multiple_options(self, from_language, source_text, service, expected_result_list):
+        from_language_name = from_language.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language_name and x['service'] == service]
+
+        actual_result_list = []
+        for transliteration_option in transliteration_candidates:
+            transliteration_key = transliteration_option['transliteration_key']
+            result = self.manager.get_transliteration(source_text, service, transliteration_key)
+            actual_result_list.append(result)
+
+        # sort both actual and expected
+        actual_result_list.sort()
+        expected_result_list.sort()
+
+        self.assertEqual(actual_result_list, expected_result_list)
+
+
     def test_transliteration_epitran(self):
         # pytest test_translation.py -rPP -k test_transliteration_epitran
 
@@ -271,6 +289,9 @@ class TestTranslation(unittest.TestCase):
         # french service 2
         transliteration_option = transliteration_candidates[1]
         self.verify_transliteration(source_text, transliteration_option, 'l’hɛrbɛ ɛst plys vɛrtɛ elœrs')
+
+        # french
+        self.verify_transliteration_multiple_options(Language.fr, 'l’herbe est plus verte ailleurs', service, ['l’ɛrbə ɛst plys vɛrtə ajlœr', 'l’hɛrbɛ ɛst plys vɛrtɛ elœrs'])
 
         # english 
         self.verify_transliteration_single_option(Language.en, 'do you have a boyfriend', service, 'du ju hæv ə bojfɹɛnd')

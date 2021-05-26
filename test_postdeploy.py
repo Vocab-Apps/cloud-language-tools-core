@@ -19,6 +19,9 @@ class PostDeployTests(unittest.TestCase):
         cls.api_key=os.environ['ANKI_LANGUAGE_TOOLS_API_KEY']
         cls.client_version = 'v0.01'
 
+        response = requests.get(f'{cls.base_url}/voice_list')
+        cls.voice_list = response.json()
+
     @classmethod
     def tearDownClass(cls):
         pass
@@ -129,32 +132,16 @@ class PostDeployTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['translated_text'], 'There are many foreigners in China')
 
-    def test_translate_not_authenticated(self):
-        # pytest test_postdeploy.py -rPP -k test_translate_not_authenticated
-
-        source_text = 'Je ne suis pas intéressé.'
-        response = requests.post(self.get_url('/translate'), json={
-            'text': source_text,
-            'service': 'Azure',
-            'from_language_key': 'fr',
-            'to_language_key': 'en'
-        })
-
-        self.assertEqual(response.status_code, 401)
-        data = response.json()
-        self.assertEqual(data['error'], "API Key not valid")
-
-
     def test_translate_all(self):
         # pytest test_api.py -k test_translate_all
         source_text = '成本很低'
-        response = self.client.post('/translate_all', json={
+        response = requests.post(self.get_url('/translate_all'), json={
             'text': source_text,
             'from_language': 'zh_cn',
             'to_language': 'fr'
         }, headers={'api_key': self.api_key})
 
-        data = json.loads(response.data)
+        data = response.json()
         self.assertTrue(data['Azure'] == 'Le coût est faible' or data['Azure'] == 'Le coût est très faible')
         self.assertEqual(data['Amazon'], 'Très faible coût')
         self.assertEqual(data['Google'], 'À bas prix')
@@ -162,7 +149,7 @@ class PostDeployTests(unittest.TestCase):
 
     def test_translate_error(self):
         source_text = 'Je ne suis pas intéressé.'
-        response = self.client.post('/translate', json={
+        response = requests.post(self.get_url('/translate'), json={
             'text': source_text,
             'service': 'Azure',
             'from_language_key': 'fr',
@@ -170,14 +157,14 @@ class PostDeployTests(unittest.TestCase):
         }, headers={'api_key': self.api_key})
 
         self.assertEqual(response.status_code, 400)
-        error_response = json.loads(response.data)
+        error_response = response.json()
         error_message = error_response['error']
         self.assertTrue('The target language is not valid' in error_message)
 
 
     def test_transliteration(self):
-        response = self.client.get('/transliteration_language_list')
-        transliteration_language_list = json.loads(response.data)
+        response = requests.get(self.get_url('/transliteration_language_list'))
+        transliteration_language_list = response.json()
 
         service = 'Azure'
         source_text = '成本很低'
@@ -188,18 +175,18 @@ class PostDeployTests(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
 
-        response = self.client.post('/transliterate', json={
+        response = requests.post(self.get_url('/transliterate'), json={
             'text': source_text,
             'service': service,
             'transliteration_key': transliteration_key
         }, headers={'api_key': self.api_key})
 
-        result = json.loads(response.data)
+        result = response.json()
         self.assertEqual({'transliterated_text': 'chéng běn hěn dī'}, result)
 
     def test_transliteration_mandarin_cantonese(self):
-        response = self.client.get('/transliteration_language_list')
-        transliteration_language_list = json.loads(response.data)
+        response = requests.get(self.get_url('/transliteration_language_list'))
+        transliteration_language_list = response.json()
 
         service = 'MandarinCantonese'
         source_text = '成本很低'
@@ -215,18 +202,18 @@ class PostDeployTests(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
 
-        response = self.client.post('/transliterate', json={
+        response = requests.post(self.get_url('/transliterate'), json={
             'text': source_text,
             'service': service,
             'transliteration_key': transliteration_key
         }, headers={'api_key': self.api_key})
 
-        result = json.loads(response.data)
+        result = response.json()
         self.assertEqual({'transliterated_text': 'chéngběn hěn dī'}, result)
 
     def test_transliteration_mandarin_cantonese_2(self):
-        response = self.client.get('/transliteration_language_list')
-        transliteration_language_list = json.loads(response.data)
+        response = requests.get(self.get_url('/transliteration_language_list'))
+        transliteration_language_list = response.json()
 
         service = 'MandarinCantonese'
         source_text = '好多嘢要搞'
@@ -242,37 +229,15 @@ class PostDeployTests(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
 
-        response = self.client.post('/transliterate', json={
+        response = requests.post(self.get_url('/transliterate'), json={
             'text': source_text,
             'service': service,
             'transliteration_key': transliteration_key
         }, headers={'api_key': self.api_key})
 
-        result = json.loads(response.data)
+        result = response.json()
         self.assertEqual({'transliterated_text': 'hóudō jě jîu gáau'}, result)
 
-    def test_transliteration_not_authenticated(self):
-        response = self.client.get('/transliteration_language_list')
-        transliteration_language_list = json.loads(response.data)
-
-        service = 'Azure'
-        source_text = '成本很低'
-        from_language = 'zh_cn'
-        transliteration_candidates = [x for x in transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
-        self.assertTrue(len(transliteration_candidates) == 1) # once more services are introduced, change this
-        transliteration_option = transliteration_candidates[0]
-        service = transliteration_option['service']
-        transliteration_key = transliteration_option['transliteration_key']
-
-        response = self.client.post('/transliterate', json={
-            'text': source_text,
-            'service': service,
-            'transliteration_key': transliteration_key
-        })
-
-        self.assertEqual(response.status_code, 401)
-        result = json.loads(response.data)
-        self.assertEqual({'error': 'API Key not valid'}, result)
 
     def test_detection(self):
         source_list = [
@@ -280,37 +245,22 @@ class PostDeployTests(unittest.TestCase):
             'Pouvez-vous débarrasser la table, s\'il vous plaît?'
         ]
 
-        response = self.client.post('/detect', json={
+        response = requests.post(self.get_url('/detect'), json={
             'text_list': source_list
         }, headers={'api_key': self.api_key})
 
-        data = json.loads(response.data)
+        data = response.json()
         self.assertEqual(data['detected_language'], 'fr')
 
-    def test_detection_not_authenticated(self):
-        source_list = [
-            'Pouvez-vous me faire le change ?',
-            'Pouvez-vous débarrasser la table, s\'il vous plaît?'
-        ]
-
-        response = self.client.post('/detect', json={
-            'text_list': source_list
-        }, headers={'api_key': self.api_key_expired})
-
-        self.assertEqual(response.status_code, 401)
-        data = json.loads(response.data)
-        self.assertEqual(data['error'], 'API Key expired')
 
     def test_audio(self):
-        # pytest test_api.py -k test_audio
+        # pytest test_postdeploy.py -k test_audio
         # get one azure voice for french
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
 
-        response = self.client.post('/audio', json={
+        response = requests.post(self.get_url('/audio'), json={
             'text': 'Je ne suis pas intéressé.',
             'service': service,
             'voice_key': first_voice['voice_key'],
@@ -321,7 +271,7 @@ class PostDeployTests(unittest.TestCase):
 
         output_temp_file = tempfile.NamedTemporaryFile()
         with open(output_temp_file.name, 'wb') as f:
-            f.write(response.data)
+            f.write(response.content)
         f.close()
 
         # verify file type
@@ -339,13 +289,11 @@ class PostDeployTests(unittest.TestCase):
         source_text_japanese = 'おはようございます'
 
         # get one azure voice for french
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)
 
         service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
         first_voice = french_voices[0]
-        response = self.client.post('/audio_v2', json={
+        response = requests.post(self.get_url('/audio_v2'), json={
             'text': source_text_french,
             'service': service,
             'deck_name': 'french_deck_1',
@@ -353,14 +301,14 @@ class PostDeployTests(unittest.TestCase):
             'language_code': first_voice['language_code'],
             'voice_key': first_voice['voice_key'],
             'options': {}
-        }, headers={'api_key': self.api_key_v2, 'client': 'test', 'client_version': self.client_version})
+        }, headers={'api_key': self.api_key, 'client': 'test', 'client_version': self.client_version})
 
         self.assertEqual(response.status_code, 200)
 
         # retrieve file
         output_temp_file = tempfile.NamedTemporaryFile()
         with open(output_temp_file.name, 'wb') as f:
-            f.write(response.data)
+            f.write(response.content)
         f.close()
 
         # perform checks on file
@@ -374,50 +322,28 @@ class PostDeployTests(unittest.TestCase):
         self.assertTrue(expected_filetype in filetype)
 
 
-    def test_audio_forvo_not_found(self):
-        # pytest test_api.py -k test_audio_forvo_not_found
-        
-        # get one azure voice for french
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
-        service = 'Forvo'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
-        first_voice = french_voices[0]
-
-        response = self.client.post('/audio', json={
-            'text': 'wordnotfound',
-            'service': service,
-            'voice_key': first_voice['voice_key'],
-            'options': {}
-        }, headers={'api_key': self.api_key})
-
-        self.assertEqual(response.status_code, 404)
-
-
     def test_audio_yomichan(self):
         # pytest test_api.py -rPP -k test_audio_yomichan
         
         # get one azure voice for japanese
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
         service = 'Azure'
-        japanese_voices = [x for x in voice_list if x['language_code'] == 'ja' and x['service'] == service]
+        japanese_voices = [x for x in self.voice_list if x['language_code'] == 'ja' and x['service'] == service]
         first_voice = japanese_voices[0]
 
         source_text = 'おはようございます'
         voice_key_str = urllib.parse.quote_plus(json.dumps(first_voice['voice_key']))
         url_params = f'api_key={self.api_key}&service={service}&voice_key={voice_key_str}&text={source_text}'
-        url = f'/yomichan_audio?{url_params}'
+        url = self.get_url(f'/yomichan_audio?{url_params}')
 
         print(f'url: {url}')
 
-        response = self.client.get(url)
+        response = requests.get(url)
 
         self.assertEqual(response.status_code, 200)
 
         output_temp_file = tempfile.NamedTemporaryFile()
         with open(output_temp_file.name, 'wb') as f:
-            f.write(response.data)
+            f.write(response.content)
         f.close()
 
         # verify file type
@@ -427,63 +353,6 @@ class PostDeployTests(unittest.TestCase):
 
         self.assertTrue(expected_filetype in filetype)
 
-    def test_audio_yomichan_incorrect_api_key(self):
-        # pytest test_api.py -rPP -k test_audio_yomichan_incorrect_api_key
-        
-        # get one azure voice for japanese
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
-        service = 'Azure'
-        japanese_voices = [x for x in voice_list if x['language_code'] == 'ja' and x['service'] == service]
-        first_voice = japanese_voices[0]
-
-        source_text = 'おはようございます'
-        voice_key_str = urllib.parse.quote_plus(json.dumps(first_voice['voice_key']))
-        url_params = f'api_key=incorrectapikey&service={service}&voice_key={voice_key_str}&text={source_text}'
-        url = f'/yomichan_audio?{url_params}'
-
-        print(f'url: {url}')
-
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 401)
-
-    def test_audio_not_authenticated(self):
-        # get one azure voice for french
-        response = requests.get(f'/voice_list')
-        voice_list = json.loads(response.data)        
-        service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
-        first_voice = french_voices[0]
-
-        response = self.client.post('/audio', json={
-            'text': 'Je ne suis pas intéressé.',
-            'service': service,
-            'voice_key': first_voice['voice_key'],
-            'options': {}
-        })
-
-        self.assertEqual(response.status_code, 401)
-
-    def test_audio_not_authenticated_v2(self):
-        # pytest test_api.py -rPP -k test_audio_not_authenticated_v2
-
-        response = self.client.get('/voice_list')
-        voice_list = json.loads(response.data)        
-        service = 'Azure'
-        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
-        first_voice = french_voices[0]
-
-        response = self.client.post('/audio_v2', json={
-            'text': 'Je ne suis pas intéressé.',
-            'service': service,
-            'voice_key': first_voice['voice_key'],
-            'language_code': first_voice['language_code'],
-            'options': {}
-        })
-
-        self.assertEqual(response.status_code, 401)        
-        
 
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate

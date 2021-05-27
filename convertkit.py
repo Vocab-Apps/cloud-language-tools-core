@@ -98,6 +98,28 @@ class ConvertKit():
 
         return subscriber_list
 
+    def list_canceled(self):
+        canceled_list = []
+
+        url = f'https://api.convertkit.com/v3/subscribers?api_secret={self.api_secret}&sort_field=cancelled_at'
+        response = requests.get(url)
+        data = response.json()
+
+        current_page = data['page']
+        total_pages = data['total_pages']
+
+        canceled_list.extend(data['subscribers'])
+
+        while current_page < total_pages:
+            next_page = current_page + 1
+            url = f'https://api.convertkit.com/v3/subscribers?api_secret={self.api_secret}&sort_field=cancelled_at&page={next_page}'
+            response = requests.get(url)
+            data = response.json()
+            current_page = data['page']
+            canceled_list.extend(data['subscribers'])
+
+        return canceled_list
+
     def list_trial_users(self):
         return self.list_subscribers_tag(self.tag_id_trial_user)
 

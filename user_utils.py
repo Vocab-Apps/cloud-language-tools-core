@@ -247,6 +247,13 @@ class UserUtils():
         subscribers = self.convertkit_client.list_patreon_users()
         return self.get_dataframe_from_subscriber_list(subscribers)
 
+    def get_convertkit_canceled_users(self):
+        canceled_list = self.convertkit_client.list_canceled()
+        canceled_df = self.get_dataframe_from_subscriber_list(canceled_list)
+        canceled_df['canceled'] = True
+        canceled_df = canceled_df[['subscriber_id', 'canceled']]
+        return canceled_df
+
     def get_dataframe_from_subscriber_list(self, subscribers):
         users = []
         for subscriber in subscribers:
@@ -327,6 +334,9 @@ class UserUtils():
         # get convertkit subscriber ids
         convertkit_trial_users_df = self.get_convertkit_trial_users()
 
+        # get convertkit canceled users
+        canceled_df = self.get_convertkit_canceled_users()
+
         # get tag data from convertkit
         tag_data_df = self.get_convertkit_tag_data()
 
@@ -342,9 +352,12 @@ class UserUtils():
 
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, convertkit_trial_users_df, how='left', on='email')
+        combined_df = pandas.merge(combined_df, canceled_df, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, tag_data_df, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, api_key_usage_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, entitlement_df, how='left', on='api_key')
+
+        combined_df['canceled'] = combined_df['canceled'].fillna(False)
 
         combined_df['characters'] = combined_df['characters'].fillna(0)
         combined_df['character_limit'] = combined_df['character_limit'].fillna(0)
@@ -440,7 +453,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_trial_df, user_data_df, how='left', left_on='email', right_on='email')
 
-        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'detected_languages', 'services', 'clients', 'versions', 'tags']]
+        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'detected_languages', 'services', 'clients', 'versions', 'tags', 'canceled']]
 
         # print(update_df)
 

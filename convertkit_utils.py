@@ -13,6 +13,13 @@ def list_subscribers():
     data = response.json()
     pprint.pprint(data)    
 
+def list_canceled():
+    # curl https://api.convertkit.com/v3/subscribers?api_secret=<your_secret_api_key>&from=2016-02-01&to=2015-02-28
+    url = f'https://api.convertkit.com/v3/subscribers?api_secret={api_secret}&sort_field=cancelled_at'
+    response = requests.get(url)
+    data = response.json()
+    pprint.pprint(data)   
+
 def view_subscriber():
     url = f'https://api.convertkit.com/v3/subscribers/1215642036?api_secret={api_secret}'
     response = requests.get(url)
@@ -122,9 +129,10 @@ def configure_addtag_webhook():
 
 if __name__ == '__main__':
     # configure_addtag_webhook()
-    list_tags()
+    # list_tags()
     # list_fields()
     # list_subscribers()
+    list_canceled()
     # view_subscribers()
     # list_tags_subscriber()
     # tag_subscriber()

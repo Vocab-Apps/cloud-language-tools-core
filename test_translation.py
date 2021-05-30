@@ -98,8 +98,8 @@ class TestTranslation(unittest.TestCase):
         self.assertRaises(cloudlanguagetools.errors.RequestError, self.translate_text, Service.Naver, 'Veuillez parler lentement.', Language.fr, Language.th, 'Please speak slowly.')
 
     def test_translate_deepl(self):
-        # pytest test_translation.py -k test_translate_deepl
-        self.translate_text(Service.Naver, 'Please speak slowly', Language.en, Language.fr, 'Parlez lentement.')
+        # pytest test_translation.py -rPP -k test_translate_deepl
+        self.translate_text(Service.DeepL, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement')
 
 
     def test_translate_all(self):

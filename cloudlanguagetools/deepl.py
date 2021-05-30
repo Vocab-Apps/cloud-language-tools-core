@@ -74,6 +74,7 @@ class DeepLService(cloudlanguagetools.service.Service):
 
     def get_translation(self, text, from_language_key, to_language_key):
         params = {
+            'auth_key': self.api_key,
             'text': text,
             'source_lang': from_language_key,
             'target_lang': to_language_key
@@ -82,8 +83,10 @@ class DeepLService(cloudlanguagetools.service.Service):
 
         if response.status_code == 200:
             # {'translations': [{'translation': 'Le coût est très bas.'}], 'word_count': 2, 'character_count': 4}
+            print(response.content)
             data = response.json()
+            print(data)
             return data['translations'][0]['text']
 
-        error_message = error_message = f'DeepL: could not translate text [{text}] from {from_language_key} to {to_language_key} ({response.json()})'
+        error_message = error_message = f'DeepL: could not translate text [{text}] from {from_language_key} to {to_language_key} (status_code: {response.status_code} {response.content})'
         raise cloudlanguagetools.errors.RequestError(error_message)

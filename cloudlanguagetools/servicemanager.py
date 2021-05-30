@@ -70,6 +70,8 @@ class ServiceManager():
         # cereproc
         self.services[cloudlanguagetools.constants.Service.CereProc.name].configure()
 
+        self.services[cloudlanguagetools.constants.Service.DeepL.name].configure()
+
         # for AWS, the boto3 library will read environment variables itself
 
         self.translation_language_list = self.get_translation_language_list()

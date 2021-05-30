@@ -101,6 +101,7 @@ class TestTranslation(unittest.TestCase):
         # pytest test_translation.py -rPP -k test_translate_deepl
         self.translate_text(Service.DeepL, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement')
         self.translate_text(Service.DeepL, 'Je ne suis pas intéressé.', Language.fr, Language.en, """I'm not interested.""")
+        self.translate_text(Service.DeepL, '送外卖的人', Language.zh_cn, Language.en, 'delivery person')
 
 
     def test_translate_all(self):

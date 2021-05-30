@@ -15,6 +15,7 @@ import cloudlanguagetools.amazon
 import cloudlanguagetools.forvo
 import cloudlanguagetools.cereproc
 import cloudlanguagetools.epitran
+import cloudlanguagetools.deepl
 
 class ServiceManager():
     def  __init__(self):
@@ -29,6 +30,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.Forvo.name] = cloudlanguagetools.forvo.ForvoService()
         self.services[cloudlanguagetools.constants.Service.CereProc.name] = cloudlanguagetools.cereproc.CereProcService()
         self.services[cloudlanguagetools.constants.Service.Epitran.name] = cloudlanguagetools.epitran.EpitranService()
+        self.services[cloudlanguagetools.constants.Service.DeepL.name] = cloudlanguagetools.deepl.DeepLService()
 
     def configure(self):
         # azure

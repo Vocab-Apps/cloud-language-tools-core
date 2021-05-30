@@ -97,6 +97,11 @@ class TestTranslation(unittest.TestCase):
         # pytest test_translation.py -k test_translate_naver_unsupported_pair
         self.assertRaises(cloudlanguagetools.errors.RequestError, self.translate_text, Service.Naver, 'Veuillez parler lentement.', Language.fr, Language.th, 'Please speak slowly.')
 
+    def test_translate_deepl(self):
+        # pytest test_translation.py -k test_translate_deepl
+        self.translate_text(Service.Naver, 'Please speak slowly', Language.en, Language.fr, 'Parlez lentement.')
+
+
     def test_translate_all(self):
         # pytest test_translation.py -rPP -k test_translate_all
         # pytest test_translation.py --capture=no --log-cli-level=INFO -k test_translate_all

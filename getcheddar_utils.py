@@ -13,13 +13,14 @@ class GetCheddarUtils():
     
 
     def report_customer_usage(self, customer_code):
-        url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{PRODUCT_CODE}/code/{customer_code}/itemCode/{TRACKED_ITEM_CODE}/quantity/0.5'
+        url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{PRODUCT_CODE}/code/{customer_code}/itemCode/{TRACKED_ITEM_CODE}'
         print(url)
-        response = requests.post(url, auth=(self.user, self.api_key))
+        params = {'quantity': 0.012345}
+        response = requests.post(url, auth=(self.user, self.api_key), data=params)
         if response.status_code == 200:
             # success
             dom = xml.dom.minidom.parseString(response.content)
-            pretty_xml_as_string = dom.toprettyxml()
+            pretty_xml_as_string = dom.toprettyxml(newl='')
             print(pretty_xml_as_string)
 
 if __name__ == '__main__':

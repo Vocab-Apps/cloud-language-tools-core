@@ -50,6 +50,7 @@ def main():
                'backup_redis_db']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--api_key', help='Pass in API key to check validity')
+    parser.add_argument('--expiration', help='expiration for API key', type=int) # 1627649602
     parser.add_argument('--trial_email', help='email address of trial user')
     parser.add_argument('--pattern', help='Use a special pattern for key iteration')
     parser.add_argument('--dbnum', help='connect to a different db number', type=int)
@@ -105,9 +106,10 @@ def main():
     elif args.action == 'modify_key_expiration':
         # to modify the expiration timestamp of an api key
         api_key = args.api_key
+        expiration = args.key_expiration
         redis_api_key = connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
         print(f'redis_api_key: {redis_api_key}')
-        connection.r.hset(redis_api_key, 'expiration', 1614785533)
+        connection.r.hset(redis_api_key, 'expiration', expiration)
     else:
         print(f'not recognized: {args.action}')
 

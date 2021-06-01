@@ -14,6 +14,7 @@ import cloudlanguagetools.errors
 import redisdb
 import patreon_utils
 import convertkit
+import pprint
 
 #logging.basicConfig()
 logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -295,6 +296,12 @@ class ConvertKitRequestPatreonKey(flask_restful.Resource):
 
         logging.info(f'patreon key created for {email_address}: {api_key}')
 
+class GetCheddar(flask_restful.Resource):
+    def post(self):
+        data = request.json
+        pprint.pprint(data)
+
+
 
 api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
@@ -314,6 +321,9 @@ api.add_resource(PatreonKeyRequest, '/request_patreon_key')
 # convertkit webhooks
 api.add_resource(ConvertKitRequestTrialKey, '/convertkit_subscriber_request_trial_key')
 api.add_resource(ConvertKitRequestPatreonKey, '/convertkit_subscriber_request_patreon_key')
+
+# getcheddar webooks
+api.add_resource(GetCheddar, '/getcheddar')
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')

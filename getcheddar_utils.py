@@ -2,7 +2,8 @@ import os
 import logging
 import requests
 import urllib.parse
-import xml.dom.minidom
+import xml.etree.ElementTree
+import pprint
 
 PRODUCT_CODE='LANGUAGE_TOOLS'
 TRACKED_ITEM_CODE='thousand_chars'
@@ -34,10 +35,23 @@ class GetCheddarUtils():
         print(url)
         response = requests.get(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
+
             # success
-            dom = xml.dom.minidom.parseString(response.content)
-            pretty_xml_as_string = dom.toprettyxml(newl='')
-            print(pretty_xml_as_string)
+            # navigate the XML
+            root = xml.etree.ElementTree.fromstring(response.content)
+
+            # do some assertions
+            assert len(root.findall('./customer/subscriptions/subscription')) == 1
+            assert len(root.findall('./customer/subscriptions/subscription[1]/plans/plan')) == 1
+
+            quantity_included = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text
+            overage_amount = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text
+            print(f'quantity included: {quantity_included} overage amount: {overage_amount}')
+
+            current_usage = root.find('./customer/subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text
+            print(f'current usage: {current_usage}')
+
+
         else:
             print(response.content)
 
@@ -48,6 +62,6 @@ if __name__ == '__main__':
                         level=logging.INFO)
 
     cheddar_utils = GetCheddarUtils()
-    customer_code = 'languagetools+customer2@mailc.net '
-    cheddar_utils.report_customer_usage(customer_code)
-    # cheddar_utils.get_customer(customer_code)
+    customer_code = 'no1@spam.com'
+    # cheddar_utils.report_customer_usage(customer_code)
+    cheddar_utils.get_customer(customer_code)

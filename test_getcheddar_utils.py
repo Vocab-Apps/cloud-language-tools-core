@@ -1293,5 +1293,7 @@ class TestGetCheddarUtils(unittest.TestCase):
         actual_xml_data = self.utils.decode_customer_xml(xml_str)
         expected_xml_data = {
             'code': 'languagetools+customer3@mailc.net',
-            'email': 'languagetools+customer3@mailc.net'
+            'email': 'languagetools+customer3@mailc.net',
+            'thousand_char_used': 42.789
         }
+        self.assertEqual(actual_xml_data, expected_xml_data)

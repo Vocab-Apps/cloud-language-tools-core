@@ -37,12 +37,13 @@ class GetCheddarUtils():
         overage_amount = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text
         print(f'quantity included: {quantity_included} overage amount: {overage_amount}')
 
-        current_usage = root.find('./customer/subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text
+        current_usage = float(root.find('./customer/subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text)
         print(f'current usage: {current_usage}')
 
         return {
             'code': customer_code,
-            'email': customer_email
+            'email': customer_email,
+            'thousand_char_used': current_usage
         }
 
 

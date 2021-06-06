@@ -84,14 +84,16 @@ class GetCheddarUtils():
 
 
     # for testing purposes
-    def create_test_customer(self, code, email, first_name, last_name):
+    # ====================
+
+    def create_test_customer(self, code, email, first_name, last_name, plan):
         url = f'https://getcheddar.com/xml/customers/new/productCode/{PRODUCT_CODE}'
         params = {
             'code': code,
             'email': email,
             'firstName': first_name,
             'lastName': last_name,
-            'subscription[planCode]':'SMALL',
+            'subscription[planCode]': plan,
             'subscription[ccFirstName]': first_name,
             'subscription[ccLastName]': last_name,
             'subscription[ccNumber]': '370000000000002',
@@ -106,6 +108,20 @@ class GetCheddarUtils():
         else:
             print(response.content)        
 
+    def update_test_customer(self, code, plan):
+        customer_code_encoded = urllib.parse.quote(code)
+        url = f'https://getcheddar.com/xml/customers/edit-subscription/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}'
+        params = {
+            'planCode': plan
+        }
+        response = requests.post(url, auth=(self.user, self.api_key), data=params)
+        if response.status_code == 200:
+            # success
+            self.print_xml_response(response.content)
+            print(self.decode_customer_xml(response.content))
+        else:
+            print(response.content)            
+
 
 if __name__ == '__main__':
 
@@ -114,7 +130,8 @@ if __name__ == '__main__':
                         level=logging.INFO)
 
     cheddar_utils = GetCheddarUtils()
-    customer_code = 'languagetools+customer4@mailc.net'
+    customer_code = 'languagetools+customer5@mailc.net'
     # cheddar_utils.report_customer_usage(customer_code)
     # cheddar_utils.get_customer(customer_code)
-    cheddar_utils.create_test_customer('languagetools+customer5@mailc.net', 'languagetools+customer5@mailc.net', 'Luc', 'Customer5')
+    # cheddar_utils.create_test_customer('languagetools+customer5@mailc.net', 'languagetools+customer5@mailc.net', 'Luc', 'Customer5')
+    cheddar_utils.update_test_customer(customer_code, 'MEDIUM')

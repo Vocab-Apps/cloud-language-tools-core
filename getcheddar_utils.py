@@ -83,6 +83,29 @@ class GetCheddarUtils():
             print(response.content)
 
 
+    # for testing purposes
+    def create_test_customer(self, code, email, first_name, last_name):
+        url = f'https://getcheddar.com/xml/customers/new/productCode/{PRODUCT_CODE}'
+        params = {
+            'code': code,
+            'email': email,
+            'firstName': first_name,
+            'lastName': last_name,
+            'subscription[planCode]':'SMALL',
+            'subscription[ccFirstName]': first_name,
+            'subscription[ccLastName]': last_name,
+            'subscription[ccNumber]': '370000000000002',
+            'subscription[ccCardCode]': '1234',
+            'subscription[ccExpiration]': '04/2025'
+        }
+        response = requests.post(url, auth=(self.user, self.api_key), data=params)
+        if response.status_code == 200:
+            # success
+            self.print_xml_response(response.content)
+            print(self.decode_customer_xml(response.content))
+        else:
+            print(response.content)        
+
 
 if __name__ == '__main__':
 
@@ -93,4 +116,5 @@ if __name__ == '__main__':
     cheddar_utils = GetCheddarUtils()
     customer_code = 'languagetools+customer4@mailc.net'
     # cheddar_utils.report_customer_usage(customer_code)
-    cheddar_utils.get_customer(customer_code)
+    # cheddar_utils.get_customer(customer_code)
+    cheddar_utils.create_test_customer('languagetools+customer5@mailc.net', 'languagetools+customer5@mailc.net', 'Luc', 'Customer5')

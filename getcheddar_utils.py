@@ -122,6 +122,18 @@ class GetCheddarUtils():
         else:
             print(response.content)            
 
+    def cancel_test_customer(self, code, plan):
+        customer_code_encoded = urllib.parse.quote(code)
+        url = f'https://getcheddar.com/xml/customers/cancel/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}'
+        response = requests.post(url, auth=(self.user, self.api_key))
+        if response.status_code == 200:
+            # success
+            self.print_xml_response(response.content)
+            print(self.decode_customer_xml(response.content))
+        else:
+            print(response.content)            
+
+
 
 if __name__ == '__main__':
 
@@ -134,4 +146,5 @@ if __name__ == '__main__':
     # cheddar_utils.report_customer_usage(customer_code)
     # cheddar_utils.get_customer(customer_code)
     # cheddar_utils.create_test_customer('languagetools+customer5@mailc.net', 'languagetools+customer5@mailc.net', 'Luc', 'Customer5')
-    cheddar_utils.update_test_customer(customer_code, 'MEDIUM')
+    # cheddar_utils.update_test_customer(customer_code, 'MEDIUM')
+    cheddar_utils.cancel_test_customer(customer_code, 'MEDIUM')

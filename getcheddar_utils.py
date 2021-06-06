@@ -27,6 +27,24 @@ class GetCheddarUtils():
         }
 
 
+    def decode_customer_xml(self, xml_str):
+        root = xml.etree.ElementTree.fromstring(xml_str)
+
+        customer_code = root.find('./customer').attrib['code']
+        customer_email = root.find('./customer/email').text
+
+        quantity_included = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text
+        overage_amount = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text
+        print(f'quantity included: {quantity_included} overage amount: {overage_amount}')
+
+        current_usage = root.find('./customer/subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text
+        print(f'current usage: {current_usage}')
+
+        return {
+            'code': customer_code,
+            'email': customer_email
+        }
+
 
     def print_xml_response(self, content):
         dom = xml.dom.minidom.parseString(content)
@@ -44,9 +62,7 @@ class GetCheddarUtils():
         response = requests.post(url, auth=(self.user, self.api_key), data=params)
         if response.status_code == 200:
             # success
-            dom = xml.dom.minidom.parseString(response.content)
-            pretty_xml_as_string = dom.toprettyxml(newl='')
-            print(pretty_xml_as_string)
+            self.print_xml_response(response.content)
         else:
             print(response.content)
 
@@ -87,6 +103,6 @@ if __name__ == '__main__':
                         level=logging.INFO)
 
     cheddar_utils = GetCheddarUtils()
-    customer_code = 'languagetools+customer2@mailc.net'
+    customer_code = 'languagetools+customer3@mailc.net'
     cheddar_utils.report_customer_usage(customer_code)
     # cheddar_utils.get_customer(customer_code)

@@ -15,9 +15,10 @@ class GetCheddarUtils():
         self.api_key = os.environ['GETCHEDDAR_API_KEY']
 
     def decode_webhook(self, data):
-        overage_allowed = data['subscription']['plan']['items'][0]['overageAmount'] != '0.00'
+        activity_type = data['activityType']
+        overage_allowed = data['subscription']['plan']['items'][0]['overageAmount'] != '0.00' and activity_type != 'subscriptionCanceled'
         return {
-            'type': data['activityType'],
+            'type': activity_type,
             'code': data['customer']['code'],
             'email': data['customer']['email'],
             'thousand_char_quota': data['subscription']['plan']['items'][0]['quantityIncluded'],

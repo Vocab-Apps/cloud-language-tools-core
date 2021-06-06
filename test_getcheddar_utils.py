@@ -154,6 +154,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'type': 'newSubscription',
             'code': 'no1@spam.com',
             'email': 'languagetools+customer1@mailc.net',
-            'thousand_char_quota': 250
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': False
         }
         self.assertEqual(webhook_data, expected_data)

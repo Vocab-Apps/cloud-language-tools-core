@@ -35,7 +35,8 @@ class GetCheddarUtils():
 
         quantity_included = int(root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text)
         overage_amount = float(root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text)
-        overage_allowed = overage_amount > 0
+        canceled_date = root.find('./customer/subscriptions/subscription[1]/canceledDatetime').text
+        overage_allowed = overage_amount > 0 and canceled_date == None
         current_usage = float(root.find('./customer/subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text)
 
         return {
@@ -91,5 +92,5 @@ if __name__ == '__main__':
 
     cheddar_utils = GetCheddarUtils()
     customer_code = 'languagetools+customer4@mailc.net'
-    cheddar_utils.report_customer_usage(customer_code)
-    # cheddar_utils.get_customer(customer_code)
+    # cheddar_utils.report_customer_usage(customer_code)
+    cheddar_utils.get_customer(customer_code)

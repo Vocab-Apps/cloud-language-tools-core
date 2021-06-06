@@ -1594,4 +1594,422 @@ class TestGetCheddarUtils(unittest.TestCase):
             'thousand_char_overage_allowed': True,
             'thousand_char_used': 45.87
         }
+        self.assertEqual(actual_xml_data, expected_xml_data)
+
+    def test_decode_customer_xml_large_canceled_no_overage(self):
+        xml_str = """<?xml version="1.0" ?><customers>	
+                        <customer id="e72f0991-c68c-11eb-bed7-0eff6b8b8fd3" code="languagetools+customer4@mailc.net">		
+                                <firstName>Luc</firstName>		
+                                <lastName>Customer4</lastName>		
+                                <company/>		
+                                <email>languagetools+customer4@mailc.net</email>		
+                                <notes/>		
+                                <gatewayToken>SIMULATED</gatewayToken>		
+                                <isTaxExempt>0</isTaxExempt>		
+                                <isVatExempt>0</isVatExempt>		
+                                <taxNumber/>		
+                                <vatNumber/>		
+                                <taxRate/>		
+                                <firstContactDatetime/>		
+                                <referer/>		
+                                <refererHost/>		
+                                <campaignSource/>		
+                                <campaignMedium/>		
+                                <campaignTerm/>		
+                                <campaignContent/>		
+                                <campaignName/>		
+                                <key>03ff591107</key>		
+                                <createdDatetime>2021-06-06T06:03:24+00:00</createdDatetime>		
+                                <modifiedDatetime>2021-06-06T06:03:24+00:00</modifiedDatetime>		
+                                <metaData/>		
+                                <subscriptions>			
+                                    <subscription id="ee0849c9-c693-11eb-bed7-0eff6b8b8fd3">				
+                                            <plans>					
+                                                <plan id="b1a293e7-c274-11eb-bed7-0eff6b8b8fd3" code="LARGE">						
+                                                        <name>Large</name>						
+                                                        <displayName>Large • 20.00 / Month</displayName>						
+                                                        <description/>						
+                                                        <isActive>1</isActive>						
+                                                        <isFree>0</isFree>						
+                                                        <paymentMethodIsRequired>1</paymentMethodIsRequired>						
+                                                        <trialDays>0</trialDays>						
+                                                        <initialBillCount>0</initialBillCount>						
+                                                        <initialBillCountUnit>days</initialBillCountUnit>						
+                                                        <initialInvoiceBillingDatetime>2021-06-06T06:55:48+00:00</initialInvoiceBillingDatetime>						
+                                                        <billingFrequency>monthly</billingFrequency>						
+                                                        <billingFrequencyPer>month</billingFrequencyPer>						
+                                                        <billingFrequencyUnit>months</billingFrequencyUnit>						
+                                                        <billingFrequencyQuantity>1</billingFrequencyQuantity>						
+                                                        <nextInvoiceBillingDatetime>2021-07-06T06:55:48+00:00</nextInvoiceBillingDatetime>						
+                                                        <setupChargeCode/>						
+                                                        <setupChargeAmount>0.00</setupChargeAmount>						
+                                                        <recurringChargeCode>LARGE_RECURRING</recurringChargeCode>						
+                                                        <recurringChargeAmount>20.00</recurringChargeAmount>						
+                                                        <onChangeInitialBillHandler>next</onChangeInitialBillHandler>						
+                                                        <setupChargeBillHandler>now</setupChargeBillHandler>						
+                                                        <onChangeSetupChargeBillHandler>no</onChangeSetupChargeBillHandler>						
+                                                        <createdDatetime>2021-06-01T01:00:01+00:00</createdDatetime>						
+                                                        <items>							
+                                                            <item id="382ca6fd-c274-11eb-bed7-0eff6b8b8fd3" code="thousand_chars">								
+                                                                    <name>Thousand Chars</name>								
+                                                                    <quantityIncluded>1000</quantityIncluded>								
+                                                                    <isPeriodic>1</isPeriodic>								
+                                                                    <overageAmount>0.03</overageAmount>								
+                                                                    <createdDatetime>2021-06-01T01:00:01+00:00</createdDatetime>								
+                                                            </item>							
+                                                        </items>						
+                                                </plan>					
+                                            </plans>				
+                                            <gatewayToken>SIMULATED</gatewayToken>				
+                                            <gatewayTokenAux/>				
+                                            <gatewayAccount>					
+                                                <id>71e29c22-bceb-11eb-bed7-0eff6b8b8fd3</id>					
+                                                <gateway>Stripe_Simulator</gateway>					
+                                                <type>cc</type>					
+                                            </gatewayAccount>				
+                                            <ccFirstName>Luc</ccFirstName>				
+                                            <ccLastName>Customer4</ccLastName>				
+                                            <ccCompany/>				
+                                            <ccCountry>US</ccCountry>				
+                                            <ccAddress/>				
+                                            <ccCity/>				
+                                            <ccState/>				
+                                            <ccZip/>				
+                                            <ccType>amex</ccType>				
+                                            <ccLastFour>0002</ccLastFour>				
+                                            <ccExpirationDate>2024-01-31</ccExpirationDate>				
+                                            <ccEmail/>				
+                                            <cancelType>customer</cancelType>				
+                                            <cancelReason/>				
+                                            <canceledDatetime>2021-06-06T06:54:35+00:00</canceledDatetime>				
+                                            <createdDatetime>2021-06-06T06:53:42+00:00</createdDatetime>				
+                                            <items>					
+                                                <item id="382ca6fd-c274-11eb-bed7-0eff6b8b8fd3" code="thousand_chars">						
+                                                        <name>Thousand Chars</name>						
+                                                        <quantity>45.87</quantity>						
+                                                        <createdDatetime>2021-06-06T06:04:58+00:00</createdDatetime>						
+                                                        <modifiedDatetime>2021-06-06T06:53:42+00:00</modifiedDatetime>						
+                                                </item>					
+                                            </items>				
+                                            <invoices>					
+                                                <invoice id="e76cb85b-c68c-11eb-bed7-0eff6b8b8fd3">						
+                                                        <number>25</number>						
+                                                        <type>subscription</type>						
+                                                        <vatRate/>						
+                                                        <taxRate/>						
+                                                        <billingDatetime>2021-07-06T06:03:24+00:00</billingDatetime>						
+                                                        <paidTransactionId/>						
+                                                        <createdDatetime>2021-06-06T06:03:24+00:00</createdDatetime>						
+                                                        <charges>							
+                                                            <charge id="" code="LARGE_RECURRING">								
+                                                                    <type>recurring</type>								
+                                                                    <quantity>1</quantity>								
+                                                                    <eachAmount>20.00</eachAmount>								
+                                                                    <description/>								
+                                                                    <createdDatetime>2021-07-06T06:03:24+00:00</createdDatetime>								
+                                                            </charge>							
+                                                            <charge id="" code="thousand_chars">								
+                                                                    <type>item</type>								
+                                                                    <quantity>0</quantity>								
+                                                                    <eachAmount>0.03</eachAmount>								
+                                                                    <description/>								
+                                                                    <createdDatetime>2021-06-06T06:53:42+00:00</createdDatetime>								
+                                                            </charge>							
+                                                        </charges>						
+                                                </invoice>					
+                                            </invoices>				
+                                    </subscription>			
+                                    <subscription id="44928d8f-c68f-11eb-bed7-0eff6b8b8fd3">				
+                                            <plans>					
+                                                <plan id="56561361-c274-11eb-bed7-0eff6b8b8fd3" code="SMALL">						
+                                                        <name>Small</name>						
+                                                        <displayName>Small • 5.00 / Month</displayName>						
+                                                        <description/>						
+                                                        <isActive>1</isActive>						
+                                                        <isFree>0</isFree>						
+                                                        <paymentMethodIsRequired>1</paymentMethodIsRequired>						
+                                                        <trialDays>0</trialDays>						
+                                                        <initialBillCount>0</initialBillCount>						
+                                                        <initialBillCountUnit>days</initialBillCountUnit>						
+                                                        <initialInvoiceBillingDatetime>2021-06-06T06:55:48+00:00</initialInvoiceBillingDatetime>						
+                                                        <billingFrequency>monthly</billingFrequency>						
+                                                        <billingFrequencyPer>month</billingFrequencyPer>						
+                                                        <billingFrequencyUnit>months</billingFrequencyUnit>						
+                                                        <billingFrequencyQuantity>1</billingFrequencyQuantity>						
+                                                        <nextInvoiceBillingDatetime>2021-07-06T06:55:48+00:00</nextInvoiceBillingDatetime>						
+                                                        <setupChargeCode/>						
+                                                        <setupChargeAmount>0.00</setupChargeAmount>						
+                                                        <recurringChargeCode>SMALL_RECURRING</recurringChargeCode>						
+                                                        <recurringChargeAmount>5.00</recurringChargeAmount>						
+                                                        <onChangeInitialBillHandler>next</onChangeInitialBillHandler>						
+                                                        <setupChargeBillHandler>now</setupChargeBillHandler>						
+                                                        <onChangeSetupChargeBillHandler>no</onChangeSetupChargeBillHandler>						
+                                                        <createdDatetime>2021-06-01T00:57:28+00:00</createdDatetime>						
+                                                        <items>							
+                                                            <item id="382ca6fd-c274-11eb-bed7-0eff6b8b8fd3" code="thousand_chars">								
+                                                                    <name>Thousand Chars</name>								
+                                                                    <quantityIncluded>250</quantityIncluded>								
+                                                                    <isPeriodic>1</isPeriodic>								
+                                                                    <overageAmount>0.00</overageAmount>								
+                                                                    <createdDatetime>2021-06-01T00:57:28+00:00</createdDatetime>								
+                                                            </item>							
+                                                        </items>						
+                                                </plan>					
+                                            </plans>				
+                                            <gatewayToken>SIMULATED</gatewayToken>				
+                                            <gatewayTokenAux/>				
+                                            <gatewayAccount>					
+                                                <id>71e29c22-bceb-11eb-bed7-0eff6b8b8fd3</id>					
+                                                <gateway>Stripe_Simulator</gateway>					
+                                                <type>cc</type>					
+                                            </gatewayAccount>				
+                                            <ccFirstName>Luc</ccFirstName>				
+                                            <ccLastName>Customer4</ccLastName>				
+                                            <ccCompany/>				
+                                            <ccCountry>US</ccCountry>				
+                                            <ccAddress/>				
+                                            <ccCity/>				
+                                            <ccState/>				
+                                            <ccZip/>				
+                                            <ccType>amex</ccType>				
+                                            <ccLastFour>0002</ccLastFour>				
+                                            <ccExpirationDate>2024-01-31</ccExpirationDate>				
+                                            <ccEmail/>				
+                                            <cancelType/>				
+                                            <cancelReason/>				
+                                            <canceledDatetime/>				
+                                            <createdDatetime>2021-06-06T06:20:19+00:00</createdDatetime>				
+                                    </subscription>			
+                                    <subscription id="f0ad4f2c-c68d-11eb-bed7-0eff6b8b8fd3">				
+                                            <plans>					
+                                                <plan id="b1a293e7-c274-11eb-bed7-0eff6b8b8fd3" code="LARGE">						
+                                                        <name>Large</name>						
+                                                        <displayName>Large • 20.00 / Month</displayName>						
+                                                        <description/>						
+                                                        <isActive>1</isActive>						
+                                                        <isFree>0</isFree>						
+                                                        <paymentMethodIsRequired>1</paymentMethodIsRequired>						
+                                                        <trialDays>0</trialDays>						
+                                                        <initialBillCount>0</initialBillCount>						
+                                                        <initialBillCountUnit>days</initialBillCountUnit>						
+                                                        <initialInvoiceBillingDatetime>2021-06-06T06:55:48+00:00</initialInvoiceBillingDatetime>						
+                                                        <billingFrequency>monthly</billingFrequency>						
+                                                        <billingFrequencyPer>month</billingFrequencyPer>						
+                                                        <billingFrequencyUnit>months</billingFrequencyUnit>						
+                                                        <billingFrequencyQuantity>1</billingFrequencyQuantity>						
+                                                        <nextInvoiceBillingDatetime>2021-07-06T06:55:48+00:00</nextInvoiceBillingDatetime>						
+                                                        <setupChargeCode/>						
+                                                        <setupChargeAmount>0.00</setupChargeAmount>						
+                                                        <recurringChargeCode>LARGE_RECURRING</recurringChargeCode>						
+                                                        <recurringChargeAmount>20.00</recurringChargeAmount>						
+                                                        <onChangeInitialBillHandler>next</onChangeInitialBillHandler>						
+                                                        <setupChargeBillHandler>now</setupChargeBillHandler>						
+                                                        <onChangeSetupChargeBillHandler>no</onChangeSetupChargeBillHandler>						
+                                                        <createdDatetime>2021-06-01T01:00:01+00:00</createdDatetime>						
+                                                        <items>							
+                                                            <item id="382ca6fd-c274-11eb-bed7-0eff6b8b8fd3" code="thousand_chars">								
+                                                                    <name>Thousand Chars</name>								
+                                                                    <quantityIncluded>1000</quantityIncluded>								
+                                                                    <isPeriodic>1</isPeriodic>								
+                                                                    <overageAmount>0.03</overageAmount>								
+                                                                    <createdDatetime>2021-06-01T01:00:01+00:00</createdDatetime>								
+                                                            </item>							
+                                                        </items>						
+                                                </plan>					
+                                            </plans>				
+                                            <gatewayToken>SIMULATED</gatewayToken>				
+                                            <gatewayTokenAux/>				
+                                            <gatewayAccount>					
+                                                <id>71e29c22-bceb-11eb-bed7-0eff6b8b8fd3</id>					
+                                                <gateway>Stripe_Simulator</gateway>					
+                                                <type>cc</type>					
+                                            </gatewayAccount>				
+                                            <ccFirstName>Luc</ccFirstName>				
+                                            <ccLastName>Customer4</ccLastName>				
+                                            <ccCompany/>				
+                                            <ccCountry>US</ccCountry>				
+                                            <ccAddress/>				
+                                            <ccCity/>				
+                                            <ccState/>				
+                                            <ccZip/>				
+                                            <ccType>amex</ccType>				
+                                            <ccLastFour>0002</ccLastFour>				
+                                            <ccExpirationDate>2029-04-30</ccExpirationDate>				
+                                            <ccEmail/>				
+                                            <cancelType/>				
+                                            <cancelReason/>				
+                                            <canceledDatetime/>				
+                                            <createdDatetime>2021-06-06T06:10:49+00:00</createdDatetime>				
+                                    </subscription>			
+                                    <subscription id="3bb583d8-c68d-11eb-bed7-0eff6b8b8fd3">				
+                                            <plans>					
+                                                <plan id="66431ee6-c274-11eb-bed7-0eff6b8b8fd3" code="MEDIUM">						
+                                                        <name>Medium</name>						
+                                                        <displayName>Medium • 10.00 / Month</displayName>						
+                                                        <description/>						
+                                                        <isActive>1</isActive>						
+                                                        <isFree>0</isFree>						
+                                                        <paymentMethodIsRequired>1</paymentMethodIsRequired>						
+                                                        <trialDays>0</trialDays>						
+                                                        <initialBillCount>0</initialBillCount>						
+                                                        <initialBillCountUnit>days</initialBillCountUnit>						
+                                                        <initialInvoiceBillingDatetime>2021-06-06T06:55:48+00:00</initialInvoiceBillingDatetime>						
+                                                        <billingFrequency>monthly</billingFrequency>						
+                                                        <billingFrequencyPer>month</billingFrequencyPer>						
+                                                        <billingFrequencyUnit>months</billingFrequencyUnit>						
+                                                        <billingFrequencyQuantity>1</billingFrequencyQuantity>						
+                                                        <nextInvoiceBillingDatetime>2021-07-06T06:55:48+00:00</nextInvoiceBillingDatetime>						
+                                                        <setupChargeCode/>						
+                                                        <setupChargeAmount>0.00</setupChargeAmount>						
+                                                        <recurringChargeCode>MEDIUM_RECURRING</recurringChargeCode>						
+                                                        <recurringChargeAmount>10.00</recurringChargeAmount>						
+                                                        <onChangeInitialBillHandler>next</onChangeInitialBillHandler>						
+                                                        <setupChargeBillHandler>now</setupChargeBillHandler>						
+                                                        <onChangeSetupChargeBillHandler>no</onChangeSetupChargeBillHandler>						
+                                                        <createdDatetime>2021-06-01T00:57:55+00:00</createdDatetime>						
+                                                        <items>							
+                                                            <item id="382ca6fd-c274-11eb-bed7-0eff6b8b8fd3" code="thousand_chars">								
+                                                                    <name>Thousand Chars</name>								
+                                                                    <quantityIncluded>500</quantityIncluded>								
+                                                                    <isPeriodic>1</isPeriodic>								
+                                                                    <overageAmount>0.00</overageAmount>								
+                                                                    <createdDatetime>2021-06-01T00:57:55+00:00</createdDatetime>								
+                                                            </item>							
+                                                        </items>						
+                                                </plan>					
+                                            </plans>				
+                                            <gatewayToken>SIMULATED</gatewayToken>				
+                                            <gatewayTokenAux/>				
+                                            <gatewayAccount>					
+                                                <id>71e29c22-bceb-11eb-bed7-0eff6b8b8fd3</id>					
+                                                <gateway>Stripe_Simulator</gateway>					
+                                                <type>cc</type>					
+                                            </gatewayAccount>				
+                                            <ccFirstName>Luc</ccFirstName>				
+                                            <ccLastName>Customer4</ccLastName>				
+                                            <ccCompany/>				
+                                            <ccCountry>US</ccCountry>				
+                                            <ccAddress/>				
+                                            <ccCity/>				
+                                            <ccState/>				
+                                            <ccZip/>				
+                                            <ccType>amex</ccType>				
+                                            <ccLastFour>0002</ccLastFour>				
+                                            <ccExpirationDate>2029-04-30</ccExpirationDate>				
+                                            <ccEmail/>				
+                                            <cancelType/>				
+                                            <cancelReason/>				
+                                            <canceledDatetime/>				
+                                            <createdDatetime>2021-06-06T06:05:45+00:00</createdDatetime>				
+                                    </subscription>			
+                                    <subscription id="e736c1ca-c68c-11eb-bed7-0eff6b8b8fd3">				
+                                            <plans>					
+                                                <plan id="56561361-c274-11eb-bed7-0eff6b8b8fd3" code="SMALL">						
+                                                        <name>Small</name>						
+                                                        <displayName>Small • 5.00 / Month</displayName>						
+                                                        <description/>						
+                                                        <isActive>1</isActive>						
+                                                        <isFree>0</isFree>						
+                                                        <paymentMethodIsRequired>1</paymentMethodIsRequired>						
+                                                        <trialDays>0</trialDays>						
+                                                        <initialBillCount>0</initialBillCount>						
+                                                        <initialBillCountUnit>days</initialBillCountUnit>						
+                                                        <initialInvoiceBillingDatetime>2021-06-06T06:55:48+00:00</initialInvoiceBillingDatetime>						
+                                                        <billingFrequency>monthly</billingFrequency>						
+                                                        <billingFrequencyPer>month</billingFrequencyPer>						
+                                                        <billingFrequencyUnit>months</billingFrequencyUnit>						
+                                                        <billingFrequencyQuantity>1</billingFrequencyQuantity>						
+                                                        <nextInvoiceBillingDatetime>2021-07-06T06:55:48+00:00</nextInvoiceBillingDatetime>						
+                                                        <setupChargeCode/>						
+                                                        <setupChargeAmount>0.00</setupChargeAmount>						
+                                                        <recurringChargeCode>SMALL_RECURRING</recurringChargeCode>						
+                                                        <recurringChargeAmount>5.00</recurringChargeAmount>						
+                                                        <onChangeInitialBillHandler>next</onChangeInitialBillHandler>						
+                                                        <setupChargeBillHandler>now</setupChargeBillHandler>						
+                                                        <onChangeSetupChargeBillHandler>no</onChangeSetupChargeBillHandler>						
+                                                        <createdDatetime>2021-06-01T00:57:28+00:00</createdDatetime>						
+                                                        <items>							
+                                                            <item id="382ca6fd-c274-11eb-bed7-0eff6b8b8fd3" code="thousand_chars">								
+                                                                    <name>Thousand Chars</name>								
+                                                                    <quantityIncluded>250</quantityIncluded>								
+                                                                    <isPeriodic>1</isPeriodic>								
+                                                                    <overageAmount>0.00</overageAmount>								
+                                                                    <createdDatetime>2021-06-01T00:57:28+00:00</createdDatetime>								
+                                                            </item>							
+                                                        </items>						
+                                                </plan>					
+                                            </plans>				
+                                            <gatewayToken>SIMULATED</gatewayToken>				
+                                            <gatewayTokenAux/>				
+                                            <gatewayAccount>					
+                                                <id>71e29c22-bceb-11eb-bed7-0eff6b8b8fd3</id>					
+                                                <gateway>Stripe_Simulator</gateway>					
+                                                <type>cc</type>					
+                                            </gatewayAccount>				
+                                            <ccFirstName>Luc</ccFirstName>				
+                                            <ccLastName>Customer4</ccLastName>				
+                                            <ccCompany/>				
+                                            <ccCountry>US</ccCountry>				
+                                            <ccAddress/>				
+                                            <ccCity/>				
+                                            <ccState/>				
+                                            <ccZip/>				
+                                            <ccType>amex</ccType>				
+                                            <ccLastFour>0002</ccLastFour>				
+                                            <ccExpirationDate>2029-04-30</ccExpirationDate>				
+                                            <ccEmail/>				
+                                            <cancelType/>				
+                                            <cancelReason/>				
+                                            <canceledDatetime/>				
+                                            <createdDatetime>2021-06-06T06:03:24+00:00</createdDatetime>				
+                                            <invoices>					
+                                                <invoice id="e7416930-c68c-11eb-bed7-0eff6b8b8fd3">						
+                                                        <number>24</number>						
+                                                        <type>subscription</type>						
+                                                        <vatRate/>						
+                                                        <taxRate/>						
+                                                        <billingDatetime>2021-06-06T06:03:24+00:00</billingDatetime>						
+                                                        <paidTransactionId>e753cc7c-c68c-11eb-bed7-0eff6b8b8fd3</paidTransactionId>						
+                                                        <createdDatetime>2021-06-06T06:03:24+00:00</createdDatetime>						
+                                                        <charges>							
+                                                            <charge id="e74509e1-c68c-11eb-bed7-0eff6b8b8fd3" code="SMALL_RECURRING">								
+                                                                    <type>recurring</type>								
+                                                                    <quantity>1</quantity>								
+                                                                    <eachAmount>5.00</eachAmount>								
+                                                                    <description/>								
+                                                                    <createdDatetime>2021-06-06T06:03:24+00:00</createdDatetime>								
+                                                            </charge>							
+                                                        </charges>						
+                                                        <transactions>							
+                                                            <transaction id="e753cc7c-c68c-11eb-bed7-0eff6b8b8fd3" code="">								
+                                                                    <parentId/>								
+                                                                    <gatewayToken>SIMULATED</gatewayToken>								
+                                                                    <gatewayAccount>									
+                                                                        <id>71e29c22-bceb-11eb-bed7-0eff6b8b8fd3</id>									
+                                                                        <gateway>Stripe_Simulator</gateway>									
+                                                                        <type>cc</type>									
+                                                                    </gatewayAccount>								
+                                                                    <amount>5.00</amount>								
+                                                                    <memo/>								
+                                                                    <response>approved</response>								
+                                                                    <responseReason>SIMULATED approved payment</responseReason>								
+                                                                    <transactedDatetime>2021-06-06T06:03:24+00:00</transactedDatetime>								
+                                                                    <createdDatetime>2021-06-06T06:03:24+00:00</createdDatetime>								
+                                                            </transaction>							
+                                                        </transactions>						
+                                                </invoice>					
+                                            </invoices>				
+                                    </subscription>			
+                                </subscriptions>		
+                        </customer>	
+                    </customers>"""
+
+        actual_xml_data = self.utils.decode_customer_xml(xml_str)
+        expected_xml_data = {
+            'code': 'languagetools+customer4@mailc.net',
+            'email': 'languagetools+customer4@mailc.net',
+            'thousand_char_quota': 1000,
+            'thousand_char_overage_allowed': False,
+            'thousand_char_used': 45.87
+        }
         self.assertEqual(actual_xml_data, expected_xml_data)        

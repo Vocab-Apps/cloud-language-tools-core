@@ -59,7 +59,7 @@ class GetCheddarUtils():
         customer_code_encoded = urllib.parse.quote(customer_code)
         url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}/itemCode/{TRACKED_ITEM_CODE}'
         print(url)
-        params = {'quantity': 1.234}
+        params = {'quantity': 1.01}
         response = requests.post(url, auth=(self.user, self.api_key), data=params)
         if response.status_code == 200:
             # success
@@ -75,24 +75,9 @@ class GetCheddarUtils():
         print(url)
         response = requests.get(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
-            self.print_xml_response(response.content)
-
             # success
-            # navigate the XML
-            root = xml.etree.ElementTree.fromstring(response.content)
-
-            # do some assertions
-            # assert len(root.findall('./customer/subscriptions/subscription')) == 1
-            # assert len(root.findall('./customer/subscriptions/subscription[1]/plans/plan')) == 1
-
-            quantity_included = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text
-            overage_amount = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text
-            print(f'quantity included: {quantity_included} overage amount: {overage_amount}')
-
-            current_usage = root.find('./customer/subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text
-            print(f'current usage: {current_usage}')
-
-
+            self.print_xml_response(response.content)
+            print(self.decode_customer_xml(response.content))
         else:
             print(response.content)
 
@@ -105,6 +90,6 @@ if __name__ == '__main__':
                         level=logging.INFO)
 
     cheddar_utils = GetCheddarUtils()
-    customer_code = 'languagetools+customer3@mailc.net'
+    customer_code = 'languagetools+customer4@mailc.net'
     cheddar_utils.report_customer_usage(customer_code)
     # cheddar_utils.get_customer(customer_code)

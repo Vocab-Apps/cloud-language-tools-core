@@ -39,7 +39,7 @@ class GetCheddarUtils():
         customer_code_encoded = urllib.parse.quote(customer_code)
         url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}/itemCode/{TRACKED_ITEM_CODE}'
         print(url)
-        params = {'quantity': 123.45}
+        params = {'quantity': 42.789}
         response = requests.post(url, auth=(self.user, self.api_key), data=params)
         if response.status_code == 200:
             # success

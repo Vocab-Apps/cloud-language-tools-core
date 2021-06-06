@@ -919,6 +919,8 @@ subscription reactivation
 # =====================
 
 simple case
+------------
+
 https://getcheddar.com/xml/customers/get/productCode/LANGUAGE_TOOLS/code/no1%40spam.com
 <DOM Element: customer at 0x7f2f5ebf2040>
 <?xml version="1.0" ?><customers>
@@ -1074,3 +1076,8 @@ https://getcheddar.com/xml/customers/get/productCode/LANGUAGE_TOOLS/code/no1%40s
                 </subscriptions>
         </customer>
 </customers>
+
+
+complicated case
+----------------
+

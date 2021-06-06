@@ -15,6 +15,7 @@ ENV_VAR_REDIS_URL = 'REDIS_URL'
 KEY_TYPE_API_KEY = 'api_key'
 KEY_TYPE_PATREON_USER ='patreon_user'
 KEY_TYPE_TRIAL_USER = 'trial_user'
+KEY_TYPE_GETCHEDDAR_USER = 'getcheddar_user'
 KEY_TYPE_USAGE ='usage'
 KEY_TYPE_USER_CLIENT ='user_client'
 KEY_TYPE_USER_CLIENT_VERSION ='user_client_version'
@@ -89,6 +90,17 @@ class RedisDb():
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')        
         
+
+    def add_getcheddar_api_key(self, api_key, code, email):
+        redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+        hash_value = {
+            'code': code,
+            'email': email,
+            'type': cloudlanguagetools.constants.ApiKeyType.getcheddar.name
+        }
+        self.r.hset(redis_key, mapping=hash_value)
+        logging.info(f'added {redis_key}: {hash_value}')
+
     # prod workflow
     def get_trial_user_key(self, email):
         redis_trial_user_key = self.build_key(KEY_TYPE_TRIAL_USER, email)
@@ -151,6 +163,28 @@ class RedisDb():
         # map to the patreon user
         self.r.set(redis_patreon_user_key, api_key)
         logging.info(f'added mapping: patreon user: {user_id}, email: {email} ({redis_patreon_user_key})')
+
+        return api_key
+
+    # prod workflow (app.py/patreon_key)
+    def get_getcheddar_user_key(self, code, email):
+        logging.info(f'getcheddar user: {code}, email: {email}')
+
+        redis_getcheddar_user_key = self.build_key(KEY_TYPE_GETCHEDDAR_USER, code)
+        if self.r.exists(redis_getcheddar_user_key):
+            logging.info(f'mapping exists: getcheddar user: {code}, email: {email} mapping: {redis_getcheddar_user_key}')
+            
+            # user already requested a key
+            api_key = self.r.get(redis_getcheddar_user_key)
+            return api_key
+
+        
+        # need to create a new key
+        api_key = self.password_generator()
+        self.add_getcheddar_api_key(api_key, code, email)
+        # map to the patreon user
+        self.r.set(redis_getcheddar_user_key, api_key)
+        logging.info(f'added mapping: getcheddar user: {code}, email: {email} ({redis_getcheddar_user_key})')
 
         return api_key
 

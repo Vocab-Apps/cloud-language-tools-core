@@ -24,6 +24,7 @@ class ApiKeyType(enum.Enum):
     test = enum.auto()
     patreon = enum.auto()
     trial = enum.auto()
+    getcheddar = enum.auto()
 
 class Client(enum.Enum):
     awesometts = enum.auto()

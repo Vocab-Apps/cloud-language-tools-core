@@ -2,6 +2,7 @@ import os
 import logging
 import requests
 import urllib.parse
+import xml.dom.minidom
 import xml.etree.ElementTree
 import pprint
 
@@ -12,7 +13,24 @@ class GetCheddarUtils():
     def __init__(self):
         self.user = os.environ['GETCHEDDAR_USER']
         self.api_key = os.environ['GETCHEDDAR_API_KEY']
-    
+
+    def decode_webhook(self, data):
+        return {
+            'type': data['activityType'],
+            'code': data['customer']['code'],
+            'email': data['customer']['email'],
+            'thousand_char_quota': data['subscription']['plan']['items'][0]['quantityIncluded']
+        }
+
+
+
+    def print_xml_response(self, content):
+        dom = xml.dom.minidom.parseString(content)
+        pretty_xml_as_string = dom.toprettyxml(newl='')
+        f = open('getcheddar_response.xml', 'w')
+        f.write(pretty_xml_as_string)
+        f.close()
+        # print(pretty_xml_as_string)
 
     def report_customer_usage(self, customer_code):
         customer_code_encoded = urllib.parse.quote(customer_code)
@@ -35,14 +53,15 @@ class GetCheddarUtils():
         print(url)
         response = requests.get(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
+            self.print_xml_response(response.content)
 
             # success
             # navigate the XML
             root = xml.etree.ElementTree.fromstring(response.content)
 
             # do some assertions
-            assert len(root.findall('./customer/subscriptions/subscription')) == 1
-            assert len(root.findall('./customer/subscriptions/subscription[1]/plans/plan')) == 1
+            # assert len(root.findall('./customer/subscriptions/subscription')) == 1
+            # assert len(root.findall('./customer/subscriptions/subscription[1]/plans/plan')) == 1
 
             quantity_included = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text
             overage_amount = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text
@@ -54,6 +73,8 @@ class GetCheddarUtils():
 
         else:
             print(response.content)
+
+
 
 if __name__ == '__main__':
 

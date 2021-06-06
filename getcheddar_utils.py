@@ -33,17 +33,17 @@ class GetCheddarUtils():
         customer_code = root.find('./customer').attrib['code']
         customer_email = root.find('./customer/email').text
 
-        quantity_included = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text
-        overage_amount = root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text
-        print(f'quantity included: {quantity_included} overage amount: {overage_amount}')
-
+        quantity_included = int(root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text)
+        overage_amount = float(root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text)
+        overage_allowed = overage_amount > 0
         current_usage = float(root.find('./customer/subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text)
-        print(f'current usage: {current_usage}')
 
         return {
             'code': customer_code,
             'email': customer_email,
-            'thousand_char_used': current_usage
+            'thousand_char_quota': quantity_included,
+            'thousand_char_overage_allowed': overage_allowed,
+            'thousand_char_used': current_usage,
         }
 
 
@@ -59,11 +59,12 @@ class GetCheddarUtils():
         customer_code_encoded = urllib.parse.quote(customer_code)
         url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}/itemCode/{TRACKED_ITEM_CODE}'
         print(url)
-        params = {'quantity': 42.789}
+        params = {'quantity': 1.234}
         response = requests.post(url, auth=(self.user, self.api_key), data=params)
         if response.status_code == 200:
             # success
             self.print_xml_response(response.content)
+            print(self.decode_customer_xml(response.content))
         else:
             print(response.content)
 

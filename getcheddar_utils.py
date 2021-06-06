@@ -21,7 +21,8 @@ class GetCheddarUtils():
             'code': data['customer']['code'],
             'email': data['customer']['email'],
             'thousand_char_quota': data['subscription']['plan']['items'][0]['quantityIncluded'],
-            'thousand_char_overage_allowed': overage_allowed
+            'thousand_char_overage_allowed': overage_allowed,
+            'thousand_char_used': data['subscription']['invoice']['items'][0]['quantity']
         }
 
 

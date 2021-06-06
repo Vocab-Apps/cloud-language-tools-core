@@ -300,6 +300,9 @@ class GetCheddar(flask_restful.Resource):
     def post(self):
         data = request.json
         pprint.pprint(data)
+        f = open('getcheddar_webhook.py', 'w')
+        f.write(pprint.pformat(data))
+        f.close()
 
 
 

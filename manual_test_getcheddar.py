@@ -47,8 +47,14 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # create the user
         self.getcheddar_utils.create_test_customer(self.customer_code, self.customer_code, 'Test', 'Customer', 'SMALL')
 
-        
-        time.sleep(2.0)
+        redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, self.customer_code)
+        max_wait_cycles = 25
+        while not self.redis_connection.r.exists(redis_getcheddar_user_key) and max_wait_cycles > 0:
+            time.sleep(0.1)
+            max_wait_cycles -= 1
+            logging.info('waiting for user key to get created')
+
+        self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
 
         # finally, delete the user
         self.getcheddar_utils.delete_test_customer(self.customer_code)

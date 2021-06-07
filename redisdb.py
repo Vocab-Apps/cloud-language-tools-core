@@ -167,6 +167,7 @@ class RedisDb():
             # create new API key
             api_key = self.password_generator()
             logging.info(f'created new api_key {api_key} for {user_code}')
+            self.r.set(redis_getcheddar_user_key, api_key)
         else:
             api_key = self.r.get(redis_getcheddar_user_key)
             logging.info(f'api_key is {api_key} for {user_code}')

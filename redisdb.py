@@ -209,6 +209,10 @@ class RedisDb():
         key_data = self.r.hgetall(redis_key)
         logging.info(key_data)
 
+    def transform_api_key_data_test(self, api_key_data):
+        api_key_data['expiration'] = int(api_key_data['expiration'])
+        return api_key_data
+
     def transform_api_key_data_patreon(self, api_key_data):
         api_key_data['expiration'] = int(api_key_data['expiration'])
         return api_key_data
@@ -229,6 +233,7 @@ class RedisDb():
         api_key_data = self.r.hgetall(redis_key)
 
         transform_map = {
+            cloudlanguagetools.constants.ApiKeyType.test.name: self.transform_api_key_data_test,
             cloudlanguagetools.constants.ApiKeyType.patreon.name: self.transform_api_key_data_patreon,
             cloudlanguagetools.constants.ApiKeyType.trial.name: self.transform_api_key_data_trial,
             cloudlanguagetools.constants.ApiKeyType.getcheddar.name: self.transform_api_key_data_getcheddar

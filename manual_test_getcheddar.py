@@ -10,6 +10,7 @@ import requests
 import urllib.parse
 import datetime
 import time
+import sys
 
 import redisdb
 import getcheddar_utils
@@ -17,10 +18,18 @@ import cloudlanguagetools.constants
 
 # this test requires webhooks from getcheddar to go through
 
+SLEEP_TIME = 0.1
+MAX_WAIT_CYCLES = 25
+
 class GetCheddarEndToEnd(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(GetCheddarEndToEnd, cls).setUpClass()
+
+        logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                            datefmt='%Y%m%d-%H:%M:%S',
+                            stream=sys.stdout,
+                            level=logging.DEBUG)        
 
         # setup redis connection
         cls.redis_connection = redisdb.RedisDb()
@@ -45,16 +54,31 @@ class GetCheddarEndToEnd(unittest.TestCase):
         print(self.customer_code)
 
         # create the user
+        # ===============
+
         self.getcheddar_utils.create_test_customer(self.customer_code, self.customer_code, 'Test', 'Customer', 'SMALL')
 
         redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, self.customer_code)
-        max_wait_cycles = 25
+        max_wait_cycles = MAX_WAIT_CYCLES
         while not self.redis_connection.r.exists(redis_getcheddar_user_key) and max_wait_cycles > 0:
-            time.sleep(0.1)
+            time.sleep(SLEEP_TIME)
             max_wait_cycles -= 1
-            logging.info('waiting for user key to get created')
+
+        # ensure redis keys got created correctly
+        # ---------------------------------------
 
         self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
+        
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(self.customer_code)
+        expected_user_data = {
+            'code': self.customer_code,
+            'email': self.customer_code,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 0
+        }
+        self.assertEqual(actual_user_data, expected_user_data)
+
 
         # finally, delete the user
         self.getcheddar_utils.delete_test_customer(self.customer_code)

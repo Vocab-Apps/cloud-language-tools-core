@@ -179,6 +179,20 @@ class RedisDb():
 
         # return api key so it can be used to communicate to the user
         return api_key
+    
+    def get_getcheddar_user_data(self, user_code):
+        redis_getcheddar_user_key = self.build_key(KEY_TYPE_GETCHEDDAR_USER, user_code)
+        api_key = self.r.get(redis_getcheddar_user_key)
+        # now retrieve user data
+        redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+        user_data = self.r.hgetall(redis_key)
+        user_data['thousand_char_quota'] = int(user_data['thousand_char_quota'])
+        user_data['thousand_char_overage_allowed'] = int(user_data['thousand_char_overage_allowed'])
+        user_data['thousand_char_used'] = float(user_data['thousand_char_used'])
+
+        return user_data
+
+
 
     def password_generator(self):
 

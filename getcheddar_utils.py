@@ -103,8 +103,9 @@ class GetCheddarUtils():
         response = requests.post(url, auth=(self.user, self.api_key), data=params)
         if response.status_code == 200:
             # success
-            self.print_xml_response(response.content)
+            # self.print_xml_response(response.content)
             print(self.decode_customer_xml(response.content))
+            logging.info(f'created customer {code}')
         else:
             print(response.content)        
 

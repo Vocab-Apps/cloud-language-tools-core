@@ -134,6 +134,17 @@ class GetCheddarUtils():
             print(response.content)            
 
 
+    def delete_test_customer(self, code):
+        # /customers/delete/productCode/MY_PRODUCT_CODE/code/MY_CUSTOMER_CODE
+        customer_code_encoded = urllib.parse.quote(code)
+        url = f'https://getcheddar.com/xml/customers/delete/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}'
+        response = requests.post(url, auth=(self.user, self.api_key))
+        if response.status_code == 200:
+            # success
+            logging.info(f'customer {code} deleted')
+        else:
+            print(response.content)                    
+
 
 if __name__ == '__main__':
 

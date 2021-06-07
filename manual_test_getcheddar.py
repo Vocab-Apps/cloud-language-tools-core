@@ -9,6 +9,7 @@ import os
 import requests
 import urllib.parse
 import datetime
+import time
 
 import redisdb
 import getcheddar_utils
@@ -45,6 +46,12 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
         # create the user
         self.getcheddar_utils.create_test_customer(self.customer_code, self.customer_code, 'Test', 'Customer', 'SMALL')
+
+        
+        time.sleep(2.0)
+
+        # finally, delete the user
+        self.getcheddar_utils.delete_test_customer(self.customer_code)
 
 
 if __name__ == '__main__':

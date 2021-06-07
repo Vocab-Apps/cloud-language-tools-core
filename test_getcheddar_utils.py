@@ -155,7 +155,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'no1@spam.com',
             'email': 'languagetools+customer1@mailc.net',
             'thousand_char_quota': 250,
-            'thousand_char_overage_allowed': False,
+            'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
         }
         self.assertEqual(webhook_data, expected_data)
@@ -298,7 +298,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer2@mailc.net',
             'thousand_char_quota': 500,
-            'thousand_char_overage_allowed': False,
+            'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
         }
         self.assertEqual(webhook_data, expected_data)        
@@ -486,7 +486,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
             'thousand_char_quota': 500,
-            'thousand_char_overage_allowed': False,
+            'thousand_char_overage_allowed': 0,
             'thousand_char_used': 123.45
         }
         self.assertEqual(webhook_data, expected_data)
@@ -674,7 +674,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
             'thousand_char_quota': 1000,
-            'thousand_char_overage_allowed': True,
+            'thousand_char_overage_allowed': 1,
             'thousand_char_used': 0.0
         }
         self.assertEqual(webhook_data, expected_data)        
@@ -843,7 +843,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
             'thousand_char_quota': 250,
-            'thousand_char_overage_allowed': False,
+            'thousand_char_overage_allowed': 0,
             'thousand_char_used': 42.789
         }
         self.assertEqual(webhook_data, expected_data)                
@@ -986,7 +986,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
             'thousand_char_quota': 1000,
-            'thousand_char_overage_allowed': False,
+            'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0.0
         }
         self.assertEqual(webhook_data, expected_data)
@@ -1130,7 +1130,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
             'thousand_char_quota': 1000,
-            'thousand_char_overage_allowed': True,
+            'thousand_char_overage_allowed': 1,
             'thousand_char_used': 0.0
         }
         self.assertEqual(webhook_data, expected_data)        
@@ -1295,7 +1295,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'languagetools+customer3@mailc.net',
             'email': 'languagetools+customer3@mailc.net',
             'thousand_char_quota': 250,
-            'thousand_char_overage_allowed': False,
+            'thousand_char_overage_allowed': 0,
             'thousand_char_used': 42.789
         }
         self.assertEqual(actual_xml_data, expected_xml_data)
@@ -1591,7 +1591,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'languagetools+customer4@mailc.net',
             'email': 'languagetools+customer4@mailc.net',
             'thousand_char_quota': 1000,
-            'thousand_char_overage_allowed': True,
+            'thousand_char_overage_allowed': 1,
             'thousand_char_used': 45.87
         }
         self.assertEqual(actual_xml_data, expected_xml_data)
@@ -2009,7 +2009,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'code': 'languagetools+customer4@mailc.net',
             'email': 'languagetools+customer4@mailc.net',
             'thousand_char_quota': 1000,
-            'thousand_char_overage_allowed': False,
+            'thousand_char_overage_allowed': 0,
             'thousand_char_used': 45.87
         }
         self.assertEqual(actual_xml_data, expected_xml_data)        

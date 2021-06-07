@@ -13,6 +13,7 @@ import cloudlanguagetools.servicemanager
 import cloudlanguagetools.errors
 import redisdb
 import patreon_utils
+import getcheddar_utils as getcheddar_utils_module
 import convertkit
 import pprint
 
@@ -29,6 +30,7 @@ manager.configure()
 
 redis_connection = redisdb.RedisDb()
 convertkit_client = convertkit.ConvertKit()
+getcheddar_utils = getcheddar_utils_module.GetCheddarUtils()
 
 def authenticate(func):
     @functools.wraps(func)
@@ -299,10 +301,13 @@ class ConvertKitRequestPatreonKey(flask_restful.Resource):
 class GetCheddar(flask_restful.Resource):
     def post(self):
         data = request.json
-        pprint.pprint(data)
-        f = open('getcheddar_webhook.py', 'w')
-        f.write(pprint.pformat(data))
-        f.close()
+        webhook_data = getcheddar_utils.decode_webhook(data)
+        user_data = webhook_data.copy()
+        del user_data['type']
+        api_key = redis_connection.get_update_getcheddar_user_key(user_data)
+        if webhook_data['type'] == 'newSubscription':
+            logging.info(f'new getcheddar user, need to send API key: {api_key}, {user_data}')
+
 
 
 

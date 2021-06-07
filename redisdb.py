@@ -90,17 +90,6 @@ class RedisDb():
         self.r.hset(redis_key, mapping=hash_value)
         logging.info(f'added {redis_key}: {hash_value}')        
         
-
-    def add_getcheddar_api_key(self, api_key, code, email):
-        redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
-        hash_value = {
-            'code': code,
-            'email': email,
-            'type': cloudlanguagetools.constants.ApiKeyType.getcheddar.name
-        }
-        self.r.hset(redis_key, mapping=hash_value)
-        logging.info(f'added {redis_key}: {hash_value}')
-
     # prod workflow
     def get_trial_user_key(self, email):
         redis_trial_user_key = self.build_key(KEY_TYPE_TRIAL_USER, email)
@@ -167,25 +156,27 @@ class RedisDb():
         return api_key
 
     # prod workflow (app.py/patreon_key)
-    def get_getcheddar_user_key(self, code, email):
-        logging.info(f'getcheddar user: {code}, email: {email}')
+    def get_update_getcheddar_user_key(self, user_data):
+        user_code = user_data['code']
+        email = user_data['email']
+        logging.info(f'getcheddar user: {user_code}, email: {email}')
 
-        redis_getcheddar_user_key = self.build_key(KEY_TYPE_GETCHEDDAR_USER, code)
-        if self.r.exists(redis_getcheddar_user_key):
-            logging.info(f'mapping exists: getcheddar user: {code}, email: {email} mapping: {redis_getcheddar_user_key}')
-            
-            # user already requested a key
+        # do we need to create the API key mapping ?
+        redis_getcheddar_user_key = self.build_key(KEY_TYPE_GETCHEDDAR_USER, user_code)
+        if not self.r.exists(redis_getcheddar_user_key):
+            # create new API key
+            api_key = self.password_generator()
+            logging.info(f'created new api_key {api_key} for {user_code}')
+        else:
             api_key = self.r.get(redis_getcheddar_user_key)
-            return api_key
+            logging.info(f'api_key is {api_key} for {user_code}')
 
-        
-        # need to create a new key
-        api_key = self.password_generator()
-        self.add_getcheddar_api_key(api_key, code, email)
-        # map to the patreon user
-        self.r.set(redis_getcheddar_user_key, api_key)
-        logging.info(f'added mapping: getcheddar user: {code}, email: {email} ({redis_getcheddar_user_key})')
+        # update user data
+        redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+        logging.info(f'setting user_data {user_data} on {redis_key}')
+        self.r.hset(redis_key, mapping=user_data)
 
+        # return api key so it can be used to communicate to the user
         return api_key
 
     def password_generator(self):

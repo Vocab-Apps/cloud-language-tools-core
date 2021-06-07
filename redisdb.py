@@ -184,15 +184,7 @@ class RedisDb():
     def get_getcheddar_user_data(self, user_code):
         redis_getcheddar_user_key = self.build_key(KEY_TYPE_GETCHEDDAR_USER, user_code)
         api_key = self.r.get(redis_getcheddar_user_key)
-        # now retrieve user data
-        redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
-        user_data = self.r.hgetall(redis_key)
-        user_data['thousand_char_quota'] = int(user_data['thousand_char_quota'])
-        user_data['thousand_char_overage_allowed'] = int(user_data['thousand_char_overage_allowed'])
-        user_data['thousand_char_used'] = float(user_data['thousand_char_used'])
-
-        return user_data
-
+        return self.get_api_key_data(api_key)
 
 
     def password_generator(self):
@@ -216,6 +208,34 @@ class RedisDb():
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         key_data = self.r.hgetall(redis_key)
         logging.info(key_data)
+
+    def transform_api_key_data_patreon(self, api_key_data):
+        api_key_data['expiration'] = int(api_key_data['expiration'])
+        return api_key_data
+
+    def transform_api_key_data_trial(self, api_key_data):
+        api_key_data['expiration'] = int(api_key_data['expiration'])
+        api_key_data['character_limit'] = int(api_key_data['character_limit'])
+        return api_key_data
+
+    def transform_api_key_data_getcheddar(self, api_key_data):
+        api_key_data['thousand_char_quota'] = int(api_key_data['thousand_char_quota'])
+        api_key_data['thousand_char_overage_allowed'] = int(api_key_data['thousand_char_overage_allowed'])
+        api_key_data['thousand_char_used'] = float(api_key_data['thousand_char_used'])        
+        return api_key_data
+
+    def get_api_key_data(self, api_key):
+        redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+        api_key_data = self.r.hgetall(redis_key)
+
+        transform_map = {
+            cloudlanguagetools.constants.ApiKeyType.patreon.name: self.transform_api_key_data_patreon,
+            cloudlanguagetools.constants.ApiKeyType.trial.name: self.transform_api_key_data_trial,
+            cloudlanguagetools.constants.ApiKeyType.getcheddar.name: self.transform_api_key_data_getcheddar
+        }
+        
+        return transform_map[api_key_data['type']](api_key_data)
+
 
     def api_key_valid(self, api_key):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)

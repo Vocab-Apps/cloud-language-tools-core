@@ -174,6 +174,7 @@ class RedisDb():
 
         # update user data
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+        user_data['type'] = cloudlanguagetools.constants.ApiKeyType.getcheddar.name
         logging.info(f'setting user_data {user_data} on {redis_key}')
         self.r.hset(redis_key, mapping=user_data)
 
@@ -221,6 +222,11 @@ class RedisDb():
         if self.r.exists(redis_key) == 0:
             return {'key_valid': False, 'msg': 'API Key not valid'}
         key_data = self.r.hgetall(redis_key)
+
+        if key_data['type'] == cloudlanguagetools.constants.ApiKeyType.getcheddar.name:
+            # no expiration
+            return {'key_valid': True, 'msg': f'API Key is valid'}
+
         expiration = self.r.hget(redis_key, 'expiration')
         expiration_timestamp = int(self.r.hget(redis_key, 'expiration'))
         current_dt = datetime.datetime.now()

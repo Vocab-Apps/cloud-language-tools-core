@@ -28,8 +28,12 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
         logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                             datefmt='%Y%m%d-%H:%M:%S',
-                            stream=sys.stdout,
+                            #stream=sys.stdout,
                             level=logging.DEBUG)        
+
+        # url for cloud language tools
+        cls.base_url = 'http://localhost:5000'
+        cls.client_version = 'test'
 
         # setup redis connection
         cls.redis_connection = redisdb.RedisDb()
@@ -68,9 +72,12 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # ---------------------------------------
 
         self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
+        api_key = self.redis_connection.r.get(redis_getcheddar_user_key)
+        print(f'api_key: {api_key}')
         
         actual_user_data = self.redis_connection.get_getcheddar_user_data(self.customer_code)
         expected_user_data = {
+            'type': 'getcheddar',
             'code': self.customer_code,
             'email': self.customer_code,
             'thousand_char_quota': 250,
@@ -79,6 +86,46 @@ class GetCheddarEndToEnd(unittest.TestCase):
         }
         self.assertEqual(actual_user_data, expected_user_data)
 
+        # ensure we can retrieve some audio
+        # ---------------------------------
+
+        # get voice list
+        response = requests.get(f'{self.base_url}/voice_list')
+        voice_list = response.json()
+
+        source_text_french = 'Je ne suis pas intéressé.'
+        source_text_japanese = 'おはようございます'
+
+        # get one azure voice for french
+
+        service = 'Azure'
+        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        first_voice = french_voices[0]
+        response = requests.post(f'{self.base_url}/audio_v2', json={
+            'text': source_text_french,
+            'service': service,
+            'deck_name': 'french_deck_1',
+            'request_mode': 'batch',
+            'language_code': first_voice['language_code'],
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': api_key, 'client': 'test', 'client_version': self.client_version})
+
+        self.assertEqual(response.status_code, 200)
+
+        # retrieve file
+        output_temp_file = tempfile.NamedTemporaryFile()
+        with open(output_temp_file.name, 'wb') as f:
+            f.write(response.content)
+        f.close()
+
+        # perform checks on file
+        # ----------------------
+
+        # verify file type
+        filetype = magic.from_file(output_temp_file.name)
+        # should be an MP3 file
+        expected_filetype = 'MPEG ADTS, layer III'        
 
         # finally, delete the user
         self.getcheddar_utils.delete_test_customer(self.customer_code)

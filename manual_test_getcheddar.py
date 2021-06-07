@@ -40,7 +40,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
         # build customer code
         timestamp = int(datetime.datetime.now().timestamp())
-        cls.customer_code = f'languagetools+customer-{timestamp}@mailc.net'
+        cls.customer_code = f'languagetools+development.language_tools.customer-{timestamp}@mailc.net'
 
 
     @classmethod

@@ -99,14 +99,14 @@ class UsageSlice():
                 service: cloudlanguagetools.constants.Service, 
                 api_key: str,
                 api_key_type: cloudlanguagetools.constants.ApiKeyType,
-                character_limit):
+                api_key_data):
         self.request_type = request_type
         self.usage_scope = usage_scope
         self.usage_period = usage_period
         self.service = service
         self.api_key = api_key
         self.api_key_type = api_key_type
-        self.character_limit = character_limit
+        self.api_key_data = api_key_data
 
     def build_key_suffix(self) -> str:
         if self.usage_scope == cloudlanguagetools.constants.UsageScope.User and self.usage_period == cloudlanguagetools.constants.UsagePeriod.lifetime:
@@ -126,8 +126,9 @@ class UsageSlice():
     def over_quota(self, characters, requests) -> bool:
         if self.usage_scope == cloudlanguagetools.constants.UsageScope.User:
             if self.usage_period == cloudlanguagetools.constants.UsagePeriod.lifetime:
-                if self.character_limit != None:
-                    if characters > self.character_limit:
+                character_limit = self.api_key_data.get('character_limit', None)
+                if character_limit != None:
+                    if characters > character_limit:
                         return True
 
             if self.usage_period == cloudlanguagetools.constants.UsagePeriod.daily:

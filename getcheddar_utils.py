@@ -56,18 +56,18 @@ class GetCheddarUtils():
         f.close()
         # print(pretty_xml_as_string)
 
-    def report_customer_usage(self, customer_code):
+    def report_customer_usage(self, customer_code, thousand_char_quantity):
         customer_code_encoded = urllib.parse.quote(customer_code)
         url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}/itemCode/{TRACKED_ITEM_CODE}'
         print(url)
-        params = {'quantity': 1.01}
+        params = {'quantity': thousand_char_quantity}
         response = requests.post(url, auth=(self.user, self.api_key), data=params)
         if response.status_code == 200:
             # success
-            self.print_xml_response(response.content)
-            print(self.decode_customer_xml(response.content))
+            return self.decode_customer_xml(response.content)
         else:
-            print(response.content)
+            error_message = f'Could not report customer usage: {response.content}'
+            raise Exception(error_message)
 
     def get_customer(self, customer_code):
         # /customers/get/productCode/MY_PRODUCT_CODE/code/MY_CUSTOMER_CODE

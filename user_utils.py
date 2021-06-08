@@ -474,6 +474,11 @@ class UserUtils():
         logging.info('extending patreon key validity')
         self.patreon_utils.extend_user_key_validity()
 
+    def report_getcheddar_user_usage(self, customer_code):
+        # retrieve the accumulated usage
+        
+        pass
+
     def download_audio_requests(self):
         audio_request_list = self.redis_connection.retrieve_audio_requests()
         audio_requests = [json.loads(x) for x in audio_request_list]

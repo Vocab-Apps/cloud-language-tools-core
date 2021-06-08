@@ -21,10 +21,10 @@ class TestQuotas(unittest.TestCase):
 
     def test_quotas_getcheddar(self):
         usage_slice = quotas.UsageSlice(
-            cloudlanguagetools.constants.RequestType.audio,
+            None,
             cloudlanguagetools.constants.UsageScope.User, 
             cloudlanguagetools.constants.UsagePeriod.recurring,
-            cloudlanguagetools.constants.Service.Azure,
+            None,
             'getcheddar_api_key_1',
             cloudlanguagetools.constants.ApiKeyType.getcheddar,
             {'thousand_char_quota': 250,
@@ -200,10 +200,10 @@ class TestQuotas(unittest.TestCase):
 
         # clt:usage:user:recurring:zrrVDK3svzDOLzI6
         usage_slice_recurring_user = quotas.UsageSlice(
-            cloudlanguagetools.constants.RequestType.audio,
+            None,
             cloudlanguagetools.constants.UsageScope.User, 
             cloudlanguagetools.constants.UsagePeriod.recurring, 
-            cloudlanguagetools.constants.Service.Azure,
+            None,
             'zrrVDK3svzDOLzI6',
             cloudlanguagetools.constants.ApiKeyType.getcheddar,
             {})

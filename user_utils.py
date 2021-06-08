@@ -8,6 +8,7 @@ import quotas
 import redisdb
 import airtable_utils
 import patreon_utils
+import getcheddar_utils
 import convertkit
 import redisdb
 import cloudlanguagetools.constants
@@ -19,6 +20,7 @@ class UserUtils():
         self.patreon_utils = patreon_utils.PatreonUtils()
         self.convertkit_client = convertkit.ConvertKit()
         self.redis_connection = redisdb.RedisDb()
+        self.getcheddar_utils = getcheddar_utils.GetCheddarUtils()
 
     def get_full_api_key_list(self):
         logging.info('getting full API key list')
@@ -474,10 +476,18 @@ class UserUtils():
         logging.info('extending patreon key validity')
         self.patreon_utils.extend_user_key_validity()
 
-    def report_getcheddar_user_usage(self, customer_code):
+    def report_getcheddar_user_usage(self, api_key):
+        user_data = self.redis_connection.get_api_key_data(api_key)
         # retrieve the accumulated usage
+        usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
+        usage = self.redis_connection.get_usage_slice_data(usage_slice)
+        thousand_char_quantity = usage['characters'] / quotas.GETCHEDDAR_CHAR_MULTIPLIER
+        updated_user_data = self.getcheddar_utils.report_customer_usage(user_data['code'], thousand_char_quantity)
+        # this will update the usage on the api_key_data
+        self.redis_connection.get_update_getcheddar_user_key(updated_user_data)
+        # reset the usage slice
+        self.redis_connection.reset_getcheddar_usage_slice(api_key)
         
-        pass
 
     def download_audio_requests(self):
         audio_request_list = self.redis_connection.retrieve_audio_requests()

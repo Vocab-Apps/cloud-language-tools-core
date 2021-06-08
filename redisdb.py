@@ -342,6 +342,40 @@ class RedisDb():
         self.r.hincrby(redis_key, request_mode.name, 1)
         self.r.expire(redis_key, self.get_expire_time_usage())    
 
+    def get_usage_slice_data(self, usage_slice):
+        key = self.build_key(KEY_TYPE_USAGE, usage_slice.build_key_suffix())
+
+        def convert_usage(usage_output):
+            if usage_output == None:
+                return 0
+            return int(usage_output)
+
+        return {
+            'characters': convert_usage(self.r.hget(key, 'characters')),
+            'requests': convert_usage(self.r.hget(key, 'requests'))
+        }
+
+
+    def get_getcheddar_usage_slice(self, api_key):
+        api_key_data = self.get_api_key_data(api_key)
+        usage_slice = quotas.UsageSlice(None, 
+                        cloudlanguagetools.constants.UsageScope.User, 
+                        cloudlanguagetools.constants.UsagePeriod.recurring, 
+                        None, 
+                        api_key,
+                        cloudlanguagetools.constants.ApiKeyType.getcheddar,
+                        api_key_data)
+        return usage_slice
+
+    def reset_getcheddar_usage_slice(self, api_key):
+        usage_slice = self.get_getcheddar_usage_slice(api_key)
+        redis_key = self.build_key(KEY_TYPE_USAGE, usage_slice.build_key_suffix())
+        self.r.hset(redis_key, mapping={
+            'characters': 0,
+            'requests': 0
+        })
+
+
     def track_usage(self, api_key, service, request_type, characters: int, language_code=None):
         expire_time_seconds = 30*3*24*3600 # 3 months
 

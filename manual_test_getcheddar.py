@@ -14,6 +14,7 @@ import sys
 
 import redisdb
 import getcheddar_utils
+import user_utils
 import cloudlanguagetools.constants
 
 # this test requires webhooks from getcheddar to go through
@@ -162,6 +163,82 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # finally, delete the user
         self.getcheddar_utils.delete_test_customer(customer_code)
 
+
+    def test_endtoend_report_usage(self):
+        # create a user
+        # pytest manual_test_getcheddar.py -rPP -k test_endtoend_report_usage
+
+        customer_code = self.get_customer_code()
+
+        # create the user
+        # ===============
+
+        self.getcheddar_utils.create_test_customer(customer_code, customer_code, 'Test', 'Customer', 'SMALL')
+
+        redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code)
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while not self.redis_connection.r.exists(redis_getcheddar_user_key) and max_wait_cycles > 0:
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+
+        # ensure redis keys got created correctly
+        # ---------------------------------------
+
+        self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
+        api_key = self.redis_connection.r.get(redis_getcheddar_user_key)
+        print(f'api_key: {api_key}')
+        
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        expected_user_data = {
+            'type': 'getcheddar',
+            'code': customer_code,
+            'email': customer_code,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 0
+        }
+        self.assertEqual(actual_user_data, expected_user_data)
+
+        # log some usage (fake)
+        # =====================
+        service = cloudlanguagetools.constants.Service.Azure
+        language_code = cloudlanguagetools.constants.Language.fr
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        characters = 142456
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        # check the usage slice, it should contain this usage
+        usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
+        usage = self.redis_connection.get_usage_slice_data(usage_slice)
+        self.assertEqual(usage['characters'], 142456)
+
+        # now, report this usage to getcheddar
+        user_utils_instance = user_utils.UserUtils()
+        user_utils_instance.report_getcheddar_user_usage(api_key)
+
+        # retrieve user data again
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        expected_user_data = {
+            'type': 'getcheddar',
+            'code': customer_code,
+            'email': customer_code,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 142.456
+        }
+        self.assertEqual(actual_user_data, expected_user_data)
+
+        # retrieve the usage slice again, it should have been reset
+        usage = self.redis_connection.get_usage_slice_data(usage_slice)
+        self.assertEqual(usage['characters'], 0)
+
+        # characters = 140000
+        # # should not throw either
+        # print(f'logging {characters} characters of usage')
+        # self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        # finally, delete the user
+        self.getcheddar_utils.delete_test_customer(customer_code)
 
     def test_new_user_audio(self):
         # create a user

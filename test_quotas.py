@@ -197,3 +197,15 @@ class TestQuotas(unittest.TestCase):
             {})
 
         self.assertEqual(usage_slice_lifetime_user.build_key_suffix(), f'user:lifetime:zrrVDK3svzDOLzI6')
+
+        # clt:usage:user:recurring:zrrVDK3svzDOLzI6
+        usage_slice_recurring_user = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.recurring, 
+            cloudlanguagetools.constants.Service.Azure,
+            'zrrVDK3svzDOLzI6',
+            cloudlanguagetools.constants.ApiKeyType.getcheddar,
+            {})
+
+        self.assertEqual(usage_slice_recurring_user.build_key_suffix(), f'user:recurring:zrrVDK3svzDOLzI6')        

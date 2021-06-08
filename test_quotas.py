@@ -19,6 +19,49 @@ class TestQuotas(unittest.TestCase):
         self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.zh_tw, 42), 84)
         self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.yue, 42), 84)
 
+    def test_quotas_getcheddar(self):
+        usage_slice = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.recurring,
+            cloudlanguagetools.constants.Service.Azure,
+            'getcheddar_api_key_1',
+            cloudlanguagetools.constants.ApiKeyType.getcheddar,
+            {'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 0})
+
+        self.assertEqual(usage_slice.over_quota(249000, 200), False)
+        self.assertEqual(usage_slice.over_quota(250001, 200), True)
+
+        usage_slice_existing_usage = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.recurring,
+            cloudlanguagetools.constants.Service.Azure,
+            'getcheddar_api_key_1',
+            cloudlanguagetools.constants.ApiKeyType.getcheddar,
+            {'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 240})
+
+        self.assertEqual(usage_slice_existing_usage.over_quota(9000, 200), False)
+        self.assertEqual(usage_slice_existing_usage.over_quota(11000, 200), True)
+
+        usage_slice_overage_allowed = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.recurring,
+            cloudlanguagetools.constants.Service.Azure,
+            'getcheddar_api_key_1',
+            cloudlanguagetools.constants.ApiKeyType.getcheddar,
+            {'thousand_char_quota': 500,
+            'thousand_char_overage_allowed': 1,
+            'thousand_char_used': 0})        
+
+        self.assertEqual(usage_slice_overage_allowed.over_quota(500001, 200), False)
+
+
     def test_quotas_trial(self):
         usage_slice_monthly_global = quotas.UsageSlice(
             cloudlanguagetools.constants.RequestType.audio,

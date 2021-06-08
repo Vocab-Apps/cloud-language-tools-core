@@ -19,6 +19,7 @@ class UsagePeriod(enum.Enum):
     daily = enum.auto()
     monthly = enum.auto()
     lifetime = enum.auto()
+    recurring = enum.auto()
 
 class ApiKeyType(enum.Enum):
     test = enum.auto()

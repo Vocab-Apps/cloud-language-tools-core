@@ -129,14 +129,17 @@ class UsageSlice():
 
 
     def over_quota(self, characters, requests) -> bool:
+        # print(f'over_quota: usage_period: {self.usage_period} api_key_type: {self.api_key_type}')
         if self.api_key_type == cloudlanguagetools.constants.ApiKeyType.getcheddar:
-            if self.api_key_data['thousand_char_overage_allowed'] == 1:
-                # overages allowed, don't restrict
-                return False
-            total_chars = GETCHEDDAR_CHAR_MULTIPLIER * self.api_key_data['thousand_char_used'] + characters
-            allowed_chars = GETCHEDDAR_CHAR_MULTIPLIER * self.api_key_data['thousand_char_quota']
-            if total_chars > allowed_chars:
-                return True
+            if self.usage_period == cloudlanguagetools.constants.UsagePeriod.recurring:
+                if self.api_key_data['thousand_char_overage_allowed'] == 1:
+                    # overages allowed, don't restrict
+                    return False
+                total_chars = GETCHEDDAR_CHAR_MULTIPLIER * self.api_key_data['thousand_char_used'] + characters
+                allowed_chars = GETCHEDDAR_CHAR_MULTIPLIER * self.api_key_data['thousand_char_quota']
+                # print(f'total_chars: {total_chars} allowed_chars: {allowed_chars}')
+                if total_chars > allowed_chars:
+                    return True
             # don't run through other checks for getcheddar users
             return False
 

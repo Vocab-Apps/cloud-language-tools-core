@@ -452,7 +452,7 @@ class RedisDb():
             current_quota_requests = convert_usage(self.r.hget(key, 'requests'))
             
             if usage_slice.over_quota(current_quota_characters + characters, current_quota_requests + 1):
-                error_msg = f'Exceeded {usage_slice.usage_scope.name} {usage_slice.usage_period.name} quota'
+                error_msg = f'Exceeded {usage_slice.usage_scope.name} {usage_slice.usage_period.name} quota)'
                 raise cloudlanguagetools.errors.OverQuotaError(error_msg)        
 
         # track usage

@@ -232,10 +232,31 @@ class GetCheddarEndToEnd(unittest.TestCase):
         usage = self.redis_connection.get_usage_slice_data(usage_slice)
         self.assertEqual(usage['characters'], 0)
 
-        # characters = 140000
-        # # should not throw either
-        # print(f'logging {characters} characters of usage')
-        # self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+        characters = 107544
+        # should not throw either
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        # report usage again
+        user_utils_instance.report_getcheddar_user_usage(api_key)
+
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        expected_user_data = {
+            'type': 'getcheddar',
+            'code': customer_code,
+            'email': customer_code,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 250
+        }
+        self.assertEqual(actual_user_data, expected_user_data)
+
+        # even requesting 1 char now should throw an error
+        characters = 1
+        # this one should throw
+        self.assertRaises(
+            cloudlanguagetools.errors.OverQuotaError, 
+            self.redis_connection.track_usage, api_key, service, request_type, characters, language_code=language_code)
+
 
         # finally, delete the user
         self.getcheddar_utils.delete_test_customer(customer_code)

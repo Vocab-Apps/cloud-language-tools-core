@@ -139,6 +139,26 @@ class GetCheddarEndToEnd(unittest.TestCase):
             cloudlanguagetools.errors.OverQuotaError, 
             self.redis_connection.track_usage, api_key, service, request_type, characters, language_code=language_code)        
 
+        # upgrade to large plan
+        # =====================
+        self.getcheddar_utils.update_test_customer(customer_code, 'LARGE')
+        upgrade_done = False
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while upgrade_done == False and max_wait_cycles > 0:
+            # retrieve customer data
+            actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+            upgrade_done = actual_user_data['thousand_char_quota'] == 1000
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+        self.assertEqual(upgrade_done, True)        
+
+        # should not throw
+        characters = 500000
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)                
+        characters = 500000
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)                        
+
+
         # finally, delete the user
         self.getcheddar_utils.delete_test_customer(customer_code)
 

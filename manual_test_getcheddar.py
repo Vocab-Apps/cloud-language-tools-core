@@ -42,27 +42,32 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # helper classes
         cls.getcheddar_utils = getcheddar_utils.GetCheddarUtils()
 
-        # build customer code
-        timestamp = int(datetime.datetime.now().timestamp())
-        cls.customer_code = f'languagetools+development.language_tools.customer-{timestamp}@mailc.net'
+        cls.customer_code_timestamp_offset = 0
 
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_customer_code(self):
+        timestamp = int(datetime.datetime.now().timestamp()) + self.customer_code_timestamp_offset
+        customer_code = f'languagetools+development.language_tools.customer-{timestamp}@mailc.net'
+        self.customer_code_timestamp_offset +=1
+        return customer_code
 
-    def test_endtoend_1(self):
+
+    def test_endtoend_signup_quotas(self):
         # create a user
-        # pytest manual_test_getcheddar.py -rPP -k test_endtoend_1
-        print(self.customer_code)
+        # pytest manual_test_getcheddar.py -rPP -k test_endtoend_signup_quotas
+
+        customer_code = self.get_customer_code()
 
         # create the user
         # ===============
 
-        self.getcheddar_utils.create_test_customer(self.customer_code, self.customer_code, 'Test', 'Customer', 'SMALL')
+        self.getcheddar_utils.create_test_customer(customer_code, customer_code, 'Test', 'Customer', 'SMALL')
 
-        redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, self.customer_code)
+        redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code)
         max_wait_cycles = MAX_WAIT_CYCLES
         while not self.redis_connection.r.exists(redis_getcheddar_user_key) and max_wait_cycles > 0:
             time.sleep(SLEEP_TIME)
@@ -75,16 +80,62 @@ class GetCheddarEndToEnd(unittest.TestCase):
         api_key = self.redis_connection.r.get(redis_getcheddar_user_key)
         print(f'api_key: {api_key}')
         
-        actual_user_data = self.redis_connection.get_getcheddar_user_data(self.customer_code)
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
         expected_user_data = {
             'type': 'getcheddar',
-            'code': self.customer_code,
-            'email': self.customer_code,
+            'code': customer_code,
+            'email': customer_code,
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
         }
         self.assertEqual(actual_user_data, expected_user_data)
+
+        # log some usage (fake)
+        # =====================
+        service = cloudlanguagetools.constants.Service.Azure
+        language_code = cloudlanguagetools.constants.Language.fr
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        characters = 100000
+        # should not throw
+        print(f'logging {characters} characters of usage')
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        characters = 140000
+        # should not throw either
+        print(f'logging {characters} characters of usage')
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        characters = 10001
+        # this one should throw
+        print(f'logging {characters} characters of usage')
+        self.assertRaises(
+            cloudlanguagetools.errors.OverQuotaError, 
+            self.redis_connection.track_usage, api_key, service, request_type, characters, language_code=language_code)
+
+        # finally, delete the user
+        self.getcheddar_utils.delete_test_customer(customer_code)
+
+
+    def test_new_user_audio(self):
+        # create a user
+        # pytest manual_test_getcheddar.py -rPP -k test_new_user_audio
+
+        customer_code = self.get_customer_code()
+
+        # create the user
+        # ===============
+
+        self.getcheddar_utils.create_test_customer(customer_code, customer_code, 'Test', 'Customer', 'SMALL')
+
+        redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code)
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while not self.redis_connection.r.exists(redis_getcheddar_user_key) and max_wait_cycles > 0:
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+
+        self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
+        api_key = self.redis_connection.r.get(redis_getcheddar_user_key)
 
         # ensure we can retrieve some audio
         # ---------------------------------
@@ -128,7 +179,8 @@ class GetCheddarEndToEnd(unittest.TestCase):
         expected_filetype = 'MPEG ADTS, layer III'        
 
         # finally, delete the user
-        self.getcheddar_utils.delete_test_customer(self.customer_code)
+        self.getcheddar_utils.delete_test_customer(customer_code)
+
 
 
 if __name__ == '__main__':

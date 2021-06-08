@@ -355,6 +355,7 @@ class RedisDb():
 
         api_key_data = self.get_api_key_data(api_key)
 
+
         usage_slice_list = [
             quotas.UsageSlice(request_type, 
                               cloudlanguagetools.constants.UsageScope.User, 
@@ -392,6 +393,18 @@ class RedisDb():
                               key_type,
                               api_key_data),
         ]
+
+        if key_type == cloudlanguagetools.constants.ApiKeyType.getcheddar:
+            # track the recurring usage for getcheddar users
+            # this is also the only usage slice which will block for getchedar users
+            usage_slice_list.append(
+                quotas.UsageSlice(request_type, 
+                                cloudlanguagetools.constants.UsageScope.User, 
+                                cloudlanguagetools.constants.UsagePeriod.recurring, 
+                                service, 
+                                api_key,
+                                key_type,
+                                api_key_data))
 
         def convert_usage(usage_output):
             if usage_output == None:

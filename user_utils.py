@@ -573,6 +573,7 @@ if __name__ == '__main__':
         'show_getcheddar_user_data',
         'extend_patreon_key_validity',
         'usage_data',
+        'report_getcheddar_usage_all_users',
         'show_patreon_user_data',
         'show_trial_user_data',
         'download_audio_requests'
@@ -603,5 +604,7 @@ if __name__ == '__main__':
         # user_utils.build_global_usage_data()
         data_df = user_utils.build_global_daily_usage_data()
         print(data_df)
+    elif args.action == 'report_getcheddar_usage_all_users':
+        user_utils.report_getcheddar_usage_all_users()
     elif args.action == 'download_audio_requests':
         user_utils.download_audio_requests()

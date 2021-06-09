@@ -476,7 +476,13 @@ class UserUtils():
         logging.info('extending patreon key validity')
         self.patreon_utils.extend_user_key_validity()
 
+    def report_getcheddar_usage_all_users(self):
+        api_key_list = self.redis_connection.list_getcheddar_api_keys()
+        for api_key in api_key_list:
+            self.report_getcheddar_user_usage(api_key)
+
     def report_getcheddar_user_usage(self, api_key):
+        logging.info(f'reporting getcheddar usage for api key {api_key}')
         user_data = self.redis_connection.get_api_key_data(api_key)
         # retrieve the accumulated usage
         usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)

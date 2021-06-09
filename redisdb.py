@@ -186,6 +186,25 @@ class RedisDb():
         api_key = self.r.get(redis_getcheddar_user_key)
         return self.get_api_key_data(api_key)
 
+    def list_getcheddar_api_keys(self):
+        pattern = self.build_key(KEY_TYPE_GETCHEDDAR_USER, '*')
+        customer_api_key_map_list = []
+
+        logging.info('scanning list of getcheddar users from redis')
+        cursor = '0'
+        while cursor != 0:
+            cursor, keys = self.r.scan(cursor=cursor, match=pattern, count=100)
+            for key in keys:
+                customer_api_key_map_list.append(key)
+
+        logging.info('getting API key list')
+        pipe = self.r.pipeline()
+        for redis_key in customer_api_key_map_list:
+            pipe.get(redis_key)
+        api_key_list = pipe.execute()
+
+        return api_key_list
+
 
     def password_generator(self):
 

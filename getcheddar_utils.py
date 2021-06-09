@@ -5,6 +5,7 @@ import urllib.parse
 import xml.dom.minidom
 import xml.etree.ElementTree
 import pprint
+import datetime
 
 PRODUCT_CODE='LANGUAGE_TOOLS'
 TRACKED_ITEM_CODE='thousand_chars'
@@ -146,6 +147,17 @@ class GetCheddarUtils():
         else:
             print(response.content)                    
 
+    def delete_all_test_customers(self):
+        # /customers/delete-all/confirm/[current unix timestamp]/productCode/MY_PRODUCT_CODE
+        timestamp = int(datetime.datetime.now().timestamp())
+        url = f'https://getcheddar.com/xml/customers/delete-all/confirm/{timestamp}/productCode/{PRODUCT_CODE}'
+        response = requests.post(url, auth=(self.user, self.api_key))
+        if response.status_code == 200:
+            # success
+            logging.info('all test customers deleted')
+        else:
+            print(response.content)                    
+
 
 if __name__ == '__main__':
 
@@ -159,4 +171,5 @@ if __name__ == '__main__':
     # cheddar_utils.get_customer(customer_code)
     # cheddar_utils.create_test_customer('languagetools+customer5@mailc.net', 'languagetools+customer5@mailc.net', 'Luc', 'Customer5')
     # cheddar_utils.update_test_customer(customer_code, 'MEDIUM')
-    cheddar_utils.cancel_test_customer(customer_code, 'MEDIUM')
+    # cheddar_utils.cancel_test_customer(customer_code, 'MEDIUM')
+    # cheddar_utils.delete_all_test_customers()

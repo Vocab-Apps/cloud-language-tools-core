@@ -42,14 +42,16 @@ class UserUtils():
                 records.append(data)
 
         data_df = pandas.DataFrame(records)
-        data_df['expiration_dt'] = pandas.to_datetime(data_df['expiration'], unit='s')
-        data_df['expiration_str'] = data_df['expiration_dt'].dt.strftime('%Y-%m-%d')
-        data_df['key_valid'] = data_df['expiration_dt'] > datetime.datetime.now()
-        data_df = data_df.rename(columns={'user_id': 'patreon_user_id', 'expiration_str': 'api_key_expiration', 'key_valid': 'api_key_valid'})
+        if 'expiration' in data_df:
+            data_df['expiration_dt'] = pandas.to_datetime(data_df['expiration'], unit='s')
+            data_df['expiration_str'] = data_df['expiration_dt'].dt.strftime('%Y-%m-%d')
+            data_df['key_valid'] = data_df['expiration_dt'] > datetime.datetime.now()
+            data_df = data_df.rename(columns={'user_id': 'patreon_user_id', 'expiration_str': 'api_key_expiration', 'key_valid': 'api_key_valid'})
 
         field_list_map = {
             'patreon': ['api_key', 'email', 'patreon_user_id', 'api_key_valid', 'api_key_expiration'],
-            'trial': ['api_key', 'email', 'api_key_valid', 'api_key_expiration']
+            'trial': ['api_key', 'email', 'api_key_valid', 'api_key_expiration'],
+            'getcheddar': ['api_key', 'email', 'code']
         }
 
         return data_df[field_list_map[key_type]]
@@ -113,6 +115,9 @@ class UserUtils():
                 'request_type': request_type,
                 'characters': int(entry['characters'])
             })
+
+        if len(records) == 0:
+            return pandas.DataFrame()
 
         records_df = pandas.DataFrame(records)
 
@@ -371,6 +376,31 @@ class UserUtils():
 
         return combined_df
 
+    def build_user_data_getcheddar(self):
+        # api keys
+        api_key_list = self.get_full_api_key_list()
+        flat_api_key_list = [x['api_key'] for x in api_key_list]
+
+        api_key_list_df = self.get_api_key_list_df(api_key_list, cloudlanguagetools.constants.ApiKeyType.getcheddar.name)
+
+        # get user tracking data
+        tracking_data_df = self.get_user_tracking_data(api_key_list)
+
+        # usage data
+        monthly_usage_data_df = self.get_monthly_usage_data()
+        prev_monthly_usage_data_df = self.get_prev_monthly_usage_data()
+
+        combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
+        if len(monthly_usage_data_df) > 0:
+            combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
+        if len(prev_monthly_usage_data_df) > 0:
+            combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
+
+        # do this when we're in production
+        # self.update_tags_convertkit_users(combined_df)
+
+        return combined_df
+
     def update_tags_convertkit_users(self, data_df):
         # perform necessary taggings on convertkit
         
@@ -540,6 +570,7 @@ if __name__ == '__main__':
         'update_airtable_patreon',
         'update_airtable_trial',
         'update_airtable_usage',
+        'show_getcheddar_user_data',
         'extend_patreon_key_validity',
         'usage_data',
         'show_patreon_user_data',
@@ -563,6 +594,9 @@ if __name__ == '__main__':
     elif args.action == 'show_trial_user_data':
         user_data_df = user_utils.build_user_data_trial()
         print(user_data_df)
+    elif args.action == 'show_getcheddar_user_data':
+        user_data_df = user_utils.build_user_data_getcheddar()
+        print(user_data_df)        
     elif args.action == 'extend_patreon_key_validity':
         user_utils.extend_patreon_key_validity()    
     elif args.action == 'usage_data':

@@ -282,9 +282,9 @@ class GetCheddarEndToEnd(unittest.TestCase):
         redis_getcheddar_user_key_2 = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code_2)
         redis_getcheddar_user_key_3 = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code_3)
         max_wait_cycles = MAX_WAIT_CYCLES
-        while not self.redis_connection.r.exists(redis_getcheddar_user_key_1) \
-        and not self.redis_connection.r.exists(redis_getcheddar_user_key_2) \
-        and not self.redis_connection.r.exists(redis_getcheddar_user_key_3) and max_wait_cycles > 0:
+        while (not self.redis_connection.r.exists(redis_getcheddar_user_key_1) \
+        or not self.redis_connection.r.exists(redis_getcheddar_user_key_2) \
+        or not self.redis_connection.r.exists(redis_getcheddar_user_key_3)) and max_wait_cycles > 0:
             time.sleep(SLEEP_TIME)
             max_wait_cycles -= 1
 

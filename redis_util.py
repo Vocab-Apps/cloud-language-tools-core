@@ -106,7 +106,7 @@ def main():
     elif args.action == 'modify_key_expiration':
         # to modify the expiration timestamp of an api key
         api_key = args.api_key
-        expiration = args.key_expiration
+        expiration = args.expiration
         redis_api_key = connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
         print(f'redis_api_key: {redis_api_key}')
         connection.r.hset(redis_api_key, 'expiration', expiration)

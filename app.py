@@ -16,6 +16,8 @@ import patreon_utils
 import getcheddar_utils as getcheddar_utils_module
 import convertkit
 import pprint
+import hashlib
+import hmac
 
 #logging.basicConfig()
 logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -300,6 +302,17 @@ class ConvertKitRequestPatreonKey(flask_restful.Resource):
 
 class GetCheddar(flask_restful.Resource):
     def post(self):
+        # get content body for verification purposes
+        raw_data = request.get_data()
+        token = hashlib.md5(raw_data).hexdigest()
+        expected_signature = hmac.new(bytes(getcheddar_utils.get_api_secret() , 'utf-8'), msg = bytes(token , 'utf-8'), digestmod = hashlib.sha256).hexdigest()
+        actual_signature = request.headers.get('X-CG-SIGNATURE')
+        # X-CG-SIGNATURE
+        if expected_signature != actual_signature:
+            error_message = f'error validating getcheddar request: {request.json}, headers: {request.headers}'
+            logging.error(error_message)
+            return {'error': str(error_message)}, 400
+
         data = request.json
         webhook_data = getcheddar_utils.decode_webhook(data)
         user_data = webhook_data.copy()

@@ -7,13 +7,16 @@ import xml.etree.ElementTree
 import pprint
 import datetime
 
-PRODUCT_CODE='LANGUAGE_TOOLS'
 TRACKED_ITEM_CODE='thousand_chars'
 
 class GetCheddarUtils():
     def __init__(self):
+        self.product_code = os.environ['GETCHEDDAR_PRODUCT_CODE']
         self.user = os.environ['GETCHEDDAR_USER']
         self.api_key = os.environ['GETCHEDDAR_API_KEY']
+
+    def get_api_secret(self):
+        return self.api_key
 
     def decode_webhook(self, data):
         activity_type = data['activityType']
@@ -59,7 +62,7 @@ class GetCheddarUtils():
 
     def report_customer_usage(self, customer_code, thousand_char_quantity):
         customer_code_encoded = urllib.parse.quote(customer_code)
-        url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}/itemCode/{TRACKED_ITEM_CODE}'
+        url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{self.product_code}/code/{customer_code_encoded}/itemCode/{TRACKED_ITEM_CODE}'
         print(url)
         params = {'quantity': thousand_char_quantity}
         response = requests.post(url, auth=(self.user, self.api_key), data=params)
@@ -71,9 +74,9 @@ class GetCheddarUtils():
             raise Exception(error_message)
 
     def get_customer(self, customer_code):
-        # /customers/get/productCode/MY_PRODUCT_CODE/code/MY_CUSTOMER_CODE
+        # /customers/get/productCode/MY_self.product_code/code/MY_CUSTOMER_CODE
         customer_code_encoded = urllib.parse.quote(customer_code)
-        url = f'https://getcheddar.com/xml/customers/get/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}'
+        url = f'https://getcheddar.com/xml/customers/get/productCode/{self.product_code}/code/{customer_code_encoded}'
         print(url)
         response = requests.get(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
@@ -88,7 +91,7 @@ class GetCheddarUtils():
     # ====================
 
     def create_test_customer(self, code, email, first_name, last_name, plan):
-        url = f'https://getcheddar.com/xml/customers/new/productCode/{PRODUCT_CODE}'
+        url = f'https://getcheddar.com/xml/customers/new/productCode/{self.product_code}'
         params = {
             'code': code,
             'email': email,
@@ -112,7 +115,7 @@ class GetCheddarUtils():
 
     def update_test_customer(self, code, plan):
         customer_code_encoded = urllib.parse.quote(code)
-        url = f'https://getcheddar.com/xml/customers/edit-subscription/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}'
+        url = f'https://getcheddar.com/xml/customers/edit-subscription/productCode/{self.product_code}/code/{customer_code_encoded}'
         params = {
             'planCode': plan
         }
@@ -126,7 +129,7 @@ class GetCheddarUtils():
 
     def cancel_test_customer(self, code, plan):
         customer_code_encoded = urllib.parse.quote(code)
-        url = f'https://getcheddar.com/xml/customers/cancel/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}'
+        url = f'https://getcheddar.com/xml/customers/cancel/productCode/{self.product_code}/code/{customer_code_encoded}'
         response = requests.post(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
             # success
@@ -137,9 +140,9 @@ class GetCheddarUtils():
 
 
     def delete_test_customer(self, code):
-        # /customers/delete/productCode/MY_PRODUCT_CODE/code/MY_CUSTOMER_CODE
+        # /customers/delete/productCode/MY_self.product_code/code/MY_CUSTOMER_CODE
         customer_code_encoded = urllib.parse.quote(code)
-        url = f'https://getcheddar.com/xml/customers/delete/productCode/{PRODUCT_CODE}/code/{customer_code_encoded}'
+        url = f'https://getcheddar.com/xml/customers/delete/productCode/{self.product_code}/code/{customer_code_encoded}'
         response = requests.post(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
             # success
@@ -150,7 +153,7 @@ class GetCheddarUtils():
     def delete_all_test_customers(self):
         # /customers/delete-all/confirm/[current unix timestamp]/productCode/MY_PRODUCT_CODE
         timestamp = int(datetime.datetime.now().timestamp())
-        url = f'https://getcheddar.com/xml/customers/delete-all/confirm/{timestamp}/productCode/{PRODUCT_CODE}'
+        url = f'https://getcheddar.com/xml/customers/delete-all/confirm/{timestamp}/productCode/{self.product_code}'
         response = requests.post(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
             # success

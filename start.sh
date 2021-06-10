@@ -20,5 +20,6 @@ python3 scheduled_tasks.py
 else
 . ${CWD}/tts_keys.sh
 . ${CWD}/convertkit.sh
+. ${CWD}/getcheddar.sh
 exec gunicorn --workers 3 -b :8042 --timeout 120 --access-logfile - --error-logfile - app:app
 fi

@@ -92,6 +92,18 @@ class GetCheddarEndToEnd(unittest.TestCase):
         }
         self.assertEqual(actual_user_data, expected_user_data)
 
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '0 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
+
+
+
         # log some usage (fake)
         # =====================
         service = cloudlanguagetools.constants.Service.Azure
@@ -101,6 +113,16 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # should not throw
         print(f'logging {characters} characters of usage')
         self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '100,000 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)        
 
         characters = 140000
         # should not throw either

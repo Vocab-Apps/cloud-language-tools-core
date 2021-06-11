@@ -283,16 +283,42 @@ class RedisDb():
             }
 
         if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.patreon.name:
+            usage_slice = quotas.UsageSlice(None, 
+                              cloudlanguagetools.constants.UsageScope.User, 
+                              cloudlanguagetools.constants.UsagePeriod.monthly, 
+                              None, 
+                              api_key,
+                              api_key_data['type'],
+                              api_key_data)
+            usage_data = self.get_usage_slice_data(usage_slice)
+            characters_str = f"""{usage_data['characters']:,}"""                              
             return {
                 'email': api_key_data['email'],
-                'type': 'Patreon'
+                'type': 'Patreon',
+                'usage': f'{characters_str} characters'
             }
 
         if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.getcheddar.name:
             account_type = f"""{api_key_data['thousand_char_quota']},000 characters"""
+
+            usage_slice = quotas.UsageSlice(None, 
+                              cloudlanguagetools.constants.UsageScope.User, 
+                              cloudlanguagetools.constants.UsagePeriod.recurring, 
+                              None, 
+                              api_key,
+                              api_key_data['type'],
+                              api_key_data)
+            usage_data = self.get_usage_slice_data(usage_slice)
+
+            reported_usage = int(api_key_data['thousand_char_used'] * quotas.GETCHEDDAR_CHAR_MULTIPLIER)
+            total_usage = usage_data['characters'] + reported_usage
+
+            characters_str = f"""{total_usage:,}"""
+
             return {
                 'email': api_key_data['email'],
-                'type': account_type
+                'type': account_type,
+                'usage': f'{characters_str} characters'
             }
 
         raise Exception(f"""unsupported api key type: {api_key_data['type']}""")

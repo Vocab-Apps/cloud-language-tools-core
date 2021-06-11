@@ -247,6 +247,12 @@ class VerifyApiKey(flask_restful.Resource):
         result = redis_connection.api_key_valid(api_key)
         return result
 
+class Account(flask_restful.Resource):
+    def get(self):
+        api_key = request.headers.get('api_key')
+        account_data = redis_connection.get_account_data(api_key)
+        return account_data
+
 class PatreonKey(flask_restful.Resource):
     def get(self):
         # www.patreon.com/oauth2/authorize?response_type=code&client_id=trDOSYhOAtp3MRuBhaZgnfCv4Visg237B2gslK4dha9K780iEClYNBM0QW1OH8MM&redirect_uri=https://4b1c5e33b08b.ngrok.io/patreon_key&scope=identity%20identity%5Bemail%5D
@@ -336,6 +342,7 @@ api.add_resource(Audio, '/audio')
 api.add_resource(AudioV2, '/audio_v2')
 api.add_resource(YomichanAudio, '/yomichan_audio')
 api.add_resource(VerifyApiKey, '/verify_api_key')
+api.add_resource(Account, '/account')
 api.add_resource(PatreonKey, '/patreon_key')
 api.add_resource(PatreonKeyRequest, '/request_patreon_key')
 

@@ -260,6 +260,44 @@ class RedisDb():
         
         return transform_map[api_key_data['type']](api_key_data)
 
+    def get_account_data(self, api_key):
+        api_key_data = self.get_api_key_data(api_key)
+
+        if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.test.name:
+            return {'type': 'test'}
+
+        if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.trial.name:
+            usage_slice = quotas.UsageSlice(None, 
+                              cloudlanguagetools.constants.UsageScope.User, 
+                              cloudlanguagetools.constants.UsagePeriod.lifetime, 
+                              None, 
+                              api_key,
+                              api_key_data['type'],
+                              api_key_data)
+            usage_data = self.get_usage_slice_data(usage_slice)
+            characters_str = f"""{usage_data['characters']:,}"""
+            return {
+                'email': api_key_data['email'],
+                'type': 'Trial',
+                'usage': f'{characters_str} characters'
+            }
+
+        if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.patreon.name:
+            return {
+                'email': api_key_data['email'],
+                'type': 'Patreon'
+            }
+
+        if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.getcheddar.name:
+            account_type = f"""{api_key_data['thousand_char_quota']},000 characters"""
+            return {
+                'email': api_key_data['email'],
+                'type': account_type
+            }
+
+        raise Exception(f"""unsupported api key type: {api_key_data['type']}""")
+
+
 
     def api_key_valid(self, api_key):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)

@@ -67,6 +67,15 @@ class ApiTests(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual({'key_valid': False, 'msg': 'API Key not valid'}, data)
 
+    def test_account(self):
+        response = self.client.get('/account', headers={'api_key': self.api_key})
+        data = json.loads(response.data)
+        expected_data = {
+            'type': 'test'
+        }
+        self.assertEqual(data, expected_data)
+
+
     def test_language_list(self):
         response = self.client.get('/language_list')
         actual_language_list = json.loads(response.data) 
@@ -667,6 +676,18 @@ class ApiTests(unittest.TestCase):
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
         redis_connection.r.hincrby(usage_redis_key, 'characters', 9985)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
+
+        # get account data which should have usage
+        response = self.client.get('/account', headers={'api_key': self.trial_user_api_key})
+        self.assertEqual(response.status_code, 200)
+        actual_account_data = json.loads(response.data)
+        expected_account_data = {
+            'type': 'Trial',
+            'email': self.trial_user_email,
+            'usage': '10,010 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
+        
 
         # this request should get rejected
         response = self.client.post('/audio', json={

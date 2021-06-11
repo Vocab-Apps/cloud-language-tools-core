@@ -149,6 +149,16 @@ class GetCheddarEndToEnd(unittest.TestCase):
             max_wait_cycles -= 1
         self.assertEqual(upgrade_done, True)
 
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '500,000 characters',
+            'usage': '240,000 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)        
+
         # log some more usage after upgrade
         # ---------------------------------
         characters = 255000
@@ -221,6 +231,16 @@ class GetCheddarEndToEnd(unittest.TestCase):
         }
         self.assertEqual(actual_user_data, expected_user_data)
 
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '0 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
+
         # log some usage (fake)
         # =====================
         service = cloudlanguagetools.constants.Service.Azure
@@ -233,6 +253,16 @@ class GetCheddarEndToEnd(unittest.TestCase):
         usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
         usage = self.redis_connection.get_usage_slice_data(usage_slice)
         self.assertEqual(usage['characters'], 142456)
+
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '142,456 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
 
         # now, report this usage to getcheddar
         user_utils_instance = user_utils.UserUtils()
@@ -249,6 +279,16 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'thousand_char_used': 142.456
         }
         self.assertEqual(actual_user_data, expected_user_data)
+
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '142,456 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)        
 
         # retrieve the usage slice again, it should have been reset
         usage = self.redis_connection.get_usage_slice_data(usage_slice)

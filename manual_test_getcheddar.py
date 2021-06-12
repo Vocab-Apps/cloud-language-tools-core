@@ -56,6 +56,42 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.customer_code_timestamp_offset +=1
         return customer_code
 
+    def test_create_delete_user(self):
+        # create a user
+        # pytest manual_test_getcheddar.py -rPP -k test_create_delete_user
+
+        customer_code = self.get_customer_code()
+
+        # create the user
+        # ===============
+
+        self.getcheddar_utils.create_test_customer(customer_code, customer_code, 'Test', 'Customer', 'SMALL')
+
+        redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code)
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while not self.redis_connection.r.exists(redis_getcheddar_user_key) and max_wait_cycles > 0:
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+
+        api_key = self.redis_connection.r.get(redis_getcheddar_user_key)
+        redis_api_key = self.redis_connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
+
+        self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
+        self.assertTrue(self.redis_connection.r.exists(redis_api_key))
+
+        # delete user
+        # ===========
+
+        self.getcheddar_utils.delete_test_customer(customer_code)
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while (self.redis_connection.r.exists(redis_getcheddar_user_key) or
+        self.redis_connection.r.exists(redis_api_key))\
+        and max_wait_cycles > 0:
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+
+        self.assertFalse(self.redis_connection.r.exists(redis_getcheddar_user_key))
+        self.assertFalse(self.redis_connection.r.exists(redis_api_key))
 
     def test_endtoend_signup_quotas(self):
         # create a user

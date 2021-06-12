@@ -20,6 +20,11 @@ class GetCheddarUtils():
 
     def decode_webhook(self, data):
         activity_type = data['activityType']
+        if activity_type == 'customerDeleted':
+            return {
+                'type': activity_type,
+                'code': data['customer']['code']
+            }
         overage_allowed = data['subscription']['plan']['items'][0]['overageAmount'] != '0.00' and activity_type != 'subscriptionCanceled'
         return {
             'type': activity_type,

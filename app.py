@@ -321,6 +321,10 @@ class GetCheddar(flask_restful.Resource):
 
         data = request.json
         webhook_data = getcheddar_utils.decode_webhook(data)
+        if webhook_data['type'] == 'customerDeleted':
+            # delete user from redis
+            redis_connection.delete_getcheddar_user(webhook_data['code'])
+            return
         user_data = webhook_data.copy()
         del user_data['type']
         api_key = redis_connection.get_update_getcheddar_user_key(user_data)

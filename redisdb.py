@@ -186,6 +186,18 @@ class RedisDb():
         api_key = self.r.get(redis_getcheddar_user_key)
         return self.get_api_key_data(api_key)
 
+    def delete_getcheddar_user(self, user_code):
+        logging.warning(f'deleting getcheddar user {user_code}')
+        redis_getcheddar_user_key = self.build_key(KEY_TYPE_GETCHEDDAR_USER, user_code)
+        api_key = self.r.get(redis_getcheddar_user_key)
+        redis_api_key = self.build_key(KEY_TYPE_API_KEY, api_key)
+
+        # delete both
+        self.r.delete(redis_getcheddar_user_key)
+        self.r.delete(redis_api_key)
+
+
+
     def list_getcheddar_api_keys(self):
         pattern = self.build_key(KEY_TYPE_GETCHEDDAR_USER, '*')
         customer_api_key_map_list = []

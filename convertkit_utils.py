@@ -40,6 +40,14 @@ def list_sequences():
     data = response.json()
     pprint.pprint(data)        
 
+def list_forms():
+    # curl https://api.convertkit.com/v3/forms?api_key=<your_public_api_key>
+    url = f'https://api.convertkit.com/v3/forms?api_key={api_key}'
+    response = requests.get(url)
+    data = response.json()
+    pprint.pprint(data)        
+
+
 def add_subscriber_sequence():
     email = 'lemoselioliveira@gmail.com'
     sequence_id = 826851 # extend_trial
@@ -130,12 +138,13 @@ def configure_addtag_webhook():
 if __name__ == '__main__':
     # configure_addtag_webhook()
     # list_tags()
-    # list_fields()
+    list_fields()
     # list_subscribers()
-    list_canceled()
+    # list_canceled()
     # view_subscribers()
     # list_tags_subscriber()
     # tag_subscriber()
     # set_subscriber_field()
     # list_sequences()
     # add_subscriber_sequence()
+    # list_forms()

@@ -2,6 +2,7 @@ import os
 import requests
 import logging
 import pprint
+import secrets
 import cloudlanguagetools.constants
 
 class ConvertKit():
@@ -19,6 +20,10 @@ class ConvertKit():
         self.tag_id_trial_patreon_convert = int(os.environ['CONVERTKIT_TRIAL_PATREON_CONVERT_TAG'])
         self.tag_id_patreon = int(os.environ['CONVERTKIT_PATREON_USER_TAG'])
 
+        self.enable = secrets.config['convertkit']['enable']
+        if self.enable:
+            self.getcheddar_user_form_id = secrets.config['convertkit']['getcheddar_user_form_id']
+
         self.tag_name_map = {
             'trial_patreon_convert': self.tag_id_trial_patreon_convert,
             'trial_end_reach_out': self.tag_id_trial_end_reach_out,
@@ -27,6 +32,21 @@ class ConvertKit():
 
 
         self.full_tag_id_map = {} 
+
+    def register_getcheddar_user(self, email, api_key):
+        if self.enable:
+            logging.info(f'registering new getcheddar user on convertkit')
+            url = f'https://api.convertkit.com/v3/forms/{self.getcheddar_user_form_id}/subscribe'
+            response = requests.post(url, json={
+                    "api_key": self.api_key,
+                    "email": email,
+                    'fields' : {
+                        'getcheddar_api_key': api_key
+                    }
+            }, timeout=cloudlanguagetools.constants.RequestTimeout)
+            if response.status_code != 200:
+                logging.error(f'could not subscribe user to form: {response.content}')
+
 
     def tag_user_api_ready(self, email, api_key):
         url = f'https://api.convertkit.com/v3/tags/{self.tag_id_api_ready}/subscribe'

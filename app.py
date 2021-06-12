@@ -329,7 +329,8 @@ class GetCheddar(flask_restful.Resource):
         del user_data['type']
         api_key = redis_connection.get_update_getcheddar_user_key(user_data)
         if webhook_data['type'] == 'newSubscription':
-            logging.info(f'new getcheddar user, need to send API key: {api_key}, {user_data}')
+            email = webhook_data['email']
+            convertkit_client.register_getcheddar_user(email, api_key)
 
 
 

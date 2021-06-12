@@ -6,14 +6,15 @@ import xml.dom.minidom
 import xml.etree.ElementTree
 import pprint
 import datetime
+import secrets
 
 TRACKED_ITEM_CODE='thousand_chars'
 
 class GetCheddarUtils():
     def __init__(self):
-        self.product_code = os.environ['GETCHEDDAR_PRODUCT_CODE']
-        self.user = os.environ['GETCHEDDAR_USER']
-        self.api_key = os.environ['GETCHEDDAR_API_KEY']
+        self.product_code = secrets.config['getcheddar']['product_code']
+        self.user = secrets.config['getcheddar']['user']
+        self.api_key = secrets.config['getcheddar']['api_key']
 
     def get_api_secret(self):
         return self.api_key

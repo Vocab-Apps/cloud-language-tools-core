@@ -517,12 +517,14 @@ class UserUtils():
         # retrieve the accumulated usage
         usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
         usage = self.redis_connection.get_usage_slice_data(usage_slice)
-        thousand_char_quantity = usage['characters'] / quotas.GETCHEDDAR_CHAR_MULTIPLIER
-        updated_user_data = self.getcheddar_utils.report_customer_usage(user_data['code'], thousand_char_quantity)
-        # this will update the usage on the api_key_data
-        self.redis_connection.get_update_getcheddar_user_key(updated_user_data)
-        # reset the usage slice
-        self.redis_connection.reset_getcheddar_usage_slice(api_key)
+        characters = usage['characters']
+        if characters > 0:
+            thousand_char_quantity = characters / quotas.GETCHEDDAR_CHAR_MULTIPLIER
+            updated_user_data = self.getcheddar_utils.report_customer_usage(user_data['code'], thousand_char_quantity)
+            # this will update the usage on the api_key_data
+            self.redis_connection.get_update_getcheddar_user_key(updated_user_data)
+            # reset the usage slice
+            self.redis_connection.reset_getcheddar_usage_slice(api_key)
         
 
     def download_audio_requests(self):

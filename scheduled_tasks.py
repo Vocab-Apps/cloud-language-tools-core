@@ -35,13 +35,19 @@ def update_airtable():
     utils = user_utils.UserUtils()
     utils.update_airtable_all()
 
+def report_getcheddar_usage():
+    utils = user_utils.UserUtils()
+    utils.report_getcheddar_usage_all_users()
+
 def setup_tasks():
     logging.info('running tasks once')
+    report_getcheddar_usage()
     backup_redis_db()
     update_airtable()
     logging.info('setting up tasks')
     schedule.every(1).hour.do(backup_redis_db)
     schedule.every(3).hours.do(update_airtable)
+    schedule.every(6).hours.do(report_getcheddar_usage)
 
 
 def run_scheduler():

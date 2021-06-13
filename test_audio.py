@@ -47,7 +47,12 @@ class TestAudio(unittest.TestCase):
     
     def sanitize_recognized_text(self, recognized_text):
         recognized_text = re.sub('<[^<]+?>', '', recognized_text)
-        result_text = recognized_text.replace('.', '').replace('。', '').replace('?', '').replace('？', '').replace(':', '').lower()
+        result_text = recognized_text.replace('.', '').\
+            replace('。', '').\
+            replace('?', '').\
+            replace('？', '').\
+            replace('您', '你').\
+            replace(':', '').lower()
         return result_text
 
     def verify_voice(self, voice, text, recognition_language):

@@ -131,11 +131,15 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.constants.AudioLanguage.en_HK: 'HKG',
             cloudlanguagetools.constants.AudioLanguage.en_US: 'USA',
             cloudlanguagetools.constants.AudioLanguage.en_PH: 'PHL',
+            cloudlanguagetools.constants.AudioLanguage.en_NZ: 'NZL',
+            cloudlanguagetools.constants.AudioLanguage.en_SG: 'SGP',
+            cloudlanguagetools.constants.AudioLanguage.en_ZA: 'ZAF',
             cloudlanguagetools.constants.AudioLanguage.es_ES: 'ESP',
             cloudlanguagetools.constants.AudioLanguage.es_MX: 'MEX',
             cloudlanguagetools.constants.AudioLanguage.es_LA: 'ANY', # any country
             cloudlanguagetools.constants.AudioLanguage.es_US: 'USA', 
             cloudlanguagetools.constants.AudioLanguage.es_AR: 'ARG', 
+            cloudlanguagetools.constants.AudioLanguage.es_CO: 'COL', 
             cloudlanguagetools.constants.AudioLanguage.en_GB_WLS: 'GBR', 
         }
         if audio_language not in country_code_map:

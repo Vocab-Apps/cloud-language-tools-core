@@ -227,7 +227,7 @@ class AudioLanguage(enum.Enum):
     en_SG = (Language.en, "English (Singapore)")
     en_ZA = (Language.en, "English (South Africa)")
     es_AR = (Language.es, "Spanish (Argentina)")
-    es_CO = (Language.es, "Spanish (Columbia)")
+    es_CO = (Language.es, "Spanish (Colombia)")
     es_ES = (Language.es, "Spanish (Spain)")
     es_MX = (Language.es, "Spanish (Mexico)")
     es_LA = (Language.es, "Spanish (Latin America)")

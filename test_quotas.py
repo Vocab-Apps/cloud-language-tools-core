@@ -19,6 +19,8 @@ class TestQuotas(unittest.TestCase):
         self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.zh_tw, 42), 84)
         self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.yue, 42), 84)
 
+        self.assertEqual(quotas.adjust_character_count(services.Naver, request_type, languages.ja, 10), 60)
+
     def test_quotas_getcheddar(self):
         usage_slice = quotas.UsageSlice(
             None,
@@ -120,17 +122,6 @@ class TestQuotas(unittest.TestCase):
         self.assertEqual(usage_slice_daily_user.over_quota(50000, 30000), False)
         self.assertEqual(usage_slice_daily_user.over_quota(200000, 30000), True)
 
-    def test_quotas_user_naver(self):
-        usage_slice_daily_user = quotas.UsageSlice(
-            cloudlanguagetools.constants.RequestType.audio,
-            cloudlanguagetools.constants.UsageScope.User, 
-            cloudlanguagetools.constants.UsagePeriod.daily, 
-            cloudlanguagetools.constants.Service.Naver,
-            'api_key_3',
-            cloudlanguagetools.constants.ApiKeyType.patreon,
-            {})
-        self.assertEqual(usage_slice_daily_user.over_quota(quotas.NAVER_USER_DAILY_CHAR_LIMIT - 100, 30000), False)
-        self.assertEqual(usage_slice_daily_user.over_quota(quotas.NAVER_USER_DAILY_CHAR_LIMIT + 100, 30000), True)
 
     def test_build_key_suffix(self):
         # clt:usage:user:daily:20210209:Naver:audio:zrrVDK3svzDOLzI6

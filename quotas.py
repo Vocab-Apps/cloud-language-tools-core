@@ -3,12 +3,14 @@ import cloudlanguagetools.constants
 
 
 DEFAULT_USER_DAILY_CHAR_LIMIT = 120000
-NAVER_USER_DAILY_CHAR_LIMIT = 50000
 
 TRIAL_USER_CHARACTER_LIMIT = 10000
 TRIAL_EXTENDED_USER_CHARACTER_LIMIT = 100000
 
 GETCHEDDAR_CHAR_MULTIPLIER = 1000.0
+
+AZURE_CJK_CHAR_MULTIPLIER = 2
+NAVER_AUDIO_CHAR_MULTIPLIER = 6
 
 COST_TABLE = [
     # audio
@@ -35,7 +37,7 @@ COST_TABLE = [
     {
         'service': 'Naver',
         'request_type': 'audio',
-        'character_cost': (1.0/1000) * 0.089
+        'character_cost': (1.0/1000) * 0.090
     },
     # translation
     {
@@ -63,6 +65,11 @@ COST_TABLE = [
         'request_type': 'translation',
         'character_cost': (1.0/1000000) * 17.70
     },            
+    {
+        'service': 'DeepL',
+        'request_type': 'translation',
+        'character_cost': (1.0/1000000) * 24.22
+    },
     # transliteration
     {
         'service': 'Azure',
@@ -90,7 +97,12 @@ def adjust_character_count(
         if language in azure_double_count_languages:
             if service == cloudlanguagetools.constants.Service.Azure:
                 if request_type == cloudlanguagetools.constants.RequestType.audio:
-                    return characters * 2
+                    return characters * AZURE_CJK_CHAR_MULTIPLIER
+
+    if service == cloudlanguagetools.constants.Service.Naver:
+        if request_type == cloudlanguagetools.constants.RequestType.audio:
+            return characters * NAVER_AUDIO_CHAR_MULTIPLIER
+
     return characters
 
 class UsageSlice():
@@ -151,9 +163,6 @@ class UsageSlice():
                         return True
 
             if self.usage_period == cloudlanguagetools.constants.UsagePeriod.daily:
-                if self.service == cloudlanguagetools.constants.Service.Naver:
-                    if characters > NAVER_USER_DAILY_CHAR_LIMIT:
-                        return True
                 if characters > DEFAULT_USER_DAILY_CHAR_LIMIT:
                     return True
         return False

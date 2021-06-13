@@ -568,8 +568,13 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
 
+    @unittest.skip('audio api v1 cant check quota witout language code')
     def test_audio_overquota(self):
         # pytest test_api.py -rPP -k test_audio_overquota
+
+        text_input_1 = 'Hello World'
+        text_input_2 = 'Hello World 2'
+        reserve_length = len(text_input_1)
 
         # increase the usage of that API key
         usage_slice = quotas.UsageSlice(cloudlanguagetools.constants.RequestType.audio,
@@ -580,7 +585,7 @@ class ApiTests(unittest.TestCase):
                             cloudlanguagetools.constants.ApiKeyType.test,
                             None)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
-        redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.NAVER_USER_DAILY_CHAR_LIMIT - 15)
+        redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.DEFAULT_USER_DAILY_CHAR_LIMIT - reserve_length * quotas.NAVER_AUDIO_CHAR_MULTIPLIER)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
 
         service = 'Naver'
@@ -589,7 +594,7 @@ class ApiTests(unittest.TestCase):
 
         # the first request should go through
         response = self.client.post('/audio', json={
-            'text': 'Hello World',
+            'text': text_input_1,
             'service': service,
             'voice_key': first_voice['voice_key'],
             'options': {}
@@ -598,7 +603,7 @@ class ApiTests(unittest.TestCase):
 
         # the second request should get blocked
         response = self.client.post('/audio', json={
-            'text': 'Hello World 2',
+            'text': text_input_2,
             'service': service,
             'voice_key': first_voice['voice_key'],
             'options': {}
@@ -607,6 +612,11 @@ class ApiTests(unittest.TestCase):
 
     def test_audio_overquota_v2(self):
         # pytest test_api.py -rPP -k test_audio_overquota_v2
+
+        text_input_1 = 'Hello World'
+        text_input_2 = 'Hello World 2'
+        reserve_length = len(text_input_1) + 2
+
 
         api_key = self.api_key_over_quota_v2
 
@@ -619,7 +629,7 @@ class ApiTests(unittest.TestCase):
                             cloudlanguagetools.constants.ApiKeyType.test,
                             None)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
-        redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.NAVER_USER_DAILY_CHAR_LIMIT - 15)
+        redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.DEFAULT_USER_DAILY_CHAR_LIMIT - reserve_length * quotas.NAVER_AUDIO_CHAR_MULTIPLIER)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
 
         service = 'Naver'
@@ -628,7 +638,7 @@ class ApiTests(unittest.TestCase):
 
         # the first request should go through
         response = self.client.post('/audio_v2', json={
-            'text': 'Hello World',
+            'text': text_input_1,
             'service': service,
             'deck_name': 'test_deck_1',
             'request_mode': 'batch',
@@ -640,7 +650,7 @@ class ApiTests(unittest.TestCase):
 
         # the second request should get blocked
         response = self.client.post('/audio_v2', json={
-            'text': 'Hello World 2',
+            'text': text_input_2,
             'service': service,
             'deck_name': 'test_deck_1',
             'request_mode': 'batch',

@@ -110,7 +110,10 @@ def generate_sound_sample():
 
     # write out voice entries as CSV
     voices_df = pandas.DataFrame(entries)
-    voices_df.to_csv(f'temp_data_files/voicelist.csv')
+    filename = f'temp_data_files/voicelist.csv'
+    voices_df.to_csv(filename)
+
+    logging.info(f'wrote {filename}')
 
 
 
@@ -118,5 +121,5 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
                         level=logging.INFO)    
-    # generate_sound_sample()
     generate_audio_language_list()
+    generate_sound_sample()

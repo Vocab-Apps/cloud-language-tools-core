@@ -297,7 +297,7 @@ class RedisDb():
         if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.patreon.name:
             usage_slice = quotas.UsageSlice(None, 
                               cloudlanguagetools.constants.UsageScope.User, 
-                              cloudlanguagetools.constants.UsagePeriod.monthly, 
+                              cloudlanguagetools.constants.UsagePeriod.patreon_monthly, 
                               None, 
                               api_key,
                               api_key_data['type'],
@@ -530,6 +530,17 @@ class RedisDb():
                 quotas.UsageSlice(request_type, 
                                 cloudlanguagetools.constants.UsageScope.User, 
                                 cloudlanguagetools.constants.UsagePeriod.recurring, 
+                                service, 
+                                api_key,
+                                key_type,
+                                api_key_data))
+
+        if key_type == cloudlanguagetools.constants.ApiKeyType.patreon:
+            # for now track only, and after 2021/06, this can be blocking
+            usage_slice_list.append(
+                quotas.UsageSlice(request_type, 
+                                cloudlanguagetools.constants.UsageScope.User, 
+                                cloudlanguagetools.constants.UsagePeriod.patreon_monthly, 
                                 service, 
                                 api_key,
                                 key_type,

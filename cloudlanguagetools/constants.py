@@ -18,6 +18,7 @@ class UsageScope(enum.Enum):
 class UsagePeriod(enum.Enum):
     daily = enum.auto()
     monthly = enum.auto()
+    patreon_monthly = enum.auto()
     lifetime = enum.auto()
     recurring = enum.auto()
 

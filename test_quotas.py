@@ -138,6 +138,19 @@ class TestQuotas(unittest.TestCase):
         date_str = datetime.datetime.today().strftime('%Y%m%d')
         self.assertEqual(usage_slice_daily_user.build_key_suffix(), f'user:daily:{date_str}:Naver:audio:zrrVDK3svzDOLzI6')
 
+
+        # clt:usage:user:patreon_monthly:202102:zrrVDK3svzDOLzI6
+        usage_slice_monthly_user = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.patreon_monthly, 
+            cloudlanguagetools.constants.Service.Azure,
+            'zrrVDK3svzDOLzI6',
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            {})
+        date_str = datetime.datetime.today().strftime('%Y%m')
+        self.assertEqual(usage_slice_monthly_user.build_key_suffix(), f'user:patreon_monthly:{date_str}:zrrVDK3svzDOLzI6')
+
         # clt:usage:user:monthly:202102:Azure:audio:zrrVDK3svzDOLzI6
         usage_slice_monthly_user = quotas.UsageSlice(
             cloudlanguagetools.constants.RequestType.audio,

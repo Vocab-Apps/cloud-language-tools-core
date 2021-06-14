@@ -382,12 +382,21 @@ class UserUtils():
 
         return combined_df
 
+    def get_getcheddar_all_customers(self):
+        customer_data_list = self.getcheddar_utils.get_all_customers()
+        customer_data_df = pandas.DataFrame(customer_data_list)
+        customer_data_df = customer_data_df.rename(columns={'thousand_char_quota': 'plan', 'thousand_char_used': 'plan_usage'})
+        customer_data_df = customer_data_df[['code', 'plan', 'plan_usage']]
+        return customer_data_df
+
     def build_user_data_getcheddar(self):
         # api keys
         api_key_list = self.get_full_api_key_list()
         flat_api_key_list = [x['api_key'] for x in api_key_list]
 
         api_key_list_df = self.get_api_key_list_df(api_key_list, cloudlanguagetools.constants.ApiKeyType.getcheddar.name)
+
+        getcheddar_customer_data_df = self.get_getcheddar_all_customers()
 
         # get user tracking data
         tracking_data_df = self.get_user_tracking_data(api_key_list)
@@ -403,6 +412,7 @@ class UserUtils():
 
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', on='email')
+        combined_df = pandas.merge(combined_df, getcheddar_customer_data_df, how='left', on='code')
         if len(monthly_usage_data_df) > 0:
             combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
         if len(prev_monthly_usage_data_df) > 0:
@@ -515,7 +525,7 @@ class UserUtils():
         joined_df = pandas.merge(airtable_getcheddar_df, user_data_df, how='left', left_on='email', right_on='email')
 
 
-        update_df = joined_df[['record_id', 'api_key', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions']]
+        update_df = joined_df[['record_id', 'api_key', 'plan', 'plan_usage', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions']]
         update_df = update_df.fillna({
             'api_key': '',
         })

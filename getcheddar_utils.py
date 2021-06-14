@@ -99,7 +99,9 @@ class GetCheddarUtils():
     def get_all_customers(self):
         # /customers/get/productCode/MY_PRODUCT_CODE
         url = f'https://getcheddar.com/xml/customers/get/productCode/{self.product_code}'
-        print(url)
+        # print(url)
+        logging.info(f'retrieving all getcheddar customer data')
+        result = []
         response = requests.get(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
             # success
@@ -108,10 +110,13 @@ class GetCheddarUtils():
             customer_list = root.findall('./customer')
             for customer in customer_list:
                 customer_data = self.decode_customer_element(customer)
-                print(customer_data)
+                # print(customer_data)
+                result.append(customer_data)
             # print(self.decode_customer_xml(response.content))
+            return result
         else:
-            print(response.content)
+            error_message = f'could not get all customer data: {response.content}'
+            raise Exception(error_message)
 
 
 

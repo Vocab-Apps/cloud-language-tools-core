@@ -541,6 +541,7 @@ class UserUtils():
         self.airtable_utils.update_usage_daily(usage_df)
 
     def update_airtable_all(self):
+        self.update_airtable_getcheddar()
         self.update_airtable_patreon()
         self.update_airtable_trial()
         self.update_airtable_usage()

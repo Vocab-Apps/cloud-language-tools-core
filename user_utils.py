@@ -254,6 +254,11 @@ class UserUtils():
         subscribers = self.convertkit_client.list_patreon_users()
         return self.get_dataframe_from_subscriber_list(subscribers)
 
+    def get_convertkit_getcheddar_users(self):
+        logging.info(f'getting list of getcheddar users from convertkit')
+        subscribers = self.convertkit_client.list_getcheddar_users()
+        return self.get_dataframe_from_subscriber_list(subscribers)
+
     def get_convertkit_canceled_users(self):
         canceled_list = self.convertkit_client.list_canceled()
         canceled_df = self.get_dataframe_from_subscriber_list(canceled_list)
@@ -386,11 +391,17 @@ class UserUtils():
         # get user tracking data
         tracking_data_df = self.get_user_tracking_data(api_key_list)
 
+        # get tag data from convertkit
+        convertkit_users_df = self.get_convertkit_getcheddar_users()
+        tag_data_df = self.get_convertkit_tag_data()
+        convertkit_data_df = pandas.merge(convertkit_users_df, tag_data_df, how='left', on='subscriber_id')
+
         # usage data
         monthly_usage_data_df = self.get_monthly_usage_data()
         prev_monthly_usage_data_df = self.get_prev_monthly_usage_data()
 
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
+        combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', on='email')
         if len(monthly_usage_data_df) > 0:
             combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
         if len(prev_monthly_usage_data_df) > 0:
@@ -491,6 +502,27 @@ class UserUtils():
 
         self.airtable_utils.update_trial_users(update_df)
 
+    def update_airtable_getcheddar(self):
+        logging.info('updating airtable for getcheddar users')
+
+        user_data_df = self.build_user_data_getcheddar()
+
+        # get airtable trial users table
+        airtable_getcheddar_df = self.airtable_utils.get_getcheddar_users()
+        airtable_getcheddar_df = airtable_getcheddar_df[['record_id', 'email']]
+
+        joined_df = pandas.merge(airtable_getcheddar_df, user_data_df, how='left', left_on='email', right_on='email')
+
+
+        update_df = joined_df[['record_id', 'api_key', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions']]
+        update_df = update_df.fillna({
+            'api_key': '',
+        })
+
+        print(update_df)
+
+        # self.airtable_utils.update_getcheddar_users(update_df)        
+
     def update_airtable_usage(self):
         usage_df = self.build_global_usage_data()
         self.airtable_utils.update_usage(usage_df)
@@ -570,6 +602,7 @@ if __name__ == '__main__':
     choices = [
         'update_airtable_all',
         'update_airtable_patreon',
+        'update_airtable_getcheddar',
         'update_airtable_trial',
         'update_airtable_usage',
         'show_getcheddar_user_data',
@@ -587,6 +620,8 @@ if __name__ == '__main__':
         user_utils.update_airtable_all()
     elif args.action == 'update_airtable_patreon':
         user_utils.update_airtable_patreon()
+    elif args.action == 'update_airtable_getcheddar':
+        user_utils.update_airtable_getcheddar()        
     if args.action == 'update_airtable_trial':
         user_utils.update_airtable_trial()
     if args.action == 'update_airtable_usage':
@@ -600,6 +635,7 @@ if __name__ == '__main__':
     elif args.action == 'show_getcheddar_user_data':
         user_data_df = user_utils.build_user_data_getcheddar()
         print(user_data_df)        
+        print(user_data_df.dtypes)
     elif args.action == 'extend_patreon_key_validity':
         user_utils.extend_patreon_key_validity()    
     elif args.action == 'usage_data':

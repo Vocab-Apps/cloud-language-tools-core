@@ -4,14 +4,18 @@ import logging
 import requests
 import urllib
 import pprint
+import secrets
 
 class AirtableUtils():
     def __init__(self):
-        self.airtable_api_key = os.environ['AIRTABLE_API_KEY']
-        self.airtable_trial_users_url = os.environ['AIRTABLE_TRIAL_USERS_URL']
-        self.airtable_patreon_users_url = os.environ['AIRTABLE_PATREON_USERS_URL']
-        self.airtable_usage_url = os.environ['AIRTABLE_USAGE_URL']
-        self.airtable_usage_daily_url = os.environ['AIRTABLE_USAGE_DAILY_URL']
+        self.enable = secrets.config['airtable']['enable']
+        if self.enable:
+            self.airtable_api_key = secrets.config['airtable']['api_key']
+            self.airtable_trial_users_url = secrets.config['airtable']['trial_users_url']
+            self.airtable_patreon_users_url = secrets.config['airtable']['patreon_users_url']
+            self.airtable_getcheddar_users_url = secrets.config['airtable']['getcheddar_users_url']
+            self.airtable_usage_url = secrets.config['airtable']['usage_url']
+            self.airtable_usage_daily_url = secrets.config['airtable']['usage_daily_url']
 
     def get_trial_users(self):
         return self.get_airtable_records(self.airtable_trial_users_url)
@@ -28,6 +32,9 @@ class AirtableUtils():
 
     def get_patreon_users(self):
         return self.get_airtable_records(self.airtable_patreon_users_url)
+
+    def get_getcheddar_users(self):
+        return self.get_airtable_records(self.airtable_getcheddar_users_url)
 
     def get_airtable_records(self, base_url):
         # first, list records

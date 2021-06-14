@@ -137,8 +137,8 @@ def configure_addtag_webhook():
 
 if __name__ == '__main__':
     # configure_addtag_webhook()
-    # list_tags()
-    list_fields()
+    list_tags()
+    # list_fields()
     # list_subscribers()
     # list_canceled()
     # view_subscribers()

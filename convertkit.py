@@ -23,6 +23,7 @@ class ConvertKit():
         self.enable = secrets.config['convertkit']['enable']
         if self.enable:
             self.getcheddar_user_form_id = secrets.config['convertkit']['getcheddar_user_form_id']
+            self.tag_id_getcheddar_user = secrets.config['convertkit']['tag_ig_getchedar_user']
 
         self.tag_name_map = {
             'trial_patreon_convert': self.tag_id_trial_patreon_convert,
@@ -145,6 +146,9 @@ class ConvertKit():
 
     def list_patreon_users(self):
         return self.list_subscribers_tag(self.tag_id_patreon)
+
+    def list_getcheddar_users(self):
+        return self.list_subscribers_tag(self.tag_id_getcheddar_user)
 
     def list_tags(self, subscriber_id):
         url = f'https://api.convertkit.com/v3/subscribers/{subscriber_id}/tags?api_secret={self.api_secret}'

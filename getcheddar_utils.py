@@ -124,7 +124,7 @@ class GetCheddarUtils():
     # ====================
 
     def ensure_dev(self):
-        if self.product_code != 'LANGUAGE_TOOLS_DEV':
+        if self.product_code != 'LANGUAGE_TOOLS_DEV' and self.product_code != 'LANGUAGE_TOOLS_LOCAL':
             raise Exception('must be in dev environment !')
 
 

@@ -519,9 +519,9 @@ class UserUtils():
             'api_key': '',
         })
 
-        print(update_df)
+        # print(update_df)
 
-        # self.airtable_utils.update_getcheddar_users(update_df)        
+        self.airtable_utils.update_getcheddar_users(update_df)
 
     def update_airtable_usage(self):
         usage_df = self.build_global_usage_data()

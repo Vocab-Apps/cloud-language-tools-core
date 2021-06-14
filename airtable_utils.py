@@ -66,6 +66,9 @@ class AirtableUtils():
     def update_trial_users(self, data_df):
         self.update_airtable_records(self.airtable_trial_users_url, data_df)
 
+    def update_getcheddar_users(self, data_df):
+        self.update_airtable_records(self.airtable_getcheddar_users_url, data_df)
+
     def update_usage(self, usage_df):
         # self.airtable_usage_url
         self.delete_all_airtable_records(self.airtable_usage_url)

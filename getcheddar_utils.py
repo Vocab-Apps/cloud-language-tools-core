@@ -38,17 +38,15 @@ class GetCheddarUtils():
         }
 
 
-    def decode_customer_xml(self, xml_str):
-        root = xml.etree.ElementTree.fromstring(xml_str)
+    def decode_customer_element(self, root):
+        customer_code = root.attrib['code']
+        customer_email = root.find('./email').text
 
-        customer_code = root.find('./customer').attrib['code']
-        customer_email = root.find('./customer/email').text
-
-        quantity_included = int(root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text)
-        overage_amount = float(root.find('./customer/subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text)
-        canceled_date = root.find('./customer/subscriptions/subscription[1]/canceledDatetime').text
+        quantity_included = int(root.find('./subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text)
+        overage_amount = float(root.find('./subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text)
+        canceled_date = root.find('./subscriptions/subscription[1]/canceledDatetime').text
         overage_allowed = overage_amount > 0 and canceled_date == None
-        current_usage = float(root.find('./customer/subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text)
+        current_usage = float(root.find('./subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text)
 
         return {
             'code': customer_code,
@@ -57,6 +55,11 @@ class GetCheddarUtils():
             'thousand_char_overage_allowed': int(overage_allowed == True),
             'thousand_char_used': current_usage,
         }
+
+    def decode_customer_xml(self, xml_str):
+        root = xml.etree.ElementTree.fromstring(xml_str)
+        customer_element = root.find('./customer')
+        return self.decode_customer_element(customer_element)
 
 
     def print_xml_response(self, content):
@@ -92,6 +95,24 @@ class GetCheddarUtils():
             print(self.decode_customer_xml(response.content))
         else:
             print(response.content)
+
+    def get_all_customers(self):
+        # /customers/get/productCode/MY_PRODUCT_CODE
+        url = f'https://getcheddar.com/xml/customers/get/productCode/{self.product_code}'
+        print(url)
+        response = requests.get(url, auth=(self.user, self.api_key))
+        if response.status_code == 200:
+            # success
+            # self.print_xml_response(response.content)
+            root = xml.etree.ElementTree.fromstring(response.content)
+            customer_list = root.findall('./customer')
+            for customer in customer_list:
+                customer_data = self.decode_customer_element(customer)
+                print(customer_data)
+            # print(self.decode_customer_xml(response.content))
+        else:
+            print(response.content)
+
 
 
     # for testing purposes
@@ -196,4 +217,4 @@ if __name__ == '__main__':
     customer_code = 'languagetools+customer5@mailc.net'
     # cheddar_utils.report_customer_usage(customer_code)
     # cheddar_utils.get_customer(customer_code)
-    # cheddar_utils.get_all_customers()
+    cheddar_utils.get_all_customers()

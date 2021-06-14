@@ -7,6 +7,7 @@ import xml.etree.ElementTree
 import pprint
 import datetime
 import secrets
+import time
 
 TRACKED_ITEM_CODE='thousand_chars'
 
@@ -96,7 +97,14 @@ class GetCheddarUtils():
     # for testing purposes
     # ====================
 
+    def ensure_dev(self):
+        if self.product_code != 'LANGUAGE_TOOLS_DEV':
+            raise Exception('must be in dev environment !')
+
+
     def create_test_customer(self, code, email, first_name, last_name, plan):
+        self.ensure_dev()
+
         url = f'https://getcheddar.com/xml/customers/new/productCode/{self.product_code}'
         params = {
             'code': code,
@@ -120,6 +128,8 @@ class GetCheddarUtils():
             print(response.content)        
 
     def update_test_customer(self, code, plan):
+        self.ensure_dev()
+
         customer_code_encoded = urllib.parse.quote(code)
         url = f'https://getcheddar.com/xml/customers/edit-subscription/productCode/{self.product_code}/code/{customer_code_encoded}'
         params = {
@@ -134,6 +144,8 @@ class GetCheddarUtils():
             print(response.content)            
 
     def cancel_test_customer(self, code, plan):
+        self.ensure_dev()
+
         customer_code_encoded = urllib.parse.quote(code)
         url = f'https://getcheddar.com/xml/customers/cancel/productCode/{self.product_code}/code/{customer_code_encoded}'
         response = requests.post(url, auth=(self.user, self.api_key))
@@ -146,6 +158,8 @@ class GetCheddarUtils():
 
 
     def delete_test_customer(self, code):
+        self.ensure_dev()
+
         # /customers/delete/productCode/MY_self.product_code/code/MY_CUSTOMER_CODE
         customer_code_encoded = urllib.parse.quote(code)
         url = f'https://getcheddar.com/xml/customers/delete/productCode/{self.product_code}/code/{customer_code_encoded}'
@@ -157,6 +171,10 @@ class GetCheddarUtils():
             print(response.content)                    
 
     def delete_all_test_customers(self):
+        self.ensure_dev()
+
+        logging.warning('WARNING DELETING ALL CUSTOMERS IN 30s')
+        time.sleep(30)
         # /customers/delete-all/confirm/[current unix timestamp]/productCode/MY_PRODUCT_CODE
         timestamp = int(datetime.datetime.now().timestamp())
         url = f'https://getcheddar.com/xml/customers/delete-all/confirm/{timestamp}/productCode/{self.product_code}'
@@ -178,7 +196,4 @@ if __name__ == '__main__':
     customer_code = 'languagetools+customer5@mailc.net'
     # cheddar_utils.report_customer_usage(customer_code)
     # cheddar_utils.get_customer(customer_code)
-    # cheddar_utils.create_test_customer('languagetools+customer5@mailc.net', 'languagetools+customer5@mailc.net', 'Luc', 'Customer5')
-    # cheddar_utils.update_test_customer(customer_code, 'MEDIUM')
-    # cheddar_utils.cancel_test_customer(customer_code, 'MEDIUM')
-    # cheddar_utils.delete_all_test_customers()
+    # cheddar_utils.get_all_customers()

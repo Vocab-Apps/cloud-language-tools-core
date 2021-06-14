@@ -297,7 +297,8 @@ class UserUtils():
         'patreon_user',
         'trial_api_key_ready',
         'trial_api_key_requested',
-        'trial_user']
+        'trial_user',
+        'getcheddar_user']
 
         tag_id_map = {tag_name:tag_id for tag_name, tag_id in self.convertkit_client.full_tag_id_map.items() if tag_name not in tag_ignore_list}
         present_tags = []
@@ -408,7 +409,7 @@ class UserUtils():
             combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
 
         # do this when we're in production
-        # self.update_tags_convertkit_users(combined_df)
+        self.update_tags_convertkit_users(combined_df)
 
         return combined_df
 

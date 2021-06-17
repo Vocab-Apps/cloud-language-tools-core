@@ -361,6 +361,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
     def test_report_usage_repeat(self):
         # create a user
+        # report usage multiple times
         # pytest manual_test_getcheddar.py -rPP -k test_report_usage_repeat
 
         customer_code = self.get_customer_code()
@@ -376,23 +377,8 @@ class GetCheddarEndToEnd(unittest.TestCase):
             time.sleep(SLEEP_TIME)
             max_wait_cycles -= 1
 
-        # ensure redis keys got created correctly
-        # ---------------------------------------
-
         self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
         api_key = self.redis_connection.r.get(redis_getcheddar_user_key)
-        print(f'api_key: {api_key}')
-        
-        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
-        expected_user_data = {
-            'type': 'getcheddar',
-            'code': customer_code,
-            'email': customer_code,
-            'thousand_char_quota': 250,
-            'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 0
-        }
-        self.assertEqual(actual_user_data, expected_user_data)
 
         # verify account data
         # -------------------
@@ -413,6 +399,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
 
         # check the usage slice, it should contain this usage
+        # ---------------------------------------------------
         usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
         usage = self.redis_connection.get_usage_slice_data(usage_slice)
         self.assertEqual(usage['characters'], 142456)
@@ -428,10 +415,12 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.assertEqual(actual_account_data, expected_account_data)
 
         # now, report this usage to getcheddar
+        # ------------------------------------
         user_utils_instance = user_utils.UserUtils()
         user_utils_instance.report_getcheddar_user_usage(api_key)
 
         # retrieve user data again
+        # ------------------------
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
         expected_user_data = {
             'type': 'getcheddar',
@@ -443,11 +432,19 @@ class GetCheddarEndToEnd(unittest.TestCase):
         }
         self.assertEqual(actual_user_data, expected_user_data)
 
+        # check the usage slice, it should be reset
+        # -----------------------------------------
+        usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
+        usage = self.redis_connection.get_usage_slice_data(usage_slice)
+        self.assertEqual(usage['characters'], 0)
+
         # report usage again
+        # ------------------
         user_utils_instance.report_getcheddar_user_usage(api_key)
         user_utils_instance.report_getcheddar_user_usage(api_key)
 
         # retrieve user data again
+        # ------------------------
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
         expected_user_data = {
             'type': 'getcheddar',
@@ -470,14 +467,48 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.assertEqual(actual_account_data, expected_account_data)        
 
         # retrieve the usage slice again, it should have been reset
+        # ---------------------------------------------------------
         usage = self.redis_connection.get_usage_slice_data(usage_slice)
         self.assertEqual(usage['characters'], 0)
 
+        # now, request some usage which brings up to the max for this plan
+        # ================================================================
+
         characters = 107544
-        # should not throw either
+        # should not throw
         self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
 
+        # verify account data (should reported we maxed out the 250k characters)
+        # ----------------------------------------------------------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '250,000 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
+
+        # check getcheddar account data (should be unchanged)
+        # ----------------------------------------
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        expected_user_data = {
+            'type': 'getcheddar',
+            'code': customer_code,
+            'email': customer_code,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 142.456
+        }
+        self.assertEqual(actual_user_data, expected_user_data)
+
+        # check usage slice
+        # -----------------
+        usage = self.redis_connection.get_usage_slice_data(usage_slice)
+        self.assertEqual(usage['characters'], 107544)
+        
+
         # report usage again
+        # ------------------
         user_utils_instance.report_getcheddar_user_usage(api_key)
 
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
@@ -490,6 +521,18 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'thousand_char_used': 250
         }
         self.assertEqual(actual_user_data, expected_user_data)
+
+
+        # verify account data (should reported we maxed out the 250k characters)
+        # ----------------------------------------------------------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '250,000 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
+
 
         # even requesting 1 char now should throw an error
         characters = 1

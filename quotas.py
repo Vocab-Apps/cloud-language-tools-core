@@ -1,9 +1,6 @@
 import datetime
 import cloudlanguagetools.constants
 
-
-DEFAULT_USER_DAILY_CHAR_LIMIT = 120000
-
 PATREON_MONTHLY_CHARACTER_LIMIT = 250000
 
 TRIAL_USER_CHARACTER_LIMIT = 10000
@@ -174,9 +171,6 @@ class UsageSlice():
                     if characters > character_limit:
                         return True
 
-            if self.usage_period == cloudlanguagetools.constants.UsagePeriod.daily:
-                if characters > DEFAULT_USER_DAILY_CHAR_LIMIT:
-                    return True
         return False
 
 

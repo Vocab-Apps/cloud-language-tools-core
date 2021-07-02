@@ -120,7 +120,19 @@ class TestQuotas(unittest.TestCase):
             cloudlanguagetools.constants.ApiKeyType.patreon,
             {})
         self.assertEqual(usage_slice_daily_user.over_quota(50000, 30000), False)
-        self.assertEqual(usage_slice_daily_user.over_quota(200000, 30000), True)
+        self.assertEqual(usage_slice_daily_user.over_quota(200000, 30000), False) # no daily limit anymore
+
+    def test_quotas_patreon(self):
+        usage_slice_monthly_patreon_user = quotas.UsageSlice(
+            cloudlanguagetools.constants.RequestType.audio,
+            cloudlanguagetools.constants.UsageScope.User, 
+            cloudlanguagetools.constants.UsagePeriod.patreon_monthly, 
+            cloudlanguagetools.constants.Service.Azure,
+            'api_key_1',
+            cloudlanguagetools.constants.ApiKeyType.patreon,
+            {})
+        self.assertEqual(usage_slice_monthly_patreon_user.over_quota(249999, 2), False)
+        self.assertEqual(usage_slice_monthly_patreon_user.over_quota(250001, 2), True)
 
 
     def test_build_key_suffix(self):

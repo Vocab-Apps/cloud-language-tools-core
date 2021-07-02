@@ -73,7 +73,7 @@ class GetCheddarUtils():
     def report_customer_usage(self, customer_code, thousand_char_quantity):
         customer_code_encoded = urllib.parse.quote(customer_code)
         url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{self.product_code}/code/{customer_code_encoded}/itemCode/{TRACKED_ITEM_CODE}'
-        print(url)
+        # print(url)
         params = {'quantity': thousand_char_quantity}
         response = requests.post(url, auth=(self.user, self.api_key), data=params)
         if response.status_code == 200:
@@ -87,7 +87,7 @@ class GetCheddarUtils():
         # /customers/get/productCode/MY_self.product_code/code/MY_CUSTOMER_CODE
         customer_code_encoded = urllib.parse.quote(customer_code)
         url = f'https://getcheddar.com/xml/customers/get/productCode/{self.product_code}/code/{customer_code_encoded}'
-        print(url)
+        # print(url)
         response = requests.get(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
             # success

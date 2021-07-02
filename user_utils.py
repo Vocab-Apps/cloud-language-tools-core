@@ -562,13 +562,12 @@ class UserUtils():
         usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
         usage = self.redis_connection.get_usage_slice_data(usage_slice)
         characters = usage['characters']
-        if characters > 0:
-            thousand_char_quantity = characters / quotas.GETCHEDDAR_CHAR_MULTIPLIER
-            updated_user_data = self.getcheddar_utils.report_customer_usage(user_data['code'], thousand_char_quantity)
-            # this will update the usage on the api_key_data
-            self.redis_connection.get_update_getcheddar_user_key(updated_user_data)
-            # reset the usage slice
-            self.redis_connection.reset_getcheddar_usage_slice(api_key)
+        thousand_char_quantity = characters / quotas.GETCHEDDAR_CHAR_MULTIPLIER
+        updated_user_data = self.getcheddar_utils.report_customer_usage(user_data['code'], thousand_char_quantity)
+        # this will update the usage on the api_key_data
+        self.redis_connection.get_update_getcheddar_user_key(updated_user_data)
+        # reset the usage slice
+        self.redis_connection.reset_getcheddar_usage_slice(api_key)
         
 
     def download_audio_requests(self):
@@ -626,6 +625,9 @@ if __name__ == '__main__':
         'download_audio_requests'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
+    parser.add_argument('--usage_service', help='for usage data, only report this service')
+    parser.add_argument('--usage_period_start', type=int, help='for usage data, start of period')
+    parser.add_argument('--usage_period_end', type=int, help='for usage data, start of period')
     args = parser.parse_args()
 
     if args.action == 'update_airtable_all':
@@ -651,8 +653,17 @@ if __name__ == '__main__':
     elif args.action == 'extend_patreon_key_validity':
         user_utils.extend_patreon_key_validity()    
     elif args.action == 'usage_data':
+        pandas.set_option('display.max_rows', 999)
         # user_utils.build_global_usage_data()
         data_df = user_utils.build_global_daily_usage_data()
+        data_df['period'] = data_df['period'].astype(int)
+        data_df = data_df.sort_values('period', ascending=True)
+        if args.usage_service != None:
+            data_df = data_df[data_df['service'] == args.usage_service]
+        if args.usage_period_start != None:
+            data_df = data_df[data_df['period'] >= args.usage_period_start]
+        if args.usage_period_end != None:
+            data_df = data_df[data_df['period'] <= args.usage_period_end]
         print(data_df)
     elif args.action == 'report_getcheddar_usage_all_users':
         user_utils.report_getcheddar_usage_all_users()

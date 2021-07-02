@@ -1,8 +1,7 @@
 import datetime
 import cloudlanguagetools.constants
 
-
-DEFAULT_USER_DAILY_CHAR_LIMIT = 120000
+PATREON_MONTHLY_CHARACTER_LIMIT = 250000
 
 TRIAL_USER_CHARACTER_LIMIT = 10000
 TRIAL_EXTENDED_USER_CHARACTER_LIMIT = 100000
@@ -158,6 +157,13 @@ class UsageSlice():
             # don't run through other checks for getcheddar users
             return False
 
+        if self.api_key_type == cloudlanguagetools.constants.ApiKeyType.patreon:
+            if self.usage_period == cloudlanguagetools.constants.UsagePeriod.patreon_monthly:
+                if characters > PATREON_MONTHLY_CHARACTER_LIMIT:
+                    return True
+            # don't run through other checks for patreon users
+            return False
+
         if self.usage_scope == cloudlanguagetools.constants.UsageScope.User:
             if self.usage_period == cloudlanguagetools.constants.UsagePeriod.lifetime:
                 character_limit = self.api_key_data.get('character_limit', None)
@@ -165,9 +171,6 @@ class UsageSlice():
                     if characters > character_limit:
                         return True
 
-            if self.usage_period == cloudlanguagetools.constants.UsagePeriod.daily:
-                if characters > DEFAULT_USER_DAILY_CHAR_LIMIT:
-                    return True
         return False
 
 

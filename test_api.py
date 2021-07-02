@@ -610,6 +610,7 @@ class ApiTests(unittest.TestCase):
         }, headers={'api_key': self.api_key_over_quota})
         self.assertEqual(response.status_code, 429)
 
+    @pytest.mark.skip('no more daily quotas')
     def test_audio_overquota_v2(self):
         # pytest test_api.py -rPP -k test_audio_overquota_v2
 
@@ -623,13 +624,13 @@ class ApiTests(unittest.TestCase):
         # increase the usage of that API key
         usage_slice = quotas.UsageSlice(cloudlanguagetools.constants.RequestType.audio,
                             cloudlanguagetools.constants.UsageScope.User, 
-                            cloudlanguagetools.constants.UsagePeriod.daily, 
+                            cloudlanguagetools.constants.UsagePeriod.patreon_monthly, 
                             cloudlanguagetools.constants.Service.Naver, 
                             api_key, 
-                            cloudlanguagetools.constants.ApiKeyType.test,
+                            cloudlanguagetools.constants.ApiKeyType.patreon,
                             None)
         usage_redis_key = redis_connection.build_key(redisdb.KEY_TYPE_USAGE, usage_slice.build_key_suffix())
-        redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.DEFAULT_USER_DAILY_CHAR_LIMIT - reserve_length * quotas.NAVER_AUDIO_CHAR_MULTIPLIER)
+        redis_connection.r.hincrby(usage_redis_key, 'characters', quotas.PATREON_MONTHLY_CHARACTER_LIMIT - reserve_length * quotas.NAVER_AUDIO_CHAR_MULTIPLIER)
         redis_connection.r.hincrby(usage_redis_key, 'requests', 1)
 
         service = 'Naver'

@@ -550,6 +550,12 @@ class UserUtils():
         logging.info('extending patreon key validity')
         self.patreon_utils.extend_user_key_validity()
 
+    def extend_trial_expiration(self, api_key):
+        expiration = self.redis_connection.get_api_key_expiration_timestamp()
+        redis_api_key = self.redis_connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
+        self.redis_connection.r.hset(redis_api_key, 'expiration', expiration)
+        logging.info(f'{redis_api_key}: setting expiration to {expiration}')
+
     def report_getcheddar_usage_all_users(self):
         api_key_list = self.redis_connection.list_getcheddar_api_keys()
         for api_key in api_key_list:
@@ -618,6 +624,7 @@ if __name__ == '__main__':
         'update_airtable_usage',
         'show_getcheddar_user_data',
         'extend_patreon_key_validity',
+        'extend_trial_expiration',
         'usage_data',
         'report_getcheddar_usage_all_users',
         'show_patreon_user_data',
@@ -628,6 +635,7 @@ if __name__ == '__main__':
     parser.add_argument('--usage_service', help='for usage data, only report this service')
     parser.add_argument('--usage_period_start', type=int, help='for usage data, start of period')
     parser.add_argument('--usage_period_end', type=int, help='for usage data, start of period')
+    parser.add_argument('--api_key', help='Pass in API key to check validity')
     args = parser.parse_args()
 
     if args.action == 'update_airtable_all':
@@ -652,6 +660,10 @@ if __name__ == '__main__':
         print(user_data_df.dtypes)
     elif args.action == 'extend_patreon_key_validity':
         user_utils.extend_patreon_key_validity()    
+    elif args.action == 'extend_trial_expiration':
+        # python user_utils.py --action extend_trial_expiration --api_key <api_key>
+        api_key = args.api_key
+        user_utils.extend_trial_expiration(api_key)
     elif args.action == 'usage_data':
         pandas.set_option('display.max_rows', 999)
         # user_utils.build_global_usage_data()

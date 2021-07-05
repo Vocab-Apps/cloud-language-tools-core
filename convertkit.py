@@ -24,6 +24,7 @@ class ConvertKit():
         if self.enable:
             self.getcheddar_user_form_id = secrets.config['convertkit']['getcheddar_user_form_id']
             self.tag_id_getcheddar_user = secrets.config['convertkit']['tag_ig_getchedar_user']
+            self.tag_id_disposable_email = secrets.config['convertkit']['tag_id_disposable_email']
 
         self.enable_debounce = secrets.config['debounce']['enable']
         if self.enable_debounce:
@@ -48,6 +49,7 @@ class ConvertKit():
             response = requests.get(url, params=querystring)
             if response.status_code == 200:
                 data = response.json()
+                # print(data)
                 if data['debounce']['result'] == 'Invalid' and data['debounce']['reason'] == 'Disposable':
                     logging.info(f'found disposable email: {email}')
                     return False

@@ -25,6 +25,11 @@ class ConvertKit():
             self.getcheddar_user_form_id = secrets.config['convertkit']['getcheddar_user_form_id']
             self.tag_id_getcheddar_user = secrets.config['convertkit']['tag_ig_getchedar_user']
 
+        self.enable_debounce = secrets.config['debounce']['enable']
+        if self.enable_debounce:
+            self.debounce_email = secrets.config['debounce']['email']
+            self.debounce_api_key = secrets.config['debounce']['api_key']
+
         self.tag_name_map = {
             'trial_patreon_convert': self.tag_id_trial_patreon_convert,
             'trial_end_reach_out': self.tag_id_trial_end_reach_out,
@@ -33,6 +38,25 @@ class ConvertKit():
 
 
         self.full_tag_id_map = {} 
+
+    def email_valid(self, email):
+        if not self.enable_debounce:
+            return True
+        try:
+            url = "https://api.debounce.io/v1/"
+            querystring = {'api': self.debounce_api_key, 'email': email}
+            response = requests.get(url, params=querystring)
+            if response.status_code == 200:
+                data = response.json()
+                if data['debounce']['result'] == 'Invalid' and data['debounce']['reason'] == 'Disposable':
+                    logging.info(f'found disposable email: {email}')
+                    return False
+            else:
+                logging.error(f'received error: {response.status_code}: {response.text}')
+        except:
+            logging.exception(f'could not perform debounce query to validate {email}')
+        return True # true by default
+
 
     def register_getcheddar_user(self, email, api_key):
         if self.enable:

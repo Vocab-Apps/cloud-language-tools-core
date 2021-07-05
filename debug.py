@@ -420,6 +420,7 @@ def test_epitran():
     result = epi.transliterate('Hello my friends')
     print(result)
 
+
 def create_epitran_mappings():
     language_map = {'aar-Latn': 'Afar',
         'amh-Ethi': 'Amharic',
@@ -503,6 +504,12 @@ def create_epitran_mappings():
             assignment = f"""EpitranTransliterationLanguage(cloudlanguagetools.constants.{language_enum}, '{language_key}'),"""
             print(assignment)
 
+def test_debounce():
+    import convertkit
+    convertkit_client = convertkit.ConvertKit()
+    email = '4wstpt6hpu@cloud-mail.top'
+    result = convertkit_client.email_valid(email)
+    print(f'result: {result}')
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -515,7 +522,7 @@ if __name__ == '__main__':
     # test_google_audio()
     # play_google_audio()
     # play_azure_audio()
-    get_voice_list()
+    # get_voice_list()
     # get_voice_list_awesometts()
     # get_watson_voice_list()
     # get_amazon_voice_list()
@@ -541,3 +548,4 @@ if __name__ == '__main__':
     # cereproc_tts_voice_list()
     # test_epitran()
     # create_epitran_mappings()
+    test_debounce()

@@ -382,6 +382,33 @@ class UserUtils():
 
         return combined_df
 
+    def cleanup_user_data_trial(self):
+        # api keys
+        api_key_list = self.get_full_api_key_list()
+        flat_api_key_list = [x['api_key'] for x in api_key_list]
+
+        api_key_list_df = self.get_api_key_list_df(api_key_list, 'trial')
+
+        # get convertkit subscriber ids
+        convertkit_trial_users_df = self.get_convertkit_trial_users()
+        convertkit_trial_users_df['convertkit_trial_user'] = True
+
+        # get convertkit canceled users
+        canceled_df = self.get_convertkit_canceled_users()
+
+        combined_df = pandas.merge(api_key_list_df, convertkit_trial_users_df, how='left', on='email')
+        combined_df = pandas.merge(combined_df, canceled_df, how='left', on='subscriber_id')
+
+        combined_df['convertkit_trial_user'] = combined_df['convertkit_trial_user'].fillna(False)
+        combined_df['canceled'] = combined_df['canceled'].fillna(False)
+
+        # print(combined_df)
+
+        # identify api key which are in redis but not a convertkit trial user
+        remove_api_keys_df = combined_df[(combined_df['convertkit_trial_user'] == False) | (combined_df['canceled'] == True)]
+        logging.info(f'need to remove API keys:')
+        print(remove_api_keys_df)
+
     def get_getcheddar_all_customers(self):
         customer_data_list = self.getcheddar_utils.get_all_customers()
         customer_data_df = pandas.DataFrame(customer_data_list)
@@ -629,6 +656,7 @@ if __name__ == '__main__':
         'report_getcheddar_usage_all_users',
         'show_patreon_user_data',
         'show_trial_user_data',
+        'cleanup_trial_user_data',
         'download_audio_requests'
     ]
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
@@ -654,6 +682,8 @@ if __name__ == '__main__':
     elif args.action == 'show_trial_user_data':
         user_data_df = user_utils.build_user_data_trial()
         print(user_data_df)
+    elif args.action == 'cleanup_trial_user_data':
+        user_utils.cleanup_user_data_trial()
     elif args.action == 'show_getcheddar_user_data':
         user_data_df = user_utils.build_user_data_getcheddar()
         print(user_data_df)        

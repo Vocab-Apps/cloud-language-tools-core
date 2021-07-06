@@ -285,6 +285,11 @@ class ConvertKitRequestTrialKey(flask_restful.Resource):
         subscriber_id = data['subscriber']['id']
         email_address = data['subscriber']['email_address']
 
+        email_valid = convertkit_client.email_valid(email_address)
+        if not email_valid:
+            convertkit_client.tag_user_disposable_email(email_address)
+            return
+
         # create api key for this subscriber
         api_key = redis_connection.get_trial_user_key(email_address)
 

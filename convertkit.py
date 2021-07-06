@@ -99,7 +99,8 @@ class ConvertKit():
         if response.status_code != 200:
             logging.error(f'could not tag user: {response.content}')
 
-
+    def tag_user_disposable_email(self, email):
+        self.tag_user(email, self.tag_id_disposable_email)
 
     def tag_user(self, email, tag_id):
         url = f'https://api.convertkit.com/v3/tags/{tag_id}/subscribe'

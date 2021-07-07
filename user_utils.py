@@ -388,6 +388,7 @@ class UserUtils():
         flat_api_key_list = [x['api_key'] for x in api_key_list]
 
         api_key_list_df = self.get_api_key_list_df(api_key_list, 'trial')
+        api_key_list_df['api_key'] = True
 
         # get convertkit subscriber ids
         convertkit_trial_users_df = self.get_convertkit_trial_users()
@@ -396,18 +397,31 @@ class UserUtils():
         # get convertkit canceled users
         canceled_df = self.get_convertkit_canceled_users()
 
+        # get airtable records
+        airtable_trial_df = self.airtable_utils.get_trial_users()
+        airtable_trial_df = airtable_trial_df[['record_id', 'email']]
+        airtable_trial_df['airtable_record'] = True
+
         combined_df = pandas.merge(api_key_list_df, convertkit_trial_users_df, how='left', on='email')
         combined_df = pandas.merge(combined_df, canceled_df, how='left', on='subscriber_id')
+        combined_df = pandas.merge(airtable_trial_df, combined_df, how='left', on='email')
 
         combined_df['convertkit_trial_user'] = combined_df['convertkit_trial_user'].fillna(False)
         combined_df['canceled'] = combined_df['canceled'].fillna(False)
+        combined_df['airtable_record'] = combined_df['airtable_record'].fillna(False)
+        combined_df['api_key'] = combined_df['api_key'].fillna(False)
 
         # print(combined_df)
 
         # identify api key which are in redis but not a convertkit trial user
-        remove_api_keys_df = combined_df[(combined_df['convertkit_trial_user'] == False) | (combined_df['canceled'] == True)]
+        remove_api_keys_df = combined_df[ (combined_df['api_key'] == True) & ((combined_df['convertkit_trial_user'] == False) | (combined_df['canceled'] == True))]
         logging.info(f'need to remove API keys:')
         print(remove_api_keys_df)
+
+        # identify airtable records which must be removed
+        remove_airtable_records_df = combined_df[ (combined_df['airtable_record'] == True) & ((combined_df['convertkit_trial_user'] == False) | (combined_df['canceled'] == True))]
+        logging.info(f'need to remove airtable records:')
+        print(remove_airtable_records_df)
 
     def get_getcheddar_all_customers(self):
         customer_data_list = self.getcheddar_utils.get_all_customers()

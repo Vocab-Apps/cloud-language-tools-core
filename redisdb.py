@@ -742,9 +742,10 @@ class RedisDb():
         hash_data = self.r.hgetall(redis_key)
         logging.info(f'{redis_key}: {hash_data}')
 
-    def remove_key(self, redis_key):
+    def remove_key(self, redis_key, sleep=True):
         logging.warn(f'WARNING about to remove key: {redis_key}')
-        time.sleep(15)
+        if sleep:
+            time.sleep(15)
         self.r.delete(redis_key)
 
     def full_db_dump(self):

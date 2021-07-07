@@ -66,6 +66,9 @@ class AirtableUtils():
     def update_trial_users(self, data_df):
         self.update_airtable_records(self.airtable_trial_users_url, data_df)
 
+    def delete_trial_users(self, record_ids):
+        self.delete_airtable_records(self.airtable_trial_users_url, record_ids)
+
     def update_getcheddar_users(self, data_df):
         self.update_airtable_records(self.airtable_getcheddar_users_url, data_df)
 
@@ -119,6 +122,25 @@ class AirtableUtils():
             }, headers=headers)
             if response.status_code != 200:
                 logging.error(response.content)        
+
+    def delete_airtable_records(self, base_url, record_ids):
+        logging.info(f'deleting records from {base_url} ({len(record_ids)} in total)')
+        headers = {
+            'Authorization': f'Bearer {self.airtable_api_key}',
+            'Content-Type': 'application/json' }        
+
+        while len(record_ids) > 0:
+            subset_length = min(10, len(record_ids))
+            record_selection = record_ids[0:subset_length]
+            record_ids = record_ids[subset_length:]
+            params = {'records[]': record_selection}
+            # logging.info(f'deleting records {record_selection}')
+            params_encoded = urllib.parse.urlencode(params, True)
+            url = base_url + '?' + params_encoded
+            logging.info(f'delete URL: {url}')
+            response = requests.delete(url, headers=headers)
+            if response.status_code != 200:
+                logging.error(response.content)
 
     def delete_all_airtable_records(self, base_url):
         logging.info(f'deleting all records from {base_url}')

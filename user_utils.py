@@ -418,20 +418,16 @@ class UserUtils():
         # identify api key which are in redis but not a convertkit trial user
         remove_api_keys_df = combined_df[ (combined_df['api_key_present'] == True) & ((combined_df['convertkit_trial_user'] == False) | (combined_df['canceled'] == True))]
         logging.info(f'removing API keys for trial users')
-        remove_api_keys_df = remove_api_keys_df.head(3)
         # print(remove_api_keys_df)
-        if False:
-            for index, row in remove_api_keys_df.iterrows():
-                email = row['email']
-                api_key = row['api_key']
-                # logging.info(f'removing api key for user: {row}')
-                redis_trial_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_TRIAL_USER, email)
-                redis_api_key = self.redis_connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
-                logging.info(f'need to delete redis keys: {redis_trial_user_key} and {redis_api_key}')
-                self.redis_connection.remove_key(redis_trial_user_key, sleep=False)
-                self.redis_connection.remove_key(redis_api_key, sleep=False)
-
-            return
+        for index, row in remove_api_keys_df.iterrows():
+            email = row['email']
+            api_key = row['api_key']
+            # logging.info(f'removing api key for user: {row}')
+            redis_trial_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_TRIAL_USER, email)
+            redis_api_key = self.redis_connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
+            logging.info(f'need to delete redis keys: {redis_trial_user_key} and {redis_api_key}')
+            self.redis_connection.remove_key(redis_trial_user_key, sleep=False)
+            self.redis_connection.remove_key(redis_api_key, sleep=False)
 
         # identify airtable records which must be removed
         remove_airtable_records_df = combined_df[ (combined_df['airtable_record'] == True) & ((combined_df['convertkit_trial_user'] == False) | (combined_df['canceled'] == True))]

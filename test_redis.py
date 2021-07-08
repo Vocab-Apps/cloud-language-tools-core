@@ -100,13 +100,13 @@ class TestApiKeys(unittest.TestCase):
         self.redis_connection.track_usage(api_key, service, request_type, 100)
 
         # this request will also go through but put us right under the limit
-        self.redis_connection.track_usage(api_key, service, request_type, 9899)
+        self.redis_connection.track_usage(api_key, service, request_type, quotas.TRIAL_USER_CHARACTER_LIMIT - 101)
 
         # this request will throw an exception
         self.assertRaises(cloudlanguagetools.errors.OverQuotaError, self.redis_connection.track_usage, api_key, service, request_type, 150)
 
         # increase this user's limit
-        self.redis_connection.increase_trial_key_limit(email, 100000)
+        self.redis_connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
         # this request should go through
         self.redis_connection.track_usage(api_key, service, request_type, 5200)
 

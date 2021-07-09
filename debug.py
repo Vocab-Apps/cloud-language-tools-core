@@ -10,6 +10,7 @@ import unittest
 import pydub
 import pydub.playback
 import epitran
+import pandas
 import requests
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
@@ -511,6 +512,58 @@ def test_debounce():
     result = convertkit_client.email_valid(email)
     print(f'result: {result}')
 
+def load_vocalware_voices():
+    f = open('temp_data_files/vocalware_languages.json')
+    languages_content = f.read()
+    languages = json.loads(languages_content)
+    # pprint.pprint(languages)
+
+    # build map of language name to enum
+    language_enum_map = {}
+    for language in cloudlanguagetools.constants.Language:
+        language_enum_map[language.lang_name] = language
+    
+    # add some exceptions
+    language_enum_map['Chinese'] = cloudlanguagetools.constants.Language.zh_cn
+    language_enum_map['Bengali'] = cloudlanguagetools.constants.Language.bn
+    language_enum_map['Malaylam'] = cloudlanguagetools.constants.Language.ml
+    language_enum_map['Portuguese'] = cloudlanguagetools.constants.Language.pt_pt
+    language_enum_map['Slovanian'] = cloudlanguagetools.constants.Language.sl
+    language_enum_map['Valencian'] = cloudlanguagetools.constants.Language.ca
+    # print(language_enum_map)
+
+    vocalware_language_id_to_language_enum = {}
+    for entry in languages['LANGUAGELIST']['LANGUAGE']:
+        language_name = entry['@NAME']
+        language_id = entry['@ID']
+        # print(f'language_id: {language_id} language_name: {language_name}')
+        if language_name in language_enum_map:
+            lang_enum = language_enum_map[language_name]
+            vocalware_language_id_to_language_enum[language_id] = lang_enum
+        else:
+            logging.error(f'language not found: {language_name}')
+
+    print(vocalware_language_id_to_language_enum)
+
+    f = open('temp_data_files/vocalware_voices.json')
+    voices_content = f.read()
+    voices = json.loads(voices_content)    
+    # pprint.pprint(voices)
+
+    voice_list = voices['VOICELIST']['VOICE']
+    # pprint.pprint(voice_list)
+
+    pandas.set_option('display.max_rows', 999)
+    voices_df = pandas.DataFrame(voice_list)
+    voices_df['engine_id'] = voices_df['@ENGINE'].astype(int)
+    voices_subset_df = voices_df[~voices_df['engine_id'].isin([21, 22])]
+    # print(voices_subset_df)
+    # print(voices_subset_df['engine_id'].unique())
+    # print(voices_df.dtypes)
+
+
+
+
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
@@ -548,4 +601,5 @@ if __name__ == '__main__':
     # cereproc_tts_voice_list()
     # test_epitran()
     # create_epitran_mappings()
-    test_debounce()
+    # test_debounce()
+    load_vocalware_voices()

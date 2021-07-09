@@ -535,7 +535,7 @@ def load_vocalware_voices():
     vocalware_language_id_to_language_enum = {}
     for entry in languages['LANGUAGELIST']['LANGUAGE']:
         language_name = entry['@NAME']
-        language_id = entry['@ID']
+        language_id = int(entry['@ID'])
         # print(f'language_id: {language_id} language_name: {language_name}')
         if language_name in language_enum_map:
             lang_enum = language_enum_map[language_name]
@@ -557,10 +557,17 @@ def load_vocalware_voices():
     voices_df = pandas.DataFrame(voice_list)
     voices_df['engine_id'] = voices_df['@ENGINE'].astype(int)
     voices_subset_df = voices_df[~voices_df['engine_id'].isin([21, 22])]
-    # print(voices_subset_df)
-    # print(voices_subset_df['engine_id'].unique())
-    # print(voices_df.dtypes)
 
+    # print(voices_subset_df)
+
+    for index, row in voices_subset_df.iterrows():
+        voice_name = row['@NAME']
+        voice_id = int(row['@ID'])
+        language_id = int(row['@LANG'])
+        engine_id = row['engine_id']
+        if language_id != 0:
+            language_enum = vocalware_language_id_to_language_enum[language_id]
+            print(f'name: {voice_name} language: {language_enum} voice_id: {voice_id} engine_id: {engine_id}')
 
 
 

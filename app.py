@@ -15,6 +15,7 @@ import redisdb
 import patreon_utils
 import getcheddar_utils as getcheddar_utils_module
 import convertkit
+import secrets
 import pprint
 import hashlib
 import hmac
@@ -27,7 +28,7 @@ logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d
 app = Flask(__name__)
 api = flask_restful.Api(app)
 
-manager = cloudlanguagetools.servicemanager.ServiceManager()
+manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
 manager.configure()
 
 redis_connection = redisdb.RedisDb()

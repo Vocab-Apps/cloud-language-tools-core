@@ -6,6 +6,7 @@ import shutil
 import logging
 import boto3
 import pandas
+import secrets
 import urllib.parse
 import cloudlanguagetools
 import cloudlanguagetools.constants
@@ -13,7 +14,7 @@ import cloudlanguagetools.servicemanager
 
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
     manager.configure()    
     return manager
 

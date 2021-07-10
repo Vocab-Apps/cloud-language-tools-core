@@ -2,6 +2,7 @@ import sys
 import os
 import inspect
 import pprint
+import secrets
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -11,7 +12,7 @@ import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
     manager.configure()    
     return manager
 

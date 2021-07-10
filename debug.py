@@ -13,12 +13,13 @@ import epitran
 import pandas
 import requests
 import re
+import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
     manager.configure()    
     return manager
 

@@ -1,6 +1,7 @@
 import sys
 import logging
 import unittest
+import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 from cloudlanguagetools.constants import Language
@@ -8,7 +9,7 @@ from cloudlanguagetools.constants import Service
 import cloudlanguagetools.errors
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
     manager.configure()    
     return manager
 

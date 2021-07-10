@@ -80,7 +80,11 @@ class VocalWareService(cloudlanguagetools.service.Service):
     def get_tts_voice_list(self):
         # returns list of TtSVoice
         return [
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.en_US, 'Dave (US)', cloudlanguagetools.constants.Gender.Male, 1, 2, 2),            
+            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.en_US, 'Susan', cloudlanguagetools.constants.Gender.Female, 1, 1, 2),
+            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.en_US, 'Dave', cloudlanguagetools.constants.Gender.Male, 1, 2, 2),
+            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.en_US, 'Kenneth', cloudlanguagetools.constants.Gender.Male, 1, 3, 2),
+            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.en_GB, 'Elizabeth', cloudlanguagetools.constants.Gender.Female, 1, 4, 2),
+            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.en_GB, 'Simon', cloudlanguagetools.constants.Gender.Male, 1, 5, 2),
         ]
 
     def get_translation_language_list(self):

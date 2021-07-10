@@ -12,6 +12,7 @@ import pydub.playback
 import epitran
 import pandas
 import requests
+import re
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
@@ -577,7 +578,15 @@ def load_vocalware_voices():
         'UK': cloudlanguagetools.constants.AudioLanguage.en_GB,
         'Australian': cloudlanguagetools.constants.AudioLanguage.en_AU,
         'Indian': cloudlanguagetools.constants.AudioLanguage.en_IN,
+        'Castilian': cloudlanguagetools.constants.AudioLanguage.es_ES,
+        'Chilean': cloudlanguagetools.constants.AudioLanguage.es_LA,
+        'Argentine': cloudlanguagetools.constants.AudioLanguage.es_LA,
+        'Mexican': cloudlanguagetools.constants.AudioLanguage.es_MX,
     }
+
+    voices_subset_df = voices_subset_df.head(5)
+
+    gender_api_key = os.environ['GENDER_API_KEY']
 
     vocalware_voice_file = open('temp_data_files/vocalware_voices.py', 'w')
     for index, row in voices_subset_df.iterrows():
@@ -594,7 +603,15 @@ def load_vocalware_voices():
                     audio_language_enum = value
                     break
             # print(f'name: {voice_name} audio_language: {audio_language_enum} language_id: {language_id} voice_id: {voice_id} engine_id: {engine_id}')
-            voice_code = f"""VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.{audio_language_enum.name}, '{voice_name}', cloudlanguagetools.constants.Gender.Male, {language_id}, {voice_id}, {engine_id}),\n"""
+            voice_name = re.sub('\(.*\)', '', voice_name)
+            voice_name = voice_name.strip()
+            # https://gender-api.com/get?name=elizabeth&key=afwY7pbzKjAJJxUL8AKzRzCVQujWLyuNN9ES
+            print(f'processing voice {voice_name}')
+            response = requests.get(f'https://gender-api.com/get?name={voice_name}&key={gender_api_key}')
+            response_data = response.json()
+            gender_response = response_data['gender']
+            gender = cloudlanguagetools.constants.Gender[gender_response.capitalize()]
+            voice_code = f"""VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.{audio_language_enum.name}, '{voice_name}', cloudlanguagetools.constants.Gender.{gender.name}, {language_id}, {voice_id}, {engine_id}),\n"""
             vocalware_voice_file.write(voice_code)
     
     vocalware_voice_file.close()

@@ -584,7 +584,7 @@ def load_vocalware_voices():
         'Mexican': cloudlanguagetools.constants.AudioLanguage.es_MX,
     }
 
-    voices_subset_df = voices_subset_df.head(5)
+    # voices_subset_df = voices_subset_df.head(5)
 
     gender_api_key = os.environ['GENDER_API_KEY']
 
@@ -610,6 +610,9 @@ def load_vocalware_voices():
             response = requests.get(f'https://gender-api.com/get?name={voice_name}&key={gender_api_key}')
             response_data = response.json()
             gender_response = response_data['gender']
+            if gender_response == 'unknown':
+                logging.error(f'could not detect gender for {voice_name}')
+                gender_response = 'male'
             gender = cloudlanguagetools.constants.Gender[gender_response.capitalize()]
             voice_code = f"""VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.{audio_language_enum.name}, '{voice_name}', cloudlanguagetools.constants.Gender.{gender.name}, {language_id}, {voice_id}, {engine_id}),\n"""
             vocalware_voice_file.write(voice_code)

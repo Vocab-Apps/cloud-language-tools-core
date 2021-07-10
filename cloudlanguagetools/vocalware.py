@@ -67,8 +67,6 @@ class VocalWareService(cloudlanguagetools.service.Service):
         url_parameters = f"""EID={voice_key['engine_id']}&LID={voice_key['language_id']}&VID={voice_key['voice_id']}&TXT={urlencoded_text}&ACC={self.account_id}&API={self.api_id}&CS={checksum}"""
         url = f"""http://www.vocalware.com/tts/gen.php?{url_parameters}"""
 
-
-        # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
         response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code == 200:
             with open(output_temp_filename, 'wb') as audio:

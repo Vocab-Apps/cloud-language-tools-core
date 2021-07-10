@@ -355,7 +355,7 @@ class PostDeployTests(unittest.TestCase):
 
     def test_audio_v2_all_services_english(self):
         # pytest manual_test_postdeploy.py -rPP -k test_audio_v2_all_services_english
-        service_list = ['Azure', 'Google', 'Watson', 'Naver', 'Amazon', 'Forvo', 'CereProc']
+        service_list = ['Azure', 'Google', 'Watson', 'Naver', 'Amazon', 'Forvo', 'CereProc', 'VocalWare']
         for service in service_list:
             self.verify_audio_service_english(service)
 

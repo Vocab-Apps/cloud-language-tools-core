@@ -567,7 +567,16 @@ def load_vocalware_voices():
     # print(voices_subset_df)
 
     audio_language_substr_mappings = {
-        'Cantonese': cloudlanguagetools.constants.AudioLanguage.zh_HK
+        'Cantonese': cloudlanguagetools.constants.AudioLanguage.zh_HK,
+        'Brazilian': cloudlanguagetools.constants.AudioLanguage.pt_BR,
+        'Brasilian': cloudlanguagetools.constants.AudioLanguage.pt_BR,
+        'Portugal': cloudlanguagetools.constants.AudioLanguage.pt_PT,
+        'Canadian': cloudlanguagetools.constants.AudioLanguage.fr_CA,
+        'Taiwanese': cloudlanguagetools.constants.AudioLanguage.zh_TW,
+        'US': cloudlanguagetools.constants.AudioLanguage.en_US,
+        'UK': cloudlanguagetools.constants.AudioLanguage.en_GB,
+        'Australian': cloudlanguagetools.constants.AudioLanguage.en_AU,
+        'Indian': cloudlanguagetools.constants.AudioLanguage.en_IN,
     }
 
     for index, row in voices_subset_df.iterrows():

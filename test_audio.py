@@ -85,6 +85,10 @@ class TestAudio(unittest.TestCase):
         source_text = 'Je ne suis pas intéressé.'
         self.verify_service_audio_language(source_text, Service.Watson, AudioLanguage.fr_FR, 'fr-FR')
 
+    def test_french_vocalware(self):
+        source_text = 'Je ne suis pas intéressé.'
+        self.verify_service_audio_language(source_text, Service.VocalWare, AudioLanguage.fr_FR, 'fr-FR')        
+
     def test_english_amazon(self):
         source_text = 'I am not interested.'
         self.verify_service_audio_language(source_text, Service.Amazon, AudioLanguage.en_GB, 'en-GB')

@@ -3,6 +3,7 @@ import logging
 import random
 import re
 import sys
+import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 from cloudlanguagetools.constants import Language
@@ -10,7 +11,7 @@ from cloudlanguagetools.constants import AudioLanguage
 from cloudlanguagetools.constants import Service
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
     manager.configure()    
     return manager
 
@@ -136,6 +137,12 @@ class TestAudio(unittest.TestCase):
         source_text = 'this is the first sentence'
         # source_text = 'hello'
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.en_US, 'en-US')
+
+    def test_english_vocalware(self):
+        # pytest test_audio.py -k test_english_vocalware
+        source_text = 'this is the first sentence'
+        # source_text = 'hello'
+        self.verify_service_audio_language(source_text, Service.VocalWare, AudioLanguage.en_US, 'en-US')
 
 
     def test_ssml_english_google(self):

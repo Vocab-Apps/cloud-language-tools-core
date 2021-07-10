@@ -1,5 +1,7 @@
 import json
 import requests
+import urllib
+import hashlib
 import tempfile
 import uuid
 import operator
@@ -27,86 +29,51 @@ class VocalWareVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
     def get_voice_key(self):
         return {
-            'name': self.name
+            'language_id': self.language_id,
+            'voice_id': self.voice_id,
+            'engine_id': self.engine_id
         }
 
     def get_voice_shortname(self):
-        return f'{self.description} ({self.voice_type})'
+        return f'{self.name}'
 
     def get_options(self):
-        return {
-            'speed' : {
-                'type': 'number_int',
-                'min': -5,
-                'max': 5,
-                'default': NAVER_VOICE_SPEED_DEFAULT
-            },
-            'pitch': {
-                'type': 'number_int',
-                'min': -5,
-                'max': 5,
-                'default': NAVER_VOICE_PITCH_DEFAULT
-            }
-        }
+        return {}
 
 
 class VocalWareService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass
 
-    def configure(self, client_id, client_secret):
-        self.client_id = client_id
-        self.client_secret = client_secret
+    def configure(self, secret_phrase, account_id, api_id):
+        self.secret_phrase = secret_phrase
+        self.account_id = account_id
+        self.api_id = api_id
 
     def get_translation(self, text, from_language_key, to_language_key):
-        url = 'https://naveropenapi.apigw.ntruss.com/nmt/v1/translation'
-        headers = {
-            'X-NCP-APIGW-API-KEY-ID': self.client_id,
-            'X-NCP-APIGW-API-KEY': self.client_secret
-        }
-
-        data = {
-            'text': text,
-            'source': from_language_key,
-            'target': to_language_key
-        }
-
-        # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
-        response = requests.post(url, json=data, headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
-        if response.status_code == 200:
-            response_data = response.json()
-            return response_data['message']['result']['translatedText']
-
-        error_message = f'Status code: {response.status_code}: {response.content}'
-        raise cloudlanguagetools.errors.RequestError(error_message)
-
+        raise cloudlanguagetools.errors.RequestError('not supported')
 
     def get_tts_audio(self, text, voice_key, options):
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
 
-        url = 'https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts'
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-NCP-APIGW-API-KEY-ID': self.client_id,
-            'X-NCP-APIGW-API-KEY': self.client_secret
-        }
+        urlencoded_text = urllib.parse.unquote_plus(text)
 
-        data = {
-            'text': text,
-            'speaker': voice_key['name'],
-            'speed': options.get('speed', NAVER_VOICE_SPEED_DEFAULT),
-            'pitch': options.get('pitch', NAVER_VOICE_PITCH_DEFAULT)
-        }
+        checksum_input = f"""{voice_key['engine_id']}{voice_key['language_id']}{voice_key['voice_id']}{urlencoded_text}{self.secret_phrase}"""
+        checksum = hashlib.md5(checksum_input.encode('utf-8')).hexdigest()
+
+        url_parameters = f"""EID={voice_key['engine_id']}&LID={voice_key['language_id']}&VID={voice_key['voice_id']}&TXT={urlencoded_text}&ACC={self.account_id}&API={self.api_id}&CS={checksum}"""
+        url = f"""http://www.vocalware.com/tts/gen.php?{url_parameters}"""
+
 
         # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
-        response = requests.post(url, data=data, headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
+        response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code == 200:
             with open(output_temp_filename, 'wb') as audio:
                 audio.write(response.content)
             return output_temp_file
 
-        response_data = json.loads(response.content)['error']
+        response_data = response.content
         error_message = f'Status code: {response.status_code}: {response_data}'
         raise cloudlanguagetools.errors.RequestError(error_message)
 

@@ -16,9 +16,11 @@ import cloudlanguagetools.forvo
 import cloudlanguagetools.cereproc
 import cloudlanguagetools.epitran
 import cloudlanguagetools.deepl
+import cloudlanguagetools.vocalware
 
 class ServiceManager():
-    def  __init__(self):
+    def  __init__(self, secrets_config):
+        self.secrets_config = secrets_config
         self.services = {}
         self.services[cloudlanguagetools.constants.Service.Azure.name] = cloudlanguagetools.azure.AzureService()
         self.services[cloudlanguagetools.constants.Service.Google.name] = cloudlanguagetools.google.GoogleService()
@@ -31,6 +33,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.CereProc.name] = cloudlanguagetools.cereproc.CereProcService()
         self.services[cloudlanguagetools.constants.Service.Epitran.name] = cloudlanguagetools.epitran.EpitranService()
         self.services[cloudlanguagetools.constants.Service.DeepL.name] = cloudlanguagetools.deepl.DeepLService()
+        self.services[cloudlanguagetools.constants.Service.VocalWare.name] = cloudlanguagetools.vocalware.VocalWareService()
 
     def configure(self):
         # azure
@@ -71,6 +74,13 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.CereProc.name].configure()
 
         self.services[cloudlanguagetools.constants.Service.DeepL.name].configure()
+
+        # vocalware
+        self.services[cloudlanguagetools.constants.Service.VocalWare.name].configure(
+            self.secrets_config['services']['vocalware']['secret_phrase'],
+            self.secrets_config['services']['vocalware']['account_id'],
+            self.secrets_config['services']['vocalware']['api_id']
+        )
 
         # for AWS, the boto3 library will read environment variables itself
 

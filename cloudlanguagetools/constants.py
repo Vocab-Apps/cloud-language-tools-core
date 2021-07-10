@@ -57,6 +57,7 @@ class Service(enum.Enum):
     CereProc = enum.auto()
     Epitran = enum.auto()
     DeepL = enum.auto()
+    VocalWare = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()
@@ -227,6 +228,7 @@ class AudioLanguage(enum.Enum):
     en_PH = (Language.en, "English (Philippines)")
     en_SG = (Language.en, "English (Singapore)")
     en_ZA = (Language.en, "English (South Africa)")
+    eo_EO = (Language.eo, "Esperanto")
     es_AR = (Language.es, "Spanish (Argentina)")
     es_CO = (Language.es, "Spanish (Colombia)")
     es_ES = (Language.es, "Spanish (Spain)")
@@ -241,6 +243,7 @@ class AudioLanguage(enum.Enum):
     fr_CH = (Language.fr, "French (Switzerland)")
     fr_FR = (Language.fr, "French (France)")
     ga_IE = (Language.ga, "Irish (Ireland)")
+    gl_ES = (Language.gl, "Galician (Spain)")
     gd_GB = (Language.gd, "Gaelic (UK)")
     gu_IN = (Language.gu, "Gujarati (India)")
     he_IL = (Language.he, "Hebrew (Israel)")

@@ -545,6 +545,11 @@ def load_vocalware_voices():
 
     print(vocalware_language_id_to_language_enum)
 
+    language_to_audio_language_map = {}
+    for audio_language in cloudlanguagetools.constants.AudioLanguage:
+        language_to_audio_language_map[audio_language.lang] = audio_language
+    
+
     f = open('temp_data_files/vocalware_voices.json')
     voices_content = f.read()
     voices = json.loads(voices_content)    
@@ -556,9 +561,14 @@ def load_vocalware_voices():
     pandas.set_option('display.max_rows', 999)
     voices_df = pandas.DataFrame(voice_list)
     voices_df['engine_id'] = voices_df['@ENGINE'].astype(int)
-    voices_subset_df = voices_df[~voices_df['engine_id'].isin([21, 22])]
+    # voices_subset_df = voices_df[~voices_df['engine_id'].isin([21, 22])]
+    voices_subset_df = voices_df[voices_df['engine_id'].isin([2, 3, 7])]
 
     # print(voices_subset_df)
+
+    audio_language_substr_mappings = {
+        'Cantonese': cloudlanguagetools.constants.AudioLanguage.zh_HK
+    }
 
     for index, row in voices_subset_df.iterrows():
         voice_name = row['@NAME']
@@ -567,7 +577,13 @@ def load_vocalware_voices():
         engine_id = row['engine_id']
         if language_id != 0:
             language_enum = vocalware_language_id_to_language_enum[language_id]
-            print(f'name: {voice_name} language: {language_enum} voice_id: {voice_id} engine_id: {engine_id}')
+            audio_language_enum = language_to_audio_language_map[language_enum]
+            for key, value in audio_language_substr_mappings.items():
+                if key in voice_name:
+                    audio_language_enum = value
+                    break
+            print(f'name: {voice_name} audio_language: {audio_language_enum} language_id: {language_id} voice_id: {voice_id} engine_id: {engine_id}')
+            voice_code = f"""VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'mijin', cloudlanguagetools.constants.Gender.Female, 'Mijin', 'General'),"""
 
 
 

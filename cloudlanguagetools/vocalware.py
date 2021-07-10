@@ -59,8 +59,8 @@ class VocalWareService(cloudlanguagetools.service.Service):
 
         urlencoded_text = urllib.parse.unquote_plus(text)
 
+        # checksum calculation
         # CS = md5 (EID + LID + VID + TXT + EXT + FX_TYPE + FX_LEVEL + ACC + API+ SESSION + HTTP_ERR + SECRET PHRASE)
-        # checksum_input = f"""{voice_key['engine_id']}{voice_key['language_id']}{voice_key['voice_id']}{urlencoded_text}{self.secret_phrase}"""
         checksum_input = f"""{voice_key['engine_id']}{voice_key['language_id']}{voice_key['voice_id']}{text}{self.account_id}{self.api_id}{self.secret_phrase}"""
         checksum = hashlib.md5(checksum_input.encode('utf-8')).hexdigest()
 

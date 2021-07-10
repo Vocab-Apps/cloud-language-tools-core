@@ -16,11 +16,12 @@ NAVER_VOICE_SPEED_DEFAULT = 0
 NAVER_VOICE_PITCH_DEFAULT = 0
 
 class VocalWareVoice(cloudlanguagetools.ttsvoice.TtsVoice):
-    def __init__(self, audio_language, name, gender, voice_id, engine_id):
+    def __init__(self, audio_language, name, gender, language_id, voice_id, engine_id):
         self.service = cloudlanguagetools.constants.Service.VocalWare
         self.audio_language = audio_language
         self.name = name
         self.gender = gender
+        self.language_id = language_id
         self.voice_id = voice_id
         self.engine_id = engine_id
 
@@ -112,39 +113,7 @@ class VocalWareService(cloudlanguagetools.service.Service):
     def get_tts_voice_list(self):
         # returns list of TtSVoice
         return [
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'mijin', cloudlanguagetools.constants.Gender.Female, 'Mijin', 'General'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'jinho', cloudlanguagetools.constants.Gender.Male, 'Jinho', 'General'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.en_US, 'clara', cloudlanguagetools.constants.Gender.Female, 'Clara', 'General'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.en_US, 'matt', cloudlanguagetools.constants.Gender.Male, 'Matt', 'General'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'shinji', cloudlanguagetools.constants.Gender.Male, 'Shinji', 'General'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.zh_CN, 'meimei', cloudlanguagetools.constants.Gender.Female, 'Meimei', 'General'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.zh_CN, 'liangliang', cloudlanguagetools.constants.Gender.Male, 'Liangliang', 'General'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.es_ES, 'jose', cloudlanguagetools.constants.Gender.Male, 'Jose', 'General'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.es_ES, 'carmen', cloudlanguagetools.constants.Gender.Female, 'Carmen', 'General'),
-
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nara', cloudlanguagetools.constants.Gender.Female, 'Nara', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nminsang', cloudlanguagetools.constants.Gender.Male, 'Minsang', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nhajun', cloudlanguagetools.constants.Gender.Male, 'Hajoon', 'Premium (Child)'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'ndain', cloudlanguagetools.constants.Gender.Female, 'Dain', 'Premium (Child)'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'njiyun', cloudlanguagetools.constants.Gender.Female, 'Jiyoon', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nsujin', cloudlanguagetools.constants.Gender.Female, 'Sujin', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'njinho', cloudlanguagetools.constants.Gender.Male, 'Jinho', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nsinu', cloudlanguagetools.constants.Gender.Male, 'Shinwoo', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'njihun', cloudlanguagetools.constants.Gender.Male, 'Jihoon', 'Premium'),
-
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'ntomoko', cloudlanguagetools.constants.Gender.Female, 'Tomoko', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'nnaomi', cloudlanguagetools.constants.Gender.Female, 'Naomi', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'nsayuri', cloudlanguagetools.constants.Gender.Female, 'Sayuri', 'Premium'),
-
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'ngoeun', cloudlanguagetools.constants.Gender.Female, 'Koeun', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'neunyoung', cloudlanguagetools.constants.Gender.Female, 'Eunyoung', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nsunkyung', cloudlanguagetools.constants.Gender.Female, 'Sunkyung', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nyujin', cloudlanguagetools.constants.Gender.Female, 'Yujin', 'Premium'),
-            
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'ntaejin', cloudlanguagetools.constants.Gender.Male, 'Taejin', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nyoungil', cloudlanguagetools.constants.Gender.Male, 'Youngil', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nseungpyo', cloudlanguagetools.constants.Gender.Male, 'Seungpyo', 'Premium'),
-            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nwontak', cloudlanguagetools.constants.Gender.Male, 'Wontak', 'Premium'),
+            VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.en_US, 'Dave (US)', cloudlanguagetools.constants.Gender.Male, 1, 2, 2),            
         ]
 
     def get_translation_language_list(self):

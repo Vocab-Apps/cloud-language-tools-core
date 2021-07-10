@@ -579,11 +579,13 @@ def load_vocalware_voices():
         'Indian': cloudlanguagetools.constants.AudioLanguage.en_IN,
     }
 
+    vocalware_voice_file = open('temp_data_files/vocalware_voices.py', 'w')
     for index, row in voices_subset_df.iterrows():
         voice_name = row['@NAME']
         voice_id = int(row['@ID'])
         language_id = int(row['@LANG'])
         engine_id = row['engine_id']
+
         if language_id != 0:
             language_enum = vocalware_language_id_to_language_enum[language_id]
             audio_language_enum = language_to_audio_language_map[language_enum]
@@ -591,9 +593,11 @@ def load_vocalware_voices():
                 if key in voice_name:
                     audio_language_enum = value
                     break
-            print(f'name: {voice_name} audio_language: {audio_language_enum} language_id: {language_id} voice_id: {voice_id} engine_id: {engine_id}')
-            voice_code = f"""VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'mijin', cloudlanguagetools.constants.Gender.Female, 'Mijin', 'General'),"""
-
+            # print(f'name: {voice_name} audio_language: {audio_language_enum} language_id: {language_id} voice_id: {voice_id} engine_id: {engine_id}')
+            voice_code = f"""VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.{audio_language_enum.name}, '{voice_name}', cloudlanguagetools.constants.Gender.Male, {language_id}, {voice_id}, {engine_id}),\n"""
+            vocalware_voice_file.write(voice_code)
+    
+    vocalware_voice_file.close()
 
 
 if __name__ == '__main__':

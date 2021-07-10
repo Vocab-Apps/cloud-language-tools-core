@@ -89,7 +89,7 @@ class TestTranslation(unittest.TestCase):
     def test_translate_naver(self):
         # pytest test_translation.py -k test_translate_naver
         self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.en, 'Please speak slowly.')
-        self.translate_text(Service.Naver, 'Please speak slowly', Language.en, Language.ko, '천천히 말씀해 주세요.')
+        self.translate_text(Service.Naver, 'Please speak slowly', Language.en, Language.ko, '천천히 말씀해 주세요')
 
         self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.fr, 'Parlez lentement.')
         self.translate_text(Service.Naver, 'Veuillez parler lentement.', Language.fr, Language.ko, '천천히 말씀해 주세요.')        

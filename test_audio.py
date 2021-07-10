@@ -3,6 +3,7 @@ import logging
 import random
 import re
 import sys
+import pytest
 import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
@@ -184,6 +185,7 @@ class TestAudio(unittest.TestCase):
         source_text = 'absolutely'
         self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.en_US, 'en-US')
 
+    @pytest.skip('not stable')
     def test_english_cereproc(self):
         # pytest test_audio.py -rPP -k test_english_cereproc
         source_text = 'absolutely'

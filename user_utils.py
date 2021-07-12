@@ -623,6 +623,9 @@ class UserUtils():
         usage = self.redis_connection.get_usage_slice_data(usage_slice)
         characters = usage['characters']
         thousand_char_quantity = characters / quotas.GETCHEDDAR_CHAR_MULTIPLIER
+        if thousand_char_quantity < 0.005:
+            # assume zero, the getcheddar API fails on very small quantities
+            thousand_char_quantity = 0
         updated_user_data = self.getcheddar_utils.report_customer_usage(user_data['code'], thousand_char_quantity)
         # this will update the usage on the api_key_data
         self.redis_connection.get_update_getcheddar_user_key(updated_user_data)

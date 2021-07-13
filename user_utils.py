@@ -681,6 +681,7 @@ if __name__ == '__main__':
         'extend_trial_expiration',
         'usage_data',
         'report_getcheddar_usage_all_users',
+        'report_getcheddar_user_usage',
         'show_patreon_user_data',
         'show_trial_user_data',
         'cleanup_trial_user_data',
@@ -736,5 +737,8 @@ if __name__ == '__main__':
         print(data_df)
     elif args.action == 'report_getcheddar_usage_all_users':
         user_utils.report_getcheddar_usage_all_users()
+    elif args.action == 'report_getcheddar_user_usage':
+        api_key = args.api_key
+        user_utils.report_getcheddar_user_usage(api_key)        
     elif args.action == 'download_audio_requests':
         user_utils.download_audio_requests()

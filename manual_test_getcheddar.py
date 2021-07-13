@@ -734,6 +734,49 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.getcheddar_utils.delete_test_customer(customer_code)
 
 
+    def test_endtoend_report_usage_max_out(self):
+        # create a user
+        # pytest manual_test_getcheddar.py -rPP -k test_endtoend_report_usage_max_out
+
+        customer_code = self.get_customer_code()
+        user_utils_instance = user_utils.UserUtils()
+
+        # create the user
+        # ===============
+
+        self.getcheddar_utils.create_test_customer(customer_code, customer_code, 'Test', 'Customer', 'SMALL')
+
+        redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code)
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while not self.redis_connection.r.exists(redis_getcheddar_user_key) and max_wait_cycles > 0:
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+
+        # ensure redis keys got created correctly
+        # ---------------------------------------
+
+        self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
+        api_key = self.redis_connection.r.get(redis_getcheddar_user_key)
+        print(f'api_key: {api_key}')
+        
+        # log some usage (fake)
+        # =====================
+        service = cloudlanguagetools.constants.Service.Azure
+        language_code = cloudlanguagetools.constants.Language.fr
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        characters = 249983
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        # now, report this usage to getcheddar
+        user_utils_instance.report_getcheddar_user_usage(api_key)
+
+        # log some usage which maxes out
+        characters = 17
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)        
+
+        # report to getcheddar
+        user_utils_instance.report_getcheddar_user_usage(api_key)
+
 
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate

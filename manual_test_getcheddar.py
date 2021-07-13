@@ -344,12 +344,12 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'email': customer_code,
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 250
+            'thousand_char_used': 249.999
         }
         self.assertEqual(actual_user_data, expected_user_data)
 
-        # even requesting 1 char now should throw an error
-        characters = 1
+        # even requesting 2 chars now should throw an error
+        characters = 2
         # this one should throw
         self.assertRaises(
             cloudlanguagetools.errors.OverQuotaError, 
@@ -518,7 +518,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'email': customer_code,
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 250
+            'thousand_char_used': 249.999
         }
         self.assertEqual(actual_user_data, expected_user_data)
 
@@ -529,13 +529,13 @@ class GetCheddarEndToEnd(unittest.TestCase):
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
-            'usage': '250,000 characters'
+            'usage': '249,999 characters'
         }
         self.assertEqual(actual_account_data, expected_account_data)
 
 
-        # even requesting 1 char now should throw an error
-        characters = 1
+        # even requesting 2 char now should throw an error
+        characters = 2
         # this one should throw
         self.assertRaises(
             cloudlanguagetools.errors.OverQuotaError, 
@@ -770,6 +770,17 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # now, report this usage to getcheddar
         user_utils_instance.report_getcheddar_user_usage(api_key)
 
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        expected_user_data = {
+            'type': 'getcheddar',
+            'code': customer_code,
+            'email': customer_code,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 249.983
+        }
+        self.assertEqual(actual_user_data, expected_user_data)        
+
         # log some usage which maxes out
         characters = 17
         self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)        
@@ -777,6 +788,17 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # report to getcheddar
         user_utils_instance.report_getcheddar_user_usage(api_key)
 
+        # get user data
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        expected_user_data = {
+            'type': 'getcheddar',
+            'code': customer_code,
+            'email': customer_code,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 249.999
+        }
+        self.assertEqual(actual_user_data, expected_user_data)
 
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate

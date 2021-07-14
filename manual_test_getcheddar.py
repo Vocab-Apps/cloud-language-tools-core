@@ -800,6 +800,147 @@ class GetCheddarEndToEnd(unittest.TestCase):
         }
         self.assertEqual(actual_user_data, expected_user_data)
 
+
+    def test_endtoend_multi_user_same_email(self):
+        # multiple users using the same email
+        # pytest manual_test_getcheddar.py -rPP -k test_endtoend_multi_user_same_email
+
+        customer_code_1 = self.get_customer_code()
+        customer_code_2 = self.get_customer_code()
+        same_email = customer_code_1
+
+        user_utils_instance = user_utils.UserUtils()
+
+        # create the users
+        # ================
+
+        self.getcheddar_utils.create_test_customer(customer_code_1, same_email, 'Test', 'Customer', 'SMALL')
+        self.getcheddar_utils.create_test_customer(customer_code_2, same_email, 'Test', 'Customer', 'SMALL')
+
+        redis_getcheddar_user_key_1 = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code_1)
+        redis_getcheddar_user_key_2 = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code_2)
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while (not self.redis_connection.r.exists(redis_getcheddar_user_key_1) \
+        or not self.redis_connection.r.exists(redis_getcheddar_user_key_2)) and max_wait_cycles > 0:
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+
+
+        api_key_1 = self.redis_connection.r.get(redis_getcheddar_user_key_1)
+        api_key_2 = self.redis_connection.r.get(redis_getcheddar_user_key_2)
+        
+        # log some usage for api_key_1
+        # ----------------------------
+        service = cloudlanguagetools.constants.Service.Azure
+        language_code = cloudlanguagetools.constants.Language.fr
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        characters = 249995
+        self.redis_connection.track_usage(api_key_1, service, request_type, characters, language_code=language_code)
+
+        # report usage for all users
+        # --------------------------
+        user_utils_instance.report_getcheddar_usage_all_users()
+
+
+        # get user data for both users and verify
+        # ---------------------------------------
+
+        actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        expected_user_data_1 = {
+            'type': 'getcheddar',
+            'code': customer_code_1,
+            'email': same_email,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 249.995
+        }
+        self.assertEqual(actual_user_data_1, expected_user_data_1)
+
+        actual_user_data_2 = self.redis_connection.get_getcheddar_user_data(customer_code_2)
+        expected_user_data_2 = {
+            'type': 'getcheddar',
+            'code': customer_code_2,
+            'email': same_email,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 0
+        }
+        self.assertEqual(actual_user_data_2, expected_user_data_2)
+
+        # log some usage for api_key_2
+        # ----------------------------
+        service = cloudlanguagetools.constants.Service.Azure
+        language_code = cloudlanguagetools.constants.Language.fr
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        characters = 150000
+        self.redis_connection.track_usage(api_key_2, service, request_type, characters, language_code=language_code)
+
+        # report usage again
+        user_utils_instance.report_getcheddar_usage_all_users()
+
+        # check user data again
+
+        actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        expected_user_data_1 = {
+            'type': 'getcheddar',
+            'code': customer_code_1,
+            'email': same_email,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 249.995
+        }
+        self.assertEqual(actual_user_data_1, expected_user_data_1)
+
+        actual_user_data_2 = self.redis_connection.get_getcheddar_user_data(customer_code_2)
+        expected_user_data_2 = {
+            'type': 'getcheddar',
+            'code': customer_code_2,
+            'email': same_email,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 150.000
+        }
+        self.assertEqual(actual_user_data_2, expected_user_data_2)
+
+        # log some more usage for api_key_2
+        # ----------------------------
+        service = cloudlanguagetools.constants.Service.Azure
+        language_code = cloudlanguagetools.constants.Language.fr
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        characters = 50000
+        self.redis_connection.track_usage(api_key_2, service, request_type, characters, language_code=language_code)
+
+        # report usage again
+        user_utils_instance.report_getcheddar_usage_all_users()        
+
+        actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        expected_user_data_1 = {
+            'type': 'getcheddar',
+            'code': customer_code_1,
+            'email': same_email,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 249.995
+        }
+        self.assertEqual(actual_user_data_1, expected_user_data_1)
+
+        actual_user_data_2 = self.redis_connection.get_getcheddar_user_data(customer_code_2)
+        expected_user_data_2 = {
+            'type': 'getcheddar',
+            'code': customer_code_2,
+            'email': same_email,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 200.000
+        }
+        self.assertEqual(actual_user_data_2, expected_user_data_2)
+
+        # finally, delete the users
+        # -------------------------
+
+        self.getcheddar_utils.delete_test_customer(customer_code_1)
+        self.getcheddar_utils.delete_test_customer(customer_code_2)
+
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate
     unittest.main()  

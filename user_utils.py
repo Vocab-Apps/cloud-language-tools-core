@@ -574,9 +574,9 @@ class UserUtils():
 
         # get airtable trial users table
         airtable_getcheddar_df = self.airtable_utils.get_getcheddar_users()
-        airtable_getcheddar_df = airtable_getcheddar_df[['record_id', 'email']]
+        airtable_getcheddar_df = airtable_getcheddar_df[['record_id', 'code']]
 
-        joined_df = pandas.merge(airtable_getcheddar_df, user_data_df, how='left', left_on='email', right_on='email')
+        joined_df = pandas.merge(airtable_getcheddar_df, user_data_df, how='left', left_on='code', right_on='code')
 
 
         update_df = joined_df[['record_id', 'api_key', 'plan', 'plan_usage', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions']]

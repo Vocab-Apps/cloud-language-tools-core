@@ -630,7 +630,7 @@ class UserUtils():
             max_reportable_quantity = user_data['thousand_char_quota'] - user_data['thousand_char_used'] - 0.001
             thousand_char_quantity = max(0.0, min(max_reportable_quantity, thousand_char_quantity))
 
-        logging.info(f'reporting usage for {api_key}: {thousand_char_quantity}')
+        logging.info(f'reporting usage for {api_key} ({user_data}): {thousand_char_quantity}')
         updated_user_data = self.getcheddar_utils.report_customer_usage(user_data['code'], thousand_char_quantity)
         # this will update the usage on the api_key_data
         self.redis_connection.get_update_getcheddar_user_key(updated_user_data)

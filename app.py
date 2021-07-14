@@ -333,6 +333,10 @@ class GetCheddar(flask_restful.Resource):
             return
         user_data = webhook_data.copy()
         del user_data['type']
+        if webhook_data['type'] == 'subscriptionCanceled':
+            # don't retain the "thousand_char_used" member as it's 0
+            # it will get set correctly when reporting usage
+            del user_data['thousand_char_used']
         api_key = redis_connection.get_update_getcheddar_user_key(user_data)
         if webhook_data['type'] == 'newSubscription':
             email = webhook_data['email']

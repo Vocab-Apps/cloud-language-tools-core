@@ -941,6 +941,89 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.getcheddar_utils.delete_test_customer(customer_code_1)
         self.getcheddar_utils.delete_test_customer(customer_code_2)
 
+    def test_endtoend_cancel(self):
+        # multiple users using the same email
+        # pytest manual_test_getcheddar.py -rPP -k test_endtoend_cancel
+
+        customer_code_1 = self.get_customer_code()
+
+        user_utils_instance = user_utils.UserUtils()
+
+        # create the users
+        # ================
+
+        self.getcheddar_utils.create_test_customer(customer_code_1, customer_code_1, 'Test', 'Customer', 'SMALL')
+
+        redis_getcheddar_user_key_1 = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code_1)
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while not self.redis_connection.r.exists(redis_getcheddar_user_key_1) and max_wait_cycles > 0:
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+
+
+        api_key_1 = self.redis_connection.r.get(redis_getcheddar_user_key_1)
+        
+        # log some usage for api_key_1
+        # ----------------------------
+        service = cloudlanguagetools.constants.Service.Azure
+        language_code = cloudlanguagetools.constants.Language.fr
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        characters = 249995
+        self.redis_connection.track_usage(api_key_1, service, request_type, characters, language_code=language_code)
+
+        # report usage for all users
+        # --------------------------
+        user_utils_instance.report_getcheddar_usage_all_users()
+
+
+        # get user data and verify
+        # ---------------------------------------
+
+        actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        expected_user_data_1 = {
+            'type': 'getcheddar',
+            'code': customer_code_1,
+            'email': customer_code_1,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 249.995
+        }
+        self.assertEqual(actual_user_data_1, expected_user_data_1)
+
+        # cancel
+        # ------
+        self.getcheddar_utils.cancel_test_customer(customer_code_1)
+        time.sleep(1)
+
+        actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        expected_user_data_1 = {
+            'type': 'getcheddar',
+            'code': customer_code_1,
+            'email': customer_code_1,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 249.995
+        }
+        self.assertEqual(actual_user_data_1, expected_user_data_1)
+
+        # get customer data from getcheddar
+        actual_getcheddar_customer_data = self.getcheddar_utils.get_customer(customer_code_1)
+        expected_getcheddar_customer_data = {
+            'code': customer_code_1,
+            'email': customer_code_1,
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 249.995            
+        }
+        self.assertEqual(actual_getcheddar_customer_data, expected_getcheddar_customer_data)
+
+
+
+        # finally, delete the user
+        # -------------------------
+
+        self.getcheddar_utils.delete_test_customer(customer_code_1)
+
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate
     unittest.main()  

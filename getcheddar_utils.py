@@ -21,6 +21,7 @@ class GetCheddarUtils():
         return self.api_key
 
     def decode_webhook(self, data):
+        # self.print_json_webhook(data)
         activity_type = data['activityType']
         if activity_type == 'customerDeleted':
             return {
@@ -62,6 +63,13 @@ class GetCheddarUtils():
         return self.decode_customer_element(customer_element)
 
 
+    def print_json_webhook(self, data):
+        webhook_formatted = pprint.pformat(data)
+        f = open('getcheddar_webhook_data.py', 'w')
+        f.write(webhook_formatted)
+        f.close()        
+        print(webhook_formatted)
+
     def print_xml_response(self, content):
         dom = xml.dom.minidom.parseString(content)
         pretty_xml_as_string = dom.toprettyxml(newl='')
@@ -92,7 +100,9 @@ class GetCheddarUtils():
         if response.status_code == 200:
             # success
             # self.print_xml_response(response.content)
-            print(self.decode_customer_xml(response.content))
+            customer_data = self.decode_customer_xml(response.content)
+            print(customer_data)
+            return customer_data
         else:
             print(response.content)
 
@@ -169,7 +179,7 @@ class GetCheddarUtils():
         else:
             print(response.content)            
 
-    def cancel_test_customer(self, code, plan):
+    def cancel_test_customer(self, code):
         self.ensure_dev()
 
         customer_code_encoded = urllib.parse.quote(code)

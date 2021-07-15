@@ -616,26 +616,29 @@ class UserUtils():
             self.report_getcheddar_user_usage(api_key)
 
     def report_getcheddar_user_usage(self, api_key):
-        logging.info(f'reporting getcheddar usage for api key {api_key}')
-        user_data = self.redis_connection.get_api_key_data(api_key)
-        # retrieve the accumulated usage
-        usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
-        usage = self.redis_connection.get_usage_slice_data(usage_slice)
-        characters = usage['characters']
-        thousand_char_quantity = characters / quotas.GETCHEDDAR_CHAR_MULTIPLIER
-        
-        # are we very close to the max ?
-        if user_data['thousand_char_overage_allowed'] != True:
-            user_quota = user_data['thousand_char_quota']
-            max_reportable_quantity = user_data['thousand_char_quota'] - user_data['thousand_char_used'] - 0.001
-            thousand_char_quantity = max(0.0, min(max_reportable_quantity, thousand_char_quantity))
+        try:
+            logging.info(f'reporting getcheddar usage for api key {api_key}')
+            user_data = self.redis_connection.get_api_key_data(api_key)
+            # retrieve the accumulated usage
+            usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
+            usage = self.redis_connection.get_usage_slice_data(usage_slice)
+            characters = usage['characters']
+            thousand_char_quantity = characters / quotas.GETCHEDDAR_CHAR_MULTIPLIER
+            
+            # are we very close to the max ?
+            if user_data['thousand_char_overage_allowed'] != True:
+                user_quota = user_data['thousand_char_quota']
+                max_reportable_quantity = user_data['thousand_char_quota'] - user_data['thousand_char_used'] - 0.001
+                thousand_char_quantity = max(0.0, min(max_reportable_quantity, thousand_char_quantity))
 
-        logging.info(f'reporting usage for {api_key} ({user_data}): {thousand_char_quantity}')
-        updated_user_data = self.getcheddar_utils.report_customer_usage(user_data['code'], thousand_char_quantity)
-        # this will update the usage on the api_key_data
-        self.redis_connection.get_update_getcheddar_user_key(updated_user_data)
-        # reset the usage slice
-        self.redis_connection.reset_getcheddar_usage_slice(api_key)
+            logging.info(f'reporting usage for {api_key} ({user_data}): {thousand_char_quantity}')
+            updated_user_data = self.getcheddar_utils.report_customer_usage(user_data['code'], thousand_char_quantity)
+            # this will update the usage on the api_key_data
+            self.redis_connection.get_update_getcheddar_user_key(updated_user_data)
+            # reset the usage slice
+            self.redis_connection.reset_getcheddar_usage_slice(api_key)
+        except:
+            logging.exception(f'could not report getcheddar usage for {api_key}')
         
 
     def download_audio_requests(self):

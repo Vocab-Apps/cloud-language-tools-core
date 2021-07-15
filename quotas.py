@@ -36,7 +36,7 @@ COST_TABLE = [
     {
         'service': 'Naver',
         'request_type': 'audio',
-        'character_cost': (1.0/1000) * 0.090
+        'character_cost': ((1.0/1000) * 0.090) / NAVER_AUDIO_CHAR_MULTIPLIER
     },
     # translation
     {

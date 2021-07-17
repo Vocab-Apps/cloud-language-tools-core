@@ -170,6 +170,11 @@ class UserUtils():
             language_name_list = [cloudlanguagetools.constants.Language[x].lang_name for x in language_list]            
             return language_name_list
 
+        def process_languages_enum(hash_data):
+            language_list = hash_data.keys()
+            return language_list
+
+
         def process_tag(hash_data):
             return list(hash_data.keys())
 
@@ -200,6 +205,9 @@ class UserUtils():
                         'api_key': api_key
                     }
                 processed_records_dict[api_key][field_name] = processing_fn(record['data'])
+                if key == redisdb.KEY_TYPE_USER_AUDIO_LANGUAGE:
+                    # add the enum as a string
+                    processed_records_dict[api_key]['audio_language_enum'] = process_languages_enum(record['data'])
 
         record_list = list(processed_records_dict.values())
         return pandas.DataFrame(record_list)
@@ -298,7 +306,9 @@ class UserUtils():
         'trial_api_key_ready',
         'trial_api_key_requested',
         'trial_user',
-        'getcheddar_user']
+        'getcheddar_user',
+        'heavy_users',
+        'disposable_email']
 
         tag_id_map = {tag_name:tag_id for tag_name, tag_id in self.convertkit_client.full_tag_id_map.items() if tag_name not in tag_ignore_list}
         present_tags = []
@@ -483,6 +493,7 @@ class UserUtils():
         # make the logic a bit easier by removing nans
         data_df['tags'] = data_df['tags'].fillna("").apply(list)
         data_df['clients'] = data_df['clients'].fillna("").apply(list)
+        data_df['audio_languages'] = data_df['audio_language_enum'].fillna("").apply(list)
 
         for index, row in data_df.iterrows():
             email = row['email']
@@ -496,6 +507,15 @@ class UserUtils():
                         logging.info(f'tagging {email} with {tag_name}')
                         tag_id = self.convertkit_client.full_tag_id_map[tag_name]
                         self.convertkit_client.tag_user(email, tag_id)
+
+            audio_languages = row['audio_languages']
+            for audio_language in audio_languages:
+                tag_name = f'language_{audio_language}'
+                if tag_name in self.convertkit_client.full_tag_id_map:
+                    if tag_name not in tags:
+                        logging.info(f'tagging {email} with {tag_name}')
+                        tag_id = self.convertkit_client.full_tag_id_map[tag_name]
+                        self.convertkit_client.tag_user(email, tag_id)                
 
     def perform_airtable_trial_tag_requests(self):
         airtable_records_df = self.airtable_utils.get_trial_tag_requests()
@@ -721,6 +741,7 @@ if __name__ == '__main__':
     elif args.action == 'show_trial_user_data':
         user_data_df = user_utils.build_user_data_trial()
         print(user_data_df)
+        print(user_data_df.dtypes)
     elif args.action == 'cleanup_trial_user_data':
         user_utils.cleanup_user_data_trial()
     elif args.action == 'show_getcheddar_user_data':

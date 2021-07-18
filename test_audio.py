@@ -239,3 +239,17 @@ class TestAudio(unittest.TestCase):
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
         audio_text = self.speech_to_text(audio_temp_file, 'fr-FR')
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
+
+    def test_fptai_options(self):
+        service = 'FptAi'
+        source_text = 'Tôi bị mất cái ví.'
+
+        voice_key = {
+            "voice_id": "leminh"
+        }
+
+        options = {'speed': -0.5}
+
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+        audio_text = self.speech_to_text(audio_temp_file, 'vi-VN')
+        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))

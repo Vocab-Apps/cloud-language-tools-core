@@ -12,6 +12,8 @@ import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
 
 
+FPTAI_VOICE_SPEED_DEFAULT = 0
+
 
 class FptAiVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, audio_language, voice_id, name, gender, region):
@@ -32,6 +34,12 @@ class FptAiVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
     def get_options(self):
         return {
+            'speed' : {
+                'type': 'number',
+                'min': -3,
+                'max': 3,
+                'default': FPTAI_VOICE_SPEED_DEFAULT
+            },            
         }
 
 
@@ -59,6 +67,9 @@ class FptAiService(cloudlanguagetools.service.Service):
             'format': 'mp3',
             #'speed': str(options['speed'])
         }
+        speed = options.get('speed', FPTAI_VOICE_SPEED_DEFAULT)
+        if speed != FPTAI_VOICE_SPEED_DEFAULT:
+            headers['speed'] = str(speed)
         response = requests.post(api_url, headers=headers, data=body.encode('utf-8'))
 
         if response.status_code == 200:

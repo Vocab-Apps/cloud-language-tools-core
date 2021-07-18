@@ -58,6 +58,7 @@ class Service(enum.Enum):
     Epitran = enum.auto()
     DeepL = enum.auto()
     VocalWare = enum.auto()
+    FptAi = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()

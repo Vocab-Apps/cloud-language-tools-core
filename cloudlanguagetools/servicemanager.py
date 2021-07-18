@@ -17,6 +17,7 @@ import cloudlanguagetools.cereproc
 import cloudlanguagetools.epitran
 import cloudlanguagetools.deepl
 import cloudlanguagetools.vocalware
+import cloudlanguagetools.fptai
 
 class ServiceManager():
     def  __init__(self, secrets_config):
@@ -34,6 +35,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.Epitran.name] = cloudlanguagetools.epitran.EpitranService()
         self.services[cloudlanguagetools.constants.Service.DeepL.name] = cloudlanguagetools.deepl.DeepLService()
         self.services[cloudlanguagetools.constants.Service.VocalWare.name] = cloudlanguagetools.vocalware.VocalWareService()
+        self.services[cloudlanguagetools.constants.Service.FptAi.name] = cloudlanguagetools.fptai.FptAiService()
 
     def configure(self):
         # azure
@@ -80,6 +82,11 @@ class ServiceManager():
             self.secrets_config['services']['vocalware']['secret_phrase'],
             self.secrets_config['services']['vocalware']['account_id'],
             self.secrets_config['services']['vocalware']['api_id']
+        )
+
+        # fpt.ai
+        self.services[cloudlanguagetools.constants.Service.FptAi.name].configure(
+            self.secrets_config['services']['fptai']['api_key']
         )
 
         # for AWS, the boto3 library will read environment variables itself

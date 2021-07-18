@@ -142,6 +142,11 @@ class TestAudio(unittest.TestCase):
         source_text = 'おはようございます'
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ja_JP, 'ja-JP')
 
+    def test_vietnamese_fptai(self):
+        # pytest test_audio.py -k test_vietnamese_fptai
+        source_text = 'Tôi bị mất cái ví.'
+        self.verify_service_audio_language(source_text, Service.FptAi, AudioLanguage.vi_VN, 'vi-VN')
+
     def test_english_naver(self):
         # pytest test_audio.py -k test_english_naver
         source_text = 'this is the first sentence'

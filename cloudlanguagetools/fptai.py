@@ -74,7 +74,7 @@ class FptAiService(cloudlanguagetools.service.Service):
                 time.sleep(wait_time)
                 logging.debug(f'checking whether audio is available on {async_url}')
                 response = requests.get(async_url, allow_redirects=True)
-                if response.status_code == 200:
+                if response.status_code == 200 and len(response.content) > 0:
                     with open(output_temp_filename, 'wb') as audio:
                         audio.write(response.content)                    
                     audio_available = True

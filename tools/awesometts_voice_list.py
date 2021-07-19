@@ -2,12 +2,13 @@ import sys
 import os
 import inspect
 import pprint
-import secrets
+
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir) 
 
+import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 

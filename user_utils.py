@@ -444,6 +444,8 @@ class UserUtils():
         logging.info(f'removing airtable records for trial users')
         # print(remove_airtable_records_df)
         record_ids = list(remove_airtable_records_df['record_id'])
+        # remove duplicates
+        record_ids = list(set(record_ids))
         self.airtable_utils.delete_trial_users(record_ids)
 
     def get_getcheddar_all_customers(self):

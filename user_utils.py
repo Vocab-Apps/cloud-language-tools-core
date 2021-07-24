@@ -393,6 +393,8 @@ class UserUtils():
         return combined_df
 
     def cleanup_user_data_trial(self):
+        logging.info('cleaning up trial users')
+
         # api keys
         api_key_list = self.get_full_api_key_list()
         flat_api_key_list = [x['api_key'] for x in api_key_list]
@@ -572,6 +574,7 @@ class UserUtils():
 
     def update_airtable_trial(self):
         logging.info('updating airtable for trial users')
+        self.cleanup_user_data_trial()
 
         self.perform_airtable_trial_tag_requests()
 

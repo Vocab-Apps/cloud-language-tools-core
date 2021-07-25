@@ -62,6 +62,15 @@ class TestTranslation(unittest.TestCase):
         source_text = 'Je ne suis pas intéressé.'
         self.assertRaises(cloudlanguagetools.errors.RequestError, self.manager.get_translation, source_text, cloudlanguagetools.constants.Service.Azure.name, 'fr', 'zh_cn')
 
+    def sanitize_text(self, recognized_text):
+        result_text = recognized_text.replace('.', '').\
+            replace('。', '').\
+            replace('?', '').\
+            replace('？', '').\
+            replace('您', '你').\
+            replace(':', '').lower()
+        return result_text
+
     def translate_text(self, service, source_text, source_language, target_language, expected_result):
         source_language_list = [x for x in self.translation_language_list if x['language_code'] == source_language.name and x['service'] == service.name]
         self.assertEqual(1, len(source_language_list))
@@ -73,6 +82,10 @@ class TestTranslation(unittest.TestCase):
 
         # now, translate
         translated_text = self.manager.get_translation(source_text, service.name, from_language_key, to_language_key)
+
+        expected_result = self.sanitize_text(expected_result)
+        translated_text = self.sanitize_text(translated_text)
+
         self.assertEqual(expected_result, translated_text)
 
     def test_translate_chinese(self):
@@ -92,7 +105,7 @@ class TestTranslation(unittest.TestCase):
         self.translate_text(Service.Naver, 'Please speak slowly', Language.en, Language.ko, '천천히 말씀해 주세요')
 
         self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.fr, 'Parlez lentement.')
-        self.translate_text(Service.Naver, 'Veuillez parler lentement.', Language.fr, Language.ko, '천천히 말씀해 주세요.')        
+        self.translate_text(Service.Naver, 'Veuillez parler lentement.', Language.fr, Language.ko, '천천히 말씀해 주세요')        
 
     def test_translate_naver_unsupported_pair(self):
         # pytest test_translation.py -k test_translate_naver_unsupported_pair
@@ -117,7 +130,7 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue('Google' in result)
         self.assertTrue('Watson' in result)
         self.assertTrue(result['Azure'] == 'Le coût est faible' or result['Azure'] == 'Le coût est très faible')
-        self.assertEqual(result['Google'], 'À bas prix')
+        self.assertEqual(result['Google'], 'Faible coût')
         self.assertEqual(result['Watson'], 'Le coût est très bas.')
 
     def test_transliteration(self):

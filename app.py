@@ -16,6 +16,7 @@ import patreon_utils
 import getcheddar_utils as getcheddar_utils_module
 import convertkit
 import secrets
+import quotas
 import pprint
 import hashlib
 import hmac
@@ -294,7 +295,7 @@ class ConvertKitRequestTrialKey(flask_restful.Resource):
         # create api key for this subscriber
         api_key = redis_connection.get_trial_user_key(email_address)
 
-        convertkit_client.tag_user_api_ready(email_address, api_key)
+        convertkit_client.tag_user_api_ready(email_address, api_key, quotas.TRIAL_USER_CHARACTER_LIMIT)
 
         logging.info(f'trial key created for {email_address}')
 

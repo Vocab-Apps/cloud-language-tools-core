@@ -58,6 +58,9 @@ class RedisDb():
         key_expiration_timestamp = int(expiration_date.timestamp())
         return key_expiration_timestamp
 
+    def get_api_key_expiration_timestamp_long(self):
+        return self.get_specific_api_key_expiration_timestamp(180)
+
     def add_test_api_key(self, api_key):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
@@ -83,7 +86,7 @@ class RedisDb():
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
             'email': email,
-            'expiration': self.get_api_key_expiration_timestamp(),
+            'expiration': self.get_api_key_expiration_timestamp_long(),
             'type': cloudlanguagetools.constants.ApiKeyType.trial.name,
             'character_limit': character_limit
         }

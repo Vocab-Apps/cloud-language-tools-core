@@ -536,7 +536,13 @@ class UserUtils():
                 # increase API key character limit
                 self.redis_connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
                 # tag user on convertkit
-                self.convertkit_client.tag_user_trial_extended(email)
+                self.convertkit_client.tag_user_trial_extended(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
+            elif tag_request == 'trial_vip':
+                logging.info(f'enabling trial VIP for {email}')
+                # increase API key character limit
+                self.redis_connection.increase_trial_key_limit(email, quotas.TRIAL_VIP_USER_CHARACTER_LIMIT)
+                # tag user on convertkit
+                self.convertkit_client.tag_user_trial_vip(email, quotas.TRIAL_VIP_USER_CHARACTER_LIMIT)
             else:
                 tag_id = self.convertkit_client.tag_name_map[tag_request]                
                 logging.info(f'tagging {email} with {tag_request} / {tag_id}')

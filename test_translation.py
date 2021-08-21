@@ -90,9 +90,9 @@ class TestTranslation(unittest.TestCase):
 
     def test_translate_chinese(self):
         # pytest test_translation.py -k test_translate_chinese
-        self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, 'The person who sent the takeaway')
+        self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, 'the person who delivers the takeaway')
         self.translate_text(Service.Google, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
-        self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est très faible')
+        self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
         self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, "Changer la carte d'embarquement")
         self.translate_text(Service.Amazon, '换登机牌', Language.zh_cn, Language.fr, "Changement de carte d'embarquement")
 
@@ -130,7 +130,7 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue('Google' in result)
         self.assertTrue('Watson' in result)
         self.assertTrue(result['Azure'] == 'Le coût est faible' or result['Azure'] == 'Le coût est très faible')
-        self.assertEqual(result['Google'], 'Faible coût')
+        self.assertIn(result['Google'], ['Faible coût', 'À bas prix'])
         self.assertEqual(result['Watson'], 'Le coût est très bas.')
 
     def test_transliteration(self):

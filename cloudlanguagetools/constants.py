@@ -132,6 +132,7 @@ class Language(enum.Enum):
     mi = ("Maori")
     mr = ("Marathi")
     mn = ("Mongolian")
+    mn_cyrl = ("Mongolian (Cyrillic)")
     cnr = ("Montenegrin")
     my = ("Myanmar (Burmese)")
     ne = ("Nepali")

@@ -266,6 +266,7 @@ class AudioLanguage(enum.Enum):
     nb_NO = (Language.nb, "Norwegian")
     nl_BE = (Language.nl, "Dutch (Belgium)")
     nl_NL = (Language.nl, "Dutch")
+    pa_IN = (Language.pa, "Punjabi (India)")
     pl_PL = (Language.pl, "Polish")
     pt_BR = (Language.pt_br, "Portuguese (Brazil)")
     pt_PT = (Language.pt_pt, "Portuguese (Portugal)")

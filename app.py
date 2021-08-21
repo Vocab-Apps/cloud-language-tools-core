@@ -20,11 +20,23 @@ import quotas
 import pprint
 import hashlib
 import hmac
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 #logging.basicConfig()
 logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                     datefmt='%Y%m%d-%H:%M:%S',
                     level=logging.INFO)
+
+if secrets.config['sentry']['enable']:
+    dsn = secrets.config['sentry']['dsn']
+    sentry_sdk.init(
+        dsn=dsn,
+        integrations=[FlaskIntegration()],
+        traces_sample_rate=1.0
+    )
+
+
 
 app = Flask(__name__)
 api = flask_restful.Api(app)
@@ -140,6 +152,7 @@ class Translate(flask_restful.Resource):
             data = request.json
             return {'translated_text': manager.get_translation(data['text'], data['service'], data['from_language_key'], data['to_language_key'])}
         except cloudlanguagetools.errors.RequestError as err:
+            sentry_sdk.capture_exception(err)
             return {'error': str(err)}, 400
 
 class TranslateAll(flask_restful.Resource):
@@ -149,6 +162,7 @@ class TranslateAll(flask_restful.Resource):
             data = request.json
             return manager.get_all_translations(data['text'], data['from_language'], data['to_language'])
         except cloudlanguagetools.errors.RequestError as err:
+            sentry_sdk.capture_exception(err)
             return {'error': str(err)}, 400
 
 class Transliterate(flask_restful.Resource):
@@ -158,6 +172,7 @@ class Transliterate(flask_restful.Resource):
             data = request.json
             return {'transliterated_text': manager.get_transliteration(data['text'], data['service'], data['transliteration_key'])}
         except cloudlanguagetools.errors.RequestError as err:
+            sentry_sdk.capture_exception(err)
             return {'error': str(err)}, 400    
 
 class Detect(flask_restful.Resource):
@@ -178,6 +193,7 @@ class Audio(flask_restful.Resource):
         except cloudlanguagetools.errors.NotFoundError as err:
             return {'error': str(err)}, 404
         except cloudlanguagetools.errors.RequestError as err:
+            sentry_sdk.capture_exception(err)
             return {'error': str(err)}, 400
 
 
@@ -222,6 +238,7 @@ class AudioV2(flask_restful.Resource):
         except cloudlanguagetools.errors.NotFoundError as err:
             return {'error': str(err)}, 404
         except cloudlanguagetools.errors.RequestError as err:
+            sentry_sdk.capture_exception(err)
             return {'error': str(err)}, 400            
 
 class YomichanAudio(flask_restful.Resource):
@@ -239,6 +256,7 @@ class YomichanAudio(flask_restful.Resource):
             audio_temp_file = manager.get_tts_audio(source_text, service, voice_key, options)
             return send_file(audio_temp_file.name, mimetype='audio/mpeg')
         except cloudlanguagetools.errors.RequestError as err:
+            sentry_sdk.capture_exception(err)
             return {'error': str(err)}, 400        
 
 

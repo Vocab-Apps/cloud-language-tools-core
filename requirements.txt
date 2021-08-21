@@ -14,3 +14,4 @@ boto3
 schedule
 pandas
 epitran
+sentry-sdk[flask]

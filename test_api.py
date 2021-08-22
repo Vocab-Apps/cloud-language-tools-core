@@ -375,6 +375,25 @@ class ApiTests(unittest.TestCase):
 
         self.assertTrue(expected_filetype in filetype)
 
+    def test_audio_v2_empty(self):
+        # pytest test_api.py -k test_audio_v2_empty
+        service = 'Azure'
+        french_voices = [x for x in self.voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        first_voice = french_voices[0]
+        response = self.client.post('/audio_v2', json={
+            'text': '',
+            'service': service,
+            'deck_name': 'french_deck_1',
+            'request_mode': 'batch',
+            'language_code': first_voice['language_code'],
+            'voice_key': first_voice['voice_key'],
+            'options': {}
+        }, headers={'api_key': self.api_key_v2, 'client': 'test', 'client_version': self.client_version})
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.data)
+        self.assertEqual(response_data['error'], 'empty text')
+
     def test_audio_v2(self):
         # pytest test_api.py -k test_audio_v2
 

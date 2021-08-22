@@ -211,6 +211,9 @@ class AudioV2(flask_restful.Resource):
             voice_key = data['voice_key']
             options = data['options']
 
+            if len(text) == 0:
+                return {'error': 'empty text'}, 400
+
             # convert to enum
             language_code = cloudlanguagetools.constants.Language[language]
             service = cloudlanguagetools.constants.Service[service_str]

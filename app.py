@@ -33,7 +33,7 @@ if secrets.config['sentry']['enable']:
     sentry_sdk.init(
         dsn=dsn,
         integrations=[FlaskIntegration()],
-        traces_sample_rate=1.0
+        traces_sample_rate=0.2
     )
 
 
@@ -150,6 +150,8 @@ class Translate(flask_restful.Resource):
     def post(self):
         try:
             data = request.json
+            # add sentry service tag
+            sentry_sdk.set_tag("clt.service", data['service'])
             return {'translated_text': manager.get_translation(data['text'], data['service'], data['from_language_key'], data['to_language_key'])}
         except cloudlanguagetools.errors.RequestError as err:
             sentry_sdk.capture_exception(err)
@@ -170,6 +172,8 @@ class Transliterate(flask_restful.Resource):
     def post(self):
         try:
             data = request.json
+            # add sentry service tag
+            sentry_sdk.set_tag("clt.service", data['service'])
             return {'transliterated_text': manager.get_transliteration(data['text'], data['service'], data['transliteration_key'])}
         except cloudlanguagetools.errors.RequestError as err:
             sentry_sdk.capture_exception(err)
@@ -218,6 +222,9 @@ class AudioV2(flask_restful.Resource):
             language_code = cloudlanguagetools.constants.Language[language]
             service = cloudlanguagetools.constants.Service[service_str]
             request_mode = cloudlanguagetools.constants.RequestMode[request_mode_str]
+
+            # add sentry service tag
+            sentry_sdk.set_tag("clt.service", service.name)
 
             audio_temp_file = manager.get_tts_audio(text, service.name, voice_key, options)
 

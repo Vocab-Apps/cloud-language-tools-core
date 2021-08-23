@@ -335,7 +335,7 @@ class PostDeployTests(unittest.TestCase):
             'options': {}
         }, headers={'api_key': self.api_key, 'client': 'test', 'client_version': self.client_version})
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, msg=f'Verifying status code for {service}')
 
         # retrieve file
         output_temp_file = tempfile.NamedTemporaryFile()

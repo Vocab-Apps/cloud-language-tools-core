@@ -32,6 +32,7 @@ if secrets.config['sentry']['enable']:
     dsn = secrets.config['sentry']['dsn']
     sentry_sdk.init(
         dsn=dsn,
+        environment=secrets.config['sentry']['environment'],
         integrations=[FlaskIntegration()],
         traces_sample_rate=0.2
     )

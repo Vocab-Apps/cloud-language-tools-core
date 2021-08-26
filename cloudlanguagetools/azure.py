@@ -344,7 +344,7 @@ class AzureService(cloudlanguagetools.service.Service):
         params = f'&to={to_language_key}&from={from_language_key}'
         url = base_url + params
 
-        print(url)
+        logging.info(f'querying url for dictionary lookup: {url}')
 
         # You can pass more than one object in body.
         body = [{
@@ -353,7 +353,12 @@ class AzureService(cloudlanguagetools.service.Service):
         request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
         response = request.json()
 
-        print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
+        translation_entries = response[0]['translations']
+        translations = [entry['displayTarget'] for entry in translation_entries]
+
+        return translations
+        
+        # print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
 
         # return response[0]['translations'][0]['text']
 

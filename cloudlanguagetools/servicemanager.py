@@ -18,6 +18,7 @@ import cloudlanguagetools.epitran
 import cloudlanguagetools.deepl
 import cloudlanguagetools.vocalware
 import cloudlanguagetools.fptai
+import cloudlanguagetools.pythainlp
 
 class ServiceManager():
     def  __init__(self, secrets_config):
@@ -36,6 +37,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.DeepL.name] = cloudlanguagetools.deepl.DeepLService()
         self.services[cloudlanguagetools.constants.Service.VocalWare.name] = cloudlanguagetools.vocalware.VocalWareService()
         self.services[cloudlanguagetools.constants.Service.FptAi.name] = cloudlanguagetools.fptai.FptAiService()
+        self.services[cloudlanguagetools.constants.Service.PyThaiNLP.name] = cloudlanguagetools.pythainlp.PyThaiNLPService()
 
     def configure(self):
         # azure

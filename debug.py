@@ -620,6 +620,28 @@ def load_vocalware_voices():
     
     vocalware_voice_file.close()
 
+def thai_tokenization():
+    manager = get_manager()
+    pythainlp_service = manager.services[cloudlanguagetools.constants.Service.PyThaiNLP.name]
+    azure_service = manager.services[cloudlanguagetools.constants.Service.Azure.name]
+
+    text = 'ผมจะไปประเทศไทยพรุ่งนี้ครับ'
+    
+    tokenized_result = pythainlp_service.tokenize(text, {})
+
+    breakdown_entries = []
+    for token in tokenized_result:
+        romanization = pythainlp_service.get_transliteration(token, {})
+        dictionary_lookup_result = azure_service.dictionary_lookup(token, 'th', 'en')
+        
+        breakdown_entries.append({
+            'token': token,
+            'transliteration':  romanization,
+            'dictionary_lookups': dictionary_lookup_result
+        })
+
+    pprint.pprint(breakdown_entries)
+
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -651,7 +673,7 @@ if __name__ == '__main__':
     # dictionary_examples_azure()
     # end_to_end_test()
     # transliterate_azure()
-    get_transliteration_language_list()
+    # get_transliteration_language_list()
     # print_all_languages()
     # print_all_audio_languages()
     # cereproc_authentication()
@@ -660,3 +682,4 @@ if __name__ == '__main__':
     # create_epitran_mappings()
     # test_debounce()
     # load_vocalware_voices()
+    thai_tokenization()

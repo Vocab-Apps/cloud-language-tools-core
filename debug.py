@@ -625,19 +625,35 @@ def thai_tokenization():
     pythainlp_service = manager.services[cloudlanguagetools.constants.Service.PyThaiNLP.name]
     azure_service = manager.services[cloudlanguagetools.constants.Service.Azure.name]
 
-    text = 'ผมจะไปประเทศไทยพรุ่งนี้ครับ'
+    text = 'ขอโทษครับ ช่วยพูดช้าๆได้ไหมครับ'
     
     tokenized_result = pythainlp_service.tokenize(text, {})
+    tokenized_result = [token for token in tokenized_result if len(token.strip()) > 0]
+
+    if True:
+        tokenized_result = [
+            'ขอโทษ',
+            'ครับ',
+            'ช่วย',
+            'พูด',
+            'ช้าๆ',
+            'ได้ไหม',
+            'ครับ'
+        ]
+
+    print(tokenized_result)
 
     breakdown_entries = []
     for token in tokenized_result:
         romanization = pythainlp_service.get_transliteration(token, {})
         dictionary_lookup_result = azure_service.dictionary_lookup(token, 'th', 'en')
+        translation = azure_service.get_translation(token, 'th', 'en')
         
         breakdown_entries.append({
             'token': token,
             'transliteration':  romanization,
-            'dictionary_lookups': dictionary_lookup_result
+            'dictionary_lookups': dictionary_lookup_result,
+            'translation': translation
         })
 
     pprint.pprint(breakdown_entries)

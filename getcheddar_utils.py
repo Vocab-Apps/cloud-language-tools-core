@@ -237,7 +237,7 @@ if __name__ == '__main__':
                         level=logging.INFO)
 
     cheddar_utils = GetCheddarUtils()
-    customer_code = 'lazivnm@gmail.com'
+    customer_code = 'languagetools+customer5@mailc.net'
     # cheddar_utils.report_customer_usage(customer_code)
     cheddar_utils.get_customer(customer_code)
     # cheddar_utils.get_all_customers()

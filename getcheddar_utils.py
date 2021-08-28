@@ -29,10 +29,14 @@ class GetCheddarUtils():
                 'code': data['customer']['code']
             }
         overage_allowed = data['subscription']['plan']['items'][0]['overageAmount'] != '0.00' and activity_type != 'subscriptionCanceled'
+        status = 'active'
+        if activity_type == 'subscriptionCanceled':
+            status = 'canceled'
         return {
             'type': activity_type,
             'code': data['customer']['code'],
             'email': data['customer']['email'],
+            'status': status,
             'thousand_char_quota': data['subscription']['plan']['items'][0]['quantityIncluded'],
             'thousand_char_overage_allowed': int(overage_allowed == True),
             'thousand_char_used': data['subscription']['invoice']['items'][0]['quantity']
@@ -46,12 +50,16 @@ class GetCheddarUtils():
         quantity_included = int(root.find('./subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/quantityIncluded').text)
         overage_amount = float(root.find('./subscriptions/subscription[1]/plans/plan[1]/items/item[@code="thousand_chars"]/overageAmount').text)
         canceled_date = root.find('./subscriptions/subscription[1]/canceledDatetime').text
+        status = 'active'
+        if canceled_date != None:
+            status = 'canceled'
         overage_allowed = overage_amount > 0 and canceled_date == None
         current_usage = float(root.find('./subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text)
 
         return {
             'code': customer_code,
             'email': customer_email,
+            'status': status,
             'thousand_char_quota': quantity_included,
             'thousand_char_overage_allowed': int(overage_allowed == True),
             'thousand_char_used': current_usage,
@@ -99,7 +107,7 @@ class GetCheddarUtils():
         response = requests.get(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
             # success
-            # self.print_xml_response(response.content)
+            self.print_xml_response(response.content)
             customer_data = self.decode_customer_xml(response.content)
             print(customer_data)
             return customer_data
@@ -229,7 +237,7 @@ if __name__ == '__main__':
                         level=logging.INFO)
 
     cheddar_utils = GetCheddarUtils()
-    customer_code = 'languagetools+customer5@mailc.net'
+    customer_code = 'lazivnm@gmail.com'
     # cheddar_utils.report_customer_usage(customer_code)
-    # cheddar_utils.get_customer(customer_code)
-    cheddar_utils.get_all_customers()
+    cheddar_utils.get_customer(customer_code)
+    # cheddar_utils.get_all_customers()

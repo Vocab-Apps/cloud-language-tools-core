@@ -154,6 +154,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'type': 'newSubscription',
             'code': 'no1@spam.com',
             'email': 'languagetools+customer1@mailc.net',
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
@@ -297,6 +298,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'type': 'subscriptionChanged',
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer2@mailc.net',
+            'status': 'active',
             'thousand_char_quota': 500,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
@@ -485,6 +487,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'type': 'subscriptionChanged',
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
+            'status': 'active',
             'thousand_char_quota': 500,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 123.45
@@ -673,6 +676,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'type': 'subscriptionChanged',
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
+            'status': 'active',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 1,
             'thousand_char_used': 0.0
@@ -842,6 +846,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'type': 'subscriptionChanged',
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 42.789
@@ -985,6 +990,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'type': 'subscriptionCanceled',
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
+            'status': 'canceled',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0.0
@@ -1132,6 +1138,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'type': 'subscriptionCanceled',
             'code': 'languagetools+development.language_tools.customer-1626266982@mailc.net',
             'email': 'languagetools+development.language_tools.customer-1626266982@mailc.net',
+            'status': 'canceled',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0.0
@@ -1275,6 +1282,7 @@ class TestGetCheddarUtils(unittest.TestCase):
             'type': 'subscriptionReactivated',
             'code': 'languagetools+customer2@mailc.net',
             'email': 'languagetools+customer1@mailc.net',
+            'status': 'active',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 1,
             'thousand_char_used': 0.0
@@ -1440,6 +1448,7 @@ class TestGetCheddarUtils(unittest.TestCase):
         expected_xml_data = {
             'code': 'languagetools+customer3@mailc.net',
             'email': 'languagetools+customer3@mailc.net',
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 42.789
@@ -1736,6 +1745,7 @@ class TestGetCheddarUtils(unittest.TestCase):
         expected_xml_data = {
             'code': 'languagetools+customer4@mailc.net',
             'email': 'languagetools+customer4@mailc.net',
+            'status': 'active',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 1,
             'thousand_char_used': 45.87
@@ -2154,6 +2164,7 @@ class TestGetCheddarUtils(unittest.TestCase):
         expected_xml_data = {
             'code': 'languagetools+customer4@mailc.net',
             'email': 'languagetools+customer4@mailc.net',
+            'status': 'canceled',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 45.87

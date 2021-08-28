@@ -7,6 +7,8 @@ import json
 import os
 import redisdb
 import user_utils
+import secrets
+import sentry_sdk
 
 def backup_redis_db():
     scp_username = os.environ['RSYNC_NET_USER']
@@ -62,5 +64,14 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
                         level=logging.INFO)    
+
+    if secrets.config['sentry']['enable']:
+        dsn = secrets.config['sentry']['dsn']
+        sentry_sdk.init(
+            dsn=dsn,
+            environment=secrets.config['sentry']['environment'],
+            traces_sample_rate=1.0
+        )
+
     setup_tasks()
     run_scheduler()

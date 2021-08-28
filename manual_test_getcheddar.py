@@ -122,6 +122,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
@@ -261,6 +262,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
@@ -310,6 +312,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 142.456
@@ -342,6 +345,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.999
@@ -426,6 +430,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 142.456
@@ -450,6 +455,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 142.456
@@ -495,6 +501,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 142.456
@@ -516,6 +523,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.999
@@ -598,6 +606,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_1,
             'email': customer_code_1,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 142.456
@@ -609,6 +618,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_2,
             'email': customer_code_2,
+            'status': 'active',
             'thousand_char_quota': 500,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
@@ -633,6 +643,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_1,
             'email': customer_code_1,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 142.456
@@ -644,6 +655,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_2,
             'email': customer_code_2,
+            'status': 'active',
             'thousand_char_quota': 500,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
@@ -655,6 +667,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_3,
             'email': customer_code_3,
+            'status': 'active',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 1,
             'thousand_char_used': 1500.0
@@ -775,6 +788,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.983
@@ -794,6 +808,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code,
             'email': customer_code,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.999
@@ -850,6 +865,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_1,
             'email': same_email,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.995
@@ -861,6 +877,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_2,
             'email': same_email,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 0
@@ -885,6 +902,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_1,
             'email': same_email,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.995
@@ -896,6 +914,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_2,
             'email': same_email,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 150.000
@@ -918,6 +937,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_1,
             'email': same_email,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.995
@@ -929,6 +949,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_2,
             'email': same_email,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 200.000
@@ -984,6 +1005,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_1,
             'email': customer_code_1,
+            'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.995
@@ -1000,6 +1022,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'type': 'getcheddar',
             'code': customer_code_1,
             'email': customer_code_1,
+            'status': 'canceled',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.995
@@ -1011,6 +1034,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         expected_getcheddar_customer_data = {
             'code': customer_code_1,
             'email': customer_code_1,
+            'status': 'canceled',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
             'thousand_char_used': 249.995            

@@ -650,6 +650,13 @@ class UserUtils():
         try:
             logging.info(f'reporting getcheddar usage for api key {api_key}')
             user_data = self.redis_connection.get_api_key_data(api_key)
+
+            # retrieve getcheddar customer info
+            customer_info = self.getcheddar_utils.get_customer(user_data['code'])
+            if customer_info['status'] == 'canceled':
+                logging.info(f'not reporting usage for api_key {api_key}, getcheddar status is canceled')
+                return
+
             # retrieve the accumulated usage
             usage_slice = self.redis_connection.get_getcheddar_usage_slice(api_key)
             usage = self.redis_connection.get_usage_slice_data(usage_slice)

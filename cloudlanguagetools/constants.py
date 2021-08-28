@@ -44,6 +44,7 @@ class RequestMode(enum.Enum):
 # ======================================
 
 RequestTimeout = 10 # 10 seconds max
+ReadTimeout = 3 # 3 seconds read timeout
 
 class Service(enum.Enum):
     Azure = enum.auto()

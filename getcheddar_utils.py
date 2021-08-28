@@ -107,12 +107,12 @@ class GetCheddarUtils():
         response = requests.get(url, auth=(self.user, self.api_key))
         if response.status_code == 200:
             # success
-            self.print_xml_response(response.content)
+            # self.print_xml_response(response.content)
             customer_data = self.decode_customer_xml(response.content)
-            print(customer_data)
+            # print(customer_data)
             return customer_data
         else:
-            print(response.content)
+            raise ValueError(f'could not get customer data for customer_code {customer_code}: {response.content}')
 
     def get_all_customers(self):
         # /customers/get/productCode/MY_PRODUCT_CODE

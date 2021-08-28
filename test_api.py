@@ -68,12 +68,22 @@ class ApiTests(unittest.TestCase):
         self.assertEqual({'key_valid': False, 'msg': 'API Key not valid'}, data)
 
     def test_account(self):
+        # pytest test_api.py -rPP -k 'test_account'
+
         response = self.client.get('/account', headers={'api_key': self.api_key})
         data = json.loads(response.data)
         expected_data = {
             'type': 'test'
         }
         self.assertEqual(data, expected_data)
+
+        # non-existent API key
+        response = self.client.get('/account', headers={'api_key': 'yo yo yo'})
+        data = json.loads(response.data)
+        expected_data = {
+            'error': 'API Key not found'
+        }
+        self.assertEqual(data, expected_data)        
 
 
     def test_language_list(self):

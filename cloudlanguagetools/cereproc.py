@@ -72,7 +72,7 @@ class CereProcService(cloudlanguagetools.service.Service):
     def list_voices(self):
         list_voices_url = 'https://api.cerevoice.com/v2/voices'
         
-        response = requests.get(list_voices_url, headers=self.get_auth_headers())
+        response = requests.get(list_voices_url, headers=self.get_auth_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         data = response.json()
         return data['voices']
 

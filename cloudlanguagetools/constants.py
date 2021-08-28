@@ -198,6 +198,7 @@ class Language(enum.Enum):
     yue = ("Chinese (Cantonese, Traditional)")
     zh_cn = ("Chinese (Simplified)")
     zh_tw = ("Chinese (Traditional)")
+    zh_lit = ("Chinese (Literary)")
 
 
     def __init__(self, lang_name):

@@ -210,11 +210,27 @@ class ApiTests(unittest.TestCase):
             'to_language': 'fr'
         }, headers={'api_key': self.api_key})
 
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         self.assertTrue(data['Azure'] == 'Le coût est faible' or data['Azure'] == 'Le coût est très faible')
         self.assertEqual(data['Amazon'], 'Très faible coût')
         self.assertIn(data['Google'], ['Faible coût', 'À bas prix'])
-        self.assertEqual(data['Watson'], 'Le coût est très bas.')
+        self.assertEqual(data['Watson'], 'Le coût est très bas.')        
+
+
+        source_text = 'crevant'
+        response = self.client.post('/translate_all', json={
+            'text': source_text,
+            'from_language': 'fr',
+            'to_language': 'pl'
+        }, headers={'api_key': self.api_key})
+
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data)
+        self.assertEqual(data['Azure'], 'Przebicie')
+        self.assertEqual(data['Amazon'], 'dziurkowanie')
+        self.assertEqual(data['Google'], 'ostry')
 
     def test_translate_error(self):
         source_text = 'Je ne suis pas intéressé.'

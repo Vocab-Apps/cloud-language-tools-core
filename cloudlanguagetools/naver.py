@@ -1,6 +1,7 @@
 import json
 import requests
 import tempfile
+import logging
 import uuid
 import operator
 import pydub
@@ -113,7 +114,7 @@ class NaverService(cloudlanguagetools.service.Service):
                 audio.write(response.content)
             return output_temp_file
 
-        response_data = json.loads(response.content)['error']
+        response_data = response.json()
         error_message = f'Status code: {response.status_code}: {response_data}'
         raise cloudlanguagetools.errors.RequestError(error_message)
 

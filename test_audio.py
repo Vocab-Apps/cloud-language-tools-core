@@ -142,6 +142,19 @@ class TestAudio(unittest.TestCase):
         source_text = 'おはようございます'
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ja_JP, 'ja-JP')
 
+    def test_japanese_naver_error(self):
+        # pytest test_audio.py -k test_japanese_naver_error
+
+        source_text = '瑩'
+        service = 'Naver'
+        voice_key = {"name": "ntomoko"}
+        options = {}
+
+        self.assertRaises(cloudlanguagetools.errors.RequestError, 
+                          self.manager.get_tts_audio,
+                          source_text, service, voice_key, options )
+
+
     def test_vietnamese_fptai(self):
         # pytest test_audio.py -k test_vietnamese_fptai
         source_text = 'Tôi bị mất cái ví.'

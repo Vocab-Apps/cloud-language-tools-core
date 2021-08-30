@@ -1,4 +1,6 @@
 
+class ApiKeyNotFoundError(ValueError):
+    pass
 
 class RequestError(ValueError):
     pass

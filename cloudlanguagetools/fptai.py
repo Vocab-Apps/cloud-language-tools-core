@@ -70,7 +70,8 @@ class FptAiService(cloudlanguagetools.service.Service):
         speed = options.get('speed', FPTAI_VOICE_SPEED_DEFAULT)
         if speed != FPTAI_VOICE_SPEED_DEFAULT:
             headers['speed'] = str(speed)
-        response = requests.post(api_url, headers=headers, data=body.encode('utf-8'))
+        response = requests.post(api_url, headers=headers, data=body.encode('utf-8'), 
+            timeout=cloudlanguagetools.constants.RequestTimeout)
 
         if response.status_code == 200:
             response_data = response.json()
@@ -84,7 +85,7 @@ class FptAiService(cloudlanguagetools.service.Service):
             while audio_available == False and max_tries > 0:
                 time.sleep(wait_time)
                 logging.debug(f'checking whether audio is available on {async_url}')
-                response = requests.get(async_url, allow_redirects=True)
+                response = requests.get(async_url, allow_redirects=True, timeout=cloudlanguagetools.constants.RequestTimeout)
                 if response.status_code == 200 and len(response.content) > 0:
                     with open(output_temp_filename, 'wb') as audio:
                         audio.write(response.content)                    

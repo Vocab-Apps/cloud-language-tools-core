@@ -174,14 +174,14 @@ class ServiceManager():
                 from_language_id = from_language_entries[0].get_language_id()
                 # locate to language key
                 to_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == to_language]
-                assert(len(to_language_entries) == 1)
-                to_language_id = to_language_entries[0].get_language_id()
-                try:
-                    result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
-                except cloudlanguagetools.errors.RequestError:
-                    pass # don't do anything
-                time_diff = timeit.default_timer() - starttime
-                logging.info(f'get_all_translation processing time for {service_name}: {time_diff:.1f}')
+                if len(to_language_entries) == 1:
+                    to_language_id = to_language_entries[0].get_language_id()
+                    try:
+                        result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
+                    except cloudlanguagetools.errors.RequestError:
+                        pass # don't do anything
+                    time_diff = timeit.default_timer() - starttime
+                    logging.info(f'get_all_translation processing time for {service_name}: {time_diff:.1f}')
         global_time_diff = timeit.default_timer() - global_starttime
         logging.info(f'get_all_translation total processing time: {global_time_diff:.1f}')
         return result

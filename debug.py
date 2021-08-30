@@ -680,7 +680,7 @@ if __name__ == '__main__':
     # get_google_translation_languages()
     # get_watson_translation_languages()
     #output_languages_enum()
-    # get_translation_language_list()
+    get_translation_language_list()
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()

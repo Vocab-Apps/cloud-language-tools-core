@@ -265,6 +265,8 @@ class RedisDb():
     def get_api_key_data(self, api_key):
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         api_key_data = self.r.hgetall(redis_key)
+        if len(api_key_data) == 0:
+            raise cloudlanguagetools.errors.ApiKeyNotFoundError()
 
         transform_map = {
             cloudlanguagetools.constants.ApiKeyType.test.name: self.transform_api_key_data_test,
@@ -276,67 +278,72 @@ class RedisDb():
         return transform_map[api_key_data['type']](api_key_data)
 
     def get_account_data(self, api_key):
-        api_key_data = self.get_api_key_data(api_key)
+        try:
+            api_key_data = self.get_api_key_data(api_key)
 
-        if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.test.name:
-            return {'type': 'test'}
+            if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.test.name:
+                return {'type': 'test'}
 
-        if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.trial.name:
-            usage_slice = quotas.UsageSlice(None, 
-                              cloudlanguagetools.constants.UsageScope.User, 
-                              cloudlanguagetools.constants.UsagePeriod.lifetime, 
-                              None, 
-                              api_key,
-                              api_key_data['type'],
-                              api_key_data)
-            usage_data = self.get_usage_slice_data(usage_slice)
-            characters_str = f"""{usage_data['characters']:,}"""
+            if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.trial.name:
+                usage_slice = quotas.UsageSlice(None, 
+                                cloudlanguagetools.constants.UsageScope.User, 
+                                cloudlanguagetools.constants.UsagePeriod.lifetime, 
+                                None, 
+                                api_key,
+                                api_key_data['type'],
+                                api_key_data)
+                usage_data = self.get_usage_slice_data(usage_slice)
+                characters_str = f"""{usage_data['characters']:,}"""
+                return {
+                    'email': api_key_data['email'],
+                    'type': 'Trial',
+                    'usage': f'{characters_str} characters'
+                }
+
+            if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.patreon.name:
+                usage_slice = quotas.UsageSlice(None, 
+                                cloudlanguagetools.constants.UsageScope.User, 
+                                cloudlanguagetools.constants.UsagePeriod.patreon_monthly, 
+                                None, 
+                                api_key,
+                                api_key_data['type'],
+                                api_key_data)
+                usage_data = self.get_usage_slice_data(usage_slice)
+                characters_str = f"""{usage_data['characters']:,}"""                              
+                return {
+                    'email': api_key_data['email'],
+                    'type': 'Patreon',
+                    'usage': f'{characters_str} characters'
+                }
+
+            if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.getcheddar.name:
+                account_type = f"""{api_key_data['thousand_char_quota']},000 characters"""
+
+                usage_slice = quotas.UsageSlice(None, 
+                                cloudlanguagetools.constants.UsageScope.User, 
+                                cloudlanguagetools.constants.UsagePeriod.recurring, 
+                                None, 
+                                api_key,
+                                api_key_data['type'],
+                                api_key_data)
+                usage_data = self.get_usage_slice_data(usage_slice)
+
+                reported_usage = int(api_key_data['thousand_char_used'] * quotas.GETCHEDDAR_CHAR_MULTIPLIER)
+                total_usage = usage_data['characters'] + reported_usage
+
+                characters_str = f"""{total_usage:,}"""
+
+                return {
+                    'email': api_key_data['email'],
+                    'type': account_type,
+                    'usage': f'{characters_str} characters'
+                }
+
+            raise Exception(f"""unsupported api key type: {api_key_data['type']}""")
+        except cloudlanguagetools.errors.ApiKeyNotFoundError:
             return {
-                'email': api_key_data['email'],
-                'type': 'Trial',
-                'usage': f'{characters_str} characters'
+                'error': 'API Key not found'
             }
-
-        if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.patreon.name:
-            usage_slice = quotas.UsageSlice(None, 
-                              cloudlanguagetools.constants.UsageScope.User, 
-                              cloudlanguagetools.constants.UsagePeriod.patreon_monthly, 
-                              None, 
-                              api_key,
-                              api_key_data['type'],
-                              api_key_data)
-            usage_data = self.get_usage_slice_data(usage_slice)
-            characters_str = f"""{usage_data['characters']:,}"""                              
-            return {
-                'email': api_key_data['email'],
-                'type': 'Patreon',
-                'usage': f'{characters_str} characters'
-            }
-
-        if api_key_data['type'] == cloudlanguagetools.constants.ApiKeyType.getcheddar.name:
-            account_type = f"""{api_key_data['thousand_char_quota']},000 characters"""
-
-            usage_slice = quotas.UsageSlice(None, 
-                              cloudlanguagetools.constants.UsageScope.User, 
-                              cloudlanguagetools.constants.UsagePeriod.recurring, 
-                              None, 
-                              api_key,
-                              api_key_data['type'],
-                              api_key_data)
-            usage_data = self.get_usage_slice_data(usage_slice)
-
-            reported_usage = int(api_key_data['thousand_char_used'] * quotas.GETCHEDDAR_CHAR_MULTIPLIER)
-            total_usage = usage_data['characters'] + reported_usage
-
-            characters_str = f"""{total_usage:,}"""
-
-            return {
-                'email': api_key_data['email'],
-                'type': account_type,
-                'usage': f'{characters_str} characters'
-            }
-
-        raise Exception(f"""unsupported api key type: {api_key_data['type']}""")
 
 
 

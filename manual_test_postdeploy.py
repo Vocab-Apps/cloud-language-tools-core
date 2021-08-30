@@ -392,6 +392,15 @@ class PostDeployTests(unittest.TestCase):
 
         self.assertTrue(expected_filetype in filetype)
 
+    def test_account(self):
+        # pytest manual_test_postdeploy.py -rPP -k test_account
+
+        url = self.get_url('/account')
+        response = requests.get(url, headers={'api_key': self.api_key})
+        data = response.json()
+
+        self.assertEqual(data['type'], '250,000 characters')
+
 
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate

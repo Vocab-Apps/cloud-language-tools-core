@@ -44,6 +44,7 @@ class RequestMode(enum.Enum):
 # ======================================
 
 RequestTimeout = 10 # 10 seconds max
+ReadTimeout = 3 # 3 seconds read timeout
 
 class Service(enum.Enum):
     Azure = enum.auto()
@@ -199,6 +200,7 @@ class Language(enum.Enum):
     yue = ("Chinese (Cantonese, Traditional)")
     zh_cn = ("Chinese (Simplified)")
     zh_tw = ("Chinese (Traditional)")
+    zh_lit = ("Chinese (Literary)")
 
 
     def __init__(self, lang_name):

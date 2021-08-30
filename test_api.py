@@ -68,12 +68,22 @@ class ApiTests(unittest.TestCase):
         self.assertEqual({'key_valid': False, 'msg': 'API Key not valid'}, data)
 
     def test_account(self):
+        # pytest test_api.py -rPP -k 'test_account'
+
         response = self.client.get('/account', headers={'api_key': self.api_key})
         data = json.loads(response.data)
         expected_data = {
             'type': 'test'
         }
         self.assertEqual(data, expected_data)
+
+        # non-existent API key
+        response = self.client.get('/account', headers={'api_key': 'yo yo yo'})
+        data = json.loads(response.data)
+        expected_data = {
+            'error': 'API Key not found'
+        }
+        self.assertEqual(data, expected_data)        
 
 
     def test_language_list(self):
@@ -200,11 +210,27 @@ class ApiTests(unittest.TestCase):
             'to_language': 'fr'
         }, headers={'api_key': self.api_key})
 
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         self.assertTrue(data['Azure'] == 'Le coût est faible' or data['Azure'] == 'Le coût est très faible')
         self.assertEqual(data['Amazon'], 'Très faible coût')
         self.assertIn(data['Google'], ['Faible coût', 'À bas prix'])
-        self.assertEqual(data['Watson'], 'Le coût est très bas.')
+        self.assertEqual(data['Watson'], 'Le coût est très bas.')        
+
+
+        source_text = 'crevant'
+        response = self.client.post('/translate_all', json={
+            'text': source_text,
+            'from_language': 'fr',
+            'to_language': 'pl'
+        }, headers={'api_key': self.api_key})
+
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data)
+        self.assertEqual(data['Azure'], 'Przebicie')
+        self.assertEqual(data['Amazon'], 'dziurkowanie')
+        self.assertEqual(data['Google'], 'ostry')
 
     def test_translate_error(self):
         source_text = 'Je ne suis pas intéressé.'

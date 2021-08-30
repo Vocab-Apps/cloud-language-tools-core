@@ -625,12 +625,12 @@ def thai_tokenization():
     pythainlp_service = manager.services[cloudlanguagetools.constants.Service.PyThaiNLP.name]
     azure_service = manager.services[cloudlanguagetools.constants.Service.Azure.name]
 
-    text = 'ขอโทษครับ ช่วยพูดช้าๆได้ไหมครับ'
+    text = 'รถแท็กซี่อยู่ที่หน้าโรงแรมค่ะ'
     
     tokenized_result = pythainlp_service.tokenize(text, {})
     tokenized_result = [token for token in tokenized_result if len(token.strip()) > 0]
 
-    if True:
+    if False:
         tokenized_result = [
             'ขอโทษ',
             'ครับ',
@@ -656,7 +656,30 @@ def thai_tokenization():
             'translation': translation
         })
 
-    pprint.pprint(breakdown_entries)
+    # pprint.pprint(breakdown_entries)
+
+    def format_entry(entry):
+        # do we have dictionary lookups ?
+        token = entry['token']
+        transliteration = entry['transliteration']
+
+        translation = entry['translation']
+        dictionary_lookups = entry['dictionary_lookups']
+
+        meanings = [translation] + dictionary_lookups
+
+        result = f"{token} <b>{transliteration}</b>: {' / '.join(meanings)}"
+        return result
+
+    html_entries = [format_entry(x) for x in breakdown_entries]
+
+    html_text = '<br/>\n'.join(html_entries)
+    output_filename = 'temp_data_files/breakdown.html'
+    with open(output_filename, 'w', encoding='utf8') as f:
+        f.write(html_text)
+        f.close()    
+    logging.info(f'wrote {output_filename}')
+
 
 
 if __name__ == '__main__':
@@ -680,7 +703,7 @@ if __name__ == '__main__':
     # get_google_translation_languages()
     # get_watson_translation_languages()
     #output_languages_enum()
-    get_translation_language_list()
+    # get_translation_language_list()
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()

@@ -14,5 +14,5 @@ boto3
 schedule
 pandas
 epitran
-pythainlp[thai2rom]
+pythainlp[thai2rom,ipa]
 sentry-sdk[flask]

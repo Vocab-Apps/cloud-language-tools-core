@@ -318,5 +318,5 @@ class TestTranslation(unittest.TestCase):
         service = cloudlanguagetools.constants.Service.PyThaiNLP.name
 
         # thai
-        self.verify_transliteration_single_option(Language.th, 'สวัสดี', service, 'sawatdi')
+        self.verify_transliteration_multiple_options(Language.th, 'สวัสดี', service, ['s a ˧ . w a t̚ ˨˩ . d iː ˧', 'sawatdi'])
 

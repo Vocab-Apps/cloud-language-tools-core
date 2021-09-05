@@ -335,4 +335,3 @@ class TestTranslation(unittest.TestCase):
         
         expected_result = ['ดิฉัน', 'อายุ', 'ยี่สิบ', 'เจ็ด', 'ปี', 'ค่ะ']
         self.assertEqual(tokenization_result, expected_result)
-        # self.verify_transliteration_multiple_options(Language.th, 'สวัสดี', service, ['s a ˧ . w a t̚ ˨˩ . d iː ˧', 'sawatdi'])

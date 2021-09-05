@@ -153,6 +153,17 @@ class ServiceManager():
         language_list = self.get_transliteration_language_list()
         return [language.json_obj() for language in language_list]
 
+    def get_tokenization_options(self):
+        result = []
+        for key, service in self.services.items():
+            result.extend(service.get_tokenization_options())
+        return result
+
+    def get_tokenization_options_json(self):
+        """return list of languages supported for tokenization, using plain objects/strings"""
+        tokenization_list = self.get_tokenization_options()
+        return [tokenization_option.json_obj() for tokenization_option in tokenization_list]
+
     def get_tts_audio(self, text, service, voice_id, options):
         service = self.services[service]
         return service.get_tts_audio(text, voice_id, options)
@@ -189,6 +200,10 @@ class ServiceManager():
     def get_transliteration(self, text, service, transliteration_key):
         service = self.services[service]
         return service.get_transliteration(text, transliteration_key)
+
+    def get_tokenization(self, text, service, tokenization_key):
+        service = self.services[service]
+        return service.get_tokenization(text, tokenization_key)
 
     def detect_language(self, text_list):
         """returns an enum from constants.Language"""

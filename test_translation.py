@@ -24,6 +24,7 @@ class TestTranslation(unittest.TestCase):
         self.language_list = self.manager.get_language_list()
         self.translation_language_list = self.manager.get_translation_language_list_json()
         self.transliteration_language_list = self.manager.get_transliteration_language_list_json()
+        self.tokenization_options = self.manager.get_tokenization_options_json()
 
     def test_language_list(self):
         self.assertTrue(len(self.language_list) > 0)
@@ -320,3 +321,18 @@ class TestTranslation(unittest.TestCase):
         # thai
         self.verify_transliteration_multiple_options(Language.th, 'สวัสดี', service, ['s a ˧ . w a t̚ ˨˩ . d iː ˧', 'sawatdi'])
 
+    def test_tokenization_pythainlp(self):
+        # pytest test_translation.py -rPP -k test_tokenization_pythainlp
+
+        service = cloudlanguagetools.constants.Service.PyThaiNLP.name
+
+        tokenization_candidates = [x for x in self.tokenization_options if x['language_code'] == Language.th.name and x['service'] == service]
+        self.assertEqual(len(tokenization_candidates), 1)
+        tokenization_option = tokenization_candidates[0]
+
+        # thai
+        tokenization_result = self.manager.get_tokenization('ดิฉันอายุยี่สิบเจ็ดปีค่ะ', service, tokenization_option['tokenization_key'])
+        
+        expected_result = ['ดิฉัน', 'อายุ', 'ยี่สิบ', 'เจ็ด', 'ปี', 'ค่ะ']
+        self.assertEqual(tokenization_result, expected_result)
+        # self.verify_transliteration_multiple_options(Language.th, 'สวัสดี', service, ['s a ˧ . w a t̚ ˨˩ . d iː ˧', 'sawatdi'])

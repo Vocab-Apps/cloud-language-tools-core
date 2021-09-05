@@ -3,10 +3,14 @@ import enum
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.tokenization
 
 class PyThaiNLPTransliterationMode(enum.Enum):
     Romanization = enum.auto()
     IPA = enum.auto()
+
+class PyThaiNLPTokenizationMode(enum.Enum):
+    Default = enum.auto()
 
 class PyThaiNLPTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, mode):
@@ -19,6 +23,21 @@ class PyThaiNLPTransliterationLanguage(cloudlanguagetools.transliterationlanguag
         return result
 
     def get_transliteration_key(self):
+        return {
+            'mode': self.mode.name
+        }
+
+class PyThaiNLPTokenization(cloudlanguagetools.tokenization.Tokenization):
+    def __init__(self, mode):
+        self.language = cloudlanguagetools.constants.Language.th
+        self.service = cloudlanguagetools.constants.Service.PyThaiNLP
+        self.mode = mode
+
+    def get_tokenization_name(self):
+        result = f'{self.language.lang_name} ({self.mode.name}), {self.service.name}'
+        return result
+
+    def get_tokenization_key(self):
         return {
             'mode': self.mode.name
         }
@@ -43,6 +62,15 @@ class PyThaiNLPService(cloudlanguagetools.service.Service):
         elif mode == PyThaiNLPTransliterationMode.IPA:
             return pythainlp.transliterate(text)
 
-    def tokenize(self, text, tokenization_key):
-        tokens = pythainlp.word_tokenize(text)
+    def get_tokenization(self, text, tokenization_key):
+        mode = PyThaiNLPTokenizationMode[tokenization_key['mode']]
+        
+        if mode == PyThaiNLPTokenizationMode.Default:
+            tokens = pythainlp.word_tokenize(text)
         return tokens
+
+    def get_tokenization_options(self):
+        result = [
+            PyThaiNLPTokenization(PyThaiNLPTokenizationMode.Default)
+        ]
+        return result

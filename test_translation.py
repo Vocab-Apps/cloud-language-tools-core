@@ -311,3 +311,12 @@ class TestTranslation(unittest.TestCase):
 
         # spanish
         self.verify_transliteration_single_option(Language.es, '¿A qué hora usted cierra?', service, '¿a ke oɾa usted siera?')
+
+    def test_transliteration_pythainlp(self):
+        # pytest test_translation.py -rPP -k test_transliteration_pythainlp
+
+        service = cloudlanguagetools.constants.Service.PyThaiNLP.name
+
+        # thai
+        self.verify_transliteration_single_option(Language.th, 'สวัสดี', service, 'sawatdi')
+

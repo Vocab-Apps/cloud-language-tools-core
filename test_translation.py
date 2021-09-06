@@ -456,5 +456,67 @@ class TestTranslation(unittest.TestCase):
             'lemma': '.',
             'pos_description': 'punctuation',
             'token': '.'}]
-            
+
         self.assertEqual(tokenization_result, expected_result)                
+
+
+    def test_tokenization_spacy_chinese(self):
+        # pytest test_translation.py -rPP -k test_tokenization_spacy_chinese
+
+        service = cloudlanguagetools.constants.Service.Spacy.name
+
+        language = Language.zh_cn.name
+        tokenization_options = [x for x in self.tokenization_options if x['language_code'] == language and x['service'] == service]
+
+        text = "送外卖的人"
+
+        expected_result_chars = [{'can_translate': True,
+            'can_transliterate': True,
+            'lemma': '送',
+            'pos_description': None,
+            'token': '送'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': '外',
+            'pos_description': None,
+            'token': '外'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': '卖',
+            'pos_description': None,
+            'token': '卖'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': '的',
+            'pos_description': None,
+            'token': '的'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': '人',
+            'pos_description': None,
+            'token': '人'}]
+
+        expected_result_words = [{'can_translate': True,
+            'can_transliterate': True,
+            'lemma': '送',
+            'pos_description': None,
+            'token': '送'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': '外卖',
+            'pos_description': None,
+            'token': '外卖'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': '的',
+            'pos_description': None,
+            'token': '的'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': '人',
+            'pos_description': None,
+            'token': '人'}]
+
+        self.assertEqual(self.manager.get_tokenization(text, service, tokenization_options[0]['tokenization_key']), expected_result_chars)
+        self.assertEqual(self.manager.get_tokenization(text, service, tokenization_options[1]['tokenization_key']), expected_result_words)
+        self.assertEqual(self.manager.get_tokenization(text, service, tokenization_options[2]['tokenization_key']), expected_result_words)

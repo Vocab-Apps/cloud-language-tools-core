@@ -333,5 +333,13 @@ class TestTranslation(unittest.TestCase):
         # thai
         tokenization_result = self.manager.get_tokenization('ดิฉันอายุยี่สิบเจ็ดปีค่ะ', service, tokenization_option['tokenization_key'])
         
-        expected_result = ['ดิฉัน', 'อายุ', 'ยี่สิบ', 'เจ็ด', 'ปี', 'ค่ะ']
+        expected_result = [
+            {'token': 'ดิฉัน', 'lemma': 'ดิฉัน'}, 
+            {'token': 'อายุ', 'lemma': 'อายุ'},
+            {'token': 'ยี่สิบ', 'lemma': 'ยี่สิบ'},
+            {'token': 'เจ็ด', 'lemma': 'เจ็ด'},
+            {'token': 'ปี', 'lemma': 'ปี'},
+            {'token': 'ค่ะ', 'lemma': 'ค่ะ'}
+        ]
+
         self.assertEqual(tokenization_result, expected_result)

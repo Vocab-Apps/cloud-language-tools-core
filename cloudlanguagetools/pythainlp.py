@@ -67,7 +67,12 @@ class PyThaiNLPService(cloudlanguagetools.service.Service):
         
         if mode == PyThaiNLPTokenizationMode.Default:
             tokens = pythainlp.word_tokenize(text)
-        return tokens
+            token_entries = [{'token': token, 'lemma': token} for token in tokens]
+            return token_entries
+
+        # raise exception
+        raise cloudlanguagetools.errors.RequestError(f'unsupported tokenization mode: {mode.name}')
+
 
     def get_tokenization_options(self):
         result = [

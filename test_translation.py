@@ -1,6 +1,7 @@
 import sys
 import logging
 import unittest
+import pprint
 import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
@@ -343,3 +344,117 @@ class TestTranslation(unittest.TestCase):
         ]
 
         self.assertEqual(tokenization_result, expected_result)
+
+    def test_tokenization_spacy(self):
+        # pytest test_translation.py -rPP -k test_tokenization_spacy
+
+        service = cloudlanguagetools.constants.Service.Spacy.name
+
+        language = Language.en.name
+        tokenization_candidates = [x for x in self.tokenization_options if x['language_code'] == language and x['service'] == service]
+        self.assertEqual(len(tokenization_candidates), 1)
+        tokenization_option = tokenization_candidates[0]
+
+        # english
+        # =======
+
+        text = "I was reading today's paper."
+        tokenization_result = self.manager.get_tokenization(text, service, tokenization_option['tokenization_key'])
+        # pprint.pprint(tokenization_result)
+        
+        expected_result = [{'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'I',
+            'pos_description': 'pronoun, personal',
+            'token': 'I'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'be',
+            'pos_description': 'verb, past tense',
+            'token': 'was'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'read',
+            'pos_description': 'verb, gerund or present participle',
+            'token': 'reading'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'today',
+            'pos_description': 'noun, singular or mass',
+            'token': 'today'},
+            {'can_translate': False,
+            'can_transliterate': False,
+            'lemma': "'s",
+            'pos_description': 'possessive ending',
+            'token': "'s"},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'paper',
+            'pos_description': 'noun, singular or mass',
+            'token': 'paper'},
+            {'can_translate': False,
+            'can_transliterate': False,
+            'lemma': '.',
+            'pos_description': 'punctuation mark, sentence closer',
+            'token': '.'}]
+        self.assertEqual(tokenization_result, expected_result)        
+
+    def test_tokenization_spacy_french(self):
+        # pytest test_translation.py -rPP -k test_tokenization_spacy_french
+
+        service = cloudlanguagetools.constants.Service.Spacy.name
+
+        # french
+        # ======
+
+        language = Language.fr.name
+        tokenization_candidates = [x for x in self.tokenization_options if x['language_code'] == language and x['service'] == service]
+        self.assertEqual(len(tokenization_candidates), 1)
+        tokenization_option = tokenization_candidates[0]
+
+        text = "Le nouveau plan d’investissement du gouvernement."
+        tokenization_result = self.manager.get_tokenization(text, service, tokenization_option['tokenization_key'])
+        pprint.pprint(tokenization_result)
+        
+        expected_result = [{'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'le',
+            'pos_description': 'determiner',
+            'token': 'Le'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'nouveau',
+            'pos_description': 'adjective',
+            'token': 'nouveau'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'plan',
+            'pos_description': 'noun',
+            'token': 'plan'},
+            {'can_translate': False,
+            'can_transliterate': False,
+            'lemma': 'd’',
+            'pos_description': 'adposition',
+            'token': 'd’'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'investissement',
+            'pos_description': 'noun',
+            'token': 'investissement'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'de',
+            'pos_description': 'adposition',
+            'token': 'du'},
+            {'can_translate': True,
+            'can_transliterate': True,
+            'lemma': 'gouvernement',
+            'pos_description': 'noun',
+            'token': 'gouvernement'},
+            {'can_translate': False,
+            'can_transliterate': False,
+            'lemma': '.',
+            'pos_description': 'punctuation',
+            'token': '.'}]
+            
+        self.assertEqual(tokenization_result, expected_result)                

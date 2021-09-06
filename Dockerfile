@@ -7,6 +7,10 @@ RUN wget http://tts.speech.cs.cmu.edu/awb/flite-2.0.5-current.tar.bz2 && tar xvj
 COPY requirements.txt ./
 RUN pip3 install -r requirements.txt
 RUN pip3 install git+https://github.com/Patreon/patreon-python
+# spacy trained datasets
+RUN python3 -m spacy download zh_core_web_trf
+RUN python3 -m spacy download en_core_web_trf
+RUN python3 -m spacy download fr_dep_news_trf
 
 COPY start.sh app.py redisdb.py patreon_utils.py quotas.py convertkit.py airtable_utils.py getcheddar_utils.py user_utils.py scheduled_tasks.py ./
 COPY secrets.py.gpg secrets/tts_keys.sh.gpg secrets/convertkit.sh.gpg secrets/airtable.sh.gpg secrets/digitalocean_spaces.sh.gpg secrets/patreon_prod_digitalocean.sh.gpg secrets/rsync_net.sh.gpg secrets/ssh_id_rsync_redis_backup.gpg ./

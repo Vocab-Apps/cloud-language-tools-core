@@ -16,3 +16,4 @@ pandas
 epitran
 pythainlp[thai2rom,ipa]
 sentry-sdk[flask]
+spacy

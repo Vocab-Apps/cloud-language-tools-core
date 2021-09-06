@@ -61,6 +61,7 @@ class Service(enum.Enum):
     VocalWare = enum.auto()
     FptAi = enum.auto()
     PyThaiNLP = enum.auto()
+    Spacy = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()

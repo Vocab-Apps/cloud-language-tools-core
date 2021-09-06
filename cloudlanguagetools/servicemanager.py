@@ -19,6 +19,7 @@ import cloudlanguagetools.deepl
 import cloudlanguagetools.vocalware
 import cloudlanguagetools.fptai
 import cloudlanguagetools.pythainlp
+import cloudlanguagetools.spacy
 
 class ServiceManager():
     def  __init__(self, secrets_config):
@@ -38,6 +39,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.VocalWare.name] = cloudlanguagetools.vocalware.VocalWareService()
         self.services[cloudlanguagetools.constants.Service.FptAi.name] = cloudlanguagetools.fptai.FptAiService()
         self.services[cloudlanguagetools.constants.Service.PyThaiNLP.name] = cloudlanguagetools.pythainlp.PyThaiNLPService()
+        self.services[cloudlanguagetools.constants.Service.Spacy.name] = cloudlanguagetools.spacy.SpacyService()
 
     def configure(self):
         # azure

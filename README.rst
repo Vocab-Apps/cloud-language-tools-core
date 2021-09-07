@@ -11,4 +11,4 @@ gpg --batch --yes --passphrase-file gpg_passphrase_file --output tts_keys.sh.tes
 
 
 # regenerate requirements_frozen.txt
-pip freeze | grep -v -E 'en-core-web-trf|zh-core-web-trf|fr-dep-news-trf' > requirements_frozen.txt
+pip freeze | grep -v -E 'en-core-web-trf|zh-core-web-trf|fr-dep-news-trf|patreon' > requirements_frozen.txt

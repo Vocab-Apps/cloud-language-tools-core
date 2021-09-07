@@ -43,7 +43,6 @@ packaging==20.9
 pandas==1.3.2
 panphon==0.19
 pathy==0.6.0
-patreon==0.5.1
 pluggy==0.13.1
 preshed==3.0.5
 proto-plus==1.19.0

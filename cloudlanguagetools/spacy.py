@@ -51,13 +51,15 @@ class SpacyService(cloudlanguagetools.service.Service):
             lemma = token.lemma_
             if len(lemma) == 0:
                 lemma = str(token)
+            pos_description = spacy.explain(token.tag_)
             entry = {
                 'token': str(token),
                 'lemma': lemma,
-                'pos_description': spacy.explain(token.tag_),
                 'can_translate': token.is_alpha,
                 'can_transliterate': token.is_alpha
             }
+            if pos_description != None:
+                entry['pos_description'] = pos_description
             result.append(entry)
         return result
 

@@ -1,5 +1,7 @@
 FROM ubuntu:20.04
 
+# use ubuntu mirrors
+RUN sed -i -e 's|archive\.ubuntu\.com|mirrors\.xtom\.com\.hk|g' /etc/apt/sources.list
 # install packages first
 RUN apt-get update -y && apt-get install -y libasound2 python3-pip git gnupg build-essential wget
 # required by Epitran module

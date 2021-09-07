@@ -4,7 +4,7 @@ FROM ubuntu:20.04
 RUN apt-get update -y && apt-get install -y libasound2 python3-pip git gnupg build-essential wget
 # required by Epitran module
 RUN wget http://tts.speech.cs.cmu.edu/awb/flite-2.0.5-current.tar.bz2 && tar xvjf flite-2.0.5-current.tar.bz2 && cd flite-2.0.5-current && ./configure && make && make install && cd testsuite && make lex_lookup && cp lex_lookup /usr/local/bin
-COPY requirements.txt ./
+COPY requirements_frozen.txt ./
 RUN pip3 install -r requirements_frozen.txt
 RUN pip3 install git+https://github.com/Patreon/patreon-python
 # spacy trained datasets

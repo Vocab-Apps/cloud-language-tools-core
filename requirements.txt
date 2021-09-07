@@ -1,5 +1,5 @@
-azure-cognitiveservices-speech==1.16.0
-requests==2.25.1
+azure-cognitiveservices-speech
+requests
 google-cloud-texttospeech
 google-cloud-translate
 pytest

@@ -148,8 +148,7 @@ class AzureService(cloudlanguagetools.service.Service):
         output_temp_filename = output_temp_file.name
         speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
         speech_config.set_speech_synthesis_output_format(azure.cognitiveservices.speech.SpeechSynthesisOutputFormat["Audio24Khz96KBitRateMonoMp3"])
-        audio_config = azure.cognitiveservices.speech.audio.AudioOutputConfig(filename=output_temp_filename)
-        synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
+        synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
         default_pitch = 0
         default_rate = 1.0
@@ -177,7 +176,10 @@ class AzureService(cloudlanguagetools.service.Service):
 
         # print(f'[{ssml_str}] len: {len(ssml_str)}')
 
-        result = synthesizer.start_speaking_ssml(ssml_str)
+        result = synthesizer.speak_ssml(ssml_str)
+
+        stream = azure.cognitiveservices.speech.AudioDataStream(result)
+        stream.save_to_wav_file(output_temp_filename)
 
         return output_temp_file
 

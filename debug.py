@@ -689,7 +689,7 @@ if __name__ == '__main__':
                         level=logging.INFO)    
 
     # generate_video_audio()
-    # test_azure_audio()
+    test_azure_audio()
     # test_google_audio()
     # play_google_audio()
     # play_azure_audio()
@@ -721,4 +721,4 @@ if __name__ == '__main__':
     # create_epitran_mappings()
     # test_debounce()
     # load_vocalware_voices()
-    thai_tokenization()
+    # thai_tokenization()

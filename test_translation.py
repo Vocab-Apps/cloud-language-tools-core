@@ -414,7 +414,7 @@ class TestTranslation(unittest.TestCase):
 
         text = "Le nouveau plan d’investissement du gouvernement."
         tokenization_result = self.manager.get_tokenization(text, service, tokenization_option['tokenization_key'])
-        pprint.pprint(tokenization_result)
+        # pprint.pprint(tokenization_result)
         
         expected_result = [{'can_translate': True,
             'can_transliterate': True,

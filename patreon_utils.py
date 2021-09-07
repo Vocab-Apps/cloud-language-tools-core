@@ -4,15 +4,16 @@ import redisdb
 import argparse
 import logging
 import pprint
+import secrets
 
 # prod workflow (app.py/PatreonKey)
 def user_authorized(oauth_code):
-    client_id = os.environ['PATREON_CLIENT_ID']
-    client_secret = os.environ['PATREON_CLIENT_SECRET']
-    redirect_uri = os.environ['PATREON_REDIRECT_URI']
+    client_id = secrets.config['patreon']['client_id']
+    client_secret = secrets.config['patreon']['client_secret']
+    redirect_uri = secrets.config['patreon']['redirect_uri']
 
-    creator_access_token = os.environ['PATREON_ACCESS_TOKEN']
-    campaign_id = os.environ['PATREON_CAMPAIGN_ID']
+    creator_access_token = secrets.config['patreon']['access_token']
+    campaign_id = secrets.config['patreon']['campaign_id']
 
     oauth_client = patreon.OAuth(client_id, client_secret)
     tokens = oauth_client.get_tokens(oauth_code, redirect_uri)
@@ -58,8 +59,8 @@ def user_authorized(oauth_code):
 
 class PatreonUtils():
     def __init__(self):
-        self.creator_access_token = os.environ['PATREON_ACCESS_TOKEN']
-        self.campaign_id = os.environ['PATREON_CAMPAIGN_ID']
+        self.creator_access_token = secrets.config['patreon']['access_token']
+        self.campaign_id = secrets.config['patreon']['campaign_id']
 
     def get_patreon_user_ids(self):
         api_client = patreon.API(self.creator_access_token)
@@ -157,8 +158,8 @@ if __name__ == '__main__':
                         datefmt='%Y%m%d-%H:%M:%S',
                         level=logging.INFO)
 
-    access_token = os.environ['PATREON_ACCESS_TOKEN']
-    campaign_id = os.environ['PATREON_CAMPAIGN_ID']
+    access_token = secrets.config['patreon']['access_token']
+    campaign_id = secrets.config['patreon']['campaign_id']
 
     parser = argparse.ArgumentParser(description='Patreon Utils')
     choices = ['list_patreon_entitled_users', 'extend_key_validity', 'find_cancelations']

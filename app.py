@@ -304,8 +304,8 @@ class PatreonKey(flask_restful.Resource):
 class PatreonKeyRequest(flask_restful.Resource):
     def get(self):
         headers = {'Content-Type': 'text/html'}
-        patreon_client_id = os.environ['PATREON_CLIENT_ID']
-        redirect_uri = os.environ['PATREON_REDIRECT_URI']
+        patreon_client_id = secrets.config['patreon']['client_id']
+        redirect_uri = secrets.config['patreon']['redirect_uri']
         oauth_request_link = f'https://www.patreon.com/oauth2/authorize?response_type=code&client_id={patreon_client_id}&redirect_uri={redirect_uri}&scope=identity%20identity%5Bemail%5D'
         result_html = f'Click here to request your AwesomeTTS Plus / Language Tools API Key: <a href="{oauth_request_link}">Connect with Patreon</a>'
         return make_response(result_html, 200, headers)

@@ -14,12 +14,10 @@ click==7.1.2
 cymem==2.0.5
 Cython==0.29.24
 editdistance==0.5.3
-en-core-web-trf==3.1.0
 epitran==1.11
 filelock==3.0.12
 Flask==2.0.1
 Flask-RESTful==0.3.9
-fr-dep-news-trf==3.1.0
 google-api-core==1.30.0
 google-auth==1.32.1
 google-cloud-core==1.7.1
@@ -95,4 +93,3 @@ unicodecsv==0.14.1
 urllib3==1.26.6
 wasabi==0.8.2
 Werkzeug==2.0.1
-zh-core-web-trf==3.1.0

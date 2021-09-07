@@ -1,3 +1,7 @@
+# building for dev:
+# docker build -t lucwastiaux/cloud-language-tools:dev -f Dockerfile .
+# docker push lucwastiaux/cloud-language-tools:dev
+
 FROM ubuntu:20.04
 
 # use ubuntu mirrors

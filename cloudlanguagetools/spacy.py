@@ -28,22 +28,21 @@ class SpacyTokenization(cloudlanguagetools.tokenization.Tokenization):
 
 class SpacyService(cloudlanguagetools.service.Service):
     def __init__(self):
-        self.nlp_engine_cache = {}
-        models = ['en_core_web_trf', 'fr_dep_news_trf']
-        for model in models:
-            logging.info(f'loading spacy model {model}')
-            self.nlp_engine_cache[model] = spacy.load(model)
+        pass
 
-        # initialize chinese models
-        self.nlp_engine_cache['chinese_char'] = spacy.lang.zh.Chinese()
-        self.nlp_engine_cache['chinese_jieba'] = spacy.lang.zh.Chinese.from_config({"nlp": {"tokenizer": {"segmenter": "jieba"}}})
-        self.nlp_engine_cache['chinese_pkuseg'] = spacy.lang.zh.Chinese.from_config({"nlp": {"tokenizer": {"segmenter": "pkuseg"}}})
+    def get_nlp_engine(self, model_name):
+        if model_name == 'chinese_char':
+            return spacy.lang.zh.Chinese()
+        if model_name == 'chinese_jieba':
+            return spacy.lang.zh.Chinese.from_config({"nlp": {"tokenizer": {"segmenter": "jieba"}}})
+        if model_name == 'chinese_pkuseg':
+            return spacy.lang.zh.Chinese.from_config({"nlp": {"tokenizer": {"segmenter": "pkuseg"}}})
+        return spacy.load(model_name)
 
-        
 
     def get_tokenization(self, text, tokenization_key):
         model_name = tokenization_key['model_name']
-        nlp_engine = self.nlp_engine_cache[model_name]
+        nlp_engine = self.get_nlp_engine(model_name)
 
         doc = nlp_engine(text)
         result = []

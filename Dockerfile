@@ -14,8 +14,8 @@ COPY requirements_frozen.txt ./
 RUN pip3 install -r requirements_frozen.txt
 # spacy trained datasets
 RUN python3 -m spacy download zh_core_web_sm
-RUN python3 -m spacy download en_core_web_sm
-RUN python3 -m spacy download fr_core_news_sm
+RUN python3 -m spacy download en_core_web_md
+RUN python3 -m spacy download fr_core_news_md
 # modules not available on pypi
 RUN pip3 install git+https://github.com/Patreon/patreon-python
 

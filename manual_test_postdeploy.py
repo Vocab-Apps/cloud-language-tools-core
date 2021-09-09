@@ -402,15 +402,60 @@ class PostDeployTests(unittest.TestCase):
         self.assertEqual(data['type'], '250,000 characters')
 
     def test_spacy_tokenization_english(self):
+        # pytest manual_test_postdeploy.py -rPP -k test_spacy_tokenization_english
+
         service = 'Spacy'
-        language = 'en'
-        tokenization_option = {
-            'tokenization_key': {
-                'model_name': 'en_core_web_sm'
-            }
+
+        # english
+        source_text = "I was reading today's paper."
+        from_language = 'en'
+        tokenization_key = {
+            'model_name': 'en_core_web_sm'
         }
 
-        
+        url = self.get_url('/tokenize_v1')
+        response = requests.post(url, json={
+            'text': source_text,
+            'service': service,
+            'tokenization_key': tokenization_key
+        }, headers={'api_key': self.api_key})
+
+        self.assertEqual(response.status_code, 200)
+
+
+        # french
+        source_text = "Le nouveau plan d’investissement du gouvernement."
+        from_language = 'fr'
+        tokenization_key = {
+            'model_name': 'fr_core_news_sm'
+        }
+
+        url = self.get_url('/tokenize_v1')
+        response = requests.post(url, json={
+            'text': source_text,
+            'service': service,
+            'tokenization_key': tokenization_key
+        }, headers={'api_key': self.api_key})
+
+        self.assertEqual(response.status_code, 200)        
+
+        # chinese
+        source_text = "送外卖的人"
+        from_language = 'zh_cn'
+        tokenization_key = {
+            'model_name': 'chinese_jieba'
+        }
+
+        url = self.get_url('/tokenize_v1')
+        response = requests.post(url, json={
+            'text': source_text,
+            'service': service,
+            'tokenization_key': tokenization_key
+        }, headers={'api_key': self.api_key})
+
+        self.assertEqual(response.status_code, 200)
+
+
 
 
 if __name__ == '__main__':

@@ -402,6 +402,8 @@ class TestTranslation(unittest.TestCase):
     def test_tokenization_spacy_french(self):
         # pytest test_translation.py -rPP -k test_tokenization_spacy_french
 
+        self.maxDiff = None
+
         service = cloudlanguagetools.constants.Service.Spacy.name
 
         # french

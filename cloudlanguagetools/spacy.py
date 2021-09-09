@@ -28,17 +28,24 @@ class SpacyTokenization(cloudlanguagetools.tokenization.Tokenization):
 
 class SpacyService(cloudlanguagetools.service.Service):
     def __init__(self):
-        pass
+        self.nlp_engine_cache = {}
 
-    def get_nlp_engine(self, model_name):
+    def build_nlp_engine(self, model_name):
         if model_name == 'chinese_char':
             return spacy.lang.zh.Chinese()
         if model_name == 'chinese_jieba':
             return spacy.lang.zh.Chinese.from_config({"nlp": {"tokenizer": {"segmenter": "jieba"}}})
         if model_name == 'chinese_pkuseg':
             return spacy.lang.zh.Chinese.from_config({"nlp": {"tokenizer": {"segmenter": "pkuseg"}}})
-        return spacy.load(model_name)
+        return spacy.load(model_name)        
 
+    def get_nlp_engine(self, model_name):
+        if model_name in self.nlp_engine_cache:
+            return self.nlp_engine_cache[model_name]
+
+        nlp_engine = self.build_nlp_engine(model_name)
+        self.nlp_engine_cache[model_name] = nlp_engine
+        return nlp_engine
 
     def get_tokenization(self, text, tokenization_key):
         model_name = tokenization_key['model_name']
@@ -68,8 +75,8 @@ class SpacyService(cloudlanguagetools.service.Service):
 
     def get_tokenization_options(self):
         result = [
-            SpacyTokenization(cloudlanguagetools.constants.Language.en, 'en_core_web_sm'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.fr, 'fr_core_news_sm'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.en, 'en_core_web_md'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.fr, 'fr_core_news_md'),
 
             # chinese variants
             SpacyTokenization(cloudlanguagetools.constants.Language.zh_cn, 'chinese_char', 'Characters'),

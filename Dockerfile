@@ -1,6 +1,10 @@
 # building for dev:
 # docker build -t lucwastiaux/cloud-language-tools:dev -f Dockerfile .
 # docker push lucwastiaux/cloud-language-tools:dev
+# 
+# pushing to digitalocean registry
+# docker tag lucwastiaux/cloud-language-tools:dev-3 registry.digitalocean.com/luc/cloud-language-tools:dev-3
+# docker push registry.digitalocean.com/luc/cloud-language-tools:dev-3
 
 FROM ubuntu:20.04
 

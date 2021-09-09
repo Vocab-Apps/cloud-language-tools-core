@@ -401,6 +401,17 @@ class PostDeployTests(unittest.TestCase):
 
         self.assertEqual(data['type'], '250,000 characters')
 
+    def test_spacy_tokenization_english(self):
+        service = 'Spacy'
+        language = 'en'
+        tokenization_option = {
+            'tokenization_key': {
+                'model_name': 'en_core_web_sm'
+            }
+        }
+
+        
+
 
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate

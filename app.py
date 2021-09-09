@@ -180,6 +180,19 @@ class Transliterate(flask_restful.Resource):
             sentry_sdk.capture_exception(err)
             return {'error': str(err)}, 400    
 
+class TokenizeV1(flask_restful.Resource):
+    # method_decorators = [track_usage_transliteration, authenticate]
+    method_decorators = [authenticate]
+    def post(self):
+        try:
+            data = request.json
+            # add sentry service tag
+            sentry_sdk.set_tag("clt.service", data['service'])
+            return {'tokenization': manager.get_tokenization(data['text'], data['service'], data['tokenization_key'])}
+        except cloudlanguagetools.errors.RequestError as err:
+            sentry_sdk.capture_exception(err)
+            return {'error': str(err)}, 400    
+
 class Detect(flask_restful.Resource):
     method_decorators = [authenticate]
     def post(self):
@@ -382,6 +395,7 @@ api.add_resource(TransliterationLanguageList, '/transliteration_language_list')
 api.add_resource(Translate, '/translate')
 api.add_resource(TranslateAll, '/translate_all')
 api.add_resource(Transliterate, '/transliterate')
+api.add_resource(TokenizeV1, '/tokenize_v1')
 api.add_resource(Detect, '/detect')
 api.add_resource(Audio, '/audio')
 api.add_resource(AudioV2, '/audio_v2')

@@ -68,8 +68,8 @@ class SpacyService(cloudlanguagetools.service.Service):
 
     def get_tokenization_options(self):
         result = [
-            SpacyTokenization(cloudlanguagetools.constants.Language.en, 'en_core_web_trf'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.fr, 'fr_dep_news_trf'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.en, 'en_core_web_sm'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.fr, 'fr_core_news_sm'),
 
             # chinese variants
             SpacyTokenization(cloudlanguagetools.constants.Language.zh_cn, 'chinese_char', 'Characters'),

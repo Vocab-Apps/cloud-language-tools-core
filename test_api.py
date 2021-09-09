@@ -876,7 +876,67 @@ class ApiTests(unittest.TestCase):
         })
 
         self.assertEqual(response.status_code, 401)        
-        
+
+    def test_tokenize_v1_spacy_english(self):
+        # pytest test_api.py -rPP -k test_tokenize_v1_spacy_english
+
+        response = self.client.get('/transliteration_language_list')
+        transliteration_language_list = json.loads(response.data)
+
+        service = 'Spacy'
+        source_text = "I was reading today's paper."
+        from_language = 'en'
+        tokenization_key = {
+            'model_name': 'en_core_web_sm'
+        }
+
+        response = self.client.post('/tokenize_v1', json={
+            'text': source_text,
+            'service': service,
+            'tokenization_key': tokenization_key
+        }, headers={'api_key': self.api_key})
+
+        result = json.loads(response.data)
+        expected_result = {'tokenization': 
+                [{'can_translate': True,
+                        'can_transliterate': True,
+                        'lemma': 'I',
+                        'pos_description': 'pronoun, personal',
+                        'token': 'I'},
+                        {'can_translate': True,
+                        'can_transliterate': True,
+                        'lemma': 'be',
+                        'pos_description': 'verb, past tense',
+                        'token': 'was'},
+                        {'can_translate': True,
+                        'can_transliterate': True,
+                        'lemma': 'read',
+                        'pos_description': 'verb, gerund or present participle',
+                        'token': 'reading'},
+                        {'can_translate': True,
+                        'can_transliterate': True,
+                        'lemma': 'today',
+                        'pos_description': 'noun, singular or mass',
+                        'token': 'today'},
+                        {'can_translate': False,
+                        'can_transliterate': False,
+                        'lemma': "'s",
+                        'pos_description': 'possessive ending',
+                        'token': "'s"},
+                        {'can_translate': True,
+                        'can_transliterate': True,
+                        'lemma': 'paper',
+                        'pos_description': 'noun, singular or mass',
+                        'token': 'paper'},
+                        {'can_translate': False,
+                        'can_transliterate': False,
+                        'lemma': '.',
+                        'pos_description': 'punctuation mark, sentence closer',
+                        'token': '.'} 
+                ]
+        }
+        self.assertEqual(expected_result, result)
+
 
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate

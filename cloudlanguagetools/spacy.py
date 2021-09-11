@@ -29,6 +29,12 @@ class SpacyTokenization(cloudlanguagetools.tokenization.Tokenization):
 class SpacyService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.nlp_engine_cache = {}
+        self.initialize_nlp_engines()
+
+    def initialize_nlp_engines(self):
+        for tokenization_option in self.get_tokenization_options():
+            model_name = tokenization_option.get_tokenization_key()['model_name']
+            nlp_engine = self.get_nlp_engine(model_name)
 
     def build_nlp_engine(self, model_name):
         if model_name == 'chinese_char':
@@ -44,6 +50,7 @@ class SpacyService(cloudlanguagetools.service.Service):
             return self.nlp_engine_cache[model_name]
 
         nlp_engine = self.build_nlp_engine(model_name)
+        logging.info(f'loading model {model_name}')
         self.nlp_engine_cache[model_name] = nlp_engine
         return nlp_engine
 
@@ -75,8 +82,14 @@ class SpacyService(cloudlanguagetools.service.Service):
 
     def get_tokenization_options(self):
         result = [
-            SpacyTokenization(cloudlanguagetools.constants.Language.en, 'en_core_web_md'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.fr, 'fr_core_news_md'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.en, 'en_core_web_trf'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.fr, 'fr_dep_news_trf'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.ja, 'ja_core_news_lg'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.de, 'de_dep_news_trf'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.es, 'es_dep_news_trf'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.ru, 'ru_core_news_lg'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.pl, 'pl_core_news_lg'),
+            SpacyTokenization(cloudlanguagetools.constants.Language.it, 'it_core_news_lg'),
 
             # chinese variants
             SpacyTokenization(cloudlanguagetools.constants.Language.zh_cn, 'chinese_char', 'Characters'),

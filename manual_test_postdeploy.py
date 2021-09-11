@@ -401,8 +401,8 @@ class PostDeployTests(unittest.TestCase):
 
         self.assertEqual(data['type'], '250,000 characters')
 
-    def test_spacy_tokenization_english(self):
-        # pytest manual_test_postdeploy.py -rPP -k test_spacy_tokenization_english
+    def test_spacy_tokenization(self):
+        # pytest manual_test_postdeploy.py -rPP -k test_spacy_tokenization
 
         service = 'Spacy'
 
@@ -410,7 +410,7 @@ class PostDeployTests(unittest.TestCase):
         source_text = "I was reading today's paper."
         from_language = 'en'
         tokenization_key = {
-            'model_name': 'en_core_web_sm'
+            'model_name': 'en_core_web_md'
         }
 
         url = self.get_url('/tokenize_v1')
@@ -427,7 +427,7 @@ class PostDeployTests(unittest.TestCase):
         source_text = "Le nouveau plan d’investissement du gouvernement."
         from_language = 'fr'
         tokenization_key = {
-            'model_name': 'fr_core_news_sm'
+            'model_name': 'fr_core_news_md'
         }
 
         url = self.get_url('/tokenize_v1')

@@ -17,9 +17,15 @@ RUN wget http://tts.speech.cs.cmu.edu/awb/flite-2.0.5-current.tar.bz2 && tar xvj
 COPY requirements_frozen.txt ./
 RUN pip3 install -r requirements_frozen.txt
 # spacy trained datasets
-RUN python3 -m spacy download zh_core_web_sm
-RUN python3 -m spacy download en_core_web_md
-RUN python3 -m spacy download fr_core_news_md
+RUN python3 -m spacy download zh_core_web_trf
+RUN python3 -m spacy download en_core_web_trf
+RUN python3 -m spacy download fr_dep_news_trf
+RUN python3 -m spacy download ja_core_news_lg
+RUN python3 -m spacy download de_dep_news_trf
+RUN python3 -m spacy download es_dep_news_trf
+RUN python3 -m spacy download ru_core_news_lg
+RUN python3 -m spacy download pl_core_news_lg
+RUN python3 -m spacy download it_core_news_lg
 # modules not available on pypi
 RUN pip3 install git+https://github.com/Patreon/patreon-python
 

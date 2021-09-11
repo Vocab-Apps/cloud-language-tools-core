@@ -19,5 +19,7 @@ python3 scheduled_tasks.py
 else
 . ${CWD}/tts_keys.sh
 . ${CWD}/convertkit.sh
-exec gunicorn --workers 3 -b :8042 --timeout 120 --access-logfile - --error-logfile - app:app
+WORKERS="${GUNICORN_WORKERS:-1}" 
+echo "starting gunicorn with ${WORKERS} workers" 
+exec gunicorn --workers $WORKERS -b :8042 --timeout 120 --access-logfile - --error-logfile - app:app
 fi

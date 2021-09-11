@@ -6,6 +6,9 @@
 # docker tag lucwastiaux/cloud-language-tools:dev-3 registry.digitalocean.com/luc/cloud-language-tools:dev-3
 # docker push registry.digitalocean.com/luc/cloud-language-tools:dev-3
 
+# running:
+# docker run --env-file ./cloud-language-tools-env  -p 0.0.0.0:8042:8042/tcp lucwastiaux/cloud-language-tools:dev-3
+
 FROM ubuntu:20.04
 
 # use ubuntu mirrors

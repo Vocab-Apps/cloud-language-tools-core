@@ -32,7 +32,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     network_mode: bridge
     environment:
-      DEFAULT_EMAIL=luc.wastiaux@xsmail.com
+      - DEFAULT_EMAIL=luc.wastiaux@xsmail.com
 
 volumes:
   conf:

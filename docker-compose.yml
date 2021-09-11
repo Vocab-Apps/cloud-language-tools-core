@@ -5,6 +5,7 @@ services:
     image: lucwastiaux/cloud-language-tools:dev-4
     env_file:
       cloud-language-tools-env
+    network_mode: bridge
 
   nginx-proxy:
     image: nginxproxy/nginx-proxy

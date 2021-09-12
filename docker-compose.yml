@@ -1,11 +1,10 @@
-version: '2'
-
 services:
   cloud-language-tools:
     image: lucwastiaux/cloud-language-tools:dev-4
     env_file:
       cloud-language-tools-env
     network_mode: bridge
+    restart: unless-stopped
 
   nginx-proxy:
     image: nginxproxy/nginx-proxy
@@ -21,6 +20,7 @@ services:
       - certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
     network_mode: bridge
+    restart: unless-stopped
 
   acme-companion:
     image: nginxproxy/acme-companion
@@ -32,6 +32,7 @@ services:
       - acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
     network_mode: bridge
+    restart: unless-stopped
     environment:
       - DEFAULT_EMAIL=luc.wastiaux@xsmail.com
 

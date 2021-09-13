@@ -9,8 +9,7 @@ import logging
 import cloudlanguagetools.constants
 import cloudlanguagetools.errors
 import quotas
-
-ENV_VAR_REDIS_URL = 'REDIS_URL'
+import secrets
 
 KEY_TYPE_API_KEY = 'api_key'
 KEY_TYPE_PATREON_USER ='patreon_user'
@@ -31,7 +30,7 @@ class RedisDb():
         self.connect()
 
     def connect(self, db_num=0):
-        redis_url = os.environ[ENV_VAR_REDIS_URL]
+        redis_url = secrets.config['redis_url']
         logging.info(f'connecting to redis url: {redis_url}, db_num: {db_num}')
 
         self.r = redis.from_url(redis_url, db=db_num, decode_responses=True)

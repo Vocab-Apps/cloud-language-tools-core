@@ -1,22 +1,18 @@
 services:
   cloud-language-tools:
-    image: lucwastiaux/cloud-language-tools:dev-4
+    image: lucwastiaux/cloud-language-tools:dev-5
     env_file:
       cloud-language-tools-env
     network_mode: bridge
     restart: unless-stopped
 
   nginx-proxy:
-    image: nginxproxy/nginx-proxy
+    image: lucwastiaux/nginx-proxy:stable
     container_name: nginx-proxy
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - conf:/etc/nginx/conf.d
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - dhparam:/etc/nginx/dhparam
       - certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
     network_mode: bridge
@@ -37,9 +33,5 @@ services:
       - DEFAULT_EMAIL=luc.wastiaux@xsmail.com
 
 volumes:
-  conf:
-  vhost:
-  html:
-  dhparam:
   certs:
   acme:  

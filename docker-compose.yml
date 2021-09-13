@@ -1,6 +1,6 @@
 services:
   cloud-language-tools:
-    image: lucwastiaux/cloud-language-tools:dev-5
+    image: lucwastiaux/cloud-language-tools:dev
     env_file:
       cloud-language-tools-env
     network_mode: bridge

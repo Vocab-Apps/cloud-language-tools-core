@@ -680,7 +680,14 @@ def thai_tokenization():
         f.close()    
     logging.info(f'wrote {output_filename}')
 
-
+def test_get_language_data():
+    manager = get_manager()
+    language_data = manager.get_language_data_json()
+    output_filename = 'temp_data_files/language_data_v1.json'
+    with open(output_filename, 'w', encoding='utf8') as f:
+        f.write(json.dumps(language_data, indent=4, sort_keys=True, ensure_ascii=False))
+        f.close()    
+    logging.info(f'wrote {output_filename}')
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -689,7 +696,7 @@ if __name__ == '__main__':
                         level=logging.INFO)    
 
     # generate_video_audio()
-    test_azure_audio()
+    # test_azure_audio()
     # test_google_audio()
     # play_google_audio()
     # play_azure_audio()
@@ -722,3 +729,4 @@ if __name__ == '__main__':
     # test_debounce()
     # load_vocalware_voices()
     # thai_tokenization()
+    test_get_language_data()

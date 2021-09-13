@@ -116,6 +116,30 @@ class ServiceManager():
     def configure_forvo(self):
         self.services[cloudlanguagetools.constants.Service.Forvo.name].configure()
 
+    def get_language_data_json(self):
+        # retrieve all language data (tts, translation, transliteration, etc)
+        logging.info('retrieving language data')
+        
+        logging.info('retrieving language list')
+        language_list = self.get_language_list()
+        logging.info('retrieving translation list')
+        translation_language_list = self.get_translation_language_list()
+        logging.info('retrieving transliteration language list')
+        transliteration_language_list = self.get_transliteration_language_list()
+        logging.info('retrieving tts voice list')
+        tts_voice_list = self.get_tts_voice_list()
+        logging.info('retrieving tokenization options')
+        tokenization_options = self.get_tokenization_options()
+
+        return {
+            'language_list': language_list,
+            'translation_options': [option.json_obj() for option in translation_language_list],
+            'transliteration_options': [option.json_obj() for option in transliteration_language_list],
+            'voice_list': [voice.json_obj() for voice in tts_voice_list],
+            'tokenization_options': [option.json_obj() for option in tokenization_options],
+        }
+        
+
     def get_language_list(self):
         result_dict = {}
         for language in cloudlanguagetools.constants.Language:

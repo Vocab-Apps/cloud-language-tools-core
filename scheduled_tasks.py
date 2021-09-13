@@ -9,6 +9,7 @@ import redisdb
 import user_utils
 import secrets
 import sentry_sdk
+import cloudlanguagetools.servicemanager
 
 def backup_redis_db():
     try:
@@ -50,15 +51,33 @@ def report_getcheddar_usage():
     except:
         logging.exception(f'could not report getcheddar usage')
 
+def update_language_data():
+    try:    
+        logging.info('udpating language data')
+        manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
+        manager.configure()
+        language_data = manager.get_language_data_json()
+        redis_connection = redisdb.RedisDb()
+        redis_connection.store_language_data(language_data)
+    except:
+        logging.exception(f'could not update language_data')
+
 def setup_tasks():
     logging.info('running tasks once')
-    report_getcheddar_usage()
-    backup_redis_db()
-    update_airtable()
-    logging.info('setting up tasks')
-    schedule.every(1).hour.do(backup_redis_db)
-    schedule.every(1).hours.do(update_airtable)
-    schedule.every(6).hours.do(report_getcheddar_usage)
+    if secrets.config['scheduled_tasks']['user_data']:
+        logging.info('setting up user_data tasks')
+        report_getcheddar_usage()
+        update_airtable()
+        schedule.every(1).hours.do(update_airtable)
+        schedule.every(6).hours.do(report_getcheddar_usage)
+    if secrets.config['scheduled_tasks']['backup_redis']:
+        logging.info('setting up redis_backup')
+        backup_redis_db()
+        schedule.every(1).hour.do(backup_redis_db)
+    if secrets.config['scheduled_tasks']['language_data']:
+        logging.info('setting up language_data')
+        update_language_data()
+        schedule.every(3).hours.do(update_language_data)
 
 
 def run_scheduler():

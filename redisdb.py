@@ -38,6 +38,14 @@ class RedisDb():
     def build_key(self, key_type, key):
         return f'{KEY_PREFIX}:{key_type}:{key}'
 
+    def build_global_key(self, key):
+        return f'{KEY_PREFIX}:{key}'
+
+    def store_language_data(self, language_data):
+        redis_key = self.build_global_key('language_data_v1')
+        logging.info(f'storing language_data into {redis_key}')
+        self.r.set(redis_key, json.dumps(language_data))
+
     def build_monthly_user_key(self, key_type, api_key, prev_month=False):
         if prev_month:
             date = datetime.datetime.now() + datetime.timedelta(days=-28)

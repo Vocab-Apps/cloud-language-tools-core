@@ -29,9 +29,9 @@ class SpacyTokenization(cloudlanguagetools.tokenization.Tokenization):
 class SpacyService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.nlp_engine_cache = {}
-        self.initialize_nlp_engines()
 
-    def initialize_nlp_engines(self):
+    def load_data(self):
+        # pre-load nlp engines
         for tokenization_option in self.get_tokenization_options():
             model_name = tokenization_option.get_tokenization_key()['model_name']
             nlp_engine = self.get_nlp_engine(model_name)

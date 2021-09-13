@@ -25,6 +25,8 @@ KEY_TYPE_AUDIO_LOG ='audio_log'
 
 KEY_PREFIX = 'clt'
 
+LANGUAGE_DATA_KEY = 'language_data_v1'
+
 class RedisDb():
     def __init__(self):
         self.connect()
@@ -42,9 +44,14 @@ class RedisDb():
         return f'{KEY_PREFIX}:{key}'
 
     def store_language_data(self, language_data):
-        redis_key = self.build_global_key('language_data_v1')
+        redis_key = self.build_global_key(LANGUAGE_DATA_KEY)
         logging.info(f'storing language_data into {redis_key}')
         self.r.set(redis_key, json.dumps(language_data))
+
+    def get_language_data(self):
+        redis_key = self.build_global_key(LANGUAGE_DATA_KEY)
+        return json.loads(self.r.get(redis_key))
+
 
     def build_monthly_user_key(self, key_type, api_key, prev_month=False):
         if prev_month:

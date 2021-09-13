@@ -14,6 +14,7 @@ import pandas
 import requests
 import re
 import secrets
+import redisdb
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
@@ -689,6 +690,15 @@ def test_get_language_data():
         f.close()    
     logging.info(f'wrote {output_filename}')
 
+def test_get_language_data_redis():
+    redis_connection = redisdb.RedisDb()
+    language_data = redis_connection.get_language_data()
+    output_filename = 'temp_data_files/language_data_redis.json'
+    with open(output_filename, 'w', encoding='utf8') as f:
+        f.write(json.dumps(language_data, indent=4, sort_keys=True, ensure_ascii=False))
+        f.close()    
+    logging.info(f'wrote {output_filename}')
+
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
@@ -729,4 +739,5 @@ if __name__ == '__main__':
     # test_debounce()
     # load_vocalware_voices()
     # thai_tokenization()
-    test_get_language_data()
+    # test_get_language_data()
+    test_get_language_data_redis()

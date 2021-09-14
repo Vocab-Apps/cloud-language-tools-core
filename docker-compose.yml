@@ -46,7 +46,7 @@ services:
     network_mode: bridge
     restart: unless-stopped
     environment:
-      - DEFAULT_EMAIL=luc.wastiaux@xsmail.com
+      - DEFAULT_EMAIL
 
 volumes:
   certs:

@@ -10,6 +10,7 @@ gpg --batch --yes --passphrase ${GPG_PASSPHRASE} --output ${CWD}/rsync_net.sh  -
 gpg --batch --yes --passphrase ${GPG_PASSPHRASE} --output ${CWD}/ssh_id_rsync_redis_backup  --decrypt ssh_id_rsync_redis_backup.gpg
 if [ -n "$RUN_SCHEDULED_TASKS" ]
 then
+. ${CWD}/tts_keys.sh
 . ${CWD}/convertkit.sh
 . ${CWD}/airtable.sh
 . ${CWD}/digitalocean_spaces.sh

@@ -30,6 +30,8 @@ services:
       - "443:443"
     volumes:
       - certs:/etc/nginx/certs:ro
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html      
       - /var/run/docker.sock:/tmp/docker.sock:ro
     network_mode: bridge
     restart: unless-stopped
@@ -51,3 +53,5 @@ services:
 volumes:
   certs:
   acme:  
+  vhost:
+  html:

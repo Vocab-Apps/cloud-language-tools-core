@@ -16,9 +16,9 @@ class SpacyTokenization(cloudlanguagetools.tokenization.Tokenization):
 
     def get_tokenization_name(self):
         if self.variant != None:
-            result = f'{self.language.lang_name} ({self.variant}) {self.service.name}'
+            result = f'{self.language.lang_name} ({self.variant}), {self.service.name}'
         else:
-            result = f'{self.language.lang_name} {self.service.name}'
+            result = f'{self.language.lang_name}, {self.service.name}'
         return result
 
     def get_tokenization_key(self):

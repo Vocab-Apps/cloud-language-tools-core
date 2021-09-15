@@ -147,6 +147,10 @@ class TransliterationLanguageList(flask_restful.Resource):
     def get(self):
         return manager.get_transliteration_language_list_json()
 
+class LanguageDataV1(flask_restful.Resource):
+    def get(self):
+        return redis_connection.get_language_data()
+
 class Translate(flask_restful.Resource):
     method_decorators = [track_usage_translation, authenticate]
     def post(self):
@@ -393,6 +397,7 @@ api.add_resource(LanguageList, '/language_list')
 api.add_resource(VoiceList, '/voice_list')
 api.add_resource(TranslationLanguageList, '/translation_language_list')
 api.add_resource(TransliterationLanguageList, '/transliteration_language_list')
+api.add_resource(LanguageDataV1, '/language_data_v1')
 api.add_resource(Translate, '/translate')
 api.add_resource(TranslateAll, '/translate_all')
 api.add_resource(Transliterate, '/transliterate')

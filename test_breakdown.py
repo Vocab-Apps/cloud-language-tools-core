@@ -67,5 +67,27 @@ class TestTranslation(unittest.TestCase):
         breakdown_result = self.manager.get_breakdown(text, tokenization_option, translation_option, transliteration_option)
         pprint.pprint(breakdown_result)
 
+        expected_output = [{'lemma': 'ดิฉัน',
+        'token': 'ดิฉัน',
+        'translation': 'I',
+        'transliteration': 'dichan'},
+        {'lemma': 'อายุ',
+        'token': 'อายุ',
+        'translation': 'age',
+        'transliteration': 'ayu'},
+        {'lemma': 'ยี่สิบ',
+        'token': 'ยี่สิบ',
+        'translation': 'twenty',
+        'transliteration': 'yisip'},
+        {'lemma': 'เจ็ด',
+        'token': 'เจ็ด',
+        'translation': 'seven',
+        'transliteration': 'chet'},
+        {'lemma': 'ปี', 'token': 'ปี', 'translation': 'year', 'transliteration': 'pi'},
+        {'lemma': 'ค่ะ',
+        'token': 'ค่ะ',
+        'translation': 'yes',
+        'transliteration': 'kha'}]
 
-        self.assertTrue(False)
+
+        self.assertEqual(breakdown_result, expected_output)

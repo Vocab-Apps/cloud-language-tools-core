@@ -33,3 +33,39 @@ class TestTranslation(unittest.TestCase):
         self.assertEqual('Thai', self.language_data['language_list']['th'])
         self.assertEqual('Chinese (Cantonese, Traditional)', self.language_data['language_list']['yue'])
         self.assertEqual('Chinese (Traditional)', self.language_data['language_list']['zh_tw'])    
+
+    def test_breakdown_thai(self):
+        # pytest test_breakdown.py -s -rPP -k test_breakdown_thai
+        # pytest test_breakdown.py -s --log-cli-level=DEBUG -k test_breakdown_thai
+
+        text = 'ดิฉันอายุยี่สิบเจ็ดปีค่ะ'
+        source_language = 'th'
+        target_language = 'en'
+
+        # choose breakdown
+        tokenization_service = 'PyThaiNLP'
+        tokenization_candidates = [x for x in self.language_data['tokenization_options'] if x['language_code'] == source_language and x['service'] == tokenization_service]
+        self.assertEqual(len(tokenization_candidates), 1)
+        tokenization_option = tokenization_candidates[0]
+
+        # choose transliteration
+        transliteration_service = 'PyThaiNLP'
+        transliteration_candidates = [x for x in self.language_data['transliteration_options'] if x['language_code'] == source_language and x['service'] == transliteration_service]
+        transliteration_option = transliteration_candidates[0]
+
+        # choose translation
+        translation_service = 'Azure'
+        source_language_id = [x for x in self.language_data['translation_options'] if x['language_code'] == source_language and x['service'] == translation_service][0]['language_id']
+        target_language_id = [x for x in self.language_data['translation_options'] if x['language_code'] == target_language and x['service'] == translation_service][0]['language_id']
+        translation_option = {
+            'service': translation_service,
+            'source_language_id': source_language_id,
+            'target_language_id': target_language_id
+        }
+
+        # run the breakdown
+        breakdown_result = self.manager.get_breakdown(text, tokenization_option, translation_option, transliteration_option)
+        pprint.pprint(breakdown_result)
+
+
+        self.assertTrue(False)

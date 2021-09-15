@@ -67,7 +67,7 @@ class PyThaiNLPService(cloudlanguagetools.service.Service):
         
         if mode == PyThaiNLPTokenizationMode.Default:
             tokens = pythainlp.word_tokenize(text)
-            token_entries = [{'token': token, 'lemma': token} for token in tokens]
+            token_entries = [{'token': token, 'lemma': token, 'can_translate': True, 'can_transliterate': True} for token in tokens]
             return token_entries
 
         # raise exception

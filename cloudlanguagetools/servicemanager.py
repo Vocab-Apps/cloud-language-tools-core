@@ -236,6 +236,44 @@ class ServiceManager():
         service = self.services[service]
         return service.get_tokenization(text, tokenization_key)
 
+    def get_breakdown(self, text, tokenization_option, translation_option, transliteration_option):
+        
+        # first, tokenize
+        tokenization_service = tokenization_option['service']
+        tokenization_key = tokenization_option['tokenization_key']
+        tokenization_result = self.get_tokenization(text, tokenization_service, tokenization_key)
+
+        if translation_option != None:
+            translation_service = translation_option['service']
+            translation_source_language_id = translation_option['source_language_id']
+            translation_target_language_id = translation_option['target_language_id']
+
+        if transliteration_option != None:
+            transliteration_service = transliteration_option['service']
+            transliteration_key = transliteration_option['transliteration_key']
+
+        # then, enrich tokens with translation and transliteration
+        result = []
+        for token in tokenization_result:
+            entry = {
+                'token': token['token'],
+                'lemma': token['lemma']
+            }
+
+            if token['can_translate'] and translation_option != None:
+                # translate this token (lemma)
+                entry['translation'] = self.get_translation(token['lemma'], translation_service, translation_source_language_id, translation_target_language_id)
+
+            if token['can_transliterate'] and transliteration_option != None:
+                # transliterate the token
+                entry['transliteration'] = self.get_transliteration(token['token'], transliteration_service, transliteration_key)
+
+            result.append(entry)
+        
+        return result
+
+
+
     def detect_language(self, text_list):
         """returns an enum from constants.Language"""
         service = self.services[cloudlanguagetools.constants.Service.Azure.name]

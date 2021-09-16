@@ -198,6 +198,18 @@ class TokenizeV1(flask_restful.Resource):
             sentry_sdk.capture_exception(err)
             return {'error': str(err)}, 400    
 
+class BreakdownV1(flask_restful.Resource):
+    # method_decorators = [track_usage_transliteration, authenticate]
+    method_decorators = [authenticate]
+    def post(self):
+        try:
+            data = request.json
+            result = manager.get_breakdown(data['text'], data['tokenization_option'], data['translation_option'], data['transliteration_option'])
+            return {'breakdown': result}
+        except cloudlanguagetools.errors.RequestError as err:
+            sentry_sdk.capture_exception(err)
+            return {'error': str(err)}, 400    
+
 class Detect(flask_restful.Resource):
     method_decorators = [authenticate]
     def post(self):
@@ -402,6 +414,7 @@ api.add_resource(Translate, '/translate')
 api.add_resource(TranslateAll, '/translate_all')
 api.add_resource(Transliterate, '/transliterate')
 api.add_resource(TokenizeV1, '/tokenize_v1')
+api.add_resource(BreakdownV1, '/breakdown_v1')
 api.add_resource(Detect, '/detect')
 api.add_resource(Audio, '/audio')
 api.add_resource(AudioV2, '/audio_v2')

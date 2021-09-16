@@ -8,7 +8,7 @@ import pytest
 import quotas
 import redisdb
 import urllib.parse
-from app import app, redis_connection
+from app import app, redis_connection, manager
 import cloudlanguagetools.constants
 
 class ApiTests(unittest.TestCase):
@@ -48,6 +48,12 @@ class ApiTests(unittest.TestCase):
         # cache voice list
         response = cls.client.get('/voice_list')
         cls.voice_list = json.loads(response.data)
+
+        # generate language data (similarly to what scheduled_tasks is doing)
+        language_data = manager.get_language_data_json()
+        redis_connection.store_language_data(language_data)
+        response = cls.client.get('/language_data_v1')
+        cls.language_data = json.loads(response.data)
 
 
     @classmethod
@@ -887,7 +893,7 @@ class ApiTests(unittest.TestCase):
         source_text = "I was reading today's paper."
         from_language = 'en'
         tokenization_key = {
-            'model_name': 'en_core_web_sm'
+            'model_name': 'en_core_web_trf'
         }
 
         response = self.client.post('/tokenize_v1', json={

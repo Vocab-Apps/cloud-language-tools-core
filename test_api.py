@@ -1011,6 +1011,92 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(breakdown_result['breakdown'], expected_output)
 
+    def test_breakdown_v1_thai_alternate_options(self):
+        # pytest test_api.py -rPP -k test_breakdown_v1_thai_alternate_options
+
+        text = 'ดิฉันอายุยี่สิบเจ็ดปีค่ะ'
+        source_language = 'th'
+        target_language = 'en'
+
+        # choose breakdown
+        tokenization_service = 'PyThaiNLP'
+        tokenization_candidates = [x for x in self.language_data['tokenization_options'] if x['language_code'] == source_language and x['service'] == tokenization_service]
+        self.assertEqual(len(tokenization_candidates), 1)
+        tokenization_option = tokenization_candidates[0]
+
+        # choose transliteration
+        transliteration_service = 'PyThaiNLP'
+        transliteration_candidates = [x for x in self.language_data['transliteration_options'] if x['language_code'] == source_language and x['service'] == transliteration_service]
+        transliteration_option = transliteration_candidates[0]
+
+        # choose translation
+        translation_service = 'Azure'
+        source_language_id = [x for x in self.language_data['translation_options'] if x['language_code'] == source_language and x['service'] == translation_service][0]['language_id']
+        target_language_id = [x for x in self.language_data['translation_options'] if x['language_code'] == target_language and x['service'] == translation_service][0]['language_id']
+        translation_option = {
+            'service': translation_service,
+            'source_language_id': source_language_id,
+            'target_language_id': target_language_id
+        }
+
+        # run the breakdown with no transliteration
+        # -----------------------------------------
+        response = self.client.post('/breakdown_v1', json={
+            'text': text,
+            'tokenization_option': tokenization_option,
+            'translation_option': translation_option
+        }, headers={'api_key': self.api_key})
+
+        breakdown_result = json.loads(response.data)        
+
+        expected_output = [{'lemma': 'ดิฉัน',
+            'token': 'ดิฉัน',
+            'translation': 'I'},
+            {'lemma': 'อายุ',
+            'token': 'อายุ',
+            'translation': 'age'},
+            {'lemma': 'ยี่สิบ',
+            'token': 'ยี่สิบ',
+            'translation': 'twenty'},
+            {'lemma': 'เจ็ด',
+            'token': 'เจ็ด',
+            'translation': 'seven'},
+            {'lemma': 'ปี', 'token': 'ปี', 'translation': 'year'},
+            {'lemma': 'ค่ะ',
+            'token': 'ค่ะ',
+            'translation': 'yes'}]
+
+        self.assertEqual(breakdown_result['breakdown'], expected_output)
+
+        # run the breakdown with no translation
+        # -------------------------------------
+        response = self.client.post('/breakdown_v1', json={
+            'text': text,
+            'tokenization_option': tokenization_option,
+            'transliteration_option': transliteration_option
+        }, headers={'api_key': self.api_key})
+
+        breakdown_result = json.loads(response.data)        
+
+        expected_output = [{'lemma': 'ดิฉัน',
+            'token': 'ดิฉัน',
+            'transliteration': 'dichan'},
+            {'lemma': 'อายุ',
+            'token': 'อายุ',
+            'transliteration': 'ayu'},
+            {'lemma': 'ยี่สิบ',
+            'token': 'ยี่สิบ',
+            'transliteration': 'yisip'},
+            {'lemma': 'เจ็ด',
+            'token': 'เจ็ด',
+            'transliteration': 'chet'},
+            {'lemma': 'ปี', 'token': 'ปี', 'transliteration': 'pi'},
+            {'lemma': 'ค่ะ',
+            'token': 'ค่ะ',
+            'transliteration': 'kha'}]
+
+        self.assertEqual(breakdown_result['breakdown'], expected_output)
+
 
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate

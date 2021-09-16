@@ -204,7 +204,10 @@ class BreakdownV1(flask_restful.Resource):
     def post(self):
         try:
             data = request.json
-            result = manager.get_breakdown(data['text'], data['tokenization_option'], data['translation_option'], data['transliteration_option'])
+            result = manager.get_breakdown(data['text'], 
+                                           data['tokenization_option'], 
+                                           data.get('translation_option', None), 
+                                           data.get('transliteration_option', None))
             return {'breakdown': result}
         except cloudlanguagetools.errors.RequestError as err:
             sentry_sdk.capture_exception(err)

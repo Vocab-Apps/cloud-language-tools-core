@@ -106,7 +106,7 @@ class TestTranslation(unittest.TestCase):
         self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.en, 'Please speak slowly.')
         self.translate_text(Service.Naver, 'Please speak slowly', Language.en, Language.ko, '천천히 말씀해 주세요')
 
-        self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.fr, 'Parlez lentement.')
+        self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.fr, "parlez doucement, s'il vous plaît")
         self.translate_text(Service.Naver, 'Veuillez parler lentement.', Language.fr, Language.ko, '천천히 말씀해 주세요')        
 
     def test_translate_naver_unsupported_pair(self):
@@ -152,9 +152,10 @@ class TestTranslation(unittest.TestCase):
 
         # thai
         source_text = 'ประเทศไทย'
+        service = 'Azure'
         from_language = Language.th.name
-        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language]
-        self.assertTrue(len(transliteration_candidates) == 2)
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
+        self.assertEqual(len(transliteration_candidates), 1)
         transliteration_option = transliteration_candidates[0]
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
@@ -236,7 +237,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('pˈɔsu oʎˈaɾ ɐ kuzˈiɲɐ', result)
+        self.assertEqual('ˈpɔsu oˈʎaɾ ɐ kuˈziɲɐ', result)
 
         # portuguese - brazil
         source_text = 'Perdi a minha carteira.'
@@ -247,7 +248,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('peʁdʒˈi a mˈiɲɐ kaʁtˈejɾɐ', result)
+        self.assertEqual('peʁˈdʒi a ˈmiɲɐ kaʁˈtejɾɐ', result)
 
         # spanish
         source_text = '¿A qué hora usted cierra?'

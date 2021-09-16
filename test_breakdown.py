@@ -15,7 +15,7 @@ def get_manager():
     manager.load_data()
     return manager
 
-class TestTranslation(unittest.TestCase):
+class TestBreakdown(unittest.TestCase):
     def setUp(self):
         logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                             datefmt='%Y%m%d-%H:%M:%S',
@@ -93,7 +93,7 @@ class TestTranslation(unittest.TestCase):
         self.assertEqual(breakdown_result, expected_output)
 
     def test_tokenization_pythainlp(self):
-        # pytest test_translation.py -rPP -k test_tokenization_pythainlp
+        # pytest test_breakdown.py -rPP -k test_tokenization_pythainlp
 
         service = cloudlanguagetools.constants.Service.PyThaiNLP.name
 
@@ -105,12 +105,12 @@ class TestTranslation(unittest.TestCase):
         tokenization_result = self.manager.get_tokenization('ดิฉันอายุยี่สิบเจ็ดปีค่ะ', service, tokenization_option['tokenization_key'])
         
         expected_result = [
-            {'token': 'ดิฉัน', 'lemma': 'ดิฉัน'}, 
-            {'token': 'อายุ', 'lemma': 'อายุ'},
-            {'token': 'ยี่สิบ', 'lemma': 'ยี่สิบ'},
-            {'token': 'เจ็ด', 'lemma': 'เจ็ด'},
-            {'token': 'ปี', 'lemma': 'ปี'},
-            {'token': 'ค่ะ', 'lemma': 'ค่ะ'}
+            {'token': 'ดิฉัน', 'lemma': 'ดิฉัน', 'can_translate': True, 'can_transliterate': True}, 
+            {'token': 'อายุ', 'lemma': 'อายุ', 'can_translate': True, 'can_transliterate': True},
+            {'token': 'ยี่สิบ', 'lemma': 'ยี่สิบ', 'can_translate': True, 'can_transliterate': True},
+            {'token': 'เจ็ด', 'lemma': 'เจ็ด', 'can_translate': True, 'can_transliterate': True},
+            {'token': 'ปี', 'lemma': 'ปี', 'can_translate': True, 'can_transliterate': True},
+            {'token': 'ค่ะ', 'lemma': 'ค่ะ', 'can_translate': True, 'can_transliterate': True}
         ]
 
         self.assertEqual(tokenization_result, expected_result)

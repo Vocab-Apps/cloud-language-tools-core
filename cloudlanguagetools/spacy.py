@@ -1,6 +1,7 @@
 import spacy
 import spacy.lang.zh
 import logging
+import os
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -29,6 +30,7 @@ class SpacyTokenization(cloudlanguagetools.tokenization.Tokenization):
 class SpacyService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.nlp_engine_cache = {}
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
     def load_data(self):
         # pre-load nlp engines

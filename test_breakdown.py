@@ -116,7 +116,7 @@ class TestBreakdown(unittest.TestCase):
         self.assertEqual(tokenization_result, expected_result)
 
     def test_tokenization_spacy(self):
-        # pytest test_translation.py -rPP -k test_tokenization_spacy
+        # pytest test_breakdown.py -rPP -k test_tokenization_spacy
 
         service = cloudlanguagetools.constants.Service.Spacy.name
 

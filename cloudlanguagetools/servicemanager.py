@@ -270,6 +270,9 @@ class ServiceManager():
                 # transliterate the token
                 entry['transliteration'] = self.get_transliteration(token['token'], transliteration_service, transliteration_key)
 
+            if 'pos_description' in token:
+                entry['pos_description'] = token['pos_description']
+
             result.append(entry)
         
         return result

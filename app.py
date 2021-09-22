@@ -107,6 +107,12 @@ def track_usage_transliteration(func):
         return track_usage(cloudlanguagetools.constants.RequestType.transliteration, request, func, *args, **kwargs)
     return wrapper            
 
+def track_usage_breakdown(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return track_usage(cloudlanguagetools.constants.RequestType.breakdown, request, func, *args, **kwargs)
+    return wrapper            
+
 def track_usage_audio(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -199,12 +205,15 @@ class TokenizeV1(flask_restful.Resource):
             return {'error': str(err)}, 400    
 
 class BreakdownV1(flask_restful.Resource):
-    # method_decorators = [track_usage_transliteration, authenticate]
-    method_decorators = [authenticate]
+    method_decorators = [track_usage_breakdown, authenticate]
     def post(self):
         try:
             data = request.json
-            result = manager.get_breakdown(data['text'], 
+            text = data['text']
+            max_len = 1000
+            if len(text) > max_len:
+                raise cloudlanguagetools.errors.RequestError(f'text exceeds max length of {max_len} characters')
+            result = manager.get_breakdown(text, 
                                            data['tokenization_option'], 
                                            data.get('translation_option', None), 
                                            data.get('transliteration_option', None))

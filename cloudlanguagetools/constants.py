@@ -8,6 +8,7 @@ class RequestType(enum.Enum):
     translation = enum.auto()
     transliteration = enum.auto()
     audio = enum.auto()
+    breakdown = enum.auto()
 
 class UsageScope(enum.Enum):
     def __init__(self, key_str):

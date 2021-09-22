@@ -12,6 +12,8 @@ GETCHEDDAR_CHAR_MULTIPLIER = 1000.0
 AZURE_CJK_CHAR_MULTIPLIER = 2
 NAVER_AUDIO_CHAR_MULTIPLIER = 6
 
+BREAKDOWN_CHAR_MULTIPLIER = 3
+
 COST_TABLE = [
     # audio
     {
@@ -92,6 +94,9 @@ def adjust_character_count(
             cloudlanguagetools.constants.Language.zh_cn,
             cloudlanguagetools.constants.Language.zh_tw
         ]
+
+    if request_type == cloudlanguagetools.constants.RequestType.breakdown:  
+        return characters * BREAKDOWN_CHAR_MULTIPLIER
 
     if language != None:
         if language in azure_double_count_languages:

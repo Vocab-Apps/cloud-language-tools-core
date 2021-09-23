@@ -12,7 +12,6 @@ import cloudlanguagetools.errors
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
     manager.configure()    
-    manager.load_data()
     return manager
 
 class TestBreakdown(unittest.TestCase):

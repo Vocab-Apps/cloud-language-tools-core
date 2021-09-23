@@ -118,11 +118,6 @@ class ServiceManager():
     def configure_forvo(self):
         self.services[cloudlanguagetools.constants.Service.Forvo.name].configure()
 
-    def load_data(self):
-        for key, service in self.services.items():
-            logging.info(f'loading data for {key}')
-            service.load_data()
-
     def get_language_data_json(self):
         # retrieve all language data (tts, translation, transliteration, etc)
         logging.info('retrieving language data')

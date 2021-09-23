@@ -44,7 +44,6 @@ api = flask_restful.Api(app)
 
 manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
 manager.configure()
-manager.load_data()
 
 redis_connection = redisdb.RedisDb()
 convertkit_client = convertkit.ConvertKit()

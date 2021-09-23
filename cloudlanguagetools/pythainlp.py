@@ -1,5 +1,6 @@
 import pythainlp
 import enum
+import string
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -68,6 +69,7 @@ class PyThaiNLPService(cloudlanguagetools.service.Service):
         if mode == PyThaiNLPTokenizationMode.Default:
             tokens = pythainlp.word_tokenize(text)
             tokens = [token for token in tokens if not token.isspace()]
+            tokens = [token for token in tokens if not token in string.punctuation]
             token_entries = [{'token': token, 'lemma': token, 'can_translate': True, 'can_transliterate': True} for token in tokens]
             return token_entries
 

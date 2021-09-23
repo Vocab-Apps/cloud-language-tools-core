@@ -89,8 +89,13 @@ class TestBreakdown(unittest.TestCase):
         'translation': 'yes',
         'transliteration': 'kha'}]
 
-
         self.assertEqual(breakdown_result, expected_output)
+
+        # try same breakdown with spaces, result should be the same
+        text = 'ดิฉัน อายุ ยี่สิบเจ็ดปีค่ะ'
+        breakdown_result = self.manager.get_breakdown(text, tokenization_option, translation_option, transliteration_option)
+        self.assertEqual(breakdown_result, expected_output)
+
 
     def test_breakdown_english(self):
         # pytest test_breakdown.py -s -rPP -k test_breakdown_english

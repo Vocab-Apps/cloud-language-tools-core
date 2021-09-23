@@ -15,14 +15,15 @@ def get_manager():
     return manager
 
 class TestBreakdown(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                             datefmt='%Y%m%d-%H:%M:%S',
                             stream=sys.stdout,
                             level=logging.DEBUG)
 
-        self.manager = get_manager()
-        self.language_data = self.manager.get_language_data_json()
+        cls.manager = get_manager()
+        cls.language_data = cls.manager.get_language_data_json()
 
     def test_language_list(self):
         self.assertTrue(len(self.language_data['language_list']) > 0)

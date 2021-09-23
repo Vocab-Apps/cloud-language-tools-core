@@ -32,6 +32,13 @@ class SpacyService(cloudlanguagetools.service.Service):
         self.nlp_engine_cache = {}
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+    def preload_data(self):
+        # pre-load nlp engines (to test ram utilization)
+        for tokenization_option in self.get_tokenization_options():
+            model_name = tokenization_option.get_tokenization_key()['model_name']
+            nlp_engine = self.get_nlp_engine(model_name)
+        
+
     def build_nlp_engine(self, model_name):
         if model_name == 'chinese_char':
             return spacy.lang.zh.Chinese()

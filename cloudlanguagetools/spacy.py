@@ -94,9 +94,17 @@ class SpacyService(cloudlanguagetools.service.Service):
             SpacyTokenization(cloudlanguagetools.constants.Language.pl, 'pl_core_news_lg'),
             SpacyTokenization(cloudlanguagetools.constants.Language.it, 'it_core_news_lg'),
 
-            # chinese variants
-            SpacyTokenization(cloudlanguagetools.constants.Language.zh_cn, 'chinese_char', 'Characters'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.zh_cn, 'chinese_jieba', 'Jieba (words)'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.zh_cn, 'chinese_jieba', 'PKUSeg (words)'),
         ]
+        chinese_language_list = [
+            cloudlanguagetools.constants.Language.zh_cn,
+            cloudlanguagetools.constants.Language.zh_tw,
+            cloudlanguagetools.constants.Language.yue
+        ]
+        for language in chinese_language_list:
+            # chinese variants
+            result.extend([
+                SpacyTokenization(language, 'chinese_char', 'Characters'),
+                SpacyTokenization(language, 'chinese_jieba', 'Jieba (words)'),
+                SpacyTokenization(language, 'chinese_jieba', 'PKUSeg (words)')
+            ])
         return result

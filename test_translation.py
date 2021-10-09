@@ -204,7 +204,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('pjatʃere di konoʃʃerla', result)
+        self.assertEqual('pjaˈtʃere di konoʃʃerla', result)
 
         # japanese - Kana
         source_text = 'おはようございます'

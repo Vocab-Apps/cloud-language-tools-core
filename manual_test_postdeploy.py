@@ -404,6 +404,10 @@ class PostDeployTests(unittest.TestCase):
     def test_spacy_tokenization(self):
         # pytest manual_test_postdeploy.py -rPP -k test_spacy_tokenization
 
+        if int(os.environ['CLT_RUN_NLP_TESTS']) == 0:
+            # skip 
+            return
+
         service = 'Spacy'
 
         # english

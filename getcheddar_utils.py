@@ -35,8 +35,6 @@ class GetCheddarUtils():
             status = 'canceled'
         customer_code = data['customer']['code']
         customer_key = data['customer']['key']
-        update_url = f'{self.hosted_page_url}/update?code={urllib.parse.quote(customer_code)}&key={customer_key}'
-        cancel_url = f'{self.hosted_page_url}/cancel?code={urllib.parse.quote(customer_code)}&key={customer_key}'
         return {
             'type': activity_type,
             'code': customer_code,
@@ -45,8 +43,8 @@ class GetCheddarUtils():
             'thousand_char_quota': data['subscription']['plan']['items'][0]['quantityIncluded'],
             'thousand_char_overage_allowed': int(overage_allowed == True),
             'thousand_char_used': data['subscription']['invoice']['items'][0]['quantity'],
-            'update_url': update_url,
-            'cancel_url': cancel_url
+            'update_url': self.build_update_url(customer_code, customer_key),
+            'cancel_url': self.build_cancel_url(customer_code, customer_key)
         }
 
 
@@ -77,6 +75,13 @@ class GetCheddarUtils():
         customer_element = root.find('./customer')
         return self.decode_customer_element(customer_element)
 
+    def build_cancel_url(self, customer_code, customer_key):
+        cancel_url = f'{self.hosted_page_url}/cancel?code={urllib.parse.quote(customer_code)}&key={customer_key}'
+        return cancel_url
+
+    def build_update_url(self, customer_code, customer_key):
+        update_url = f'{self.hosted_page_url}/update?code={urllib.parse.quote(customer_code)}&key={customer_key}'
+        return update_url
 
     def print_json_webhook(self, data):
         webhook_formatted = pprint.pformat(data)

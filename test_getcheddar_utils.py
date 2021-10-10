@@ -8,11 +8,14 @@ class TestGetCheddarUtils(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.utils = getcheddar_utils.GetCheddarUtils()
+        cls.maxDiff = None
 
         logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                             datefmt='%Y%m%d-%H:%M:%S',
                             stream=sys.stdout,
                             level=logging.DEBUG)
+
+                        
 
     def test_decode_webhook_new_subscription(self):
         data = {'activityActor': 'luc.wastiaux@xsmail.com',
@@ -157,7 +160,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 0
+            'thousand_char_used': 0,
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=no1%40spam.com&key=d868455a94',
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=no1%40spam.com&key=d868455a94'
         }
         self.assertEqual(webhook_data, expected_data)
 

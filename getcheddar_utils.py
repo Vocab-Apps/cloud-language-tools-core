@@ -16,6 +16,7 @@ class GetCheddarUtils():
         self.product_code = secrets.config['getcheddar']['product_code']
         self.user = secrets.config['getcheddar']['user']
         self.api_key = secrets.config['getcheddar']['api_key']
+        self.hosted_page_url = secrets.config['getcheddar']['hosted_page_url']
 
     def get_api_secret(self):
         return self.api_key
@@ -32,14 +33,20 @@ class GetCheddarUtils():
         status = 'active'
         if activity_type == 'subscriptionCanceled':
             status = 'canceled'
+        customer_code = data['customer']['code']
+        customer_key = data['customer']['key']
+        update_url = f'{self.hosted_page_url}/update?code={urllib.parse.quote(customer_code)}&key={customer_key}'
+        cancel_url = f'{self.hosted_page_url}/cancel?code={urllib.parse.quote(customer_code)}&key={customer_key}'
         return {
             'type': activity_type,
-            'code': data['customer']['code'],
+            'code': customer_code,
             'email': data['customer']['email'],
             'status': status,
             'thousand_char_quota': data['subscription']['plan']['items'][0]['quantityIncluded'],
             'thousand_char_overage_allowed': int(overage_allowed == True),
-            'thousand_char_used': data['subscription']['invoice']['items'][0]['quantity']
+            'thousand_char_used': data['subscription']['invoice']['items'][0]['quantity'],
+            'update_url': update_url,
+            'cancel_url': cancel_url
         }
 
 

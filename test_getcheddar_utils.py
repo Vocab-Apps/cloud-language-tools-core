@@ -306,7 +306,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'active',
             'thousand_char_quota': 500,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 0
+            'thousand_char_used': 0,
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b',
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b'
         }
         self.assertEqual(webhook_data, expected_data)        
 
@@ -495,7 +497,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'active',
             'thousand_char_quota': 500,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 123.45
+            'thousand_char_used': 123.45,
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b',
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b'
         }
         self.assertEqual(webhook_data, expected_data)
 
@@ -684,7 +688,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'active',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 1,
-            'thousand_char_used': 0.0
+            'thousand_char_used': 0.0,
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b',
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b'
         }
         self.assertEqual(webhook_data, expected_data)        
 
@@ -854,7 +860,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 42.789
+            'thousand_char_used': 42.789,
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b',
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b'
         }
         self.assertEqual(webhook_data, expected_data)                
 
@@ -998,7 +1006,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'canceled',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 0.0
+            'thousand_char_used': 0.0,
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b',
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b'
         }
         self.assertEqual(webhook_data, expected_data)
 
@@ -1146,7 +1156,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'canceled',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 0.0
+            'thousand_char_used': 0.0,
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bdevelopment.language_tools.customer-1626266982%40mailc.net&key=4d5cb2fb95',
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bdevelopment.language_tools.customer-1626266982%40mailc.net&key=4d5cb2fb95'
         }
         self.assertEqual(webhook_data, expected_data)                                        
 
@@ -1290,7 +1302,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'active',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 1,
-            'thousand_char_used': 0.0
+            'thousand_char_used': 0.0,
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b',
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bcustomer2%40mailc.net&key=f63826b48b'
         }
         self.assertEqual(webhook_data, expected_data)        
 

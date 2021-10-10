@@ -4,6 +4,7 @@ import datetime
 import argparse
 import json
 
+import secrets
 import quotas
 import redisdb
 import airtable_utils
@@ -17,7 +18,8 @@ import cloudlanguagetools.constants
 class UserUtils():
     def __init__(self):
         self.airtable_utils = airtable_utils.AirtableUtils()
-        self.patreon_utils = patreon_utils.PatreonUtils()
+        if secrets.config['patreon']['enable']:
+            self.patreon_utils = patreon_utils.PatreonUtils()
         self.convertkit_client = convertkit.ConvertKit()
         self.redis_connection = redisdb.RedisDb()
         self.getcheddar_utils = getcheddar_utils.GetCheddarUtils()

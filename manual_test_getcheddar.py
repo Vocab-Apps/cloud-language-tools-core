@@ -12,6 +12,7 @@ import datetime
 import time
 import sys
 
+import secrets
 import redisdb
 import getcheddar_utils
 import user_utils
@@ -45,6 +46,10 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
         cls.customer_code_timestamp_offset = 0
 
+        cls.hosted_page_url = secrets.config['getcheddar']['hosted_page_url']
+
+        cls.maxDiff = None
+
 
     @classmethod
     def tearDownClass(cls):
@@ -55,6 +60,13 @@ class GetCheddarEndToEnd(unittest.TestCase):
         customer_code = f'languagetools+development.language_tools.customer-{timestamp}@mailc.net'
         self.customer_code_timestamp_offset +=1
         return customer_code
+
+    def clean_actual_user_data(self, actual_user_data):
+        # we can't assert urls because we don't have the customer keys
+        self.assertTrue(len(actual_user_data['update_url']) > 0)
+        self.assertTrue(len(actual_user_data['cancel_url']) > 0)
+        del actual_user_data['cancel_url']
+        del actual_user_data['update_url']
 
     def test_create_delete_user(self):
         # create a user
@@ -118,6 +130,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         print(f'api_key: {api_key}')
         
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -258,6 +271,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         print(f'api_key: {api_key}')
         
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -308,6 +322,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
         # retrieve user data again
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -341,6 +356,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         user_utils_instance.report_getcheddar_user_usage(api_key)
 
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -426,6 +442,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # retrieve user data again
         # ------------------------
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -451,6 +468,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # retrieve user data again
         # ------------------------
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -497,6 +515,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # check getcheddar account data (should be unchanged)
         # ----------------------------------------
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -519,6 +538,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         user_utils_instance.report_getcheddar_user_usage(api_key)
 
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -602,6 +622,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # ---------------------------------------
 
         actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        self.clean_actual_user_data(actual_user_data_1)
         expected_user_data_1 = {
             'type': 'getcheddar',
             'code': customer_code_1,
@@ -614,6 +635,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.assertEqual(actual_user_data_1, expected_user_data_1)
 
         actual_user_data_2 = self.redis_connection.get_getcheddar_user_data(customer_code_2)
+        self.clean_actual_user_data(actual_user_data_2)
         expected_user_data_2 = {
             'type': 'getcheddar',
             'code': customer_code_2,
@@ -639,6 +661,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # check user data again
 
         actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        self.clean_actual_user_data(actual_user_data_1)
         expected_user_data_1 = {
             'type': 'getcheddar',
             'code': customer_code_1,
@@ -651,6 +674,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.assertEqual(actual_user_data_1, expected_user_data_1)
 
         actual_user_data_2 = self.redis_connection.get_getcheddar_user_data(customer_code_2)
+        self.clean_actual_user_data(actual_user_data_2)
         expected_user_data_2 = {
             'type': 'getcheddar',
             'code': customer_code_2,
@@ -663,6 +687,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.assertEqual(actual_user_data_2, expected_user_data_2)
 
         actual_user_data_3 = self.redis_connection.get_getcheddar_user_data(customer_code_3)
+        self.clean_actual_user_data(actual_user_data_3)
         expected_user_data_3 = {
             'type': 'getcheddar',
             'code': customer_code_3,
@@ -784,6 +809,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         user_utils_instance.report_getcheddar_user_usage(api_key)
 
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -804,6 +830,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
         # get user data
         actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
         expected_user_data = {
             'type': 'getcheddar',
             'code': customer_code,
@@ -861,6 +888,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # ---------------------------------------
 
         actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        self.clean_actual_user_data(actual_user_data_1)
         expected_user_data_1 = {
             'type': 'getcheddar',
             'code': customer_code_1,
@@ -873,6 +901,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.assertEqual(actual_user_data_1, expected_user_data_1)
 
         actual_user_data_2 = self.redis_connection.get_getcheddar_user_data(customer_code_2)
+        self.clean_actual_user_data(actual_user_data_2)
         expected_user_data_2 = {
             'type': 'getcheddar',
             'code': customer_code_2,
@@ -898,6 +927,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # check user data again
 
         actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        self.clean_actual_user_data(actual_user_data_1)
         expected_user_data_1 = {
             'type': 'getcheddar',
             'code': customer_code_1,
@@ -910,6 +940,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.assertEqual(actual_user_data_1, expected_user_data_1)
 
         actual_user_data_2 = self.redis_connection.get_getcheddar_user_data(customer_code_2)
+        self.clean_actual_user_data(actual_user_data_2)
         expected_user_data_2 = {
             'type': 'getcheddar',
             'code': customer_code_2,
@@ -933,6 +964,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         user_utils_instance.report_getcheddar_usage_all_users()        
 
         actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        self.clean_actual_user_data(actual_user_data_1)
         expected_user_data_1 = {
             'type': 'getcheddar',
             'code': customer_code_1,
@@ -945,6 +977,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         self.assertEqual(actual_user_data_1, expected_user_data_1)
 
         actual_user_data_2 = self.redis_connection.get_getcheddar_user_data(customer_code_2)
+        self.clean_actual_user_data(actual_user_data_2)
         expected_user_data_2 = {
             'type': 'getcheddar',
             'code': customer_code_2,
@@ -1001,6 +1034,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # ---------------------------------------
 
         actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        self.clean_actual_user_data(actual_user_data_1)
         expected_user_data_1 = {
             'type': 'getcheddar',
             'code': customer_code_1,
@@ -1018,6 +1052,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         time.sleep(1)
 
         actual_user_data_1 = self.redis_connection.get_getcheddar_user_data(customer_code_1)
+        self.clean_actual_user_data(actual_user_data_1)
         expected_user_data_1 = {
             'type': 'getcheddar',
             'code': customer_code_1,
@@ -1031,6 +1066,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
         # get customer data from getcheddar
         actual_getcheddar_customer_data = self.getcheddar_utils.get_customer(customer_code_1)
+        self.clean_actual_user_data(actual_getcheddar_customer_data)
         expected_getcheddar_customer_data = {
             'code': customer_code_1,
             'email': customer_code_1,

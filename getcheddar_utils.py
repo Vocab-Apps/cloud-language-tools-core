@@ -61,6 +61,8 @@ class GetCheddarUtils():
         overage_allowed = overage_amount > 0 and canceled_date == None
         current_usage = float(root.find('./subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text)
 
+        customer_key = root.find('./key').text
+
         return {
             'code': customer_code,
             'email': customer_email,
@@ -68,6 +70,8 @@ class GetCheddarUtils():
             'thousand_char_quota': quantity_included,
             'thousand_char_overage_allowed': int(overage_allowed == True),
             'thousand_char_used': current_usage,
+            'update_url': self.build_update_url(customer_code, customer_key),
+            'cancel_url': self.build_cancel_url(customer_code, customer_key)
         }
 
     def decode_customer_xml(self, xml_str):

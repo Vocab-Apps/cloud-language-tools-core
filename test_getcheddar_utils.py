@@ -1470,7 +1470,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'active',
             'thousand_char_quota': 250,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 42.789
+            'thousand_char_used': 42.789,
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bcustomer3%40mailc.net&key=31b4294939',
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bcustomer3%40mailc.net&key=31b4294939'
         }
         self.assertEqual(actual_xml_data, expected_xml_data)
 
@@ -1767,7 +1769,9 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'active',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 1,
-            'thousand_char_used': 45.87
+            'thousand_char_used': 45.87,
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bcustomer4%40mailc.net&key=03ff591107',
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bcustomer4%40mailc.net&key=03ff591107'
         }
         self.assertEqual(actual_xml_data, expected_xml_data)
 
@@ -2186,6 +2190,8 @@ class TestGetCheddarUtils(unittest.TestCase):
             'status': 'canceled',
             'thousand_char_quota': 1000,
             'thousand_char_overage_allowed': 0,
-            'thousand_char_used': 45.87
+            'thousand_char_used': 45.87,
+            'cancel_url': 'https://languagetools-dev-local.chargevault.com/cancel?code=languagetools%2Bcustomer4%40mailc.net&key=03ff591107',
+            'update_url': 'https://languagetools-dev-local.chargevault.com/update?code=languagetools%2Bcustomer4%40mailc.net&key=03ff591107'
         }
         self.assertEqual(actual_xml_data, expected_xml_data)        

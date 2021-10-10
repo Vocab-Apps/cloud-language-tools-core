@@ -350,7 +350,9 @@ class RedisDb():
                 return {
                     'email': api_key_data['email'],
                     'type': account_type,
-                    'usage': f'{characters_str} characters'
+                    'usage': f'{characters_str} characters',
+                    'update_url': api_key_data.get('update_url', None),
+                    'cancel_url': api_key_data.get('cancel_url', None)
                 }
 
             raise Exception(f"""unsupported api key type: {api_key_data['type']}""")

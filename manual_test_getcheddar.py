@@ -68,6 +68,13 @@ class GetCheddarEndToEnd(unittest.TestCase):
         del actual_user_data['cancel_url']
         del actual_user_data['update_url']
 
+    def clean_actual_account_data(self, account_data):
+        # we can't assert urls because we don't have the customer keys
+        self.assertTrue(len(account_data['update_url']) > 0)
+        self.assertTrue(len(account_data['cancel_url']) > 0)
+        del account_data['cancel_url']
+        del account_data['update_url']        
+
     def test_create_delete_user(self):
         # create a user
         # pytest manual_test_getcheddar.py -rPP -k test_create_delete_user
@@ -145,6 +152,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data
         # -------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
@@ -167,6 +175,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data
         # -------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
@@ -202,6 +211,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data
         # -------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '500,000 characters',
@@ -286,6 +296,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data
         # -------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
@@ -309,6 +320,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data
         # -------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
@@ -337,6 +349,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data
         # -------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
@@ -403,6 +416,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data
         # -------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
@@ -427,6 +441,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data
         # -------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
@@ -483,6 +498,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data
         # -------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
@@ -505,6 +521,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data (should reported we maxed out the 250k characters)
         # ----------------------------------------------------------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',
@@ -554,6 +571,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # verify account data (should reported we maxed out the 250k characters)
         # ----------------------------------------------------------------------
         actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
         expected_account_data = {
             'email': customer_code,
             'type': '250,000 characters',

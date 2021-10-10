@@ -64,7 +64,7 @@ class ConvertKit():
         return True # true by default
 
 
-    def register_getcheddar_user(self, email, api_key):
+    def register_getcheddar_user(self, email, api_key, update_url, cancel_url):
         if self.enable:
             logging.info(f'registering new getcheddar user on convertkit')
             url = f'https://api.convertkit.com/v3/forms/{self.getcheddar_user_form_id}/subscribe'
@@ -72,7 +72,9 @@ class ConvertKit():
                     "api_key": self.api_key,
                     "email": email,
                     'fields' : {
-                        'getcheddar_api_key': api_key
+                        'getcheddar_api_key': api_key,
+                        'getcheddar_update_url': update_url,
+                        'getcheddar_cancel_url': cancel_url
                     }
             }, timeout=cloudlanguagetools.constants.RequestTimeout)
             if response.status_code != 200:

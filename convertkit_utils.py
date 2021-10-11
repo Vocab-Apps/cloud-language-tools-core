@@ -134,11 +134,37 @@ def configure_addtag_webhook():
     data = response.json()
     pprint.pprint(data)
 
+def configure_addtag_webhook_trialkey():
+    url = 'https://api.convertkit.com/v3/automations/hooks'
+    response = requests.post(url, json={
+        'api_secret': api_secret,
+        'target_url': 'https://cloud-language-tools-tts-prod.anki.study/convertkit_subscriber_request_trial_key',
+        'event': {  'name': 'subscriber.tag_add', 'tag_id': 2248152 } # trial_api_key_requested
+    })
+    print(response)
+    print(response.content)
+    data = response.json()
+    pprint.pprint(data)
+
+def configure_addtag_webhook_patreonuser():
+    url = 'https://api.convertkit.com/v3/automations/hooks'
+    response = requests.post(url, json={
+        'api_secret': api_secret,
+        'target_url': 'https://cloud-language-tools-tts-prod.anki.study/convertkit_subscriber_request_patreon_key',
+        'event': {  'name': 'subscriber.tag_add', 'tag_id': 2293841 } # patreon_user
+    })
+    print(response)
+    print(response.content)
+    data = response.json()
+    pprint.pprint(data)    
+
 
 if __name__ == '__main__':
     # configure_addtag_webhook()
-    # list_tags()
-    list_fields()
+    # configure_addtag_webhook_trialkey()
+    # configure_addtag_webhook_patreonuser()
+    list_tags()
+    # list_fields()
     # list_subscribers()
     # list_canceled()
     # view_subscribers()

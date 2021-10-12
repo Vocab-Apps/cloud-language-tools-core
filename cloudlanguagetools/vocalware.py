@@ -75,6 +75,11 @@ class VocalWareService(cloudlanguagetools.service.Service):
 
         response_data = response.content
         error_message = f'Status code: {response.status_code}: {response_data}'
+
+        # reformat certain error messages
+        if response.status_code == 503:
+            error_message = f'VocalWare service temporarily unavailable (503)'
+
         raise cloudlanguagetools.errors.RequestError(error_message)
 
     def get_tts_voice_list(self):

@@ -467,6 +467,7 @@ class UserUtils():
         api_key_list_df = self.get_api_key_list_df(api_key_list, cloudlanguagetools.constants.ApiKeyType.getcheddar.name)
 
         getcheddar_customer_data_df = self.get_getcheddar_all_customers()
+        getcheddar_customer_data_df['plan_percent_used'] = getcheddar_customer_data_df['plan_usage'] / getcheddar_customer_data_df['plan']
 
         # get user tracking data
         tracking_data_df = self.get_user_tracking_data(api_key_list)
@@ -528,18 +529,21 @@ class UserUtils():
 
     def update_tags_convertkit_getcheddar_users(self, data_df):
         # perform necessary taggings on convertkit getcheddar users
+        logging.info('performing tag updates for getcheddar users')
         
         # make the logic a bit easier by removing nans
         data_df['tags'] = data_df['tags'].fillna("").apply(list)
 
         tag_id_active = self.convertkit_client.full_tag_id_map['getcheddar_active']
         tag_id_cancel = self.convertkit_client.full_tag_id_map['getcheddar_canceled']
+        tag_id_near_max = self.convertkit_client.full_tag_id_map['getcheddar_near_max']
 
         for index, row in data_df.iterrows():
             status = row['status']
             email = row['email']
             subscriber_id = row['subscriber_id']
             tags = row['tags']
+            near_max = row['plan_percent_used'] > 0.75 # near maxed out
 
             if status == 'active':
                 # if tag getcheddar_active is not set, we have to set it
@@ -558,6 +562,12 @@ class UserUtils():
             else:
                 raise Exception(f'unknown getcheddar status: {status}, {row}')
 
+            if near_max:
+                if 'getcheddar_near_max' not in tags:
+                    self.convertkit_client.tag_user(email, tag_id_near_max)
+            else:
+                if 'getcheddar_near_max' in tags:
+                    self.convertkit_client.untag_user(subscriber_id, tag_id_near_max)
 
     def perform_airtable_trial_tag_requests(self):
         airtable_records_df = self.airtable_utils.get_trial_tag_requests()

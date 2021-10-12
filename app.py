@@ -340,7 +340,7 @@ class PatreonKey(flask_restful.Resource):
             result_html = f"Hello {result['email']}! Thanks for being a fan! Here is your API Key, to use with AwesomeTTS Plus or Language Tools: <b>{api_key}</b>"
             return make_response(result_html, 200, headers)
 
-        return 'You need to be a patreon subscriber to obtain an API key'
+        return 'You need to be a patreon subscriber to obtain an API key. Please contact awesometts@airpost.net if you believe you should be entitled.'
 
 class PatreonKeyRequest(flask_restful.Resource):
     def get(self):

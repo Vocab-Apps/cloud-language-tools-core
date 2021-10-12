@@ -18,6 +18,9 @@ def user_authorized(oauth_code):
     oauth_client = patreon.OAuth(client_id, client_secret)
     tokens = oauth_client.get_tokens(oauth_code, redirect_uri)
     print(tokens)
+    if 'access_token' not in tokens:
+        return {'authorized': False}
+        
     access_token = tokens['access_token']
 
     api_client = patreon.API(access_token)

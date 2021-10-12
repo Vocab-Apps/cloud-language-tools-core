@@ -122,6 +122,18 @@ class ConvertKit():
         else:
             logging.info(f'tagged user with tag_id {tag_id}: {email}')
 
+    def untag_user(self, subscriber_id, tag_id):
+        url = f'https://api.convertkit.com/v3/subscribers/#{subscriber_id}/tags/#{tag_id}'
+        response = requests.delete(url, json={
+                "api_secret": self.api_secret
+        }, timeout=cloudlanguagetools.constants.RequestTimeout)
+        # throttle
+        time.sleep(CONVERTKIT_THROTTLE_REQUESTS_SLEEP)
+        if response.status_code != 200:
+            logging.error(f'could not untag user: {response.content}')
+        else:
+            logging.info(f'untagged user with tag_id {tag_id}: {subscriber_id}')
+
     def tag_user_set_fields(self, email, tag_id, field_map):
         url = f'https://api.convertkit.com/v3/tags/{tag_id}/subscribe'
         response = requests.post(url, json={

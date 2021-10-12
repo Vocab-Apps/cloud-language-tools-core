@@ -491,6 +491,9 @@ class UserUtils():
         # do this when we're in production
         self.update_tags_convertkit_users(combined_df)
 
+        # set tags specific to getcheddar users
+        self.update_tags_convertkit_getcheddar_users(combined_df)
+
         return combined_df
 
     def update_tags_convertkit_users(self, data_df):
@@ -522,6 +525,39 @@ class UserUtils():
                         logging.info(f'tagging {email} with {tag_name}')
                         tag_id = self.convertkit_client.full_tag_id_map[tag_name]
                         self.convertkit_client.tag_user(email, tag_id)                
+
+    def update_tags_convertkit_getcheddar_users(self, data_df):
+        # perform necessary taggings on convertkit getcheddar users
+        
+        # make the logic a bit easier by removing nans
+        data_df['tags'] = data_df['tags'].fillna("").apply(list)
+
+        tag_id_active = self.convertkit_client.full_tag_id_map['getcheddar_active']
+        tag_id_cancel = self.convertkit_client.full_tag_id_map['getcheddar_canceled']
+
+        for index, row in data_df.iterrows():
+            status = row['status']
+            email = row['email']
+            subscriber_id = row['subscriber_id']
+            tags = row['tags']
+
+            if status == 'active':
+                # if tag getcheddar_active is not set, we have to set it
+                if 'getcheddar_active' not in tags:
+                    self.convertkit_client.tag_user(email, tag_id_active)
+                # if tag getcheddar_canceled is set, we have to unset it
+                if 'getcheddar_canceled' in tags:
+                    self.convertkit_client.untag_user(subscriber_id, tag_id_cancel)
+            elif status == 'canceled':
+                # if tag getcheddar_active is set, we have to unset it
+                if 'getcheddar_active' in tags:
+                    self.convertkit_client.untag_user(subscriber_id, tag_id_active)
+                # if tag getcheddar_canceled is not set, we have to set it
+                if 'getcheddar_canceled' not in tags:
+                    self.convertkit_client.tag_user(email, tag_id_cancel)
+            else:
+                raise Exception(f'unknown getcheddar status: {status}, {row}')
+
 
     def perform_airtable_trial_tag_requests(self):
         airtable_records_df = self.airtable_utils.get_trial_tag_requests()

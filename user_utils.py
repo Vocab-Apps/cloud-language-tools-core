@@ -456,7 +456,7 @@ class UserUtils():
         customer_data_list = self.getcheddar_utils.get_all_customers()
         customer_data_df = pandas.DataFrame(customer_data_list)
         customer_data_df = customer_data_df.rename(columns={'thousand_char_quota': 'plan', 'thousand_char_used': 'plan_usage'})
-        customer_data_df = customer_data_df[['code', 'plan', 'plan_usage']]
+        customer_data_df = customer_data_df[['code', 'plan', 'plan_usage', 'status']]
         return customer_data_df
 
     def build_user_data_getcheddar(self):
@@ -612,7 +612,7 @@ class UserUtils():
         joined_df = pandas.merge(airtable_getcheddar_df, user_data_df, how='left', left_on='code', right_on='code')
 
 
-        update_df = joined_df[['record_id', 'api_key', 'plan', 'plan_usage', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions']]
+        update_df = joined_df[['record_id', 'api_key', 'plan', 'status', 'plan_usage', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions']]
         update_df = update_df.fillna({
             'api_key': '',
         })

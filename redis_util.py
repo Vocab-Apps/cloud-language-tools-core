@@ -47,7 +47,8 @@ def main():
                'show_hash_key',
                'remove_key',
                'modify_key_expiration',
-               'backup_redis_db']
+               'backup_redis_db',
+               'restore_redis_db']
     parser.add_argument('--action', choices=choices, help='Indicate what to do', required=True)
     parser.add_argument('--api_key', help='Pass in API key to check validity')
     parser.add_argument('--expiration', help='expiration for API key', type=int) # 1627649602
@@ -110,6 +111,10 @@ def main():
         redis_api_key = connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
         print(f'redis_api_key: {redis_api_key}')
         connection.r.hset(redis_api_key, 'expiration', expiration)
+    elif args.action == 'restore_redis_db':
+        json_file_path = args.redis_backup_file
+        logging.info(f'restoring redis DB from file: {json_file_path}')
+        connection.restore_db_backup(json_file_path)
     else:
         print(f'not recognized: {args.action}')
 

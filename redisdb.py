@@ -824,7 +824,22 @@ class RedisDb():
 
         logging.info(f'finished getting full key dump')
         return full_key_map
-                
+
+    def restore_db_backup(self, json_file_path):
+        if os.environ['ENV'] != 'local':
+            raise Exception(f'only supported on ENV=local')
+        logging.warn(f'WARNING! going to restore redis DB from file {json_file_path} in 10s')
+        time.sleep(10)
+        f = open (json_file_path, "r")
+        data = json.loads(f.read())
+        logging.info(f'number of keys: {len(data)}')
+        for key, value in data.items():
+            if isinstance(value, str):
+                self.r.set(key, value)
+            elif isinstance(value, dict):
+                self.r.hset(key, mapping=value)
+            else:
+                raise Exception(f'value type not supported: {type(value)}')
 
     def clear_db(self, wait=True):
         if wait:

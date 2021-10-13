@@ -533,6 +533,9 @@ class UserUtils():
         
         # make the logic a bit easier by removing nans
         data_df['tags'] = data_df['tags'].fillna("").apply(list)
+        # remove users which don't have a convertkit subscriber id
+        data_df = data_df.dropna(subset=['subscriber_id'])
+        data_df['subscriber_id'] = data_df['subscriber_id'].astype(int)
 
         tag_id_active = self.convertkit_client.full_tag_id_map['getcheddar_active']
         tag_id_cancel = self.convertkit_client.full_tag_id_map['getcheddar_canceled']
@@ -544,6 +547,8 @@ class UserUtils():
             subscriber_id = row['subscriber_id']
             tags = row['tags']
             near_max = row['plan_percent_used'] > 0.75 # near maxed out
+
+            logging.info(f'processing convertkit getcheddar tags for {email} subscriber_id {subscriber_id} {status}')
 
             if status == 'active':
                 # if tag getcheddar_active is not set, we have to set it

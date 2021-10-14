@@ -117,9 +117,6 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.constants.AudioLanguage.fr_BE: 'BEL',
             cloudlanguagetools.constants.AudioLanguage.nl_BE: 'BEL',
             cloudlanguagetools.constants.AudioLanguage.nl_NL: 'NLD',
-            cloudlanguagetools.constants.AudioLanguage.ar_EG: 'EGY',
-            cloudlanguagetools.constants.AudioLanguage.ar_SA: 'SAU',
-            cloudlanguagetools.constants.AudioLanguage.ar_XA: 'ANY', # any country
             cloudlanguagetools.constants.AudioLanguage.de_AT: 'AUT',
             cloudlanguagetools.constants.AudioLanguage.de_DE: 'DEU',
             cloudlanguagetools.constants.AudioLanguage.de_CH: 'CHE',
@@ -134,13 +131,62 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.constants.AudioLanguage.en_NZ: 'NZL',
             cloudlanguagetools.constants.AudioLanguage.en_SG: 'SGP',
             cloudlanguagetools.constants.AudioLanguage.en_ZA: 'ZAF',
-            cloudlanguagetools.constants.AudioLanguage.es_ES: 'ESP',
-            cloudlanguagetools.constants.AudioLanguage.es_MX: 'MEX',
-            cloudlanguagetools.constants.AudioLanguage.es_LA: 'ANY', # any country
-            cloudlanguagetools.constants.AudioLanguage.es_US: 'USA', 
-            cloudlanguagetools.constants.AudioLanguage.es_AR: 'ARG', 
-            cloudlanguagetools.constants.AudioLanguage.es_CO: 'COL', 
+
             cloudlanguagetools.constants.AudioLanguage.en_GB_WLS: 'GBR', 
+            cloudlanguagetools.constants.AudioLanguage.bn_BD: 'BGD', 
+            cloudlanguagetools.constants.AudioLanguage.en_KE: 'KEN', 
+            cloudlanguagetools.constants.AudioLanguage.ta_IN: 'IND', 
+            cloudlanguagetools.constants.AudioLanguage.ur_IN: 'IND',
+            cloudlanguagetools.constants.AudioLanguage.bn_IN: 'IND',
+            cloudlanguagetools.constants.AudioLanguage.en_NG: 'NGA',
+            cloudlanguagetools.constants.AudioLanguage.ta_LK: 'LKA',
+            cloudlanguagetools.constants.AudioLanguage.ur_PK: 'PAK',
+            cloudlanguagetools.constants.AudioLanguage.en_TZ: 'TZA',
+            cloudlanguagetools.constants.AudioLanguage.ta_SG: 'SGP',
+
+
+            # arabic
+            cloudlanguagetools.constants.AudioLanguage.ar_AE: 'ARE',
+            cloudlanguagetools.constants.AudioLanguage.ar_BH: 'BHR',
+            cloudlanguagetools.constants.AudioLanguage.ar_DZ: 'DZA',
+            cloudlanguagetools.constants.AudioLanguage.ar_EG: 'EGY',
+            cloudlanguagetools.constants.AudioLanguage.ar_IQ: 'IRQ',
+            cloudlanguagetools.constants.AudioLanguage.ar_JO: 'JOR',
+            cloudlanguagetools.constants.AudioLanguage.ar_KW: 'KWT',
+            cloudlanguagetools.constants.AudioLanguage.ar_LY: 'LBY',
+            cloudlanguagetools.constants.AudioLanguage.ar_MA: 'MAR',
+            cloudlanguagetools.constants.AudioLanguage.ar_SA: 'SAU',
+            cloudlanguagetools.constants.AudioLanguage.ar_QA: 'QAT',
+            cloudlanguagetools.constants.AudioLanguage.ar_SA: 'SAU',
+            cloudlanguagetools.constants.AudioLanguage.ar_SY: 'SYR',
+            cloudlanguagetools.constants.AudioLanguage.ar_TN: 'TUN',
+            cloudlanguagetools.constants.AudioLanguage.ar_XA: 'ANY', # any country
+            cloudlanguagetools.constants.AudioLanguage.ar_YE: 'YEM', 
+
+            # spanish
+            cloudlanguagetools.constants.AudioLanguage.es_AR: 'ARG', 
+            cloudlanguagetools.constants.AudioLanguage.es_BO: 'BOL',
+            cloudlanguagetools.constants.AudioLanguage.es_CL: 'CHL',
+            cloudlanguagetools.constants.AudioLanguage.es_CO: 'COL',
+            cloudlanguagetools.constants.AudioLanguage.es_CR: 'CRI',
+            cloudlanguagetools.constants.AudioLanguage.es_CU: 'CUB',
+            cloudlanguagetools.constants.AudioLanguage.es_DO: 'DOM',
+            cloudlanguagetools.constants.AudioLanguage.es_EC: 'ECU',
+            cloudlanguagetools.constants.AudioLanguage.es_ES: 'ESP',
+            cloudlanguagetools.constants.AudioLanguage.es_GQ: 'GNQ',
+            cloudlanguagetools.constants.AudioLanguage.es_GT: 'GTM',
+            cloudlanguagetools.constants.AudioLanguage.es_HN: 'HND',
+            cloudlanguagetools.constants.AudioLanguage.es_LA: 'ANY', # any country
+            cloudlanguagetools.constants.AudioLanguage.es_MX: 'MEX',
+            cloudlanguagetools.constants.AudioLanguage.es_NI: 'NIC',
+            cloudlanguagetools.constants.AudioLanguage.es_PA: 'PAN',
+            cloudlanguagetools.constants.AudioLanguage.es_PE: 'PER',
+            cloudlanguagetools.constants.AudioLanguage.es_PR: 'PRI',
+            cloudlanguagetools.constants.AudioLanguage.es_PY: 'PRY',
+            cloudlanguagetools.constants.AudioLanguage.es_SV: 'SLV',
+            cloudlanguagetools.constants.AudioLanguage.es_US: 'USA', 
+            cloudlanguagetools.constants.AudioLanguage.es_UY: 'URY', 
+            cloudlanguagetools.constants.AudioLanguage.es_VE: 'VEN', 
         }
         if audio_language not in country_code_map:
             logging.error(f'no country code found for {audio_language}')

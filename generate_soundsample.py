@@ -18,19 +18,20 @@ def get_manager():
     manager.configure()    
     return manager
 
-def generate_audio_language_list():
+def generate_audio_language_list(language_set):
     records = []
-    for audio_language in cloudlanguagetools.constants.AudioLanguage:
-        records.append({
-            'id': audio_language.name,
-            'name': audio_language.audio_lang_name
-        })
+    for language in cloudlanguagetools.constants.Language:
+        if language in language_set:
+            records.append({
+                'id': language.name,
+                'name': language.lang_name
+            })
     data_df = pandas.DataFrame(records)
-    filename = 'temp_data_files/audio_languages.csv'
+    filename = 'temp_data_files/languages_with_audio.csv'
     data_df.to_csv(filename)
     logging.info(f'wrote {filename}')
 
-def generate_sound_sample():
+def generate_sound_sample(language_set):
     session = boto3.session.Session()
     client = session.client('s3',
                             region_name=os.environ['SPACE_REGION'],
@@ -93,10 +94,12 @@ def generate_sound_sample():
             # urllib.parse.urlencode(f)
             public_url = f'https://sound-samples.anki.study/{urllib.parse.quote(s3_path)}'
 
+            language_set[audio_language.lang] = True
+
             voice_entry = {
-                'audio_language': audio_language.name,
                 'language': audio_language.lang.name,
                 'language_name': audio_language.lang.lang_name,
+                'audio_language': audio_language.name,
                 'audio_language_name': audio_language.audio_lang_name,
                 'voice_description': voice.get_voice_description(),
                 'public_url': public_url
@@ -122,5 +125,6 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
                         level=logging.INFO)    
-    generate_audio_language_list()
-    generate_sound_sample()
+    language_set = {}
+    generate_sound_sample(language_set)
+    generate_audio_language_list(language_set)

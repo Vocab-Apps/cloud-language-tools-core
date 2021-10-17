@@ -21,6 +21,8 @@ def get_voice_list_awesometts():
     # for awesometts
     manager = get_manager()
     tts_voice_list = manager.get_tts_voice_list_json()
+    # sort by voice_description
+    tts_voice_list.sort(key=lambda voice: voice['voice_description'])
     output_filename = 'temp_data_files/voicelist.py'
     #processed_voice_list = [x.python_obj() for x in tts_voice_list]
     with open(output_filename, 'w', encoding='utf8') as f:

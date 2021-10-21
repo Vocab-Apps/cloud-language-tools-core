@@ -1,11 +1,8 @@
-import json
 import requests
 import urllib
 import hashlib
 import tempfile
-import uuid
-import operator
-import pydub
+import time
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -13,9 +10,6 @@ import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
-
-NAVER_VOICE_SPEED_DEFAULT = 0
-NAVER_VOICE_PITCH_DEFAULT = 0
 
 class VocalWareVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, audio_language, name, gender, language_id, voice_id, engine_id):
@@ -67,11 +61,15 @@ class VocalWareService(cloudlanguagetools.service.Service):
         url_parameters = f"""EID={voice_key['engine_id']}&LID={voice_key['language_id']}&VID={voice_key['voice_id']}&TXT={urlencoded_text}&ACC={self.account_id}&API={self.api_id}&CS={checksum}"""
         url = f"""http://www.vocalware.com/tts/gen.php?{url_parameters}"""
 
-        response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
-        if response.status_code == 200:
-            with open(output_temp_filename, 'wb') as audio:
-                audio.write(response.content)
-            return output_temp_file
+        retry_count = 3
+        while retry_count > 0:
+            response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
+            if response.status_code == 200:
+                with open(output_temp_filename, 'wb') as audio:
+                    audio.write(response.content)
+                return output_temp_file
+            retry_count -= 1
+            time.sleep(0.5)
 
         response_data = response.content
         error_message = f'Status code: {response.status_code}: {response_data}'

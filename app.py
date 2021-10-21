@@ -17,6 +17,7 @@ import getcheddar_utils as getcheddar_utils_module
 import convertkit
 import secrets
 import quotas
+import version
 import pprint
 import hashlib
 import hmac
@@ -34,6 +35,7 @@ if secrets.config['sentry']['enable']:
         dsn=dsn,
         environment=secrets.config['sentry']['environment'],
         integrations=[FlaskIntegration()],
+        release=version.CLOUD_LANGUAGE_TOOLS_VERSION,
         traces_sample_rate=0.2
     )
 

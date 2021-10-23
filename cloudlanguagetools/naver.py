@@ -131,6 +131,7 @@ class NaverService(cloudlanguagetools.service.Service):
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.es_ES, 'jose', cloudlanguagetools.constants.Gender.Male, 'Jose', 'General'),
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.es_ES, 'carmen', cloudlanguagetools.constants.Gender.Female, 'Carmen', 'General'),
 
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'dara', cloudlanguagetools.constants.Gender.Female, 'Dara', 'Premium'),
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nara', cloudlanguagetools.constants.Gender.Female, 'Nara', 'Premium'),
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nminsang', cloudlanguagetools.constants.Gender.Male, 'Minsang', 'Premium'),
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nhajun', cloudlanguagetools.constants.Gender.Male, 'Hajoon', 'Premium (Child)'),
@@ -143,7 +144,11 @@ class NaverService(cloudlanguagetools.service.Service):
 
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'ntomoko', cloudlanguagetools.constants.Gender.Female, 'Tomoko', 'Premium'),
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'nnaomi', cloudlanguagetools.constants.Gender.Female, 'Naomi', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'dnaomi_joyful', cloudlanguagetools.constants.Gender.Female, 'Naomi (Joyful)', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'dnaomi_formal', cloudlanguagetools.constants.Gender.Female, 'Naomi (Formal)', 'Premium'),
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'nsayuri', cloudlanguagetools.constants.Gender.Female, 'Sayuri', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'driko', cloudlanguagetools.constants.Gender.Female, 'Riko', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'deriko', cloudlanguagetools.constants.Gender.Female, 'Eriko', 'Premium'),
 
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'ngoeun', cloudlanguagetools.constants.Gender.Female, 'Koeun', 'Premium'),
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'neunyoung', cloudlanguagetools.constants.Gender.Female, 'Eunyoung', 'Premium'),
@@ -154,6 +159,29 @@ class NaverService(cloudlanguagetools.service.Service):
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nyoungil', cloudlanguagetools.constants.Gender.Male, 'Youngil', 'Premium'),
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nseungpyo', cloudlanguagetools.constants.Gender.Male, 'Seungpyo', 'Premium'),
             NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nwontak', cloudlanguagetools.constants.Gender.Male, 'Wontak', 'Premium'),
+            
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'dara_ang', cloudlanguagetools.constants.Gender.Female, 'Ara (Angry)', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nsunhee', cloudlanguagetools.constants.Gender.Female, 'Sunhee', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nminseo', cloudlanguagetools.constants.Gender.Female, 'Minseo', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'njiwon', cloudlanguagetools.constants.Gender.Female, 'Jiwon', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'nbora', cloudlanguagetools.constants.Gender.Female, 'Bora', 'Premium'),
+            
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'njonghyun', cloudlanguagetools.constants.Gender.Male, 'Jonghyun', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'njoonyoung', cloudlanguagetools.constants.Gender.Male, 'Joonyoung', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ko_KR, 'njaewook', cloudlanguagetools.constants.Gender.Male, 'Jaewook', 'Premium'),
+            
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.en_US, 'danna', cloudlanguagetools.constants.Gender.Female, 'Anna', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.en_US, 'djoey', cloudlanguagetools.constants.Gender.Female, 'Joey', 'Premium'),
+            
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'dhajime', cloudlanguagetools.constants.Gender.Male, 'Hajime', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'ddaiki', cloudlanguagetools.constants.Gender.Male, 'Daiki', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'dayumu', cloudlanguagetools.constants.Gender.Male, 'Ayumu', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.ja_JP, 'dmio', cloudlanguagetools.constants.Gender.Female, 'Mio', 'Premium'),
+
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.zh_TW, 'chiahua', cloudlanguagetools.constants.Gender.Female, 'Chiahua', 'Premium'),
+            NaverVoice(cloudlanguagetools.constants.AudioLanguage.zh_TW, 'kuanlin', cloudlanguagetools.constants.Gender.Male, 'Kuanlin', 'Premium'),
+
+
         ]
 
     def get_translation_language_list(self):

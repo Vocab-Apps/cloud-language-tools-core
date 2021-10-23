@@ -110,6 +110,7 @@ class ConvertKit():
         self.tag_user(email, self.tag_id_disposable_email)
 
     def tag_user(self, email, tag_id):
+        logging.info(f'tagging {email} with {tag_id}')
         url = f'https://api.convertkit.com/v3/tags/{tag_id}/subscribe'
         response = requests.post(url, json={
                 "api_key": self.api_key,
@@ -123,6 +124,7 @@ class ConvertKit():
             logging.info(f'tagged user with tag_id {tag_id}: {email}')
 
     def untag_user(self, subscriber_id, tag_id):
+        logging.info(f'untagging {subscriber_id} with {tag_id}')
         url = f'https://api.convertkit.com/v3/subscribers/{subscriber_id}/tags/{tag_id}'
         response = requests.delete(url, json={
                 "api_secret": self.api_secret

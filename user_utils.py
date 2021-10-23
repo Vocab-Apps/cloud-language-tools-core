@@ -245,6 +245,9 @@ class UserUtils():
 
         self.update_tags_convertkit_users(combined_df)
 
+        # update tags specific to patreon on convertkit
+        self.update_tags_convertkit_patreon_users(combined_df)
+
         return combined_df
 
     def build_global_usage_data(self):
@@ -301,9 +304,7 @@ class UserUtils():
         self.convertkit_client.populate_tag_map()
 
         # we are not interested in these tags
-        tag_ignore_list = ['patreon_api_key_ready', 
-        'patreon_canceled', 
-        'patreon_canceled',
+        tag_ignore_list = ['patreon_api_key_ready'
         'patreon_user',
         'trial_api_key_ready',
         'trial_api_key_requested',
@@ -573,6 +574,41 @@ class UserUtils():
             else:
                 if 'getcheddar_near_max' in tags:
                     self.convertkit_client.untag_user(subscriber_id, tag_id_near_max)
+
+
+    def update_tags_convertkit_patreon_users(self, data_df):
+        logging.info('performing tag updates for patreon users')
+        
+        # make the logic a bit easier by removing nans
+        data_df['tags'] = data_df['tags'].fillna("").apply(list)
+        # remove users which don't have a convertkit subscriber id
+        data_df = data_df.dropna(subset=['subscriber_id'])
+        data_df['subscriber_id'] = data_df['subscriber_id'].astype(int)
+
+        tag_name_active = 'patreon_active'
+        tag_name_cancel = 'patreon_canceled'
+        tag_id_active = self.convertkit_client.full_tag_id_map[tag_name_active]
+        tag_id_cancel = self.convertkit_client.full_tag_id_map[tag_name_cancel]
+
+        for index, row in data_df.iterrows():
+            entitled = row['entitled']
+            email = row['email']
+            subscriber_id = row['subscriber_id']
+            tags = row['tags']
+
+            logging.info(f'processing convertkit patreon tags for {email} subscriber_id {subscriber_id} {entitled}')
+
+            if entitled == True:
+                if tag_name_active not in tags:
+                    self.convertkit_client.tag_user(email, tag_id_active)
+                if tag_name_cancel in tags:
+                    self.convertkit_client.untag_user(subscriber_id, tag_id_cancel)
+            elif entitled == False:
+                if tag_name_active in tags:
+                    self.convertkit_client.untag_user(subscriber_id, tag_id_active)
+                if tag_name_cancel not in tags:
+                    self.convertkit_client.tag_user(email, tag_id_cancel)
+
 
     def perform_airtable_trial_tag_requests(self):
         airtable_records_df = self.airtable_utils.get_trial_tag_requests()

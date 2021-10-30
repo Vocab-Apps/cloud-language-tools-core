@@ -58,9 +58,9 @@ class SoundSampleGeneration():
 
         entries = []
 
-        # testing only
+        # testing only (restrict to N voices)
         # voice_list = random.sample(voice_list, 3)
-        voice_list = voice_list[0:5]
+        # voice_list = voice_list[0:50]
 
         for voice in voice_list:
             try:

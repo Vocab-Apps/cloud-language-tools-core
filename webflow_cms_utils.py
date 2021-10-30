@@ -55,6 +55,7 @@ class WebflowCMSUtils():
             logging.info(f'querying url {url}')            
             response = requests.get(url, headers=self.get_headers())
             items.extend(response.json()['items'])
+            offset = len(items)
         logging.info(f'found {len(items)} voices on webflow')
         return items
         
@@ -92,6 +93,6 @@ if __name__ == '__main__':
     # webflow_utils.get_auth_info()
     # webflow_utils.list_sites()
     # webflow_utils.list_collections()
-    webflow_utils.list_languages()
-    # voice_list = webflow_utils.list_voices()
-    # pprint.pprint(voice_list)
+    # webflow_utils.list_languages()
+    voice_list = webflow_utils.list_voices()
+    pprint.pprint(voice_list)

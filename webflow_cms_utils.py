@@ -42,10 +42,11 @@ class WebflowCMSUtils():
         return response.json()['items']
 
     def list_voices(self):
+        logging.info('listing webflow voices')
         total_count = -1
         url = f'https://api.webflow.com/collections/{self.voice_collection_id}/items'
         response = requests.get(url, headers=self.get_headers())
-        pprint.pprint(response.json())
+        # pprint.pprint(response.json())
         total_count = response.json()['total']
         items = response.json()['items']
         offset = len(items)
@@ -54,10 +55,12 @@ class WebflowCMSUtils():
             logging.info(f'querying url {url}')            
             response = requests.get(url, headers=self.get_headers())
             items.extend(response.json()['items'])
+        logging.info(f'found {len(items)} voices on webflow')
         return items
         
 
     def add_language(self, language_data):
+        logging.info(f'uploading language to webflow: {language_data}')
         time.sleep(1.0)
         url = f'https://api.webflow.com/collections/{self.audio_language_collection_id}/items'
         data = json.dumps({
@@ -70,6 +73,7 @@ class WebflowCMSUtils():
             raise Exception(f'status_code: {response.status_code} {response.content}')
 
     def add_voice(self, voice_data):
+        logging.info(f'uploading voice to webflow: {voice_data}')
         time.sleep(1.0)
         url = f'https://api.webflow.com//collections/{self.voice_collection_id}/items'
         data = json.dumps({

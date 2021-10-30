@@ -59,7 +59,8 @@ class SoundSampleGeneration():
         entries = []
 
         # testing only
-        voice_list = random.sample(voice_list, 3)
+        # voice_list = random.sample(voice_list, 3)
+        voice_list = voice_list[0:5]
 
         for voice in voice_list:
             try:
@@ -148,20 +149,24 @@ class SoundSampleGeneration():
                 }
                 self.webflow_utils.add_language(data)
 
-    def upload_voice_entries(self, voice_entries, webflow_language_list):
+    def upload_voice_entries(self, voice_entries, webflow_language_list, webflow_voice_list):
         logging.info(f'uploading voices')
         language_to_id_map = {}
         for language in webflow_language_list:
             language_to_id_map[language['slug']] = language['_id']
+        voice_exists_map = {}
+        for webflow_voice in webflow_voice_list:
+            voice_exists_map[webflow_voice['name']] = True
         for entry in voice_entries:
-            data = {
-                'name': entry['voice_description'],
-                'audio-language': language_to_id_map[entry['language']],
-                'sample-url': entry['public_url'],
-                '_archived': False,
-                '_draft': False
-            }
-            self.webflow_utils.add_voice(data)
+            if not voice_exists_map.get(entry['voice_description'], False):
+                data = {
+                    'name': entry['voice_description'],
+                    'audio-language': language_to_id_map[entry['language']],
+                    'sample-url': entry['public_url'],
+                    '_archived': False,
+                    '_draft': False
+                }
+                self.webflow_utils.add_voice(data)
 
     def update_voices(self):
         language_set = {}
@@ -170,7 +175,8 @@ class SoundSampleGeneration():
         webflow_language_list = self.webflow_utils.list_languages()
         self.upload_language_items(language_entries, webflow_language_list)
         webflow_language_list = self.webflow_utils.list_languages()
-        self.upload_voice_entries(voice_entries, webflow_language_list)
+        webflow_voice_list = self.webflow_utils.list_voices()
+        self.upload_voice_entries(voice_entries, webflow_language_list, webflow_voice_list)
 
         
 

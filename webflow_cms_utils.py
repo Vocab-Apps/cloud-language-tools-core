@@ -35,6 +35,7 @@ class WebflowCMSUtils():
         pprint.pprint(response.json())
 
     def list_languages(self):
+        logging.info('listing webflow languages')
         time.sleep(1.0)
         url = f'https://api.webflow.com/collections/{self.audio_language_collection_id}/items'
         response = requests.get(url, headers=self.get_headers())

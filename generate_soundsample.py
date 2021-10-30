@@ -133,16 +133,20 @@ class SoundSampleGeneration():
 
         return entries
 
-    def upload_language_items(self, language_entries):
+    def upload_language_items(self, language_entries, webflow_language_list):
         logging.info(f'uploading languages')
+        language_exists = {}
+        for language in webflow_language_list:
+            language_exists[language['slug']] = True
         for entry in language_entries:
-            data = {
-                'name': entry['name'],
-                'slug': entry['id'],
-                '_archived': False,
-                '_draft': False
-            }
-            self.webflow_utils.add_language(data)
+            if not language_exists.get(entry['id'], False):
+                data = {
+                    'name': entry['name'],
+                    'slug': entry['id'],
+                    '_archived': False,
+                    '_draft': False
+                }
+                self.webflow_utils.add_language(data)
 
     def upload_voice_entries(self, voice_entries, webflow_language_list):
         logging.info(f'uploading voices')
@@ -163,7 +167,8 @@ class SoundSampleGeneration():
         language_set = {}
         voice_entries = self.generate_sound_sample(language_set)
         language_entries = self.generate_audio_language_list(language_set)
-        self.upload_language_items(language_entries)
+        webflow_language_list = self.webflow_utils.list_languages()
+        self.upload_language_items(language_entries, webflow_language_list)
         webflow_language_list = self.webflow_utils.list_languages()
         self.upload_voice_entries(voice_entries, webflow_language_list)
 

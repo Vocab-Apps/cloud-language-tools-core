@@ -88,7 +88,10 @@ def track_usage(request_type, request, func, *args, **kwargs):
             language_code = None
             language_code_str = request.json.get('language_code', None)
             if language_code_str != None:
-                language_code = cloudlanguagetools.constants.Language[language_code_str]
+                try:
+                    language_code = cloudlanguagetools.constants.Language[language_code_str]
+                except KeyError:
+                    return {'error': f'language_code {language_code_str} not recognized'}, 400
 
             try:
                 redis_connection.track_usage(api_key, service, request_type, characters, language_code)

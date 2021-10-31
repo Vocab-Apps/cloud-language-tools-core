@@ -35,13 +35,6 @@ class ConvertKit():
             self.debounce_email = secrets.config['debounce']['email']
             self.debounce_api_key = secrets.config['debounce']['api_key']
 
-        self.tag_name_map = {
-            'trial_patreon_convert': self.tag_id_trial_patreon_convert,
-            'trial_end_reach_out': self.tag_id_trial_end_reach_out,
-            'trial_user_inactive': self.tag_id_trial_inactive 
-        }
-
-
         self.full_tag_id_map = {} 
 
     def email_valid(self, email):

@@ -310,8 +310,7 @@ class UserUtils():
         'trial_api_key_requested',
         'trial_user',
         'getcheddar_user',
-        'heavy_users',
-        'disposable_email']
+        'heavy_users']
 
         tag_id_map = {tag_name:tag_id for tag_name, tag_id in self.convertkit_client.full_tag_id_map.items() if tag_name not in tag_ignore_list}
         present_tags = []
@@ -633,7 +632,7 @@ class UserUtils():
                 # tag user on convertkit
                 self.convertkit_client.tag_user_trial_vip(email, quotas.TRIAL_VIP_USER_CHARACTER_LIMIT)
             else:
-                tag_id = self.convertkit_client.tag_name_map[tag_request]                
+                tag_id = self.convertkit_client.full_tag_id_map[tag_request]
                 logging.info(f'tagging {email} with {tag_request} / {tag_id}')
                 self.convertkit_client.tag_user(email, tag_id)
             # blank out tag_request field

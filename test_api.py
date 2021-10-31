@@ -1196,6 +1196,33 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(breakdown_result['breakdown'], expected_output)
 
 
+    def test_breakdown_v1_errors(self):
+        # pytest test_api.py -rPP -k test_breakdown_v1_errors
+
+        # same source/target translation on watson
+        # ========================================
+
+        # run the breakdown
+        response = self.client.post('/breakdown_v1', json={
+            "text": "电源插座是斜的", 
+            "tokenization_option": {
+                "language_code": "zh_cn", 
+                "language_name": "Chinese (Simplified)", 
+                "service": "Spacy", 
+                "tokenization_key": {
+                    "model_name": "chinese_jieba"
+                }, 
+                "tokenization_name": "Chinese (Simplified) (Jieba (words)), Spacy"
+            }, 
+            "translation_option": {
+                "service": "Watson", "source_language_id": "zh", "target_language_id": "zh"
+            }}, headers={'api_key': self.api_key})
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.data)
+        self.assertEqual(response_data['error'], """Watson: could not translate text [电源插座] from zh to zh ({'code': 400, 'error': "The parameter 'source' should not be equal to 'target'"})""")
+
+
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate
     unittest.main()  

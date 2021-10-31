@@ -885,6 +885,36 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 401)        
 
+    def test_audio_v2_errors(self):
+        # pytest test_api.py -k test_audio_v2_errors
+
+        # initial setup 
+        # =============
+        api_key = self.api_key_v2
+
+
+        # incorrect SSML on amazon
+        # ========================
+
+        service = 'Amazon'
+        response = self.client.post('/audio_v2', json={
+            'text': """<lang xml:lang="fr-FR"> province de l'Argentine""",
+            'service': service,
+            'deck_name': 'french_deck_1',
+            'request_mode': 'batch',
+            'language_code': 'fr',
+            'voice_key': {
+                "engine": "standard", 
+                "voice_id": "Lea"
+            },
+            'options': {}
+        }, headers={'api_key': self.api_key_v2, 'client': 'test', 'client_version': self.client_version})
+
+        self.assertEqual(response.status_code, 400)
+        response_json = json.loads(response.data)
+        self.assertTrue('error' in response_json)
+        self.assertEqual(response_json['error'], 'An error occurred (InvalidSsmlException) when calling the SynthesizeSpeech operation: Invalid SSML request')
+
     def test_tokenize_v1_spacy_english(self):
         # pytest test_api.py -rPP -k test_tokenize_v1_spacy_english
 

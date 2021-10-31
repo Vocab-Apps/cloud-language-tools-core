@@ -241,6 +241,11 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(data['Google'], 'ostry')
 
     def test_translate_error(self):
+        # pytest test_api.py -k test_translate_error
+        
+        # azure incorrect target language
+        # ===============================
+
         source_text = 'Je ne suis pas intéressé.'
         response = self.client.post('/translate', json={
             'text': source_text,
@@ -253,6 +258,28 @@ class ApiTests(unittest.TestCase):
         error_response = json.loads(response.data)
         error_message = error_response['error']
         self.assertTrue('The target language is not valid' in error_message)
+
+        # google same source/target language
+        # ==================================
+
+        response = self.client.post('/translate', json={
+            "from_language_key": "de", 
+            "service": "Google", 
+            "text": "S05 : Ich wurde nämlich vor sechzig Jahren in dieser Stadt geboren.", 
+            "to_language_key": "de"
+        }, headers={'api_key': self.api_key})
+
+        self.assertEqual(response.status_code, 400)
+        error_response = json.loads(response.data)
+        self.assertTrue('error' in error_response)
+        self.assertEqual(error_response['error'], '400 POST https://translation.googleapis.com/language/translate/v2?prettyPrint=false: Bad language pair: de|de')
+
+
+
+        # watson same source/target language
+        # ==================================
+
+
 
 
     def test_transliteration(self):

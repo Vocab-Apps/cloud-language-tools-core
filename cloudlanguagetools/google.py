@@ -4,6 +4,7 @@ import html
 import logging
 import google.cloud.texttospeech
 import google.cloud.translate_v2
+import google.api_core.exceptions
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
 
@@ -167,9 +168,12 @@ class GoogleService(cloudlanguagetools.service.Service):
         return []
 
     def get_translation(self, text, from_language_key, to_language_key):
-        client = self.get_translation_client()
-        result = client.translate(text, source_language=from_language_key, target_language=to_language_key)
-        return html.unescape(result["translatedText"])
+        try:
+            client = self.get_translation_client()
+            result = client.translate(text, source_language=from_language_key, target_language=to_language_key)
+            return html.unescape(result["translatedText"])
+        except google.api_core.exceptions.BadRequest as error:
+            raise cloudlanguagetools.errors.RequestError(str(error))
 
     def get_translation_languages(self):
         translate_client = google.cloud.translate_v2.Client()

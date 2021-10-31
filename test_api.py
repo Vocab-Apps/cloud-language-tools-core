@@ -915,6 +915,27 @@ class ApiTests(unittest.TestCase):
         self.assertTrue('error' in response_json)
         self.assertEqual(response_json['error'], 'An error occurred (InvalidSsmlException) when calling the SynthesizeSpeech operation: Invalid SSML request')
 
+        # naver incorrect input
+        # =====================
+        service = 'Naver'
+        response = self.client.post('/audio_v2', json={
+            'text': """埕""",
+            'service': service,
+            'deck_name': 'n/a',
+            'request_mode': 'batch',
+            'language_code': 'ja',
+            'voice_key': {
+                "name": "ntomoko"
+            },
+            'options': {}
+        }, headers={'api_key': self.api_key_v2, 'client': 'test', 'client_version': self.client_version})
+
+        self.assertEqual(response.status_code, 400)
+        response_json = json.loads(response.data)
+        self.assertTrue('error' in response_json)
+        self.assertEqual(response_json['error'], """Status code: 400: {'details': 'empty synthesized data', 'errorCode': 'VS10', 'message': 'text parameter check (text 파라미터를 확인해주세요.)'}""")
+
+
     def test_tokenize_v1_spacy_english(self):
         # pytest test_api.py -rPP -k test_tokenize_v1_spacy_english
 

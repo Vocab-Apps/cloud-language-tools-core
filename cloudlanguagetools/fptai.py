@@ -119,7 +119,7 @@ class FptAiService(cloudlanguagetools.service.Service):
             FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'banmaiace', 'Ban Mai (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
             FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'thuminhace', 'Thu Minh (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
             FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'ngoclamace', 'Ngọc Lam (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Trung'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'linhsansace', 'Linh San (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Nam'),
+            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'linhsanace', 'Linh San (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Nam'),
             FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'minhquangace', 'Minh Quang (AceSound)', cloudlanguagetools.constants.Gender.Male, 'miền Nam'),
 
 

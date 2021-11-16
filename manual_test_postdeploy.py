@@ -143,7 +143,7 @@ class PostDeployTests(unittest.TestCase):
 
         data = response.json()
         self.assertTrue(data['Azure'] == 'Le coût est faible' or data['Azure'] == 'Le coût est très faible')
-        self.assertEqual(data['Amazon'], 'Très faible coût')
+        self.assertTrue(data['Amazon'] == 'Très faible coût' or data['Amazon'] == 'Le coût est très faible')
         self.assertIn(data['Google'], ['Faible coût', 'À bas prix'])
         self.assertEqual(data['Watson'], 'Le coût est très bas.')
 

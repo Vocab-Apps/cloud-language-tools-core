@@ -178,6 +178,9 @@ class AzureService(cloudlanguagetools.service.Service):
         # print(f'[{ssml_str}] len: {len(ssml_str)}')
 
         result = synthesizer.speak_ssml(ssml_str)
+        if result.reason != azure.cognitiveservices.speech.ResultReason.SynthesizingAudioCompleted:
+            error_message = f'Could not generate audio: {result.cancellation_details}'
+            raise cloudlanguagetools.errors.RequestError(error_message)
 
         stream = azure.cognitiveservices.speech.AudioDataStream(result)
         stream.save_to_wav_file(output_temp_filename)

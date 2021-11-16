@@ -29,7 +29,7 @@ def test_azure_audio():
     manager = get_manager()
 
     service = 'Azure'
-    text = 'hello world 2'
+    text = """<mstts:silence type="Sentenceboundary" value="200ms"/>My mother is ill. She's in bed."""
     voice_key = {
         'name': 'Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)' 
     }
@@ -706,11 +706,11 @@ if __name__ == '__main__':
                         level=logging.INFO)    
 
     # generate_video_audio()
-    # test_azure_audio()
+    test_azure_audio()
     # test_google_audio()
     # play_google_audio()
     # play_azure_audio()
-    get_voice_list()
+    # get_voice_list()
     # get_voice_list_awesometts()
     # get_watson_voice_list()
     # get_amazon_voice_list()

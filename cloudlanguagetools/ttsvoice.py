@@ -27,6 +27,7 @@ class TtsVoice():
             'audio_language_name': self.get_audio_language_name(),
             'voice_key': self.get_voice_key(),
             'voice_description': self.get_voice_description(),
+            'voice_name': self.get_voice_shortname(),
             'options': self.get_options()
         }
    

@@ -41,6 +41,9 @@ class ForvoVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def get_voice_description(self):
         return f'{self.get_audio_language_name()}, {self.get_gender().name}, {self.service.name}'
 
+    def get_voice_shortname(self):
+        return None
+
     def get_options(self):
         return {}
 

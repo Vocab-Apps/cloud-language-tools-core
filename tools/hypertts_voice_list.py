@@ -22,7 +22,9 @@ def process_voice(voice):
         'language': voice['audio_language_code'],
         'gender': voice['gender'],
         'service': voice['service'],
-        'name': voice['voice_name']
+        'name': voice['voice_name'],
+        'key': voice['voice_key'],
+        'options': voice['options']
     }
 
 def get_voice_list_hypertts():

@@ -102,6 +102,14 @@ class GetCheddarUtils():
         f.close()
         # print(pretty_xml_as_string)
 
+    def xml_short_string(self, element):
+        xmlstr_encoded = xml.etree.ElementTree.tostring(element, encoding='utf8', method='xml')
+        xmlstr = xmlstr_encoded.decode('utf-8')
+        xmlstr = xmlstr.replace('\n', '')
+        xmlstr = xmlstr.replace(' ', '')
+        xmlstr = xmlstr.replace('\t', '')
+        return xmlstr
+
     def report_customer_usage(self, customer_code, thousand_char_quantity):
         customer_code_encoded = urllib.parse.quote(customer_code)
         url = f'https://getcheddar.com/xml/customers/add-item-quantity/productCode/{self.product_code}/code/{customer_code_encoded}/itemCode/{TRACKED_ITEM_CODE}'
@@ -147,8 +155,7 @@ class GetCheddarUtils():
                     customer_data = self.decode_customer_element(customer)
                     result.append(customer_data)
                 except Exception as e:
-                    logging.exception(f'could not decode customer data: {customer}')
-            # print(self.decode_customer_xml(response.content))
+                    logging.exception(f'could not decode customer data: {self.xml_short_string(customer)}')
             return result
         else:
             error_message = f'could not get all customer data: {response.content}'

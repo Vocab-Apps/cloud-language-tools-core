@@ -80,7 +80,8 @@ class FptAiService(cloudlanguagetools.service.Service):
 
             # wait until the audio is available
             audio_available = False
-            max_tries = 7
+            total_tries = 7
+            max_tries = total_tries
             wait_time = 0.2
             while audio_available == False and max_tries > 0:
                 time.sleep(wait_time)
@@ -94,7 +95,7 @@ class FptAiService(cloudlanguagetools.service.Service):
                 max_tries -= 1            
             
             if not audio_available:
-                error_message = f'could not retrieve audio after {max_tries} tries (url {async_url})'
+                error_message = f'could not retrieve audio after {total_tries} tries (url {async_url})'
                 raise cloudlanguagetools.errors.RequestError(error_message)
 
             return output_temp_file

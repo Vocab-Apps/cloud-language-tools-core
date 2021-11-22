@@ -15,7 +15,8 @@ import cloudlanguagetools.errors
 
 def get_audio_language_enum(language_iso, country_iso):
     cereproc_audio_id_map = {
-        'ro_ro': 'ro_RO'
+        'ro_ro': 'ro_RO',
+        'no_NO': 'nb_NO'
     }
     language_enum_name = f'{language_iso}_{country_iso}'
     if language_enum_name in cereproc_audio_id_map:

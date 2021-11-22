@@ -143,9 +143,11 @@ class GetCheddarUtils():
             root = xml.etree.ElementTree.fromstring(response.content)
             customer_list = root.findall('./customer')
             for customer in customer_list:
-                customer_data = self.decode_customer_element(customer)
-                # print(customer_data)
-                result.append(customer_data)
+                try:
+                    customer_data = self.decode_customer_element(customer)
+                    result.append(customer_data)
+                except Exception as e:
+                    logging.exception(f'could not decode customer data: {customer}')
             # print(self.decode_customer_xml(response.content))
             return result
         else:

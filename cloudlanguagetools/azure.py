@@ -167,6 +167,9 @@ class AzureService(cloudlanguagetools.service.Service):
             prosody_start_str = f"""<prosody pitch="{pitch_str}" rate="{rate_str}" >"""
             prosody_end_str = """</prosody>"""
 
+        # do some cleaning on the text
+        text = text.replace(' & ', ' &amp; ')
+
         # the ssml str must be super optimized to have no whitespace, no extra characters
         ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
 <voice name="{voice_key['name']}">

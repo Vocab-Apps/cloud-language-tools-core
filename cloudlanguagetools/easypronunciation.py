@@ -138,6 +138,15 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'spell_numbers':1
             }, 'german'),
 
+            EasyPronunciationTransliterationLanguage('/russian-api.php', cloudlanguagetools.constants.Language.ru,
+            {
+                'version':1,
+                'Convert_to_russian':'IPA',
+                'do_not_restore_yo': 0,
+                'split_into_syllables':1,
+                'spell_numbers':1
+            }, 'russian'),
+
         ]
         return result
 

@@ -272,6 +272,17 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('ˈkœ.nən ˈziː ˈmiːɐ̯ das ˈaʊ̯f deːɐ ˈkar.tə ˈtsaɪ̯.ɡn̩', result)        
 
+        # russian
+        source_text = 'Могу я посмотреть меню?'
+        from_language = Language.ru.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('mɐ.ˈɡu ˈjæ pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ', result)
+
 
 
     def verify_transliteration(self, source_text, transliteration_option, expected_output):

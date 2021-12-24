@@ -85,18 +85,25 @@ class TestTranslation(unittest.TestCase):
         # now, translate
         translated_text = self.manager.get_translation(source_text, service.name, from_language_key, to_language_key)
 
-        expected_result = self.sanitize_text(expected_result)
+
         translated_text = self.sanitize_text(translated_text)
 
-        self.assertEqual(expected_result, translated_text)
+        if isinstance(expected_result, list):
+            # multiple possible accepted translations
+            expected_results = [self.sanitize_text(x) for x in expected_result]
+            self.assertIn(translated_text, expected_results)
+        else:
+            # single value
+            expected_result = self.sanitize_text(expected_result)
+            self.assertEqual(expected_result, translated_text)
 
     def test_translate_chinese(self):
         # pytest test_translation.py -k test_translate_chinese
-        self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, 'the person who delivers the takeaway')
+        self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, ['the person who delivers the takeaway', 'people who deliver takeaways'])
         self.translate_text(Service.Google, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
         self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
         self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, "Changer la carte d'embarquement")
-        self.translate_text(Service.Amazon, '换登机牌', Language.zh_cn, Language.fr, "carte d'embarquement")
+        self.translate_text(Service.Amazon, '换登机牌', Language.zh_cn, Language.fr, ["carte d'embarquement", "modifier la carte d'embarquement"])
 
     def test_translate_chinese_watson(self):
         self.translate_text(Service.Watson, '中国有很多外国人', Language.zh_cn, Language.en, 'There are a lot of foreigners in China.')

@@ -261,6 +261,18 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('a ˈke ˈoɾa u̯sˈtɛð ˈsjɛra', result)
 
+        # german
+        source_text = 'Können Sie mir das auf der Karte zeigen?'
+        from_language = Language.de.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ˈkœ.nən ˈziː ˈmiːɐ̯ das ˈaʊ̯f deːɐ ˈkar.tə ˈtsaɪ̯.ɡn̩', result)        
+
+
 
     def verify_transliteration(self, source_text, transliteration_option, expected_output):
         service = transliteration_option['service']

@@ -131,6 +131,12 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'spell_numbers':1
             }, 'spanish'),
 
+            EasyPronunciationTransliterationLanguage('/german-api.php', cloudlanguagetools.constants.Language.de,
+            {
+                'version':1,
+                'split_into_syllables':1,
+                'spell_numbers':1
+            }, 'german'),
 
         ]
         return result

@@ -59,7 +59,11 @@ class GetCheddarUtils():
         if canceled_date != None:
             status = 'canceled'
         overage_allowed = overage_amount > 0 and canceled_date == None
-        current_usage = float(root.find('./subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity').text)
+        quantity_element = root.find('./subscriptions/subscription[1]/items/item[@code="thousand_chars"]/quantity')
+        if quantity_element != None:
+            current_usage = float(quantity_element.text)
+        else:
+            current_usage = 0
 
         customer_key = root.find('./key').text
 

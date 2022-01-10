@@ -729,6 +729,11 @@ class UserUtils():
         self.redis_connection.r.hset(redis_api_key, 'expiration', expiration)
         logging.info(f'{redis_api_key}: setting expiration to {expiration}')
 
+    def increase_trial_character_limit(self, api_key, character_limit):
+        redis_api_key = self.redis_connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
+        self.redis_connection.r.hset(redis_api_key, 'character_limit', character_limit)
+        logging.info(f'{redis_api_key}: setting character_limit to {character_limit}')
+
     def report_getcheddar_usage_all_users(self):
         api_key_list = self.redis_connection.list_getcheddar_api_keys()
         for api_key in api_key_list:
@@ -816,6 +821,7 @@ if __name__ == '__main__':
         'show_getcheddar_user_data',
         'extend_patreon_key_validity',
         'extend_trial_expiration',
+        'increase_trial_character_limit',
         'usage_data',
         'report_getcheddar_usage_all_users',
         'report_getcheddar_user_usage',
@@ -829,6 +835,7 @@ if __name__ == '__main__':
     parser.add_argument('--usage_period_start', type=int, help='for usage data, start of period')
     parser.add_argument('--usage_period_end', type=int, help='for usage data, start of period')
     parser.add_argument('--api_key', help='Pass in API key to check validity')
+    parser.add_argument('--trial_character_limit', type=int, help='Pass in custom trial character limit')
     args = parser.parse_args()
 
     if args.action == 'update_airtable_all':
@@ -860,6 +867,11 @@ if __name__ == '__main__':
         # python user_utils.py --action extend_trial_expiration --api_key <api_key>
         api_key = args.api_key
         user_utils.extend_trial_expiration(api_key)
+    elif args.action == 'increase_trial_character_limit':
+        # python user_utils.py --action extend_trial_expiration --api_key <api_key>
+        api_key = args.api_key
+        character_limit = args.trial_character_limit
+        user_utils.increase_trial_character_limit(api_key, character_limit)
     elif args.action == 'usage_data':
         pandas.set_option('display.max_rows', 999)
         # user_utils.build_global_usage_data()

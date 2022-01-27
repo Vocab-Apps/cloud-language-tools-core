@@ -31,8 +31,8 @@ class ApiKeyType(enum.Enum):
 
 class Client(enum.Enum):
     awesometts = enum.auto()
-    awesometts2 = enum.auto()
     languagetools = enum.auto()
+    hypertts = enum.auto()
     test = enum.auto()
 
 # what triggered this request (batch / on the fly / editor)

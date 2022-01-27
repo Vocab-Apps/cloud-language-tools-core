@@ -212,7 +212,7 @@ class TestTranslation(unittest.TestCase):
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertIn(result, ['pjaˈtʃere di konoʃʃerla', 'pjaˈtʃere di koˈnoʃʃerla'])
-        
+
         # japanese - Kana
         source_text = 'おはようございます'
         from_language = Language.ja.name
@@ -330,7 +330,7 @@ class TestTranslation(unittest.TestCase):
         service = cloudlanguagetools.constants.Service.Epitran.name
 
         # french
-        self.verify_transliteration_multiple_options(Language.fr, 'l’herbe est plus verte ailleurs', service, ['l’ɛrbə ɛst plys vɛrtə ajlœr', 'l’hɛrbɛ ɛst plys vɛrtɛ elœrs'])
+        self.verify_transliteration_multiple_options(Language.fr, 'l’herbe est plus verte ailleurs', service, ['l’ɛʀbə ɛst plys vɛʀtə elœʀ', 'l’hɛrbɛ ɛst plys vɛrtɛ elœrs'])
 
         # english 
         self.verify_transliteration_single_option(Language.en, 'do you have a boyfriend', service, 'du ju hæv ə bojfɹɛnd')
@@ -339,8 +339,8 @@ class TestTranslation(unittest.TestCase):
         self.verify_transliteration_multiple_options(Language.de, 'Können Sie mir das auf der Karte zeigen?', 
             service, 
             ['kønnən siː mir das awf dər karte t͡sajeːɡən?',
-            'kønən siː mir das auf dər kaəte t͡saieɡən?',
-            'kønən siː miʁ das auf deʁ kaɐte t͡saieɡən?'])
+            'kønən siː miʁ das auf deʁ kaɐte t͡saieɡən?',
+            'kœnən siː miːʀ dɑːs auf dəʀ kaʀteː t͡saiɡən?'])
 
         # spanish
         self.verify_transliteration_single_option(Language.es, '¿A qué hora usted cierra?', service, '¿a ke oɾa usted siera?')

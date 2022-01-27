@@ -123,8 +123,8 @@ class TestTranslation(unittest.TestCase):
     def test_translate_deepl(self):
         # pytest test_translation.py -rPP -k test_translate_deepl
         self.translate_text(Service.DeepL, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement')
-        self.translate_text(Service.DeepL, 'Je ne suis pas intéressé.', Language.fr, Language.en, """I'm not interested.""")
-        self.translate_text(Service.DeepL, '送外卖的人', Language.zh_cn, Language.en, 'delivery person')
+        self.translate_text(Service.DeepL, 'Je ne suis pas intéressé.', Language.fr, Language.en, ["""I'm not interested.""", 'i am not interested'])
+        self.translate_text(Service.DeepL, '送外卖的人', Language.zh_cn, Language.en, ['delivery person', 'takeaway delivery people'])
 
 
     def test_translate_all(self):
@@ -211,8 +211,8 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('pjaˈtʃere di konoʃʃerla', result)
-
+        self.assertIn(result, ['pjaˈtʃere di konoʃʃerla', 'pjaˈtʃere di koˈnoʃʃerla'])
+        
         # japanese - Kana
         source_text = 'おはようございます'
         from_language = Language.ja.name

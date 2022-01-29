@@ -29,6 +29,7 @@ class ConvertKit():
             self.tag_id_getcheddar_user = secrets.config['convertkit']['tag_ig_getchedar_user']
             self.tag_id_disposable_email = secrets.config['convertkit']['tag_id_disposable_email']
             self.tag_id_trial_vip = secrets.config['convertkit']['tag_id_trial_vip']
+            self.tag_id_trial_quota_increased = secrets.config['convertkit']['tag_id_trial_quota_increased']
 
         self.enable_debounce = secrets.config['debounce']['enable']
         if self.enable_debounce:
@@ -147,6 +148,9 @@ class ConvertKit():
 
     def tag_user_trial_vip(self, email, trial_quota):
         self.tag_user_set_fields(email, self.tag_id_trial_vip, {'trial_quota': trial_quota})
+
+    def tag_user_trial_quota_increased(self, email, trial_quota):
+        self.tag_user_set_fields(email, self.tag_id_trial_quota_increased, {'trial_quota': trial_quota})
 
     def tag_user_trial_inactive(self, email):
         self.tag_user(email, self.tag_id_trial_inactive)

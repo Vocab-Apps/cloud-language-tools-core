@@ -125,9 +125,10 @@ def configure_addtag_webhook():
         # 'target_url': 'https://bfa7c6b87809.ngrok.io/convertkit_subscriber_request_trial_key',
         # 'target_url': 'https://cloud-language-tools-dev.anki.study/convertkit_subscriber_request_trial_key',
         # 'target_url': 'https://cloud-language-tools-prod.anki.study/convertkit_subscriber_request_trial_key',
-        'target_url': 'https://cloud-language-tools-prod.anki.study/convertkit_subscriber_request_patreon_key',
+        # 'target_url': 'https://cloud-language-tools-prod.anki.study/convertkit_subscriber_request_patreon_key',
+        'target_url': 'https://df00-59-149-107-35.ngrok.io/convertkit_trial_quota_increase',
         # 'event': {  'name': 'subscriber.tag_add', 'tag_id': int(os.environ['CONVERTKIT_TRIAL_API_KEY_REQUESTED_TAG']) }
-        'event': {  'name': 'subscriber.tag_add', 'tag_id': 2293841 }
+        'event': {  'name': 'subscriber.tag_add', 'tag_id': 2898223 }
     })
     print(response)
     print(response.content)
@@ -160,10 +161,10 @@ def configure_addtag_webhook_patreonuser():
 
 
 if __name__ == '__main__':
-    # configure_addtag_webhook()
+    configure_addtag_webhook()
     # configure_addtag_webhook_trialkey()
     # configure_addtag_webhook_patreonuser()
-    list_tags()
+    # list_tags()
     # list_fields()
     # list_subscribers()
     # list_canceled()

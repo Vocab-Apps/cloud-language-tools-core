@@ -356,6 +356,21 @@ class PatreonKeyRequest(flask_restful.Resource):
         result_html = f'Click here to request your AwesomeTTS Plus / Language Tools API Key: <a href="{oauth_request_link}">Connect with Patreon</a>'
         return make_response(result_html, 200, headers)
 
+class ConvertKitTrialQuotaIncrease(flask_restful.Resource):
+    def post(self):
+        data = request.json
+        # pprint.pprint(data)
+        subscriber_id = data['subscriber']['id']
+        email_address = data['subscriber']['email_address']
+        trial_api_key = data['subscriber']['fields']['trial_api_key']
+        quota_increase = int(data['subscriber']['fields']['trial_quota_increase'])
+
+        logging.info(f'increasing trial quota for {email_address} {trial_api_key} to {quota_increase}')
+        redis_connection.increase_trial_key_limit(email_address, quota_increase)
+        convertkit_client.tag_user_trial_quota_increased(email_address, quota_increase)
+
+
+
 class ConvertKitRequestTrialKey(flask_restful.Resource):
     def post(self):
         data = request.json
@@ -445,6 +460,7 @@ api.add_resource(PatreonKeyRequest, '/request_patreon_key')
 # convertkit webhooks
 api.add_resource(ConvertKitRequestTrialKey, '/convertkit_subscriber_request_trial_key')
 api.add_resource(ConvertKitRequestPatreonKey, '/convertkit_subscriber_request_patreon_key')
+api.add_resource(ConvertKitTrialQuotaIncrease, '/convertkit_trial_quota_increase')
 
 # getcheddar webooks
 api.add_resource(GetCheddar, '/getcheddar')

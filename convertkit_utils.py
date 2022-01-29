@@ -126,7 +126,7 @@ def configure_addtag_webhook():
         # 'target_url': 'https://cloud-language-tools-dev.anki.study/convertkit_subscriber_request_trial_key',
         # 'target_url': 'https://cloud-language-tools-prod.anki.study/convertkit_subscriber_request_trial_key',
         # 'target_url': 'https://cloud-language-tools-prod.anki.study/convertkit_subscriber_request_patreon_key',
-        'target_url': 'https://df00-59-149-107-35.ngrok.io/convertkit_trial_quota_increase',
+        'target_url': 'https://cloud-language-tools-tts-prod.anki.study/convertkit_trial_quota_increase',
         # 'event': {  'name': 'subscriber.tag_add', 'tag_id': int(os.environ['CONVERTKIT_TRIAL_API_KEY_REQUESTED_TAG']) }
         'event': {  'name': 'subscriber.tag_add', 'tag_id': 2898223 }
     })

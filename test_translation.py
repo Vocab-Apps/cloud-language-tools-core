@@ -108,6 +108,9 @@ class TestTranslation(unittest.TestCase):
     def test_translate_chinese_watson(self):
         self.translate_text(Service.Watson, '中国有很多外国人', Language.zh_cn, Language.en, 'There are a lot of foreigners in China.')
 
+    def test_translate_chinese_amazon(self):
+        self.translate_text(Service.Amazon, '中国有很多外国人', Language.zh_cn, Language.en, 'there are many foreigners in china')
+
     def test_translate_naver(self):
         # pytest test_translation.py -k test_translate_naver
         self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.en, 'Please speak slowly.')

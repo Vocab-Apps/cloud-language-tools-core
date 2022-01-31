@@ -76,8 +76,10 @@ class AmazonTranslationLanguage(cloudlanguagetools.translationlanguage.Translati
 
 class AmazonService(cloudlanguagetools.service.Service):
     def __init__(self):
-        self.polly_client = boto3.client("polly")
-        self.translate_client = boto3.client("translate")
+        self.polly_client = boto3.client("polly", 
+            config=botocore.config.Config(connect_timeout=cloudlanguagetools.constants.RequestTimeout, read_timeout=cloudlanguagetools.constants.RequestTimeout))
+        self.translate_client = boto3.client("translate",
+            config=botocore.config.Config(connect_timeout=cloudlanguagetools.constants.RequestTimeout, read_timeout=cloudlanguagetools.constants.RequestTimeout))
 
     def get_translation(self, text, from_language_key, to_language_key):
         result = self.translate_client.translate_text(Text=text, 

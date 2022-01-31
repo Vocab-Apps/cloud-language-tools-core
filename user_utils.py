@@ -680,7 +680,7 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_trial_df, user_data_df, how='left', left_on='email', right_on='email')
 
-        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'detected_languages', 'services', 'clients', 'versions', 'tags', 'canceled']]
+        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions', 'tags', 'canceled']]
 
         # print(update_df)
 

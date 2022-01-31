@@ -351,36 +351,56 @@ class UserUtils():
 
     def build_user_data_trial(self):
         # api keys
+        logging.info('getting  trial API keys')            
         api_key_list = self.get_full_api_key_list()
         flat_api_key_list = [x['api_key'] for x in api_key_list]
 
         api_key_list_df = self.get_api_key_list_df(api_key_list, 'trial')
 
+
         # get convertkit subscriber ids
+        logging.info('getting convertkit trial users')
         convertkit_trial_users_df = self.get_convertkit_trial_users()
 
         # get convertkit canceled users
+        logging.info('getting convertkit canceled users')
         canceled_df = self.get_convertkit_canceled_users()
 
         # get tag data from convertkit
+        logging.info('getting convertkit tag data')
         tag_data_df = self.get_convertkit_tag_data()
 
         # get user tracking data
+        logging.info('getting user tracking data')
         tracking_data_df = self.get_user_tracking_data(api_key_list)
         
         # get character entitlement
+        logging.info('getting trial user entitlement')
         entitlement = self.redis_connection.get_trial_user_entitlement(flat_api_key_list)
         entitlement_df = pandas.DataFrame(entitlement)
         # get usage
+        logging.info('getting trial user usage')
         api_key_usage = self.redis_connection.get_trial_user_usage(flat_api_key_list)
         api_key_usage_df = pandas.DataFrame(api_key_usage)
 
+        # monthly usage data
+        logging.info('getting monthly usage')
+        monthly_usage_data_df = self.get_monthly_usage_data()
+        prev_monthly_usage_data_df = self.get_prev_monthly_usage_data()
+
+        # join data together
+        logging.info('joining data')
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, convertkit_trial_users_df, how='left', on='email')
         combined_df = pandas.merge(combined_df, canceled_df, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, tag_data_df, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, api_key_usage_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, entitlement_df, how='left', on='api_key')
+
+        if len(monthly_usage_data_df) > 0:
+            combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
+        if len(prev_monthly_usage_data_df) > 0:
+            combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
 
         combined_df['canceled'] = combined_df['canceled'].fillna(False)
 
@@ -390,6 +410,7 @@ class UserUtils():
         combined_df['characters'] =  combined_df['characters'].astype(int)
         combined_df['character_limit'] = combined_df['character_limit'].astype(int)
 
+        logging.info('update and tag convertkit users')
         self.update_tags_convertkit_users(combined_df)
 
         return combined_df
@@ -680,7 +701,9 @@ class UserUtils():
 
         joined_df = pandas.merge(airtable_trial_df, user_data_df, how='left', left_on='email', right_on='email')
 
-        update_df = joined_df[['record_id', 'api_key', 'characters', 'character_limit', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions', 'tags', 'canceled']]
+        update_df = joined_df[['record_id', 'api_key', 'api_key_valid', 'api_key_expiration', 
+            'characters', 'character_limit', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 
+            'prev_monthly_chars', 'detected_languages', 'services', 'clients', 'versions', 'tags']]
 
         # print(update_df)
 

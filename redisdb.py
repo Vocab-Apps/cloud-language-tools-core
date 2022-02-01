@@ -72,6 +72,9 @@ class RedisDb():
         key_expiration_timestamp = int(expiration_date.timestamp())
         return key_expiration_timestamp
 
+    def get_api_key_expiration_timestamp_medium(self):
+        return self.get_specific_api_key_expiration_timestamp(90)
+
     def get_api_key_expiration_timestamp_long(self):
         return self.get_specific_api_key_expiration_timestamp(180)
 
@@ -100,7 +103,7 @@ class RedisDb():
         redis_key = self.build_key(KEY_TYPE_API_KEY, api_key)
         hash_value = {
             'email': email,
-            'expiration': self.get_api_key_expiration_timestamp_long(),
+            'expiration': self.get_api_key_expiration_timestamp_medium(),
             'type': cloudlanguagetools.constants.ApiKeyType.trial.name,
             'character_limit': character_limit
         }
@@ -138,7 +141,10 @@ class RedisDb():
             # set character limit
             self.r.hset(redis_api_key, 'character_limit', character_limit)
 
-            logging.info(f'increased character limit to {character_limit} for {email} {api_key}')
+            expiration = self.get_api_key_expiration_timestamp_long()
+            self.r.hset(redis_api_key, 'expiration', expiration)
+
+            logging.info(f'increased character limit to {character_limit} for {email} {api_key} and set expiration to {expiration}')
 
 
     # prod workflow (app.py/patreon_key)

@@ -747,7 +747,7 @@ class UserUtils():
         self.patreon_utils.extend_user_key_validity()
 
     def extend_trial_expiration(self, api_key):
-        expiration = self.redis_connection.get_api_key_expiration_timestamp()
+        expiration = self.redis_connection.get_api_key_expiration_timestamp_long()
         redis_api_key = self.redis_connection.build_key(redisdb.KEY_TYPE_API_KEY, api_key)
         self.redis_connection.r.hset(redis_api_key, 'expiration', expiration)
         logging.info(f'{redis_api_key}: setting expiration to {expiration}')

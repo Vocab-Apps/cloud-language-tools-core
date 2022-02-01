@@ -29,6 +29,9 @@ logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d
                     datefmt='%Y%m%d-%H:%M:%S',
                     level=logging.INFO)
 
+# sentry crash reporting
+# ======================
+
 if secrets.config['sentry']['enable']:
     dsn = secrets.config['sentry']['dsn']
     sentry_sdk.init(
@@ -36,7 +39,7 @@ if secrets.config['sentry']['enable']:
         environment=secrets.config['sentry']['environment'],
         integrations=[FlaskIntegration()],
         release=version.CLOUD_LANGUAGE_TOOLS_VERSION,
-        traces_sample_rate=0.2
+        traces_sample_rate=0.2,
     )
 
 
@@ -55,6 +58,7 @@ def authenticate(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         api_key = request.headers.get('api_key', None)
+        sentry_sdk.set_user({'id': api_key})
         # is this API key valid ?
         result = redis_connection.api_key_valid(api_key)
         if result['key_valid']:

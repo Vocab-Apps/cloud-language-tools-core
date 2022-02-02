@@ -58,6 +58,7 @@ class AirtableUtils():
                 full_record.update(record['fields'])
                 airtable_records.append(full_record)
         airtable_records_df = pandas.DataFrame(airtable_records)
+        airtable_records_df['email'] = airtable_records_df['email'].str.lower()
         return airtable_records_df
 
     def update_patreon_users(self, data_df):

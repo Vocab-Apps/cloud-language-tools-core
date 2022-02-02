@@ -503,7 +503,7 @@ class UserUtils():
         prev_monthly_usage_data_df = self.get_prev_monthly_usage_data()
 
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
-        combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', left_on=combined_df['email'].str.lower(), rigth_on=convertkit_data_df['email'].str.lower())
+        combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', left_on=combined_df['email'].str.lower(), right_on=convertkit_data_df['email'].str.lower())
         combined_df = pandas.merge(combined_df, getcheddar_customer_data_df, how='left', on='code')
         if len(monthly_usage_data_df) > 0:
             combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')

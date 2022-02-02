@@ -238,7 +238,7 @@ class UserUtils():
         prev_monthly_usage_data_df = self.get_prev_monthly_usage_data()
 
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
-        combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', on='email')
+        combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', left_on=combined_df['email'].str.lower(), right_on=convertkit_data_df['email'].str.lower())
         combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, tracking_data_df, how='left', on='api_key')
@@ -391,7 +391,7 @@ class UserUtils():
         # join data together
         logging.info('joining data')
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
-        combined_df = pandas.merge(combined_df, convertkit_trial_users_df, how='left', on='email')
+        combined_df = pandas.merge(combined_df, convertkit_trial_users_df, how='left', left_on=combined_df['email'].str.lower(), right_on=convertkit_trial_users_df['email'].str.lower())
         combined_df = pandas.merge(combined_df, canceled_df, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, tag_data_df, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, api_key_usage_df, how='left', on='api_key')
@@ -438,9 +438,9 @@ class UserUtils():
         airtable_trial_df = airtable_trial_df[['record_id', 'email']]
         airtable_trial_df['airtable_record'] = True
 
-        combined_df = pandas.merge(api_key_list_df, convertkit_trial_users_df, how='outer', on='email')
+        combined_df = pandas.merge(api_key_list_df, convertkit_trial_users_df, how='outer', left_on=api_key_list_df['email'].str.lower(), right_on=convertkit_trial_users_df['email'].str.lower())
         combined_df = pandas.merge(combined_df, canceled_df, how='outer', on='subscriber_id')
-        combined_df = pandas.merge(airtable_trial_df, combined_df, how='outer', on='email')
+        combined_df = pandas.merge(airtable_trial_df, combined_df, how='outer', left_on=airtable_trial_df['email'].str.lower(), right_on=combined_df['email'].str.lower())
 
         combined_df['convertkit_trial_user'] = combined_df['convertkit_trial_user'].fillna(False)
         combined_df['canceled'] = combined_df['canceled'].fillna(False)
@@ -503,7 +503,7 @@ class UserUtils():
         prev_monthly_usage_data_df = self.get_prev_monthly_usage_data()
 
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
-        combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', on='email')
+        combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', left_on=combined_df['email'].str.lower(), rigth_on=convertkit_data_df['email'].str.lower())
         combined_df = pandas.merge(combined_df, getcheddar_customer_data_df, how='left', on='code')
         if len(monthly_usage_data_df) > 0:
             combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
@@ -699,7 +699,7 @@ class UserUtils():
         airtable_trial_df = self.airtable_utils.get_trial_users()
         airtable_trial_df = airtable_trial_df[['record_id', 'email']]
 
-        joined_df = pandas.merge(airtable_trial_df, user_data_df, how='left', left_on='email', right_on='email')
+        joined_df = pandas.merge(airtable_trial_df, user_data_df, how='left', left_on=airtable_trial_df['email'].str.lower(), right_on=user_data_df['email'].str.lower())
 
         update_df = joined_df[['record_id', 'api_key', 'api_key_valid', 'api_key_expiration', 
             'characters', 'character_limit', 'monthly_cost', 'monthly_chars', 'prev_monthly_cost', 

@@ -487,7 +487,7 @@ class UserUtils():
         customer_data_df = customer_data_df[['code', 'plan', 'plan_usage', 'status']]
         return customer_data_df
 
-    def build_user_data_getcheddar(self):
+    def build_user_data_getcheddar(self, readonly=False):
         # api keys
         api_key_list = self.get_full_api_key_list()
         flat_api_key_list = [x['api_key'] for x in api_key_list]
@@ -511,17 +511,25 @@ class UserUtils():
 
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', on='email')
+        # locate missed joins
+        convertkit_missed_joins_df = combined_df[combined_df['subscriber_id'].isnull()]
+        for index, row in convertkit_missed_joins_df.iterrows():
+            email = row['email']
+            code = row['code']
+            logging.error(f'could not locate getcheddar customer on convertkit email: {email} code: {code}')
+
         combined_df = pandas.merge(combined_df, getcheddar_customer_data_df, how='left', on='code')
         if len(monthly_usage_data_df) > 0:
             combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
         if len(prev_monthly_usage_data_df) > 0:
             combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
 
-        # do this when we're in production
-        self.update_tags_convertkit_users(combined_df)
+        if not readonly:
+            # do this when we're in production
+            self.update_tags_convertkit_users(combined_df)
 
-        # set tags specific to getcheddar users
-        self.update_tags_convertkit_getcheddar_users(combined_df)
+            # set tags specific to getcheddar users
+            self.update_tags_convertkit_getcheddar_users(combined_df)
 
         return combined_df
 
@@ -888,7 +896,7 @@ if __name__ == '__main__':
     elif args.action == 'cleanup_trial_user_data':
         user_utils.cleanup_user_data_trial()
     elif args.action == 'show_getcheddar_user_data':
-        user_data_df = user_utils.build_user_data_getcheddar()
+        user_data_df = user_utils.build_user_data_getcheddar(readonly=True)
         print(user_data_df)        
         print(user_data_df.dtypes)
     elif args.action == 'extend_patreon_key_validity':

@@ -45,6 +45,7 @@ def main():
                'increase_trial_limit',
                'list_trial_keys',
                'show_hash_key',
+               'show_string_key',
                'remove_key',
                'modify_key_expiration',
                'backup_redis_db',
@@ -96,6 +97,9 @@ def main():
     elif args.action == 'show_hash_key':
         redis_key = args.redis_key
         connection.show_hash_key(redis_key)
+    elif args.action == 'show_string_key':
+        redis_key = args.redis_key
+        connection.show_string_key(redis_key)
     elif args.action == 'backup_redis_db':
         backup_file = args.redis_backup_file
         connection.backup_db(backup_file)

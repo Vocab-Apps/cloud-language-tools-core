@@ -9,6 +9,38 @@ import cloudlanguagetools.constants
 CONVERTKIT_THROTTLE_REQUESTS_SLEEP = 0.5
 
 class ConvertKit():
+    # ignore these tags when building user tag maps to update airtable
+    TRIAL_SPECIFIC_TAG_LIST = [
+        'trial_user',
+        'trial_extended',
+        'trial_user_inactive',
+        'trial_end_reach_out',
+        'trial_patreon_convert',
+        'trial_api_key_ready',
+        'trial_api_key_requested',
+        'trial_vip',
+        'trial_offer_hypertts',
+        'trial_quota_50k',
+        'trial_quota_increased',
+        'trial_quota_increase_request',
+        'manual_trial_offer_hypertts_followup',
+    ]
+    PATREON_SPECIFIC_TAG_LIST = [
+        'patreon_user',
+        'patreon_active',
+        'patreon_canceled',        
+        'patreon_api_key_ready',
+    ]
+    GETCHEDDAR_SPECIFIC_TAG_LIST = [
+        'getcheddar_user',
+        'getcheddar_active',
+        'getcheddar_canceled',
+        'getcheddar_near_max'
+    ]
+    TAG_IGNORE_LIST_GETCHEDDAR = TRIAL_SPECIFIC_TAG_LIST + PATREON_SPECIFIC_TAG_LIST
+    TAG_IGNORE_LIST_TRIAL = PATREON_SPECIFIC_TAG_LIST # we still want to see which trial users migrated to getcheddar
+    TAG_IGNORE_LIST_PATREON = TRIAL_SPECIFIC_TAG_LIST + GETCHEDDAR_SPECIFIC_TAG_LIST
+
     def __init__(self):
         self.api_key = os.environ['CONVERTKIT_API_KEY']
         self.api_secret = os.environ['CONVERTKIT_API_SECRET']

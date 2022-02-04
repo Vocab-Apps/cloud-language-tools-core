@@ -216,7 +216,7 @@ class UserUtils():
         record_list = list(processed_records_dict.values())
         return pandas.DataFrame(record_list)
 
-    def build_user_data_patreon(self):
+    def build_user_data_patreon(self, readonly=False):
         # api keys
         api_key_list = self.get_full_api_key_list()
 
@@ -232,7 +232,7 @@ class UserUtils():
 
         # get tag data from convertkit
         convertkit_users_df = self.get_convertkit_patreon_users()
-        tag_data_df = self.get_convertkit_tag_data()
+        tag_data_df = self.get_convertkit_tag_data(self.convertkit_client.TAG_IGNORE_LIST_PATREON)
         convertkit_data_df = pandas.merge(convertkit_users_df, tag_data_df, how='left', on='subscriber_id')
 
         # usage data
@@ -241,14 +241,22 @@ class UserUtils():
 
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
         combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', on='email')
+        # locate missed joins
+        convertkit_missed_joins_df = combined_df[combined_df['subscriber_id'].isnull()]
+        for index, row in convertkit_missed_joins_df.iterrows():
+            email = row['email']
+            patreon_user_id = row['patreon_user_id']
+            logging.error(f'could not locate patreon customer on convertkit email: {email} patreon_user_id: {patreon_user_id}')
+
         combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, tracking_data_df, how='left', on='api_key')
 
-        self.update_tags_convertkit_users(combined_df)
+        if not readonly:
+            self.update_tags_convertkit_users(combined_df)
 
-        # update tags specific to patreon on convertkit
-        self.update_tags_convertkit_patreon_users(combined_df)
+            # update tags specific to patreon on convertkit
+            self.update_tags_convertkit_patreon_users(combined_df)
 
         return combined_df
 
@@ -303,21 +311,9 @@ class UserUtils():
         data_df = data_df[['subscriber_id', tag_name]]
         return data_df
 
-    def get_convertkit_tag_data(self):
-        logging.info(f'getting convertkit tag data')
+    def get_convertkit_tag_data(self, tag_ignore_list):
+        logging.info(f'getting convertkit tag data, tag_ignore_list: {tag_ignore_list}')
         self.convertkit_client.populate_tag_map()
-
-        # we are not interested in these tags
-        tag_ignore_list = [
-            'patreon_api_key_ready',
-            'patreon_user',
-            'trial_api_key_ready',
-            'trial_api_key_requested',
-            'trial_user',
-            'getcheddar_user',
-            'heavy_users',
-            'ssml_character_fix',
-        ]
 
         tag_id_map = {tag_name:tag_id for tag_name, tag_id in self.convertkit_client.full_tag_id_map.items() if tag_name not in tag_ignore_list}
         present_tags = []
@@ -356,7 +352,7 @@ class UserUtils():
 
         return final_df
 
-    def build_user_data_trial(self):
+    def build_user_data_trial(self, readonly=False):
         # api keys
         logging.info('getting  trial API keys')            
         api_key_list = self.get_full_api_key_list()
@@ -375,7 +371,7 @@ class UserUtils():
 
         # get tag data from convertkit
         logging.info('getting convertkit tag data')
-        tag_data_df = self.get_convertkit_tag_data()
+        tag_data_df = self.get_convertkit_tag_data(self.convertkit_client.TAG_IGNORE_LIST_TRIAL)
 
         # get user tracking data
         logging.info('getting user tracking data')
@@ -399,6 +395,13 @@ class UserUtils():
         logging.info('joining data')
         combined_df = pandas.merge(api_key_list_df, tracking_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, convertkit_trial_users_df, how='left', on='email')
+        # locate missed joins
+        convertkit_missed_joins_df = combined_df[combined_df['subscriber_id'].isnull()]
+        for index, row in convertkit_missed_joins_df.iterrows():
+            email = row['email']
+            api_key = row['api_key']
+            logging.error(f'could not locate trial customer on convertkit email: {email} api_key: {api_key}')
+
         combined_df = pandas.merge(combined_df, canceled_df, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, tag_data_df, how='left', on='subscriber_id')
         combined_df = pandas.merge(combined_df, api_key_usage_df, how='left', on='api_key')
@@ -417,8 +420,9 @@ class UserUtils():
         combined_df['characters'] =  combined_df['characters'].astype(int)
         combined_df['character_limit'] = combined_df['character_limit'].astype(int)
 
-        logging.info('update and tag convertkit users')
-        self.update_tags_convertkit_users(combined_df)
+        if not readonly:
+            logging.info('update and tag convertkit users')
+            self.update_tags_convertkit_users(combined_df)
 
         return combined_df
 
@@ -502,7 +506,7 @@ class UserUtils():
 
         # get tag data from convertkit
         convertkit_users_df = self.get_convertkit_getcheddar_users()
-        tag_data_df = self.get_convertkit_tag_data()
+        tag_data_df = self.get_convertkit_tag_data(self.convertkit_client.TAG_IGNORE_LIST_GETCHEDDAR)
         convertkit_data_df = pandas.merge(convertkit_users_df, tag_data_df, how='left', on='subscriber_id')
 
         # usage data
@@ -887,10 +891,10 @@ if __name__ == '__main__':
     if args.action == 'update_airtable_usage':
         user_utils.update_airtable_usage()
     elif args.action == 'show_patreon_user_data':
-        user_data_df = user_utils.build_user_data_patreon()
+        user_data_df = user_utils.build_user_data_patreon(readonly=True)
         print(user_data_df)
     elif args.action == 'show_trial_user_data':
-        user_data_df = user_utils.build_user_data_trial()
+        user_data_df = user_utils.build_user_data_trial(readonly=True)
         print(user_data_df)
         print(user_data_df.dtypes)
     elif args.action == 'cleanup_trial_user_data':

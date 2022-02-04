@@ -241,12 +241,13 @@ class UserUtils():
 
         combined_df = pandas.merge(api_key_list_df, patreon_user_df, how='outer', on='patreon_user_id')
         combined_df = pandas.merge(combined_df, convertkit_data_df, how='left', on='email')
-        # locate missed joins
-        convertkit_missed_joins_df = combined_df[combined_df['subscriber_id'].isnull()]
+        # locate missed joins, keeping in mind that not every patreon user has requested an api_key
+        convertkit_missed_joins_df = combined_df[(combined_df['subscriber_id'].isnull()) & (combined_df['email'].notnull())]
         for index, row in convertkit_missed_joins_df.iterrows():
             email = row['email']
             patreon_user_id = row['patreon_user_id']
-            logging.error(f'could not locate patreon customer on convertkit email: {email} patreon_user_id: {patreon_user_id}')
+            api_key = row['api_key']
+            logging.error(f'could not locate patreon customer on convertkit email: {email} patreon_user_id: {patreon_user_id} api_key: {api_key}')
 
         combined_df = pandas.merge(combined_df, monthly_usage_data_df, how='left', on='api_key')
         combined_df = pandas.merge(combined_df, prev_monthly_usage_data_df, how='left', on='api_key')

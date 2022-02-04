@@ -3,6 +3,7 @@ import logging
 import datetime
 import argparse
 import json
+import pprint
 
 import secrets
 import quotas
@@ -879,6 +880,7 @@ if __name__ == '__main__':
     parser.add_argument('--usage_period_end', type=int, help='for usage data, start of period')
     parser.add_argument('--api_key', help='Pass in API key to check validity')
     parser.add_argument('--trial_character_limit', type=int, help='Pass in custom trial character limit')
+    parser.add_argument('--email', type=str, help='if set, show details for this particular user')
     args = parser.parse_args()
 
     if args.action == 'update_airtable_all':
@@ -904,6 +906,8 @@ if __name__ == '__main__':
         user_data_df = user_utils.build_user_data_getcheddar(readonly=True)
         print(user_data_df)        
         print(user_data_df.dtypes)
+        if args.email != None:
+            pprint.pprint(user_data_df[user_data_df['email'] == args.email].to_dict(orient='records'))
     elif args.action == 'extend_patreon_key_validity':
         user_utils.extend_patreon_key_validity()    
     elif args.action == 'extend_trial_expiration':

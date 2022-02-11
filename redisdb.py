@@ -600,6 +600,21 @@ class RedisDb():
             self.r.hincrby(key, 'requests', 1)
             self.r.expire(key, expire_time_seconds)
 
+    def reset_trial_usage(self, api_key):
+        logging.info(f'resetting trial usage for {api_key}')
+        expire_time_seconds = 30*3*24*3600 # 3 months
+        usage_slice = quotas.UsageSlice(None, 
+                            cloudlanguagetools.constants.UsageScope.User, 
+                            cloudlanguagetools.constants.UsagePeriod.lifetime, 
+                            None, 
+                            api_key,
+                            cloudlanguagetools.constants.ApiKeyType.trial,
+                            {})
+        key = self.build_key(KEY_TYPE_USAGE, usage_slice.build_key_suffix())
+        self.r.hset(key, 'characters', 0)
+        self.r.hset(key, 'requests', 0)
+        self.r.expire(key, expire_time_seconds)
+
     def retrieve_audio_requests_for_key(self, redis_key):
         total_count = self.r.llen(redis_key)
         logging.info(f'audio request list: {total_count}')

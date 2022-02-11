@@ -368,8 +368,13 @@ class ConvertKitTrialQuotaIncrease(flask_restful.Resource):
         email_address = data['subscriber']['email_address']
         trial_api_key = data['subscriber']['fields']['trial_api_key']
         quota_increase = int(data['subscriber']['fields']['trial_quota_increase'])
+        
+        reset_trial_usage = False
+        if 'trial_instructions' in data['subscriber']['fields']:
+            if data['subscriber']['fields']['trial_instructions'] == 'reset_trial_usage':
+                reset_trial_usage = True
 
-        logging.info(f'increasing trial quota for {email_address} {trial_api_key} to {quota_increase}')
+        logging.info(f'increasing trial quota for {email_address} {trial_api_key} to {quota_increase}, reset_trial_usage: {reset_trial_usage}')
         redis_connection.increase_trial_key_limit(email_address, quota_increase)
         convertkit_client.tag_user_trial_quota_increased(email_address, quota_increase)
 

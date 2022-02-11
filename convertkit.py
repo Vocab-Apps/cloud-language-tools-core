@@ -38,7 +38,7 @@ class ConvertKit():
         'getcheddar_near_max'
     ]
     TAG_IGNORE_LIST_GETCHEDDAR = TRIAL_SPECIFIC_TAG_LIST + PATREON_SPECIFIC_TAG_LIST
-    TAG_IGNORE_LIST_TRIAL = PATREON_SPECIFIC_TAG_LIST # we still want to see which trial users migrated to getcheddar
+    TAG_IGNORE_LIST_TRIAL = [] # we still want to see which trial users migrated to getcheddar/patreon
     TAG_IGNORE_LIST_PATREON = TRIAL_SPECIFIC_TAG_LIST + GETCHEDDAR_SPECIFIC_TAG_LIST
 
     def __init__(self):

@@ -43,6 +43,7 @@ def main():
                'create_trial_key', 
                'create_extended_trial_key',
                'increase_trial_limit',
+               'reset_trial_usage',
                'list_trial_keys',
                'show_hash_key',
                'show_string_key',
@@ -90,6 +91,9 @@ def main():
     elif args.action == 'increase_trial_limit':
         email = args.trial_email
         connection.increase_trial_key_limit(email, quotas.TRIAL_EXTENDED_USER_CHARACTER_LIMIT)
+    elif args.action == 'reset_trial_usage':
+        api_key = args.api_key
+        connection.reset_trial_usage(api_key)
     elif args.action == 'create_extended_trial_key':
         email = args.trial_email
         connection.get_trial_user_key(email)

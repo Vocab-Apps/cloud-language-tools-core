@@ -1115,6 +1115,162 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
         self.getcheddar_utils.delete_test_customer(customer_code_1)
 
+    def test_endtoend_upgrade_downgrade(self):
+        # pytest manual_test_getcheddar.py -s -rPP -k test_endtoend_upgrade_downgrade
+
+        customer_code = self.get_customer_code()
+
+        # create the user
+        # ===============
+
+        self.getcheddar_utils.create_test_customer(customer_code, customer_code, 'Test', 'Customer', 'SMALL')
+
+        redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code)
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while not self.redis_connection.r.exists(redis_getcheddar_user_key) and max_wait_cycles > 0:
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+
+        # ensure redis keys got created correctly
+        # ---------------------------------------
+
+        self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
+        api_key = self.redis_connection.r.get(redis_getcheddar_user_key)
+        print(f'api_key: {api_key}')
+        
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
+        expected_user_data = {
+            'type': 'getcheddar',
+            'code': customer_code,
+            'email': customer_code,
+            'status': 'active',
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 0
+        }
+        self.assertEqual(actual_user_data, expected_user_data)
+
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '0 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
+
+
+
+        # log some usage (fake)
+        # =====================
+        service = cloudlanguagetools.constants.Service.Azure
+        language_code = cloudlanguagetools.constants.Language.fr
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        characters = 249999
+        # should not throw
+        print(f'logging {characters} characters of usage')
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '249,999 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)        
+        return 
+
+        characters = 140000
+        # should not throw either
+        print(f'logging {characters} characters of usage')
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        characters = 10001
+        # this one should throw
+        print(f'logging {characters} characters of usage')
+        self.assertRaises(
+            cloudlanguagetools.errors.OverQuotaError, 
+            self.redis_connection.track_usage, api_key, service, request_type, characters, language_code=language_code)
+
+        # upgrade to medium plan
+        # ======================
+        self.getcheddar_utils.update_test_customer(customer_code, 'MEDIUM')
+        upgrade_done = False
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while upgrade_done == False and max_wait_cycles > 0:
+            # retrieve customer data
+            actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+            upgrade_done = actual_user_data['thousand_char_quota'] == 500
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+        self.assertEqual(upgrade_done, True)
+
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '500,000 characters',
+            'usage': '240,000 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)        
+
+        # log some more usage after upgrade
+        # ---------------------------------
+        characters = 255000
+        # should not throw either
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)        
+
+        # log some more usage, which will throw
+        characters = 6000
+        # this one should throw
+        self.assertRaises(
+            cloudlanguagetools.errors.OverQuotaError, 
+            self.redis_connection.track_usage, api_key, service, request_type, characters, language_code=language_code)        
+
+        # upgrade to large plan
+        # =====================
+        self.getcheddar_utils.update_test_customer(customer_code, 'LARGE')
+        upgrade_done = False
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while upgrade_done == False and max_wait_cycles > 0:
+            # retrieve customer data
+            actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+            upgrade_done = actual_user_data['thousand_char_quota'] == 1000
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+        self.assertEqual(upgrade_done, True)        
+
+        # should not throw
+        characters = 500000
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)                
+
+        # at this point we should be at 995k of usage
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '1000,000 characters',
+            'usage': '995,000 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)                
+
+        # making a request for 6000 characters will fail
+        characters = 6000
+        self.assertRaises(
+            cloudlanguagetools.errors.OverQuotaError, 
+            self.redis_connection.track_usage, api_key, service, request_type, characters, language_code=language_code)
+
+        # finally, delete the user
+        self.getcheddar_utils.delete_test_customer(customer_code)
+
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate
     unittest.main()  

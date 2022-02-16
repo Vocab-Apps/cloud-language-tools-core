@@ -217,6 +217,29 @@ class GetCheddarUtils():
         else:
             print(response.content)        
 
+    def reactivate_test_customer(self, code, email, first_name, last_name, plan):
+        self.ensure_dev()
+
+        url = f'https://getcheddar.com/xml/customers/edit-subscription/productCode/{self.product_code}'
+        params = {
+            'code': code,
+            'email': email,
+            'firstName': first_name,
+            'lastName': last_name,
+            'subscription[planCode]': plan,
+            'subscription[ccFirstName]': first_name,
+            'subscription[ccLastName]': last_name,
+            'subscription[ccNumber]': '370000000000002',
+            'subscription[ccCardCode]': '1234',
+            'subscription[ccExpiration]': '04/2025'
+        }
+        response = requests.post(url, auth=(self.user, self.api_key), data=params)
+        if response.status_code == 200:
+            print(self.decode_customer_xml(response.content))
+            logging.info(f'created customer {code}')
+        else:
+            raise Exception(response.content)
+
     def update_test_customer(self, code, plan):
         self.ensure_dev()
 

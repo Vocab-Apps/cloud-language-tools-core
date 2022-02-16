@@ -1241,56 +1241,6 @@ class GetCheddarEndToEnd(unittest.TestCase):
         }
         self.assertEqual(actual_account_data, expected_account_data)
 
-        
-
-        return
-
-        # log some more usage after upgrade
-        # ---------------------------------
-        characters = 255000
-        # should not throw either
-        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)        
-
-        # log some more usage, which will throw
-        characters = 6000
-        # this one should throw
-        self.assertRaises(
-            cloudlanguagetools.errors.OverQuotaError, 
-            self.redis_connection.track_usage, api_key, service, request_type, characters, language_code=language_code)        
-
-        # upgrade to large plan
-        # =====================
-        self.getcheddar_utils.update_test_customer(customer_code, 'LARGE')
-        upgrade_done = False
-        max_wait_cycles = MAX_WAIT_CYCLES
-        while upgrade_done == False and max_wait_cycles > 0:
-            # retrieve customer data
-            actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
-            upgrade_done = actual_user_data['thousand_char_quota'] == 1000
-            time.sleep(SLEEP_TIME)
-            max_wait_cycles -= 1
-        self.assertEqual(upgrade_done, True)        
-
-        # should not throw
-        characters = 500000
-        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)                
-
-        # at this point we should be at 995k of usage
-        actual_account_data = self.redis_connection.get_account_data(api_key)
-        self.clean_actual_account_data(actual_account_data)
-        expected_account_data = {
-            'email': customer_code,
-            'type': '1000,000 characters',
-            'usage': '995,000 characters'
-        }
-        self.assertEqual(actual_account_data, expected_account_data)                
-
-        # making a request for 6000 characters will fail
-        characters = 6000
-        self.assertRaises(
-            cloudlanguagetools.errors.OverQuotaError, 
-            self.redis_connection.track_usage, api_key, service, request_type, characters, language_code=language_code)
-
         # finally, delete the user
         self.getcheddar_utils.delete_test_customer(customer_code)
 

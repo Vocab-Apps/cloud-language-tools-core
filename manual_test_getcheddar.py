@@ -606,7 +606,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
 
     def test_endtoend_multi_user(self):
         # create a user
-        # pytest manual_test_getcheddar.py -rPP -k test_endtoend_multi_user
+        # pytest manual_test_getcheddar.py -s -rPP -k test_endtoend_multi_user
 
         customer_code_1 = self.get_customer_code()
         customer_code_2 = self.get_customer_code()
@@ -683,7 +683,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         service = cloudlanguagetools.constants.Service.Azure
         language_code = cloudlanguagetools.constants.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
-        characters = 1500000
+        characters = 995000
         self.redis_connection.track_usage(api_key_3, service, request_type, characters, language_code=language_code)
 
         # report usage again
@@ -725,8 +725,8 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'email': customer_code_3,
             'status': 'active',
             'thousand_char_quota': 1000,
-            'thousand_char_overage_allowed': 1,
-            'thousand_char_used': 1500.0
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 995.0
         }
         self.assertEqual(actual_user_data_3, expected_user_data_3)
 

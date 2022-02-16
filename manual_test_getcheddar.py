@@ -1184,19 +1184,6 @@ class GetCheddarEndToEnd(unittest.TestCase):
             'usage': '249,999 characters'
         }
         self.assertEqual(actual_account_data, expected_account_data)        
-        return 
-
-        characters = 140000
-        # should not throw either
-        print(f'logging {characters} characters of usage')
-        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
-
-        characters = 10001
-        # this one should throw
-        print(f'logging {characters} characters of usage')
-        self.assertRaises(
-            cloudlanguagetools.errors.OverQuotaError, 
-            self.redis_connection.track_usage, api_key, service, request_type, characters, language_code=language_code)
 
         # upgrade to medium plan
         # ======================
@@ -1218,9 +1205,10 @@ class GetCheddarEndToEnd(unittest.TestCase):
         expected_account_data = {
             'email': customer_code,
             'type': '500,000 characters',
-            'usage': '240,000 characters'
+            'usage': '0 characters'
         }
-        self.assertEqual(actual_account_data, expected_account_data)        
+        self.assertEqual(actual_account_data, expected_account_data)
+        return 
 
         # log some more usage after upgrade
         # ---------------------------------

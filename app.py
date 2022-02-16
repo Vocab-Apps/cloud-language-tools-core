@@ -439,6 +439,9 @@ class GetCheddar(flask_restful.Resource):
             # don't retain the "thousand_char_used" member as it's 0
             # it will get set correctly when reporting usage
             del user_data['thousand_char_used']
+        # if user is upgrading/downgrading, reset usage to 0
+        if webhook_data['type'] == 'subscriptionChanged':
+            pass
         api_key = redis_connection.get_update_getcheddar_user_key(user_data)
         if webhook_data['type'] == 'newSubscription':
             email = webhook_data['email']

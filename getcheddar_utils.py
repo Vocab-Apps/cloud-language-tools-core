@@ -35,7 +35,7 @@ class GetCheddarUtils():
             status = 'canceled'
         customer_code = data['customer']['code']
         customer_key = data['customer']['key']
-        return {
+        result =  {
             'type': activity_type,
             'code': customer_code,
             'email': data['customer']['email'],
@@ -46,6 +46,10 @@ class GetCheddarUtils():
             'update_url': self.build_update_url(customer_code, customer_key),
             'cancel_url': self.build_cancel_url(customer_code, customer_key)
         }
+        if activity_type == 'subscriptionChanged':
+            result['previous_thousand_char_quota'] = data['previousSubscription']['plan']['items'][0]['quantityIncluded']
+        
+        return result
 
 
     def decode_customer_element(self, root):

@@ -429,6 +429,7 @@ class GetCheddar(flask_restful.Resource):
 
         data = request.json
         webhook_data = getcheddar_utils.decode_webhook(data)
+        logging.info(f"""getcheddar: processing {webhook_data['type']} for {webhook_data['code']}""")
         if webhook_data['type'] == 'customerDeleted':
             # delete user from redis
             redis_connection.delete_getcheddar_user(webhook_data['code'])
@@ -439,9 +440,23 @@ class GetCheddar(flask_restful.Resource):
             # don't retain the "thousand_char_used" member as it's 0
             # it will get set correctly when reporting usage
             del user_data['thousand_char_used']
-        # if user is upgrading/downgrading, reset usage to 0
+        
+        # do we need to reset the usage ?
+        reset_usage = False
         if webhook_data['type'] == 'subscriptionChanged':
-            pass
+            if webhook_data['previous_thousand_char_quota'] > webhook_data['thousand_char_quota']:
+                # downgrading
+                reset_usage = True
+        if webhook_data['type'] == 'subscriptionReactivated':
+            # user reactivated account
+            reset_usage = True
+        if reset_usage:
+            logging.info(f"""resetting usage to zero for {user_data['code']}""")
+            # first, set usage to zero here
+            user_data['thousand_char_used'] = 0
+            # then also set usage to zero on getcheddar
+            getcheddar_utils.reset_customer_usage(user_data['code'])
+
         api_key = redis_connection.get_update_getcheddar_user_key(user_data)
         if webhook_data['type'] == 'newSubscription':
             email = webhook_data['email']

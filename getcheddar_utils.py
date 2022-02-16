@@ -130,6 +130,19 @@ class GetCheddarUtils():
         else:
             error_message = f'Could not report customer usage: {response.content}'
             raise Exception(error_message)
+    
+    def reset_customer_usage(self, customer_code):
+        customer_code_encoded = urllib.parse.quote(customer_code)
+        url = f'https://getcheddar.com/xml/customers/set-item-quantity/productCode/{self.product_code}/code/{customer_code_encoded}/itemCode/{TRACKED_ITEM_CODE}'
+        # print(url)
+        params = {'quantity': 0}
+        response = requests.post(url, auth=(self.user, self.api_key), data=params)
+        if response.status_code == 200:
+            # success
+            return self.decode_customer_xml(response.content)
+        else:
+            error_message = f'Could reset customer usage: {response.content}'
+            raise Exception(error_message)            
 
     def get_customer(self, customer_code):
         # /customers/get/productCode/MY_self.product_code/code/MY_CUSTOMER_CODE

@@ -1119,6 +1119,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # pytest manual_test_getcheddar.py -s -rPP -k test_endtoend_upgrade_downgrade
 
         customer_code = self.get_customer_code()
+        user_utils_instance = user_utils.UserUtils()
 
         # create the user
         # ===============
@@ -1185,6 +1186,10 @@ class GetCheddarEndToEnd(unittest.TestCase):
         }
         self.assertEqual(actual_account_data, expected_account_data)        
 
+        # report user usage to getcheddar
+        # ===============================
+        user_utils_instance.report_getcheddar_user_usage(api_key)
+
         # upgrade to medium plan
         # ======================
         self.getcheddar_utils.update_test_customer(customer_code, 'MEDIUM')
@@ -1205,10 +1210,40 @@ class GetCheddarEndToEnd(unittest.TestCase):
         expected_account_data = {
             'email': customer_code,
             'type': '500,000 characters',
+            'usage': '249,999 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
+        
+        # report user usage to getcheddar
+        # ===============================
+        user_utils_instance.report_getcheddar_user_usage(api_key)
+        
+        # downgrade back to small 
+        # =======================
+        self.getcheddar_utils.update_test_customer(customer_code, 'SMALL')
+        upgrade_done = False
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while upgrade_done == False and max_wait_cycles > 0:
+            # retrieve customer data
+            actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+            upgrade_done = actual_user_data['thousand_char_quota'] == 250
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+        self.assertEqual(upgrade_done, True)
+
+        # usage should have been reset
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
             'usage': '0 characters'
         }
         self.assertEqual(actual_account_data, expected_account_data)
-        return 
+
+        
+
+        return
 
         # log some more usage after upgrade
         # ---------------------------------

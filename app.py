@@ -9,6 +9,7 @@ import sys
 import logging
 import urllib.parse
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.errors
 import redisdb
@@ -93,7 +94,7 @@ def track_usage(request_type, request, func, *args, **kwargs):
             language_code_str = request.json.get('language_code', None)
             if language_code_str != None:
                 try:
-                    language_code = cloudlanguagetools.constants.Language[language_code_str]
+                    language_code = cloudlanguagetools.languages.Language[language_code_str]
                 except KeyError:
                     return {'error': f'language_code {language_code_str} not recognized'}, 400
 
@@ -138,7 +139,7 @@ def track_usage_audio_yomichan(func):
                 service = cloudlanguagetools.constants.Service[service_str]
                 characters = len(text)
                 try:
-                    redis_connection.track_usage(api_key, service, cloudlanguagetools.constants.RequestType.audio, characters, cloudlanguagetools.constants.Language.ja)
+                    redis_connection.track_usage(api_key, service, cloudlanguagetools.constants.RequestType.audio, characters, cloudlanguagetools.languages.Language.ja)
                 except cloudlanguagetools.errors.OverQuotaError as err:
                     return {'error': str(err)}, 429
         return func(*args, **kwargs)
@@ -270,7 +271,7 @@ class AudioV2(flask_restful.Resource):
                 return {'error': 'empty text'}, 400
 
             # convert to enum
-            language_code = cloudlanguagetools.constants.Language[language]
+            language_code = cloudlanguagetools.languages.Language[language]
             service = cloudlanguagetools.constants.Service[service_str]
             request_mode = cloudlanguagetools.constants.RequestMode[request_mode_str]
 

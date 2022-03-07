@@ -4,6 +4,7 @@ import tempfile
 import logging
 import timeit
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.errors
 import cloudlanguagetools.azure
 import cloudlanguagetools.google
@@ -144,7 +145,7 @@ class ServiceManager():
 
     def get_language_list(self):
         result_dict = {}
-        for language in cloudlanguagetools.constants.Language:
+        for language in cloudlanguagetools.languages.Language:
             result_dict[language.name] = language.lang_name
         return result_dict
 
@@ -275,7 +276,7 @@ class ServiceManager():
 
 
     def detect_language(self, text_list):
-        """returns an enum from constants.Language"""
+        """returns an enum from languages.Language"""
         service = self.services[cloudlanguagetools.constants.Service.Azure.name]
         result = service.detect_language(text_list)
         return result

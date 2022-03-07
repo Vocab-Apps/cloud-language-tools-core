@@ -4,6 +4,7 @@ import urllib.parse
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.transliterationlanguage
 
 VARIANT_JAPANESE_ROMAJI = 'Romaji'
@@ -58,7 +59,7 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
 
     def get_transliteration_language_list(self):
         result = [
-            EasyPronunciationTransliterationLanguage('/french-api.php', cloudlanguagetools.constants.Language.fr,
+            EasyPronunciationTransliterationLanguage('/french-api.php', cloudlanguagetools.languages.Language.fr,
             {
                 'version': 1,
                 'use_un_symbol': 1,
@@ -68,7 +69,7 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'spell_numbers':1
             }, 'french'),
 
-            EasyPronunciationTransliterationLanguage('/english-api.php', cloudlanguagetools.constants.Language.en,
+            EasyPronunciationTransliterationLanguage('/english-api.php', cloudlanguagetools.languages.Language.en,
             {
                 'version': 1,
                 'english_phonetics_algorithm': 'american_miscellaneous_sources',
@@ -84,13 +85,13 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'spell_numbers':1
             }, 'english'),
 
-            EasyPronunciationTransliterationLanguage('/italian-api.php', cloudlanguagetools.constants.Language.it,
+            EasyPronunciationTransliterationLanguage('/italian-api.php', cloudlanguagetools.languages.Language.it,
             {
                 'version':1,
                 'spell_numbers':1
             }, 'italian'),
 
-            EasyPronunciationTransliterationLanguage('/japanese-api.php', cloudlanguagetools.constants.Language.ja,
+            EasyPronunciationTransliterationLanguage('/japanese-api.php', cloudlanguagetools.languages.Language.ja,
             {
                 'version':1,
                 'style':'slash',
@@ -98,7 +99,7 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'weakening':1
             }, 'japanese', VARIANT_JAPANESE_ROMAJI),
 
-            EasyPronunciationTransliterationLanguage('/japanese-api.php', cloudlanguagetools.constants.Language.ja,
+            EasyPronunciationTransliterationLanguage('/japanese-api.php', cloudlanguagetools.languages.Language.ja,
             {
                 'version':1,
                 'style':'slash',
@@ -106,21 +107,21 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'weakening':1
             }, 'japanese', VARIANT_JAPANESE_KANA),
 
-            EasyPronunciationTransliterationLanguage('/portuguese-api.php', cloudlanguagetools.constants.Language.pt_pt,
+            EasyPronunciationTransliterationLanguage('/portuguese-api.php', cloudlanguagetools.languages.Language.pt_pt,
             {
                 'version':1,
                 'portuguese_dialect':'EP',
                 'spell_numbers':1,
             }, 'portuguese'),
 
-            EasyPronunciationTransliterationLanguage('/portuguese-api.php', cloudlanguagetools.constants.Language.pt_br,
+            EasyPronunciationTransliterationLanguage('/portuguese-api.php', cloudlanguagetools.languages.Language.pt_br,
             {
                 'version':1,
                 'portuguese_dialect':'BP',
                 'spell_numbers':1,
             }, 'portuguese'),
 
-            EasyPronunciationTransliterationLanguage('/spanish-api.php', cloudlanguagetools.constants.Language.es,
+            EasyPronunciationTransliterationLanguage('/spanish-api.php', cloudlanguagetools.languages.Language.es,
             {
                 'version':1,
                 'split_into_syllables':0,
@@ -131,14 +132,14 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'spell_numbers':1
             }, 'spanish'),
 
-            EasyPronunciationTransliterationLanguage('/german-api.php', cloudlanguagetools.constants.Language.de,
+            EasyPronunciationTransliterationLanguage('/german-api.php', cloudlanguagetools.languages.Language.de,
             {
                 'version':1,
                 'split_into_syllables':1,
                 'spell_numbers':1
             }, 'german'),
 
-            EasyPronunciationTransliterationLanguage('/russian-api.php', cloudlanguagetools.constants.Language.ru,
+            EasyPronunciationTransliterationLanguage('/russian-api.php', cloudlanguagetools.languages.Language.ru,
             {
                 'version':1,
                 'Convert_to_russian':'IPA',

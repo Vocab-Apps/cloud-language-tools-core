@@ -3,13 +3,14 @@ import quotas
 import datetime
 
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 
 class TestQuotas(unittest.TestCase):
 
     def test_adjust_character_count(self):
         services = cloudlanguagetools.constants.Service
         request_type = cloudlanguagetools.constants.RequestType.audio
-        languages = cloudlanguagetools.constants.Language
+        languages = cloudlanguagetools.languages.Language
         self.assertEqual(quotas.adjust_character_count(services.Google, request_type, languages.en, 42), 42)
         self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, languages.fr, 42), 42)
         self.assertEqual(quotas.adjust_character_count(services.Azure, request_type, None, 42), 42)

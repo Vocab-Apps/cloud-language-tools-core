@@ -6,6 +6,7 @@ import time
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
@@ -107,21 +108,21 @@ class FptAiService(cloudlanguagetools.service.Service):
     def get_tts_voice_list(self):
         # returns list of TtSVoice
         return [
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'leminh', 'Lê Minh', cloudlanguagetools.constants.Gender.Male, 'miền Bắc'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'banmai', 'Ban Mai', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'thuminh', 'Thu Minh', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'giahuy', 'Gia Huy', cloudlanguagetools.constants.Gender.Male, 'miền Trung'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'ngoclam', 'Ngọc Lam', cloudlanguagetools.constants.Gender.Female, 'miền Trung'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'myan', 'Mỹ An', cloudlanguagetools.constants.Gender.Female, 'miền Trung'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'lannhi', 'Lan Nhi', cloudlanguagetools.constants.Gender.Female, 'miền Nam'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'linhsan', 'Linh San', cloudlanguagetools.constants.Gender.Female, 'miền Nam'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'minhquang', 'Minh Quang', cloudlanguagetools.constants.Gender.Male, 'miền Nam'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'leminh', 'Lê Minh', cloudlanguagetools.constants.Gender.Male, 'miền Bắc'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'banmai', 'Ban Mai', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'thuminh', 'Thu Minh', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'giahuy', 'Gia Huy', cloudlanguagetools.constants.Gender.Male, 'miền Trung'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'ngoclam', 'Ngọc Lam', cloudlanguagetools.constants.Gender.Female, 'miền Trung'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'myan', 'Mỹ An', cloudlanguagetools.constants.Gender.Female, 'miền Trung'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'lannhi', 'Lan Nhi', cloudlanguagetools.constants.Gender.Female, 'miền Nam'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'linhsan', 'Linh San', cloudlanguagetools.constants.Gender.Female, 'miền Nam'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'minhquang', 'Minh Quang', cloudlanguagetools.constants.Gender.Male, 'miền Nam'),
             # acesound voices
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'banmaiace', 'Ban Mai (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'thuminhace', 'Thu Minh (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'ngoclamace', 'Ngọc Lam (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Trung'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'linhsanace', 'Linh San (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Nam'),
-            FptAiVoice(cloudlanguagetools.constants.AudioLanguage.vi_VN, 'minhquangace', 'Minh Quang (AceSound)', cloudlanguagetools.constants.Gender.Male, 'miền Nam'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'banmaiace', 'Ban Mai (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'thuminhace', 'Thu Minh (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Bắc'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'ngoclamace', 'Ngọc Lam (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Trung'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'linhsanace', 'Linh San (AceSound)', cloudlanguagetools.constants.Gender.Female, 'miền Nam'),
+            FptAiVoice(cloudlanguagetools.languages.AudioLanguage.vi_VN, 'minhquangace', 'Minh Quang (AceSound)', cloudlanguagetools.constants.Gender.Male, 'miền Nam'),
 
 
         ]

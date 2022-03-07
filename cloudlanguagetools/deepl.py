@@ -6,6 +6,7 @@ import os
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
@@ -34,7 +35,7 @@ class DeepLService(cloudlanguagetools.service.Service):
 
 
     def get_translation_language_list(self):
-        language = cloudlanguagetools.constants.Language
+        language = cloudlanguagetools.languages.Language
         result = [
             DeepLTranslationLanguage(language.bg, 'BG'),
             DeepLTranslationLanguage(language.cs, 'CS'),

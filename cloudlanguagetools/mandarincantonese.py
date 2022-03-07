@@ -1,6 +1,7 @@
 import json
 import requests
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 
 class MandarinCantoneseTransliteration(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, language, conversion_type, tone_numbers, spaces):
@@ -42,9 +43,9 @@ class MandarinCantoneseService(cloudlanguagetools.service.Service):
         result = []
         for tone_numbers in [True, False]:
             for spaces in [True, False]:
-                result.append(MandarinCantoneseTransliteration(cloudlanguagetools.constants.Language.zh_cn, 'pinyin', tone_numbers, spaces))
-                result.append(MandarinCantoneseTransliteration(cloudlanguagetools.constants.Language.zh_tw, 'pinyin', tone_numbers, spaces))
-                result.append(MandarinCantoneseTransliteration(cloudlanguagetools.constants.Language.yue, 'jyutping', tone_numbers, spaces))
+                result.append(MandarinCantoneseTransliteration(cloudlanguagetools.languages.Language.zh_cn, 'pinyin', tone_numbers, spaces))
+                result.append(MandarinCantoneseTransliteration(cloudlanguagetools.languages.Language.zh_tw, 'pinyin', tone_numbers, spaces))
+                result.append(MandarinCantoneseTransliteration(cloudlanguagetools.languages.Language.yue, 'jyutping', tone_numbers, spaces))
         return result
 
     def get_transliteration(self, text, transliteration_key):

@@ -7,17 +7,18 @@ import google.cloud.translate_v2
 import google.api_core.exceptions
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 
 def language_code_to_enum(language_code):
     override_map = {
-        'cmn-TW': cloudlanguagetools.constants.AudioLanguage.zh_TW,
-        'cmn-CN': cloudlanguagetools.constants.AudioLanguage.zh_CN,
-        'yue-HK': cloudlanguagetools.constants.AudioLanguage.zh_HK
+        'cmn-TW': cloudlanguagetools.languages.AudioLanguage.zh_TW,
+        'cmn-CN': cloudlanguagetools.languages.AudioLanguage.zh_CN,
+        'yue-HK': cloudlanguagetools.languages.AudioLanguage.zh_HK
     }
     if language_code in override_map:
         return override_map[language_code]
     language_enum_name = language_code.replace('-', '_')
-    return cloudlanguagetools.constants.AudioLanguage[language_enum_name]
+    return cloudlanguagetools.languages.AudioLanguage[language_enum_name]
 
 class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
@@ -77,7 +78,7 @@ def get_translation_language_enum(language_id):
     }
     if language_id in google_language_id_map:
         language_id = google_language_id_map[language_id]
-    return cloudlanguagetools.constants.Language[language_id]
+    return cloudlanguagetools.languages.Language[language_id]
 
 class GoogleTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language_id):

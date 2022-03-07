@@ -187,13 +187,13 @@ def get_amazon_voice_list_awesometts():
         print(code)
 
 def print_all_languages():
-    languages = [language for language in cloudlanguagetools.constants.Language]
+    languages = [language for language in cloudlanguagetools.languages.Language]
     languages = sorted(languages, key = lambda x: x.lang_name)
     for entry in languages:
         print(f'{entry.name},{entry.lang_name}')
 
 def print_all_audio_languages():
-    languages = [language for language in cloudlanguagetools.constants.AudioLanguage]
+    languages = [language for language in cloudlanguagetools.languages.AudioLanguage]
     languages = sorted(languages, key = lambda x: x.audio_lang_name)
     for entry in languages:
         print(f'{entry.lang.name},{entry.name},{entry.audio_lang_name}')
@@ -298,7 +298,7 @@ def output_languages_enum():
 
 def output_language_audio_mapping():
     language_map = {}
-    for audio_language in cloudlanguagetools.constants.AudioLanguage:
+    for audio_language in cloudlanguagetools.languages.AudioLanguage:
         language = audio_language.lang
         if language not in language_map:
             language_map[language] = []
@@ -384,7 +384,7 @@ def end_to_end_test():
     field1_language_id = [x for x in languages_service if x['language_code'] == language1.name][0]['language_id']
     field2_language_id = [x for x in languages_service if x['language_code'] == language2.name][0]['language_id']
 
-    target_language_enum = cloudlanguagetools.constants.Language.cs
+    target_language_enum = cloudlanguagetools.languages.Language.cs
 
     target_language_id = [x for x in languages_service if x['language_code'] == target_language_enum.name][0]['language_id']
 
@@ -496,7 +496,7 @@ def create_epitran_mappings():
     # print(language_map)
 
     clt_reverse_language_map = {}
-    for language in cloudlanguagetools.constants.Language:
+    for language in cloudlanguagetools.languages.Language:
         clt_reverse_language_map[language.lang_name] = language
 
     print(clt_reverse_language_map)
@@ -523,16 +523,16 @@ def load_vocalware_voices():
 
     # build map of language name to enum
     language_enum_map = {}
-    for language in cloudlanguagetools.constants.Language:
+    for language in cloudlanguagetools.languages.Language:
         language_enum_map[language.lang_name] = language
     
     # add some exceptions
-    language_enum_map['Chinese'] = cloudlanguagetools.constants.Language.zh_cn
-    language_enum_map['Bengali'] = cloudlanguagetools.constants.Language.bn
-    language_enum_map['Malaylam'] = cloudlanguagetools.constants.Language.ml
-    language_enum_map['Portuguese'] = cloudlanguagetools.constants.Language.pt_pt
-    language_enum_map['Slovanian'] = cloudlanguagetools.constants.Language.sl
-    language_enum_map['Valencian'] = cloudlanguagetools.constants.Language.ca
+    language_enum_map['Chinese'] = cloudlanguagetools.languages.Language.zh_cn
+    language_enum_map['Bengali'] = cloudlanguagetools.languages.Language.bn
+    language_enum_map['Malaylam'] = cloudlanguagetools.languages.Language.ml
+    language_enum_map['Portuguese'] = cloudlanguagetools.languages.Language.pt_pt
+    language_enum_map['Slovanian'] = cloudlanguagetools.languages.Language.sl
+    language_enum_map['Valencian'] = cloudlanguagetools.languages.Language.ca
     # print(language_enum_map)
 
     vocalware_language_id_to_language_enum = {}
@@ -549,7 +549,7 @@ def load_vocalware_voices():
     print(vocalware_language_id_to_language_enum)
 
     language_to_audio_language_map = {}
-    for audio_language in cloudlanguagetools.constants.AudioLanguage:
+    for audio_language in cloudlanguagetools.languages.AudioLanguage:
         language_to_audio_language_map[audio_language.lang] = audio_language
     
 
@@ -570,20 +570,20 @@ def load_vocalware_voices():
     # print(voices_subset_df)
 
     audio_language_substr_mappings = {
-        'Cantonese': cloudlanguagetools.constants.AudioLanguage.zh_HK,
-        'Brazilian': cloudlanguagetools.constants.AudioLanguage.pt_BR,
-        'Brasilian': cloudlanguagetools.constants.AudioLanguage.pt_BR,
-        'Portugal': cloudlanguagetools.constants.AudioLanguage.pt_PT,
-        'Canadian': cloudlanguagetools.constants.AudioLanguage.fr_CA,
-        'Taiwanese': cloudlanguagetools.constants.AudioLanguage.zh_TW,
-        'US': cloudlanguagetools.constants.AudioLanguage.en_US,
-        'UK': cloudlanguagetools.constants.AudioLanguage.en_GB,
-        'Australian': cloudlanguagetools.constants.AudioLanguage.en_AU,
-        'Indian': cloudlanguagetools.constants.AudioLanguage.en_IN,
-        'Castilian': cloudlanguagetools.constants.AudioLanguage.es_ES,
-        'Chilean': cloudlanguagetools.constants.AudioLanguage.es_LA,
-        'Argentine': cloudlanguagetools.constants.AudioLanguage.es_LA,
-        'Mexican': cloudlanguagetools.constants.AudioLanguage.es_MX,
+        'Cantonese': cloudlanguagetools.languages.AudioLanguage.zh_HK,
+        'Brazilian': cloudlanguagetools.languages.AudioLanguage.pt_BR,
+        'Brasilian': cloudlanguagetools.languages.AudioLanguage.pt_BR,
+        'Portugal': cloudlanguagetools.languages.AudioLanguage.pt_PT,
+        'Canadian': cloudlanguagetools.languages.AudioLanguage.fr_CA,
+        'Taiwanese': cloudlanguagetools.languages.AudioLanguage.zh_TW,
+        'US': cloudlanguagetools.languages.AudioLanguage.en_US,
+        'UK': cloudlanguagetools.languages.AudioLanguage.en_GB,
+        'Australian': cloudlanguagetools.languages.AudioLanguage.en_AU,
+        'Indian': cloudlanguagetools.languages.AudioLanguage.en_IN,
+        'Castilian': cloudlanguagetools.languages.AudioLanguage.es_ES,
+        'Chilean': cloudlanguagetools.languages.AudioLanguage.es_LA,
+        'Argentine': cloudlanguagetools.languages.AudioLanguage.es_LA,
+        'Mexican': cloudlanguagetools.languages.AudioLanguage.es_MX,
     }
 
     # voices_subset_df = voices_subset_df.head(5)
@@ -616,7 +616,7 @@ def load_vocalware_voices():
                 logging.error(f'could not detect gender for {voice_name}')
                 gender_response = 'male'
             gender = cloudlanguagetools.constants.Gender[gender_response.capitalize()]
-            voice_code = f"""VocalWareVoice(cloudlanguagetools.constants.AudioLanguage.{audio_language_enum.name}, '{voice_name}', cloudlanguagetools.constants.Gender.{gender.name}, {language_id}, {voice_id}, {engine_id}),\n"""
+            voice_code = f"""VocalWareVoice(cloudlanguagetools.languages.AudioLanguage.{audio_language_enum.name}, '{voice_name}', cloudlanguagetools.constants.Gender.{gender.name}, {language_id}, {voice_id}, {engine_id}),\n"""
             vocalware_voice_file.write(voice_code)
     
     vocalware_voice_file.close()

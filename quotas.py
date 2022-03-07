@@ -1,5 +1,6 @@
 import datetime
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 
 PATREON_MONTHLY_CHARACTER_LIMIT = 250000
 
@@ -84,15 +85,15 @@ COST_TABLE = [
 def adjust_character_count(
     service: cloudlanguagetools.constants.Service, 
     request_type: cloudlanguagetools.constants.RequestType,
-    language: cloudlanguagetools.constants.Language,
+    language: cloudlanguagetools.languages.Language,
     characters: int):
     
     azure_double_count_languages = [
-            cloudlanguagetools.constants.Language.ja,
-            cloudlanguagetools.constants.Language.ko,
-            cloudlanguagetools.constants.Language.yue,
-            cloudlanguagetools.constants.Language.zh_cn,
-            cloudlanguagetools.constants.Language.zh_tw
+            cloudlanguagetools.languages.Language.ja,
+            cloudlanguagetools.languages.Language.ko,
+            cloudlanguagetools.languages.Language.yue,
+            cloudlanguagetools.languages.Language.zh_cn,
+            cloudlanguagetools.languages.Language.zh_tw
         ]
 
     if request_type == cloudlanguagetools.constants.RequestType.breakdown:  

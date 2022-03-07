@@ -17,6 +17,7 @@ import redisdb
 import getcheddar_utils
 import user_utils
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 
 # this test requires webhooks from getcheddar to go through
 
@@ -165,7 +166,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage (fake)
         # =====================
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 100000
         # should not throw
@@ -320,7 +321,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage (fake)
         # =====================
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 142456
         self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
@@ -440,7 +441,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage (fake)
         # =====================
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 142456
         self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
@@ -639,7 +640,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage for api_key_1
         # ----------------------------
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 142456
         self.redis_connection.track_usage(api_key_1, service, request_type, characters, language_code=language_code)
@@ -681,7 +682,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage for api_key_3
         # ----------------------------
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 995000
         self.redis_connection.track_usage(api_key_3, service, request_type, characters, language_code=language_code)
@@ -831,7 +832,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage (fake)
         # =====================
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 249983
         self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
@@ -905,7 +906,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage for api_key_1
         # ----------------------------
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 249995
         self.redis_connection.track_usage(api_key_1, service, request_type, characters, language_code=language_code)
@@ -947,7 +948,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage for api_key_2
         # ----------------------------
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 150000
         self.redis_connection.track_usage(api_key_2, service, request_type, characters, language_code=language_code)
@@ -986,7 +987,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some more usage for api_key_2
         # ----------------------------
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 50000
         self.redis_connection.track_usage(api_key_2, service, request_type, characters, language_code=language_code)
@@ -1051,7 +1052,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage for api_key_1
         # ----------------------------
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 249995
         self.redis_connection.track_usage(api_key_1, service, request_type, characters, language_code=language_code)
@@ -1168,7 +1169,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage (fake)
         # =====================
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 249999
         # should not throw
@@ -1297,7 +1298,7 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # log some usage (fake)
         # =====================
         service = cloudlanguagetools.constants.Service.Azure
-        language_code = cloudlanguagetools.constants.Language.fr
+        language_code = cloudlanguagetools.languages.Language.fr
         request_type = cloudlanguagetools.constants.RequestType.audio
         characters = 249999
         # should not throw

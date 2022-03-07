@@ -7,6 +7,7 @@ import base64
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
@@ -21,7 +22,7 @@ def get_audio_language_enum(language_iso, country_iso):
     language_enum_name = f'{language_iso}_{country_iso}'
     if language_enum_name in cereproc_audio_id_map:
         language_enum_name = cereproc_audio_id_map[language_enum_name]
-    return cloudlanguagetools.constants.AudioLanguage[language_enum_name]
+    return cloudlanguagetools.languages.AudioLanguage[language_enum_name]
 
 class CereProcVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):

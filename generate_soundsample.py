@@ -11,6 +11,7 @@ import random
 import urllib.parse
 import cloudlanguagetools
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.servicemanager
 import webflow_cms_utils
 
@@ -26,7 +27,7 @@ class SoundSampleGeneration():
 
     def generate_audio_language_list(self, language_set):
         records = []
-        for language in cloudlanguagetools.constants.Language:
+        for language in cloudlanguagetools.languages.Language:
             if language in language_set:
                 records.append({
                     'id': language.name,
@@ -51,7 +52,7 @@ class SoundSampleGeneration():
         voice_list = manager.get_tts_voice_list()
         translation_language_list = manager.get_translation_language_list()
         source_text = 'How many languages can you speak ? The more the better !'
-        source_language = cloudlanguagetools.constants.Language.en
+        source_language = cloudlanguagetools.languages.Language.en
         source_translation_option = [x for x in translation_language_list if x.language == source_language][0]
         translation_service = 'Azure'
         translations = {}

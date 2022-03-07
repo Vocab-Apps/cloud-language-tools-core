@@ -4,6 +4,7 @@ import string
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.tokenization
 
 class PyThaiNLPTransliterationMode(enum.Enum):
@@ -15,7 +16,7 @@ class PyThaiNLPTokenizationMode(enum.Enum):
 
 class PyThaiNLPTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, mode):
-        self.language = cloudlanguagetools.constants.Language.th
+        self.language = cloudlanguagetools.languages.Language.th
         self.service = cloudlanguagetools.constants.Service.PyThaiNLP
         self.mode = mode
 
@@ -30,7 +31,7 @@ class PyThaiNLPTransliterationLanguage(cloudlanguagetools.transliterationlanguag
 
 class PyThaiNLPTokenization(cloudlanguagetools.tokenization.Tokenization):
     def __init__(self, mode):
-        self.language = cloudlanguagetools.constants.Language.th
+        self.language = cloudlanguagetools.languages.Language.th
         self.service = cloudlanguagetools.constants.Service.PyThaiNLP
         self.mode = mode
 

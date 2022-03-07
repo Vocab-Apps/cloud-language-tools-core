@@ -8,6 +8,7 @@ import logging
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
@@ -23,7 +24,7 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.service = cloudlanguagetools.constants.Service.Azure
         locale = voice_data['Locale']
         language_enum_name = locale.replace('-', '_')
-        self.audio_language = cloudlanguagetools.constants.AudioLanguage[language_enum_name]
+        self.audio_language = cloudlanguagetools.languages.AudioLanguage[language_enum_name]
         self.name = voice_data['Name']
         self.display_name = voice_data['DisplayName']
         self.local_name = voice_data['LocalName']
@@ -86,7 +87,7 @@ def get_translation_language_enum(language_id):
     }
     if language_id in azure_language_id_map:
         language_id = azure_language_id_map[language_id]
-    return cloudlanguagetools.constants.Language[language_id]
+    return cloudlanguagetools.languages.Language[language_id]
 
 class AzureTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language_id):

@@ -14,6 +14,7 @@ import getcheddar_utils
 import convertkit
 import redisdb
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 
 
 class UserUtils():
@@ -172,7 +173,7 @@ class UserUtils():
 
         def process_languages(hash_data):
             language_list = hash_data.keys()
-            language_name_list = [cloudlanguagetools.constants.Language[x].lang_name for x in language_list]            
+            language_name_list = [cloudlanguagetools.languages.Language[x].lang_name for x in language_list]            
             return language_name_list
 
         def process_languages_enum(hash_data):

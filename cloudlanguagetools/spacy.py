@@ -5,6 +5,7 @@ import os
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.tokenization
 
 
@@ -85,20 +86,20 @@ class SpacyService(cloudlanguagetools.service.Service):
 
     def get_tokenization_options(self):
         result = [
-            SpacyTokenization(cloudlanguagetools.constants.Language.en, 'en_core_web_trf'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.fr, 'fr_dep_news_trf'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.ja, 'ja_core_news_lg'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.de, 'de_dep_news_trf'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.es, 'es_dep_news_trf'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.ru, 'ru_core_news_lg'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.pl, 'pl_core_news_lg'),
-            SpacyTokenization(cloudlanguagetools.constants.Language.it, 'it_core_news_lg'),
+            SpacyTokenization(cloudlanguagetools.languages.Language.en, 'en_core_web_trf'),
+            SpacyTokenization(cloudlanguagetools.languages.Language.fr, 'fr_dep_news_trf'),
+            SpacyTokenization(cloudlanguagetools.languages.Language.ja, 'ja_core_news_lg'),
+            SpacyTokenization(cloudlanguagetools.languages.Language.de, 'de_dep_news_trf'),
+            SpacyTokenization(cloudlanguagetools.languages.Language.es, 'es_dep_news_trf'),
+            SpacyTokenization(cloudlanguagetools.languages.Language.ru, 'ru_core_news_lg'),
+            SpacyTokenization(cloudlanguagetools.languages.Language.pl, 'pl_core_news_lg'),
+            SpacyTokenization(cloudlanguagetools.languages.Language.it, 'it_core_news_lg'),
 
         ]
         chinese_language_list = [
-            cloudlanguagetools.constants.Language.zh_cn,
-            cloudlanguagetools.constants.Language.zh_tw,
-            cloudlanguagetools.constants.Language.yue
+            cloudlanguagetools.languages.Language.zh_cn,
+            cloudlanguagetools.languages.Language.zh_tw,
+            cloudlanguagetools.languages.Language.yue
         ]
         for language in chinese_language_list:
             # chinese variants

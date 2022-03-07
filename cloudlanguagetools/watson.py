@@ -5,6 +5,7 @@ import logging
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
@@ -23,7 +24,7 @@ def get_translation_language_enum(language_id):
     }
     if language_id in watson_language_id_map:
         language_id = watson_language_id_map[language_id]
-    return cloudlanguagetools.constants.Language[language_id]
+    return cloudlanguagetools.languages.Language[language_id]
 
 def get_audio_language_enum(voice_language):
     watson_audio_id_map = {
@@ -32,7 +33,7 @@ def get_audio_language_enum(voice_language):
     language_enum_name = voice_language.replace('-', '_')
     if voice_language in watson_audio_id_map:
         language_enum_name = watson_audio_id_map[voice_language]
-    return cloudlanguagetools.constants.AudioLanguage[language_enum_name]
+    return cloudlanguagetools.languages.AudioLanguage[language_enum_name]
 
 class WatsonTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language_id):

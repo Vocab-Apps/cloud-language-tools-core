@@ -38,6 +38,7 @@ class Language(enum.Enum):
     ht = ("Haitian Creole")
     ha = ("Hausa")
     haw = ("Hawaiian")
+    hsb = ("Upper Sorbian")
     ikt = ("Inuinnaqtun")
     iw = ("Hebrew")
     iu = ("Inuktitut")

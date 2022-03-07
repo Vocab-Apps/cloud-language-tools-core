@@ -40,7 +40,7 @@ if secrets.config['sentry']['enable']:
         environment=secrets.config['sentry']['environment'],
         integrations=[FlaskIntegration()],
         release=version.CLOUD_LANGUAGE_TOOLS_VERSION,
-        traces_sample_rate=0.2,
+        traces_sample_rate=0.075,
     )
 
 

@@ -959,7 +959,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         response_json = json.loads(response.data)
         self.assertTrue('error' in response_json)
-        self.assertEqual(response_json['error'], """Status code: 400: {'details': 'empty synthesized data', 'errorCode': 'VS10', 'message': 'text parameter check (text 파라미터를 확인해주세요.)'}""")
+        self.assertEqual(response_json['error'], """Status code: 400: {'details': 'empty synthesized data : TN result is empty', 'errorCode': 'VS10', 'message': 'text parameter check (text 파라미터를 확인해주세요.)'}""")
 
         # incorrect language code passed in
         # =================================

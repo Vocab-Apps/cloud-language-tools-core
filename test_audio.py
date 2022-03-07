@@ -7,8 +7,8 @@ import pytest
 import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
-from cloudlanguagetools.constants import Language
-from cloudlanguagetools.constants import AudioLanguage
+from cloudlanguagetools.languages import Language
+from cloudlanguagetools.languages import AudioLanguage
 from cloudlanguagetools.constants import Service
 
 def get_manager():

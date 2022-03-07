@@ -5,7 +5,7 @@ import pprint
 import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
-from cloudlanguagetools.constants import Language
+from cloudlanguagetools.languages import Language
 from cloudlanguagetools.constants import Service
 import cloudlanguagetools.errors
 

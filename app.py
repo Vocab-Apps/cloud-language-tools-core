@@ -459,6 +459,9 @@ class GetCheddar(flask_restful.Resource):
             getcheddar_utils.reset_customer_usage(user_data['code'])
 
         api_key = redis_connection.get_update_getcheddar_user_key(user_data)
+        if reset_usage:
+            # any accumulated non-reported usage needs to be reset
+            redis_connection.reset_getcheddar_usage_slice(api_key)
         if webhook_data['type'] == 'newSubscription':
             email = webhook_data['email']
             update_url = webhook_data['update_url']

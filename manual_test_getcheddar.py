@@ -1342,6 +1342,151 @@ class GetCheddarEndToEnd(unittest.TestCase):
         # finally, delete the user
         self.getcheddar_utils.delete_test_customer(customer_code)        
 
+    def test_endtoend_cancel_small_reactivate_small(self):
+        # pytest manual_test_getcheddar.py -s -rPP -k test_endtoend_cancel_small_reactivate_small
+
+        customer_code = self.get_customer_code()
+        user_utils_instance = user_utils.UserUtils()
+
+        # create the user
+        # ===============
+
+        self.getcheddar_utils.create_test_customer(customer_code, customer_code, 'Test', 'Customer', 'SMALL')
+
+        redis_getcheddar_user_key = self.redis_connection.build_key(redisdb.KEY_TYPE_GETCHEDDAR_USER, customer_code)
+        max_wait_cycles = MAX_WAIT_CYCLES
+        while not self.redis_connection.r.exists(redis_getcheddar_user_key) and max_wait_cycles > 0:
+            time.sleep(SLEEP_TIME)
+            max_wait_cycles -= 1
+
+        # ensure redis keys got created correctly
+        # ---------------------------------------
+
+        self.assertTrue(self.redis_connection.r.exists(redis_getcheddar_user_key))
+        api_key = self.redis_connection.r.get(redis_getcheddar_user_key)
+        print(f'api_key: {api_key}')
+        
+        actual_user_data = self.redis_connection.get_getcheddar_user_data(customer_code)
+        self.clean_actual_user_data(actual_user_data)
+        expected_user_data = {
+            'type': 'getcheddar',
+            'code': customer_code,
+            'email': customer_code,
+            'status': 'active',
+            'thousand_char_quota': 250,
+            'thousand_char_overage_allowed': 0,
+            'thousand_char_used': 0
+        }
+        self.assertEqual(actual_user_data, expected_user_data)
+
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '0 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
+
+
+
+        # log some usage (fake)
+        # =====================
+        service = cloudlanguagetools.constants.Service.Azure
+        language_code = cloudlanguagetools.languages.Language.fr
+        request_type = cloudlanguagetools.constants.RequestType.audio
+        characters = 125000
+        # should not throw
+        print(f'logging {characters} characters of usage')
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '125,000 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)        
+
+        # report user usage to getcheddar
+        # ===============================
+        user_utils_instance.report_getcheddar_user_usage(api_key)
+
+        # verify that getcheddar usage is correct
+        customer_data = self.getcheddar_utils.get_customer(customer_code)
+        self.assertEqual(customer_data['thousand_char_used'], 125.000)
+        self.assertEqual(customer_data['status'], 'active')
+
+        # cancel plan
+        # ===========
+        self.getcheddar_utils.cancel_test_customer(customer_code)
+        time.sleep(1)
+
+        customer_data = self.getcheddar_utils.get_customer(customer_code)
+        self.assertEqual(customer_data['thousand_char_used'], 125.000)
+        self.assertEqual(customer_data['status'], 'canceled')
+
+        # now that customer is canceled, report some more usage
+        # =====================================================
+
+        characters = 124995
+        print(f'logging {characters} characters of usage')
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)
+
+
+        # verify account data
+        # -------------------
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '249,995 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)        
+
+        # reactivate plan
+        # ===============
+        self.getcheddar_utils.reactivate_test_customer(customer_code, customer_code, 'Test', 'Customer', 'SMALL')
+        time.sleep(1.5)
+
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '0 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)
+
+        # log smal amount of usage
+        # ========================
+        characters = 1234
+        print(f'logging {characters} characters of usage')
+        self.redis_connection.track_usage(api_key, service, request_type, characters, language_code=language_code)        
+
+        # report getcheddar usage
+        # =======================
+        user_utils_instance.report_getcheddar_user_usage(api_key)
+
+        # verify usage
+        actual_account_data = self.redis_connection.get_account_data(api_key)
+        self.clean_actual_account_data(actual_account_data)
+        expected_account_data = {
+            'email': customer_code,
+            'type': '250,000 characters',
+            'usage': '1,234 characters'
+        }
+        self.assertEqual(actual_account_data, expected_account_data)        
+
+        # finally, delete the user
+        self.getcheddar_utils.delete_test_customer(customer_code)        
+
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate
     unittest.main()  

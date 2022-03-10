@@ -182,6 +182,15 @@ class NaverService(cloudlanguagetools.service.Service):
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.zh_TW, 'chiahua', cloudlanguagetools.constants.Gender.Female, 'Chiahua', 'Premium'),
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.zh_TW, 'kuanlin', cloudlanguagetools.constants.Gender.Male, 'Kuanlin', 'Premium'),
 
+            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nes_c_hyeri', cloudlanguagetools.constants.Gender.Female, 'Hyeri', 'Premium'),
+            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nes_c_sohyun', cloudlanguagetools.constants.Gender.Female, 'Sohyun', 'Premium'),
+            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nes_c_mikyung', cloudlanguagetools.constants.Gender.Female, 'Mikyung', 'Premium'),
+            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nes_c_kihyo', cloudlanguagetools.constants.Gender.Female, 'Kihyo', 'Premium'),
+            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'ntiffany', cloudlanguagetools.constants.Gender.Female, 'Kiseo', 'Premium'),
+            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'napple', cloudlanguagetools.constants.Gender.Female, 'Neulbom', 'Premium'),
+            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'njangj', cloudlanguagetools.constants.Gender.Female, 'Dream', 'Premium'),
+            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'noyj', cloudlanguagetools.constants.Gender.Female, 'Bomdal', 'Premium'),
+
 
         ]
 

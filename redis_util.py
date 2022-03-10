@@ -84,7 +84,9 @@ def main():
         connection.list_all_keys()
     elif args.action == 'list_usage':
         # example: python redis_util.py --action list_usage --pattern usage:global:daily
-        connection.list_usage(args.pattern)
+        usage_entries = connection.list_usage(args.pattern)
+        for usage_entry in usage_entries:
+            logging.info(usage_entry)
     elif args.action == 'create_trial_key':
         email = args.trial_email
         connection.get_trial_user_key(email)

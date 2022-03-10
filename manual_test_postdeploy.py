@@ -185,6 +185,10 @@ class PostDeployTests(unittest.TestCase):
         self.assertEqual({'transliterated_text': 'chéng běn hěn dī'}, result)
 
     def test_transliteration_mandarin_cantonese(self):
+        if int(os.environ['CLT_RUN_NLP_TESTS']) == 0:
+            # skip 
+            raise unittest.SkipTest(f'NLP tests not enabled, skipping')
+
         response = requests.get(self.get_url('/transliteration_language_list'))
         transliteration_language_list = response.json()
 
@@ -212,6 +216,10 @@ class PostDeployTests(unittest.TestCase):
         self.assertEqual({'transliterated_text': 'chéngběn hěn dī'}, result)
 
     def test_transliteration_mandarin_cantonese_2(self):
+        if int(os.environ['CLT_RUN_NLP_TESTS']) == 0:
+            # skip 
+            raise unittest.SkipTest(f'NLP tests not enabled, skipping')
+
         response = requests.get(self.get_url('/transliteration_language_list'))
         transliteration_language_list = response.json()
 
@@ -406,7 +414,7 @@ class PostDeployTests(unittest.TestCase):
 
         if int(os.environ['CLT_RUN_NLP_TESTS']) == 0:
             # skip 
-            return
+            raise unittest.SkipTest(f'NLP tests not enabled, skipping')
 
         service = 'Spacy'
 

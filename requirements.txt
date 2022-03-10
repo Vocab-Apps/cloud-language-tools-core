@@ -18,3 +18,4 @@ pythainlp[thai2rom,ipa]
 sentry-sdk[flask]
 spacy
 jieba
+pinyin_jyutping_sentence

@@ -1,8 +1,11 @@
 import json
 import requests
-import pinyin_jyutping_sentence
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
+import secrets
+
+if secrets.config['load_nlp_models']:
+    import pinyin_jyutping_sentence
 
 class MandarinCantoneseTransliteration(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, language, conversion_type, tone_numbers, spaces):

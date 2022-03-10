@@ -24,6 +24,7 @@ import hashlib
 import hmac
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 #logging.basicConfig()
 logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -38,7 +39,7 @@ if secrets.config['sentry']['enable']:
     sentry_sdk.init(
         dsn=dsn,
         environment=secrets.config['sentry']['environment'],
-        integrations=[FlaskIntegration()],
+        integrations=[FlaskIntegration(), RedisIntegration()],
         release=version.CLOUD_LANGUAGE_TOOLS_VERSION,
         traces_sample_rate=0.075,
     )

@@ -1,5 +1,6 @@
 import json
 import requests
+import pinyin_jyutping_sentence
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 
@@ -30,7 +31,7 @@ class MandarinCantoneseTransliteration(cloudlanguagetools.transliterationlanguag
 
 class MandarinCantoneseService(cloudlanguagetools.service.Service):
     def __init__(self):
-        self.base_url = 'https://apiv2.mandarincantonese.com'
+        pass
 
 
     def get_tts_voice_list(self):
@@ -49,11 +50,10 @@ class MandarinCantoneseService(cloudlanguagetools.service.Service):
         return result
 
     def get_transliteration(self, text, transliteration_key):
-        response = requests.post(self.base_url + '/convert', json={
-            'text': text,
-            'conversion_type': transliteration_key['conversion_type'],
-            'tone_numbers': transliteration_key['tone_numbers'],
-            'spaces': transliteration_key['spaces']
-        }, timeout=cloudlanguagetools.constants.RequestTimeout)
-        data = json.loads(response.content)
-        return data['romanization']
+
+        if transliteration_key['conversion_type'] == 'pinyin':
+            return pinyin_jyutping_sentence.pinyin(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])
+        elif transliteration_key['conversion_type'] == 'jyuting':
+            return pinyin_jyutping_sentence.jyutping(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])
+
+        raise Exception(f"unsupported conversion type: {transliteration_key['conversion_type']}")

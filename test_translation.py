@@ -172,6 +172,26 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('prathetthai', result)
 
+    def test_transliteration_mandarincantonese(self):
+        # pytest test_translation.py -k test_transliteration_mandarincantonese
+        
+        # chinese
+        source_text = '成本很低'
+        from_language = Language.zh_cn.name
+        service = 'MandarinCantonese'
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language 
+            and x['service'] == service 
+            and x['transliteration_key']['tone_numbers'] == False
+            and x['transliteration_key']['spaces'] == False]
+
+        self.assertTrue(len(transliteration_candidates) == 1)
+
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('chéngběn hěn dī', result)
+
 
     def test_transliteration_easypronunciation(self):
         # pytest test_translation.py -rPP -k test_transliteration_easypronunciation

@@ -192,6 +192,25 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('chéngběn hěn dī', result)
 
+        # jyutping
+        # '我出去攞野食'
+
+        source_text = '我出去攞野食'
+        from_language = Language.yue.name
+
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language 
+            and x['service'] == service 
+            and x['transliteration_key']['tone_numbers'] == False
+            and x['transliteration_key']['spaces'] == False]
+
+        self.assertTrue(len(transliteration_candidates) == 1)
+
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ngǒ cēothêoi ló jěsik', result)
+
 
     def test_transliteration_easypronunciation(self):
         # pytest test_translation.py -rPP -k test_transliteration_easypronunciation

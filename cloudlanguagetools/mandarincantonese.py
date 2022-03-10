@@ -53,7 +53,7 @@ class MandarinCantoneseService(cloudlanguagetools.service.Service):
 
         if transliteration_key['conversion_type'] == 'pinyin':
             return pinyin_jyutping_sentence.pinyin(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])
-        elif transliteration_key['conversion_type'] == 'jyuting':
+        elif transliteration_key['conversion_type'] == 'jyutping':
             return pinyin_jyutping_sentence.jyutping(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])
 
         raise Exception(f"unsupported conversion type: {transliteration_key['conversion_type']}")

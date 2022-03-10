@@ -185,12 +185,23 @@ class TestTranslation(unittest.TestCase):
             and x['transliteration_key']['spaces'] == False]
 
         self.assertTrue(len(transliteration_candidates) == 1)
-
         transliteration_option = transliteration_candidates[0]
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('chéngběn hěn dī', result)
+
+        # tone numbers
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language 
+            and x['service'] == service 
+            and x['transliteration_key']['tone_numbers'] == True
+            and x['transliteration_key']['spaces'] == False]
+        self.assertTrue(len(transliteration_candidates) == 1) 
+        transliteration_option = transliteration_candidates[0]       
+        transliteration_key = transliteration_option['transliteration_key']
+
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('cheng2ben3 hen3 di1', result)
 
         # jyutping
         # '我出去攞野食'

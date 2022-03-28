@@ -88,7 +88,8 @@ def run_scheduler():
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
-                        level=logging.INFO)    
+                        level=logging.INFO,
+                        handlers=[logging.StreamHandler()])
 
     if secrets.config['sentry']['enable']:
         dsn = secrets.config['sentry']['dsn']

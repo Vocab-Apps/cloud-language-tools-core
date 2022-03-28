@@ -16,6 +16,7 @@ then
 . ${CWD}/digitalocean_spaces.sh
 . ${CWD}/patreon_prod_digitalocean.sh
 . ${CWD}/rsync_net.sh
+echo "starting scheduled tasks"
 python3 scheduled_tasks.py
 else
 . ${CWD}/tts_keys.sh

@@ -293,12 +293,19 @@ class UserUtils():
         return canceled_df
 
     def get_dataframe_from_subscriber_list(self, subscribers):
+        def get_int_field(subscriber, field_name):
+            field_value = 0
+            if subscriber['fields'][field_name] != None:
+                field_value = int(subscriber['fields'][field_name])
+            return field_value
+
         users = []
         for subscriber in subscribers:
             users.append({
                 'subscriber_id': subscriber['id'],
                 'email': subscriber['email_address'],
                 'subscription_date': subscriber['created_at'],
+                'trial_quota_usage': get_int_field(subscriber, 'trial_quota_usage')
             })
         users_df = pandas.DataFrame(users)
         # lowercase email so that merges don't fail
@@ -356,10 +363,8 @@ class UserUtils():
 
         return final_df
 
-    def build_user_data_trial(self, readonly=False):
+    def build_user_data_trial(self, api_key_list, readonly=False):
         # api keys
-        logging.info('getting  trial API keys')            
-        api_key_list = self.get_full_api_key_list()
         flat_api_key_list = [x['api_key'] for x in api_key_list]
 
         api_key_list_df = self.get_api_key_list_df(api_key_list, 'trial')
@@ -427,15 +432,13 @@ class UserUtils():
         if not readonly:
             logging.info('update and tag convertkit users')
             self.update_tags_convertkit_users(combined_df)
+            logging.info('update usage for convertkit trial users')
+            self.update_usage_convertkit_trial_users(combined_df)
 
         return combined_df
 
-    def cleanup_user_data_trial(self):
+    def cleanup_user_data_trial(self, api_key_list):
         logging.info('cleaning up trial users')
-
-        # api keys
-        api_key_list = self.get_full_api_key_list()
-        flat_api_key_list = [x['api_key'] for x in api_key_list]
 
         api_key_list_df = self.get_api_key_list_df(api_key_list, 'trial')
         api_key_list_df = api_key_list_df[['api_key', 'email']]
@@ -490,10 +493,11 @@ class UserUtils():
 
         # identify airtable records which must be added
         add_airtable_records_df = combined_df[ (combined_df['airtable_record'] == False) & (combined_df['convertkit_trial_user'] == True) & (combined_df['canceled'] == False)]
-        logging.info(f'the following records must be created on airtable trials table:')
-        print(add_airtable_records_df)
-        add_airtable_records_df = add_airtable_records_df[['email', 'subscription_date']]
-        self.airtable_utils.add_trial_users(add_airtable_records_df)
+        if len(add_airtable_records_df) > 0:
+            logging.info(f'the following records must be created on airtable trials table:')
+            print(add_airtable_records_df)
+            add_airtable_records_df = add_airtable_records_df[['email', 'subscription_date']]
+            self.airtable_utils.add_trial_users(add_airtable_records_df)
 
     def get_getcheddar_all_customers(self):
         customer_data_list = self.getcheddar_utils.get_all_customers()
@@ -547,6 +551,21 @@ class UserUtils():
             self.update_tags_convertkit_getcheddar_users(combined_df)
 
         return combined_df
+
+    def update_usage_convertkit_trial_users(self, data_df):
+        logging.info('update_usage_convertkit_trial_users')
+        required_usage_update_df = data_df[data_df['trial_quota_usage'] != data_df['characters']]
+        logging.info('the following records require an update:')
+
+        for index, row in required_usage_update_df.iterrows():
+            # user_set_fields
+            email = row['email']
+            subscriber_id = row['subscriber_id']
+            existing_trial_quota_usage = row['trial_quota_usage']
+            fields = {'trial_quota_usage': row['characters']}
+            logging.info(f'updating convertkit trial usage from {existing_trial_quota_usage} to {fields}')
+            self.convertkit_client.user_set_fields(email, subscriber_id, fields)
+
 
     def update_tags_convertkit_users(self, data_df):
         # perform necessary taggings on convertkit
@@ -719,11 +738,16 @@ class UserUtils():
 
     def update_airtable_trial(self):
         logging.info('updating airtable for trial users')
-        self.cleanup_user_data_trial()
+        
+        logging.info('start getting trial API keys from redis')
+        api_key_list = self.get_full_api_key_list()
+        logging.info('done getting trial API keys from redis')
+
+        self.cleanup_user_data_trial(api_key_list)
 
         self.perform_airtable_trial_tag_requests()
 
-        user_data_df = self.build_user_data_trial()
+        user_data_df = self.build_user_data_trial(api_key_list)
 
         # get airtable trial users table
         airtable_trial_df = self.airtable_utils.get_trial_users()

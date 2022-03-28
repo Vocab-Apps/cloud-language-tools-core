@@ -38,7 +38,7 @@ class ConvertKit():
         'getcheddar_near_max'
     ]
     TAG_IGNORE_LIST_GETCHEDDAR = TRIAL_SPECIFIC_TAG_LIST + PATREON_SPECIFIC_TAG_LIST
-    TAG_IGNORE_LIST_TRIAL = [] # we still want to see which trial users migrated to getcheddar/patreon
+    TAG_IGNORE_LIST_TRIAL = ['trial_api_key_requested', 'trial_api_key_ready', 'trial_user'] # we still want to see which trial users migrated to getcheddar/patreon
     TAG_IGNORE_LIST_PATREON = TRIAL_SPECIFIC_TAG_LIST + GETCHEDDAR_SPECIFIC_TAG_LIST
 
     def __init__(self):
@@ -163,6 +163,19 @@ class ConvertKit():
         else:
             logging.info(f'untagged user with tag_id {tag_id}: {subscriber_id}')
 
+    def user_set_fields(self, email, subscriber_id, field_map):
+        url = f'https://api.convertkit.com/v3/subscribers/{subscriber_id}'
+        response = requests.put(url, json={
+                "api_secret": self.api_secret,
+                "fields": field_map
+        }, timeout=cloudlanguagetools.constants.RequestTimeout)
+        # throttle
+        time.sleep(CONVERTKIT_THROTTLE_REQUESTS_SLEEP)        
+        if response.status_code != 200:
+            logging.error(f'could update user {email}, {subscriber_id} fields : {response.content}')            
+        else:
+            logging.info(f'updated user {email}, {subscriber_id} fields: {field_map}')
+
     def tag_user_set_fields(self, email, tag_id, field_map):
         url = f'https://api.convertkit.com/v3/tags/{tag_id}/subscribe'
         response = requests.post(url, json={
@@ -170,6 +183,8 @@ class ConvertKit():
                 "email": email,
                 "fields": field_map
         }, timeout=cloudlanguagetools.constants.RequestTimeout)
+        # throttle
+        time.sleep(CONVERTKIT_THROTTLE_REQUESTS_SLEEP)        
         if response.status_code != 200:
             logging.error(f'could not tag user: {response.content}')            
         else:

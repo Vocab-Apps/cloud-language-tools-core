@@ -297,7 +297,8 @@ class UserUtils():
         for subscriber in subscribers:
             users.append({
                 'subscriber_id': subscriber['id'],
-                'email': subscriber['email_address']
+                'email': subscriber['email_address'],
+                'subscription_date': subscriber['created_at'],
             })
         users_df = pandas.DataFrame(users)
         # lowercase email so that merges don't fail
@@ -486,6 +487,13 @@ class UserUtils():
         # remove duplicates
         record_ids = list(set(record_ids))
         self.airtable_utils.delete_trial_users(record_ids)
+
+        # identify airtable records which must be added
+        add_airtable_records_df = combined_df[ (combined_df['airtable_record'] == False) & (combined_df['convertkit_trial_user'] == True) & (combined_df['canceled'] == False)]
+        logging.info(f'the following records must be created on airtable trials table:')
+        print(add_airtable_records_df)
+        add_airtable_records_df = add_airtable_records_df[['email', 'subscription_date']]
+        self.airtable_utils.add_trial_users(add_airtable_records_df)
 
     def get_getcheddar_all_customers(self):
         customer_data_list = self.getcheddar_utils.get_all_customers()

@@ -41,7 +41,7 @@ if secrets.config['sentry']['enable']:
         environment=secrets.config['sentry']['environment'],
         integrations=[FlaskIntegration(), RedisIntegration()],
         release=version.CLOUD_LANGUAGE_TOOLS_VERSION,
-        traces_sample_rate=0.075,
+        traces_sample_rate=0.05,
     )
 
 

@@ -86,6 +86,10 @@ def run_scheduler():
         time.sleep(5)
 
 if __name__ == '__main__':
+    # remove all logging handlers
+    logger = logging.getLogger()
+    while logger.hasHandlers():
+        logger.removeHandler(logger.handlers[0])    
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
                         level=logging.INFO,

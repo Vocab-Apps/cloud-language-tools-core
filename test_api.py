@@ -1232,7 +1232,13 @@ class ApiTests(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual({'key_valid': True, 'msg': 'API Key is valid'}, data)
 
-        
+        # try to request for the same email again
+        response = self.client.post('/request_trial_key', json={'email': email})
+        self.assertEqual(response.status_code, 401)
+        response_data = json.loads(response.data)        
+        self.assertEqual(response_data['error'], f'trial API key for {email} already requested')
+
+
 
 
 

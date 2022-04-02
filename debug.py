@@ -511,9 +511,11 @@ def create_epitran_mappings():
 def test_debounce():
     import convertkit
     convertkit_client = convertkit.ConvertKit()
-    email = '4wstpt6hpu@cloud-mail.top'
-    result = convertkit_client.email_valid(email)
-    print(f'result: {result}')
+    # email = '4wstpt6hpu@cloud-mail.top'
+    email = sys.argv[1]
+    logging.info(f'calling debounce.io api on {email}')
+    valid, reason = convertkit_client.check_email_valid(email)
+    print(f'valid: {valid} reason: {reason}')
 
 def load_vocalware_voices():
     f = open('temp_data_files/vocalware_languages.json')
@@ -700,6 +702,9 @@ def test_get_language_data_redis():
     logging.info(f'wrote {output_filename}')
 
 if __name__ == '__main__':
+    logger = logging.getLogger()
+    while logger.hasHandlers():
+        logger.removeHandler(logger.handlers[0])        
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
                         stream=sys.stdout,
@@ -720,7 +725,7 @@ if __name__ == '__main__':
     # get_google_translation_languages()
     # get_watson_translation_languages()
     #output_languages_enum()
-    get_translation_language_list()
+    # get_translation_language_list()
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()
@@ -736,7 +741,7 @@ if __name__ == '__main__':
     # cereproc_tts_voice_list()
     # test_epitran()
     # create_epitran_mappings()
-    # test_debounce()
+    test_debounce()
     # load_vocalware_voices()
     # thai_tokenization()
     # test_get_language_data()

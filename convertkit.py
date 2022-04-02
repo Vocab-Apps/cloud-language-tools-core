@@ -79,6 +79,7 @@ class ConvertKit():
             response = requests.get(url, params=querystring)
             if response.status_code == 200:
                 data = response.json()
+                # logging.info(f'debounce.io result: {pprint.pformat(data)}')
                 # print(data)
                 if data['debounce']['result'] == 'Invalid' and data['debounce']['reason'] == 'Disposable':
                     logging.info(f'found disposable email: {email}')
@@ -88,6 +89,30 @@ class ConvertKit():
         except:
             logging.exception(f'could not perform debounce query to validate {email}')
         return True # true by default
+
+    # verify that an email is good and return reason if not
+    def check_email_valid(self, email):
+        if not self.enable_debounce:
+            return True, None
+        try:
+            url = "https://api.debounce.io/v1/"
+            querystring = {'api': self.debounce_api_key, 'email': email}
+            response = requests.get(url, params=querystring)
+            if response.status_code == 200:
+                data = response.json()
+                # logging.info(f'debounce.io result: {pprint.pformat(data)}')
+                # print(data)
+                result = data['debounce']['result']
+                reason = data['debounce']['reason']
+                if result == 'Safe to Send':
+                    return True, None
+                else:
+                    return False, f'email not valid: {result}, {reason}'
+            else:
+                logging.error(f'received error: {response.status_code}: {response.text}')
+        except:
+            logging.exception(f'could not perform debounce query to validate {email}')
+        return True, None # true by default
 
 
     def register_getcheddar_user(self, email, api_key, update_url, cancel_url):

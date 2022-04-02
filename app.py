@@ -362,6 +362,29 @@ class PatreonKeyRequest(flask_restful.Resource):
         result_html = f'Click here to request your AwesomeTTS Plus / Language Tools API Key: <a href="{oauth_request_link}">Connect with Patreon</a>'
         return make_response(result_html, 200, headers)
 
+class RequestInstantTrialKey(flask_restful.Resource):
+    def post(self):
+        data = request.json
+        email = data['email']
+
+        email_valid, reason = convertkit_client.check_email_valid(email)
+        if not email_valid:
+            return {'error': reason}, 401
+
+        if redis_connection.trial_user_key_exists(email):
+            return {'error': f'trial API key for {email} already requested'}, 401
+
+        # create api key for this subscriber
+        api_key = redis_connection.get_trial_user_key(email)
+
+        convertkit_client.tag_user_instant_trial(email, api_key, quotas.TRIAL_USER_CHARACTER_LIMIT)
+
+        logging.info(f'instant trial key created for {email}')
+        
+        return {'api_key': api_key}, 200
+
+
+
 class ConvertKitTrialQuotaIncrease(flask_restful.Resource):
     def post(self):
         data = request.json
@@ -490,6 +513,8 @@ api.add_resource(VerifyApiKey, '/verify_api_key')
 api.add_resource(Account, '/account')
 api.add_resource(PatreonKey, '/patreon_key')
 api.add_resource(PatreonKeyRequest, '/request_patreon_key')
+
+api.add_resource(RequestInstantTrialKey, '/request_trial_key')
 
 # convertkit webhooks
 api.add_resource(ConvertKitRequestTrialKey, '/convertkit_subscriber_request_trial_key')

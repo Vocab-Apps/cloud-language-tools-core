@@ -1221,6 +1221,20 @@ class ApiTests(unittest.TestCase):
         response_data = json.loads(response.data)
         self.assertEqual(response_data['error'], """Watson: could not translate text [电源插座] from zh to zh ({'code': 400, 'error': "The parameter 'source' should not be equal to 'target'"})""")
 
+    def test_request_instant_trial_key(self):
+        email = 'languagetools+development.language_tools.customer-20220402-2@mailc.net'
+        response = self.client.post('/request_trial_key', json={'email': email})
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.data)
+        api_key = response_data['api_key']
+
+        response = self.client.post('/verify_api_key', json={'api_key': api_key})
+        data = json.loads(response.data)
+        self.assertEqual({'key_valid': True, 'msg': 'API Key is valid'}, data)
+
+        
+
+
 
 if __name__ == '__main__':
     # how to run with logging on: pytest test_api.py -s -p no:logging -k test_translate

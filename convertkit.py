@@ -62,6 +62,7 @@ class ConvertKit():
             self.tag_id_disposable_email = secrets.config['convertkit']['tag_id_disposable_email']
             self.tag_id_trial_vip = secrets.config['convertkit']['tag_id_trial_vip']
             self.tag_id_trial_quota_increased = secrets.config['convertkit']['tag_id_trial_quota_increased']
+            self.tag_id_trial_user_instant = secrets.config['convertkit']['tag_id_trial_user_instant']
 
         self.enable_debounce = secrets.config['debounce']['enable']
         if self.enable_debounce:
@@ -131,6 +132,20 @@ class ConvertKit():
             if response.status_code != 200:
                 logging.error(f'could not subscribe user to form: {response.content}')
 
+
+    def tag_user_instant_trial(self, email, api_key, trial_quota):
+        if self.enable:
+            url = f'https://api.convertkit.com/v3/tags/{self.tag_id_trial_user_instant}/subscribe'
+            response = requests.post(url, json={
+                    "api_key": self.api_key,
+                    "email": email,
+                    'fields' : {
+                        'trial_api_key': api_key,
+                        'trial_quota': trial_quota
+                    }
+            }, timeout=cloudlanguagetools.constants.RequestTimeout)
+            if response.status_code != 200:
+                logging.error(f'could not tag user: {response.content}')
 
     def tag_user_api_ready(self, email, api_key, trial_quota):
         url = f'https://api.convertkit.com/v3/tags/{self.tag_id_api_ready}/subscribe'

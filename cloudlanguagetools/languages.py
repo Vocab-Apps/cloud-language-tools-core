@@ -4,6 +4,7 @@ class Language(enum.Enum):
     af = ("Afrikaans")
     sq = ("Albanian")
     am = ("Amharic")
+    an = ("Aragonese")
     ar = ("Arabic")
     hy = ("Armenian")
     az = ("Azerbaijani")
@@ -148,6 +149,7 @@ class Language(enum.Enum):
 class AudioLanguage(enum.Enum):
     af_ZA = (Language.af, "Afrikaans (South Africa)")
     am_ET = (Language.am, "Amharic (Ethiopia)")
+    an_ES = (Language.an, "Aragonese (Spain)")
     # arabic
     ar_AE = (Language.ar, "Arabic (United Arab Emirates)")
     ar_BH = (Language.ar, "Arabic (Bahrain)")
@@ -165,6 +167,11 @@ class AudioLanguage(enum.Enum):
     ar_XA = (Language.ar, "Arabic")
     ar_YE = (Language.ar, "Arabic (Yemen)")
     
+    as_IN = (Language.as_, "Assamese (India)")
+    az_AZ = (Language.az, "Azerbaijani (Azerbaijan)")
+    ba = (Language.ba, "Basque (Basque Country)")
+    ba_RU = (Language.ba, "Bashkir (Russia)")
+
     bg_BG = (Language.bg, "Bulgarian")
     bn_BD = (Language.bn, "Bangla (Bangladesh)")
     bn_IN = (Language.bn, "Bengali (India)")
@@ -179,6 +186,7 @@ class AudioLanguage(enum.Enum):
     el_GR = (Language.el, "Greek")
     en_AU = (Language.en, "English (Australia)")
     en_CA = (Language.en, "English (Canada)")
+    en_CB = (Language.en, "English (Carribean)")
     en_GB = (Language.en, "English (UK)")
     en_GB_WLS = (Language.en, "English (Welsh)")
     en_IE = (Language.en, "English (Ireland)")
@@ -281,6 +289,7 @@ class AudioLanguage(enum.Enum):
     te_IN = (Language.te, "Telugu (India)")
     th_TH = (Language.th, "Thai")
     tr_TR = (Language.tr, "Turkish (Turkey)")
+    tt_RU = (Language.tt, "Tatar (Russia)")
     ur_IN = (Language.ur, "Urdu (India)")
     ur_PK = (Language.ur, "Urdu (Pakistan)")
     uk_UA = (Language.uk, "Ukrainian (Ukraine)")

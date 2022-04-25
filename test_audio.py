@@ -245,6 +245,11 @@ class TestAudio(unittest.TestCase):
         source_text = 'улица'
         self.verify_service_audio_language(source_text, Service.Voicen, AudioLanguage.ru_RU, 'ru-RU')
 
+    def test_turkish_voicen(self):
+        # pytest test_audio.py -k test_turkish_voicen
+        source_text = 'kahvaltı'
+        self.verify_service_audio_language(source_text, Service.Voicen, AudioLanguage.tr_TR, 'tr-TR')
+
     def test_azure_options(self):
         service = 'Azure'
         source_text = 'Je ne suis pas intéressé.'

@@ -115,6 +115,7 @@ class ForvoService(cloudlanguagetools.service.Service):
         pass
 
     def get_country_code(self, audio_language):
+        # https://en.wikipedia.org/wiki/ISO_3166-1
         country_code_map = {
             cloudlanguagetools.languages.AudioLanguage.fr_FR: 'FRA',
             cloudlanguagetools.languages.AudioLanguage.fr_CH: 'CHE',
@@ -147,6 +148,8 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.ur_PK: 'PAK',
             cloudlanguagetools.languages.AudioLanguage.en_TZ: 'TZA',
             cloudlanguagetools.languages.AudioLanguage.ta_SG: 'SGP',
+
+
 
 
             # arabic
@@ -191,6 +194,10 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.es_US: 'USA', 
             cloudlanguagetools.languages.AudioLanguage.es_UY: 'URY', 
             cloudlanguagetools.languages.AudioLanguage.es_VE: 'VEN', 
+
+            cloudlanguagetools.languages.AudioLanguage.ba_RU: 'RUS',
+            cloudlanguagetools.languages.AudioLanguage.eu: 'ESP',
+            cloudlanguagetools.languages.AudioLanguage.en_CB: 'VGB',
         }
         if audio_language not in country_code_map:
             logging.error(f'no country code found for {audio_language}')
@@ -237,6 +244,7 @@ class ForvoService(cloudlanguagetools.service.Service):
 
         voice_list = []
 
+        # https://api.forvo.com/documentation/word-pronunciations/
         url = f'{self.url_base}/key/{self.key}/format/json/action/language-list/min-pronunciations/5000'
         response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         if response.status_code == 200:

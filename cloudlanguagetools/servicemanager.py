@@ -19,6 +19,7 @@ import cloudlanguagetools.epitran
 import cloudlanguagetools.deepl
 import cloudlanguagetools.vocalware
 import cloudlanguagetools.fptai
+import cloudlanguagetools.voicen
 import cloudlanguagetools.pythainlp
 import cloudlanguagetools.spacy
 
@@ -38,6 +39,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.DeepL.name] = cloudlanguagetools.deepl.DeepLService()
         self.services[cloudlanguagetools.constants.Service.VocalWare.name] = cloudlanguagetools.vocalware.VocalWareService()
         self.services[cloudlanguagetools.constants.Service.FptAi.name] = cloudlanguagetools.fptai.FptAiService()
+        self.services[cloudlanguagetools.constants.Service.Voicen.name] = cloudlanguagetools.voicen.VoicenService()
         if self.secrets_config['load_nlp_models']:
             logging.info('loading nlp models')
             self.services[cloudlanguagetools.constants.Service.PyThaiNLP.name] = cloudlanguagetools.pythainlp.PyThaiNLPService()
@@ -94,6 +96,11 @@ class ServiceManager():
         # fpt.ai
         self.services[cloudlanguagetools.constants.Service.FptAi.name].configure(
             self.secrets_config['services']['fptai']['api_key']
+        )
+
+        # voicen
+        self.services[cloudlanguagetools.constants.Service.Voicen.name].configure(
+            self.secrets_config['services']['voicen']['api_key']
         )
 
         # for AWS, the boto3 library will read environment variables itself

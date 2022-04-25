@@ -60,6 +60,7 @@ class Service(enum.Enum):
     Epitran = enum.auto()
     DeepL = enum.auto()
     VocalWare = enum.auto()
+    Voicen = enum.auto()
     FptAi = enum.auto()
     PyThaiNLP = enum.auto()
     Spacy = enum.auto()

@@ -240,6 +240,10 @@ class TestAudio(unittest.TestCase):
         source_text = 'wordnotfound'
         self.assertRaises(cloudlanguagetools.errors.NotFoundError, self.verify_service_audio_language, source_text, Service.Forvo, AudioLanguage.fr_FR, 'fr-FR')
 
+    def test_russian_voicen(self):
+        # pytest test_audio.py -k test_russian_voicen
+        source_text = 'улица'
+        self.verify_service_audio_language(source_text, Service.Voicen, AudioLanguage.ru_RU, 'ru-RU')
 
     def test_azure_options(self):
         service = 'Azure'

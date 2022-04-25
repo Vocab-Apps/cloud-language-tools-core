@@ -144,7 +144,7 @@ class PostDeployTests(unittest.TestCase):
         data = response.json()
         self.assertTrue(data['Azure'] == 'Le coût est faible' or data['Azure'] == 'Le coût est très faible')
         self.assertTrue(data['Amazon'] == 'Très faible coût' or data['Amazon'] == 'Le coût est très faible')
-        self.assertIn(data['Google'], ['à bas prix', 'Faible coût', 'À bas prix', 'À bas prix'])
+        self.assertIn(data['Google'], ['à bas prix', 'Faible coût', 'À bas prix', 'faible coût'])
         self.assertEqual(data['Watson'], 'Le coût est très bas.')
 
     def test_translate_error(self):

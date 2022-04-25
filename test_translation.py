@@ -102,8 +102,8 @@ class TestTranslation(unittest.TestCase):
         self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, ['the person who delivers the takeaway', 'people who deliver takeaways'])
         self.translate_text(Service.Google, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
         self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
-        self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, ["Changer la carte d'embarquement", "changer de carte d'embarquement"])
-        self.translate_text(Service.Amazon, '换登机牌', Language.zh_cn, Language.fr, ["carte d'embarquement", "modifier la carte d'embarquement"])
+        self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, ["Changer la carte d'embarquement", "changer de carte d'embarquement", "changer la carte d'embarquement"])
+        self.translate_text(Service.Amazon, '换登机牌', Language.zh_cn, Language.fr, ["carte d'embarquement", "modifier la carte d'embarquement", "changer la carte d'embarquement"])
 
     def test_translate_chinese_watson(self):
         self.translate_text(Service.Watson, '中国有很多外国人', Language.zh_cn, Language.en, 'There are a lot of foreigners in China.')
@@ -142,7 +142,7 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue('Google' in result)
         self.assertTrue('Watson' in result)
         self.assertTrue(result['Azure'] == 'Le coût est faible' or result['Azure'] == 'Le coût est très faible')
-        self.assertIn(result['Google'], ['à bas prix', 'Faible coût', 'À bas prix'])
+        self.assertIn(result['Google'], ['à bas prix', 'Faible coût', 'À bas prix', 'faible coût'])
         self.assertEqual(result['Watson'], 'Le coût est très bas.')
 
     def test_transliteration(self):
@@ -341,7 +341,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('mɐ.ˈɡu ˈjæ pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ', result)
+        self.assertIn(result, ['mɐ.ˈɡu ˈjæ pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ', 'mɐ.ˈɡu ˈja pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ'])
 
 
 

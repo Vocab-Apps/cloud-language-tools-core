@@ -701,6 +701,22 @@ def test_get_language_data_redis():
         f.close()    
     logging.info(f'wrote {output_filename}')
 
+def test_voicen():
+    
+    import requests
+    import json
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Token $VOICEN_ACCESS_TOKEN',
+    }
+
+    data = '{"text":"salam", "lang":"az", "voice_id": "325640"}'
+
+    response = requests.post('https://tts.voicen.com/api/v1/jobs/text/', headers=headers, data=data)
+
+    print(json.dumps(response.json(), indent=4, sort_keys=True))    
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     while logger.hasHandlers():

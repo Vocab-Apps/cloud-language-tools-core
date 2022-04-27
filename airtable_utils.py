@@ -126,7 +126,7 @@ class AirtableUtils():
                 'typecast': True
             }, headers=headers)
             if response.status_code != 200:
-                logging.error(response.content)        
+                logging.error(f'could not update airtable records for url {base_url}: {update_slice}, status_code: {response.status_code} ({response.content})')
 
     def delete_airtable_records(self, base_url, record_ids):
         logging.info(f'deleting records from {base_url} ({len(record_ids)} in total)')

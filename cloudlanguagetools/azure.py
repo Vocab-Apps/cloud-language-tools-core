@@ -334,10 +334,13 @@ class AzureService(cloudlanguagetools.service.Service):
         return response[0]['text']
 
     # supported languages: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support#speech-to-text
-    def speech_to_text(self, mp3_filepath, language):
+    def speech_to_text(self, mp3_filepath, language, audio_format):
         speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
 
-        sound = pydub.AudioSegment.from_mp3(mp3_filepath)
+        if audio_format == cloudlanguagetools.constants.AudioFormat.mp3:
+            sound = pydub.AudioSegment.from_mp3(mp3_filepath)
+        elif audio_format == cloudlanguagetools.constants.AudioFormat.ogg:
+            sound = pydub.AudioSegment.from_ogg(mp3_filepath)
         wav_filepath = tempfile.NamedTemporaryFile(suffix='.wav').name
         sound.export(wav_filepath, format="wav")
 

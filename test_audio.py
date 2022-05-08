@@ -44,8 +44,8 @@ class TestAudio(unittest.TestCase):
         subset = [x for x in self.voice_list if x['audio_language_code'] == audio_language.name and x['service'] == service.name]
         return subset        
 
-    def speech_to_text(self, audio_temp_file, language):
-        result = self.manager.services[Service.Azure.name].speech_to_text(audio_temp_file.name, language)
+    def speech_to_text(self, audio_temp_file, language, audio_format=cloudlanguagetools.constants.AudioFormat.mp3):
+        result = self.manager.services[Service.Azure.name].speech_to_text(audio_temp_file.name, language, audio_format)
         return result
     
     def sanitize_recognized_text(self, recognized_text):
@@ -283,8 +283,8 @@ class TestAudio(unittest.TestCase):
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data, Opus', file_type)
         
-        # audio_text = self.speech_to_text(audio_temp_file, 'fr-FR')
-        # self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
+        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg)
+        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_azure_ampersand(self):
         service = 'Azure'

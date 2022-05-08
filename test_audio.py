@@ -276,14 +276,14 @@ class TestAudio(unittest.TestCase):
             "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
         }
 
-        options = {'rate': 0.8, 'pitch': -10, 'format': 'ogg'}
+        options = {'rate': 0.8, 'pitch': -10, 'format': 'ogg_opus'}
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
 
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data, Opus', file_type)
         
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg)
+        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg_opus)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_google_format_ogg(self):
@@ -296,14 +296,14 @@ class TestAudio(unittest.TestCase):
             'ssml_gender': 'FEMALE'
         }
 
-        options = {'format': 'ogg'}
+        options = {'format': 'ogg_opus'}
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
 
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data, Opus', file_type)
         
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg)
+        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg_opus)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_amazon_format_ogg(self):
@@ -312,14 +312,14 @@ class TestAudio(unittest.TestCase):
 
         voice_key = {'engine': 'neural', 'voice_id': 'Gabrielle'}
 
-        options = {'format': 'ogg'}
+        options = {'format': 'ogg_vorbis'}
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
 
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data', file_type)
         
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg)
+        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg_vorbis)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_azure_ampersand(self):

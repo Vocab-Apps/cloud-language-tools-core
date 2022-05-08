@@ -111,7 +111,7 @@ class GoogleService(cloudlanguagetools.service.Service):
 
         audio_format_map = {
             cloudlanguagetools.constants.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.MP3,
-            cloudlanguagetools.constants.AudioFormat.ogg: google.cloud.texttospeech.AudioEncoding.OGG_OPUS
+            cloudlanguagetools.constants.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS
         }
 
         client = self.get_client()

@@ -56,7 +56,8 @@ class ParameterType(enum.Enum):
 
 class AudioFormat(enum.Enum):
     mp3 = enum.auto()
-    ogg = enum.auto()
+    ogg_opus = enum.auto()
+    ogg_vorbis = enum.auto()
 
 class Service(enum.Enum):
     Azure = enum.auto()

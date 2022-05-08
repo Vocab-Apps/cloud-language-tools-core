@@ -64,7 +64,7 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'type': cloudlanguagetools.constants.ParameterType.list.name,
                 'values': [
                     cloudlanguagetools.constants.AudioFormat.mp3.name,
-                    cloudlanguagetools.constants.AudioFormat.ogg.name,
+                    cloudlanguagetools.constants.AudioFormat.ogg_opus.name,
                 ]
             }
         }
@@ -160,7 +160,7 @@ class AzureService(cloudlanguagetools.service.Service):
 
         audio_format_map = {
             cloudlanguagetools.constants.AudioFormat.mp3: 'Audio24Khz96KBitRateMonoMp3',
-            cloudlanguagetools.constants.AudioFormat.ogg: 'Ogg48Khz16BitMonoOpus'
+            cloudlanguagetools.constants.AudioFormat.ogg_opus: 'Ogg48Khz16BitMonoOpus'
         }
 
         output_temp_file = tempfile.NamedTemporaryFile()
@@ -339,7 +339,7 @@ class AzureService(cloudlanguagetools.service.Service):
 
         if audio_format == cloudlanguagetools.constants.AudioFormat.mp3:
             sound = pydub.AudioSegment.from_mp3(mp3_filepath)
-        elif audio_format == cloudlanguagetools.constants.AudioFormat.ogg:
+        elif audio_format in [cloudlanguagetools.constants.AudioFormat.ogg_opus, cloudlanguagetools.constants.AudioFormat.ogg_vorbis]:
             sound = pydub.AudioSegment.from_ogg(mp3_filepath)
         wav_filepath = tempfile.NamedTemporaryFile(suffix='.wav').name
         sound.export(wav_filepath, format="wav")

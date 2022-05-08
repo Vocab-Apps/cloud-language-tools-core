@@ -68,7 +68,7 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'type': cloudlanguagetools.constants.ParameterType.list.name,
                 'values': [
                     cloudlanguagetools.constants.AudioFormat.mp3.name,
-                    cloudlanguagetools.constants.AudioFormat.ogg.name,
+                    cloudlanguagetools.constants.AudioFormat.ogg_vorbis.name,
                 ]
             }            
         }
@@ -100,7 +100,7 @@ class AmazonService(cloudlanguagetools.service.Service):
 
         audio_format_map = {
             cloudlanguagetools.constants.AudioFormat.mp3: 'mp3',
-            cloudlanguagetools.constants.AudioFormat.ogg: 'ogg_vorbis'
+            cloudlanguagetools.constants.AudioFormat.ogg_vorbis: 'ogg_vorbis'
         }
 
         output_temp_file = tempfile.NamedTemporaryFile()

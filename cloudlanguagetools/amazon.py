@@ -63,6 +63,13 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'min': -50,
                 'max': 50,
                 'default': DEFAULT_VOICE_PITCH
+            },
+            cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.constants.ParameterType.list.name,
+                'values': [
+                    cloudlanguagetools.constants.AudioFormat.mp3.name,
+                    cloudlanguagetools.constants.AudioFormat.ogg.name,
+                ]
             }            
         }
 
@@ -88,6 +95,14 @@ class AmazonService(cloudlanguagetools.service.Service):
         return result.get('TranslatedText')
 
     def get_tts_audio(self, text, voice_key, options):
+        audio_format_str = options.get(cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.constants.AudioFormat.mp3.name)
+        audio_format = cloudlanguagetools.constants.AudioFormat[audio_format_str]
+
+        audio_format_map = {
+            cloudlanguagetools.constants.AudioFormat.mp3: 'mp3',
+            cloudlanguagetools.constants.AudioFormat.ogg: 'ogg_vorbis'
+        }
+
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
 
@@ -109,7 +124,7 @@ class AmazonService(cloudlanguagetools.service.Service):
 </speak>"""
 
         try:
-            response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat="mp3", VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
+            response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=audio_format_map[audio_format], VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
             raise cloudlanguagetools.errors.RequestError(str(error))
 

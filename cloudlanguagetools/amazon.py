@@ -7,6 +7,7 @@ import contextlib
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.options
 import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
@@ -64,11 +65,11 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'max': 50,
                 'default': DEFAULT_VOICE_PITCH
             },
-            cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER: {
-                'type': cloudlanguagetools.constants.ParameterType.list.name,
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
                 'values': [
-                    cloudlanguagetools.constants.AudioFormat.mp3.name,
-                    cloudlanguagetools.constants.AudioFormat.ogg_vorbis.name,
+                    cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.ogg_vorbis.name,
                 ]
             }            
         }
@@ -95,12 +96,12 @@ class AmazonService(cloudlanguagetools.service.Service):
         return result.get('TranslatedText')
 
     def get_tts_audio(self, text, voice_key, options):
-        audio_format_str = options.get(cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.constants.AudioFormat.mp3.name)
-        audio_format = cloudlanguagetools.constants.AudioFormat[audio_format_str]
+        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
+        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
 
         audio_format_map = {
-            cloudlanguagetools.constants.AudioFormat.mp3: 'mp3',
-            cloudlanguagetools.constants.AudioFormat.ogg_vorbis: 'ogg_vorbis'
+            cloudlanguagetools.options.AudioFormat.mp3: 'mp3',
+            cloudlanguagetools.options.AudioFormat.ogg_vorbis: 'ogg_vorbis'
         }
 
         output_temp_file = tempfile.NamedTemporaryFile()

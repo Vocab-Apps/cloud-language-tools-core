@@ -1,6 +1,7 @@
 import unittest
 import logging
 import random
+import requests
 import re
 import sys
 import magic
@@ -8,6 +9,7 @@ import pytest
 import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.options
 from cloudlanguagetools.languages import Language
 from cloudlanguagetools.languages import AudioLanguage
 from cloudlanguagetools.constants import Service
@@ -20,14 +22,23 @@ def get_manager():
 class TestAudio(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.manager = get_manager()
-        cls.language_list = cls.manager.get_language_list()
-        cls.voice_list = cls.manager.get_tts_voice_list_json()
-
         logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                             datefmt='%Y%m%d-%H:%M:%S',
                             stream=sys.stdout,
                             level=logging.DEBUG)
+
+        cls.manager = get_manager()
+        cls.language_list = cls.manager.get_language_list()
+        num_tries = 3
+        success = False
+        while success == False and num_tries >= 0:
+            num_tries -= 1
+            try:
+                cls.voice_list = cls.manager.get_tts_voice_list_json()
+                success = True
+            except requests.exceptions.ReadTimeout as e:
+                logging.exception(f'could not get voice list, timeout')
+        
         import http.client as http_client                            
         http_client.HTTPConnection.debuglevel = 1
         requests_log = logging.getLogger("requests.packages.urllib3")
@@ -44,7 +55,7 @@ class TestAudio(unittest.TestCase):
         subset = [x for x in self.voice_list if x['audio_language_code'] == audio_language.name and x['service'] == service.name]
         return subset        
 
-    def speech_to_text(self, audio_temp_file, language, audio_format=cloudlanguagetools.constants.AudioFormat.mp3):
+    def speech_to_text(self, audio_temp_file, language, audio_format=cloudlanguagetools.options.AudioFormat.mp3):
         result = self.manager.services[Service.Azure.name].speech_to_text(audio_temp_file.name, language, audio_format)
         return result
     
@@ -283,7 +294,7 @@ class TestAudio(unittest.TestCase):
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data, Opus', file_type)
         
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg_opus)
+        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_google_format_ogg(self):
@@ -303,7 +314,7 @@ class TestAudio(unittest.TestCase):
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data, Opus', file_type)
         
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg_opus)
+        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_amazon_format_ogg(self):
@@ -319,7 +330,7 @@ class TestAudio(unittest.TestCase):
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data', file_type)
         
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg_vorbis)
+        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_vorbis)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_azure_ampersand(self):

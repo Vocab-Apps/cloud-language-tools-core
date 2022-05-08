@@ -8,6 +8,7 @@ import logging
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.options
 import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
@@ -49,22 +50,22 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def get_options(self):
         return {
             'rate' : {
-                'type': cloudlanguagetools.constants.ParameterType.number.name,
+                'type': cloudlanguagetools.options.ParameterType.number.name,
                 'min': 0.5,
                 'max': 3.0,
                 'default': 1.0
             },
             'pitch': {
-                'type': cloudlanguagetools.constants.ParameterType.number.name,
+                'type': cloudlanguagetools.options.ParameterType.number.name,
                 'min': -100,
                 'max': 100,
                 'default': 0
             },
-            cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER: {
-                'type': cloudlanguagetools.constants.ParameterType.list.name,
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
                 'values': [
-                    cloudlanguagetools.constants.AudioFormat.mp3.name,
-                    cloudlanguagetools.constants.AudioFormat.ogg_opus.name,
+                    cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.ogg_opus.name,
                 ]
             }
         }
@@ -155,12 +156,12 @@ class AzureService(cloudlanguagetools.service.Service):
 
     def get_tts_audio(self, text, voice_key, options):
 
-        audio_format_str = options.get(cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.constants.AudioFormat.mp3.name)
-        audio_format = cloudlanguagetools.constants.AudioFormat[audio_format_str]
+        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
+        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
 
         audio_format_map = {
-            cloudlanguagetools.constants.AudioFormat.mp3: 'Audio24Khz96KBitRateMonoMp3',
-            cloudlanguagetools.constants.AudioFormat.ogg_opus: 'Ogg48Khz16BitMonoOpus'
+            cloudlanguagetools.options.AudioFormat.mp3: 'Audio24Khz96KBitRateMonoMp3',
+            cloudlanguagetools.options.AudioFormat.ogg_opus: 'Ogg48Khz16BitMonoOpus'
         }
 
         output_temp_file = tempfile.NamedTemporaryFile()
@@ -337,9 +338,9 @@ class AzureService(cloudlanguagetools.service.Service):
     def speech_to_text(self, mp3_filepath, language, audio_format):
         speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
 
-        if audio_format == cloudlanguagetools.constants.AudioFormat.mp3:
+        if audio_format == cloudlanguagetools.options.AudioFormat.mp3:
             sound = pydub.AudioSegment.from_mp3(mp3_filepath)
-        elif audio_format in [cloudlanguagetools.constants.AudioFormat.ogg_opus, cloudlanguagetools.constants.AudioFormat.ogg_vorbis]:
+        elif audio_format in [cloudlanguagetools.options.AudioFormat.ogg_opus, cloudlanguagetools.options.AudioFormat.ogg_vorbis]:
             sound = pydub.AudioSegment.from_ogg(mp3_filepath)
         wav_filepath = tempfile.NamedTemporaryFile(suffix='.wav').name
         sound.export(wav_filepath, format="wav")

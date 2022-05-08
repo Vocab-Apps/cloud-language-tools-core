@@ -7,6 +7,7 @@ import google.cloud.translate_v2
 import google.api_core.exceptions
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.options
 import cloudlanguagetools.languages
 
 def language_code_to_enum(language_code):
@@ -106,12 +107,12 @@ class GoogleService(cloudlanguagetools.service.Service):
         return translate_client
 
     def get_tts_audio(self, text, voice_key, options):
-        audio_format_str = options.get(cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.constants.AudioFormat.mp3.name)
-        audio_format = cloudlanguagetools.constants.AudioFormat[audio_format_str]
+        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
+        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
 
         audio_format_map = {
-            cloudlanguagetools.constants.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.MP3,
-            cloudlanguagetools.constants.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS
+            cloudlanguagetools.options.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.MP3,
+            cloudlanguagetools.options.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS
         }
 
         client = self.get_client()

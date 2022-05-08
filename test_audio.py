@@ -286,6 +286,26 @@ class TestAudio(unittest.TestCase):
         audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
+    def test_google_format_ogg(self):
+        service = 'Google'
+        source_text = 'Je ne suis pas intéressé.'
+
+        voice_key = {
+            'language_code': 'fr-FR', 
+            'name': 'fr-FR-Wavenet-E', 
+            'ssml_gender': 'FEMALE'
+        }
+
+        options = {'format': 'ogg'}
+
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+
+        file_type = magic.from_file(audio_temp_file.name)
+        self.assertIn('Ogg data, Opus', file_type)
+        
+        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.constants.AudioFormat.ogg)
+        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
+
     def test_azure_ampersand(self):
         service = 'Azure'
         source_text = 'In my ignorance I had never heard country & western music.'

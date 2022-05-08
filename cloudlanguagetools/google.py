@@ -106,6 +106,14 @@ class GoogleService(cloudlanguagetools.service.Service):
         return translate_client
 
     def get_tts_audio(self, text, voice_key, options):
+        audio_format_str = options.get(cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.constants.AudioFormat.mp3.name)
+        audio_format = cloudlanguagetools.constants.AudioFormat[audio_format_str]
+
+        audio_format_map = {
+            cloudlanguagetools.constants.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.MP3,
+            cloudlanguagetools.constants.AudioFormat.ogg: google.cloud.texttospeech.AudioEncoding.OGG_OPUS
+        }
+
         client = self.get_client()
 
         ssml_text = '<speak>' + text + '</speak>'
@@ -120,7 +128,7 @@ class GoogleService(cloudlanguagetools.service.Service):
         )
 
         audio_config = google.cloud.texttospeech.AudioConfig(
-            audio_encoding=google.cloud.texttospeech.AudioEncoding.MP3,
+            audio_encoding=audio_format_map[audio_format],
             speaking_rate=options.get('speaking_rate', 1.0),
             pitch=options.get('pitch', 0.0)
         )

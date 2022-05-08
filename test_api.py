@@ -48,8 +48,18 @@ class ApiTests(unittest.TestCase):
         cls.trial_user_api_key_v2 = redis_connection.get_trial_user_key(cls.trial_user_email_v2)
 
         # cache voice list
-        response = cls.client.get('/voice_list')
-        cls.voice_list = json.loads(response.data)
+        num_tries = 3
+        voice_list_success = False
+        while voice_list_success == False and num_tries >= 0:
+            num_tries -= 1
+            try:
+                response = cls.client.get('/voice_list')
+                if response.status_code != 200:
+                    raise Exception('could not retrieve voice list')
+                cls.voice_list = json.loads(response.data)
+                voice_list_success = True
+            except Exception as e:
+                logging.exception(f'could not get voice list, timeout')
 
         # generate language data (similarly to what scheduled_tasks is doing)
         language_data = manager.get_language_data_json()

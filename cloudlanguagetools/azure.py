@@ -66,7 +66,8 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'values': [
                     cloudlanguagetools.options.AudioFormat.mp3.name,
                     cloudlanguagetools.options.AudioFormat.ogg_opus.name,
-                ]
+                ],
+                'default': cloudlanguagetools.options.AudioFormat.mp3.name
             }
         }
 

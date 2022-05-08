@@ -55,7 +55,15 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'min': -20.0,
                 'max': 20.0,
                 'default': 0.0
-            }
+            },
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [
+                    cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.ogg_opus.name,
+                ],
+                'default': cloudlanguagetools.options.AudioFormat.mp3.name
+            }            
         }        
 
 

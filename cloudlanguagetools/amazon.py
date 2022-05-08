@@ -70,7 +70,8 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'values': [
                     cloudlanguagetools.options.AudioFormat.mp3.name,
                     cloudlanguagetools.options.AudioFormat.ogg_vorbis.name,
-                ]
+                ],
+                'default': cloudlanguagetools.options.AudioFormat.mp3.name
             }            
         }
 

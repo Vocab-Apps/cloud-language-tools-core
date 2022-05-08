@@ -3,6 +3,7 @@ import logging
 import random
 import re
 import sys
+import magic
 import pytest
 import secrets
 import cloudlanguagetools
@@ -62,6 +63,9 @@ class TestAudio(unittest.TestCase):
     def verify_voice(self, voice, text, recognition_language):
         voice_key = voice['voice_key']
         audio_temp_file = self.manager.get_tts_audio(text, voice['service'], voice_key, {})
+        # check MIME type
+        mime_type = magic.from_file(audio_temp_file.name)
+        self.assertIn('MPEG ADTS, layer III', mime_type)
         audio_text = self.speech_to_text(audio_temp_file, recognition_language)
         assert_text = f"service {voice['service']} voice_key: {voice['voice_key']}"
         self.assertEqual(self.sanitize_recognized_text(text), self.sanitize_recognized_text(audio_text), msg=assert_text)

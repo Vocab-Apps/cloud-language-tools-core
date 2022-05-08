@@ -49,16 +49,23 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def get_options(self):
         return {
             'rate' : {
-                'type': 'number',
+                'type': cloudlanguagetools.constants.ParameterType.number.name,
                 'min': 0.5,
                 'max': 3.0,
                 'default': 1.0
             },
             'pitch': {
-                'type': 'number',
+                'type': cloudlanguagetools.constants.ParameterType.number.name,
                 'min': -100,
                 'max': 100,
                 'default': 0
+            },
+            cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.constants.ParameterType.list.name,
+                'values': [
+                    cloudlanguagetools.constants.AudioFormat.mp3.name,
+                    cloudlanguagetools.constants.AudioFormat.ogg.name,
+                ]
             }
         }
 
@@ -147,10 +154,19 @@ class AzureService(cloudlanguagetools.service.Service):
         return headers        
 
     def get_tts_audio(self, text, voice_key, options):
+
+        audio_format_str = options.get(cloudlanguagetools.constants.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.constants.AudioFormat.mp3.name)
+        audio_format = cloudlanguagetools.constants.AudioFormat[audio_format_str]
+
+        audio_format_map = {
+            cloudlanguagetools.constants.AudioFormat.mp3: 'Audio24Khz96KBitRateMonoMp3',
+            cloudlanguagetools.constants.AudioFormat.ogg: 'Ogg48Khz16BitMonoOpus'
+        }
+
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
         speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
-        speech_config.set_speech_synthesis_output_format(azure.cognitiveservices.speech.SpeechSynthesisOutputFormat["Audio24Khz96KBitRateMonoMp3"])
+        speech_config.set_speech_synthesis_output_format(azure.cognitiveservices.speech.SpeechSynthesisOutputFormat[audio_format_map[audio_format]])
         synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
         default_pitch = 0

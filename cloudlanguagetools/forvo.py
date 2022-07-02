@@ -148,6 +148,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.ur_PK: 'PAK',
             cloudlanguagetools.languages.AudioLanguage.en_TZ: 'TZA',
             cloudlanguagetools.languages.AudioLanguage.ta_SG: 'SGP',
+            cloudlanguagetools.languages.AudioLanguage.ta_MY: 'MYS',
 
 
 
@@ -169,6 +170,8 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.ar_TN: 'TUN',
             cloudlanguagetools.languages.AudioLanguage.ar_XA: 'ANY', # any country
             cloudlanguagetools.languages.AudioLanguage.ar_YE: 'YEM', 
+            cloudlanguagetools.languages.AudioLanguage.ar_LB: 'LBN', 
+            cloudlanguagetools.languages.AudioLanguage.ar_OM: 'OMN', 
 
             # spanish
             cloudlanguagetools.languages.AudioLanguage.es_AR: 'ARG', 

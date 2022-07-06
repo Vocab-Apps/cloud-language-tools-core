@@ -4,9 +4,10 @@ import random
 import requests
 import re
 import sys
+import os
 import magic
 import pytest
-import secrets
+# import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.options
@@ -15,8 +16,9 @@ from cloudlanguagetools.languages import AudioLanguage
 from cloudlanguagetools.constants import Service
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
-    manager.configure()    
+    manager = cloudlanguagetools.servicemanager.ServiceManager()
+    manager.configure_azure(os.environ['AZURE_REGION'], os.environ['AZURE_KEY'])
+    manager.configure_google(os.environ['GOOGLE_KEY'])
     return manager
 
 class TestAudio(unittest.TestCase):

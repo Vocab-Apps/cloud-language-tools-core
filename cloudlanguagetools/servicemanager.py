@@ -8,7 +8,7 @@ import cloudlanguagetools.languages
 import cloudlanguagetools.errors
 import cloudlanguagetools.azure
 import cloudlanguagetools.google
-import cloudlanguagetools.mandarincantonese
+# import cloudlanguagetools.mandarincantonese
 import cloudlanguagetools.easypronunciation
 import cloudlanguagetools.watson
 import cloudlanguagetools.naver
@@ -24,27 +24,26 @@ import cloudlanguagetools.pythainlp
 import cloudlanguagetools.spacy
 
 class ServiceManager():
-    def  __init__(self, secrets_config):
-        self.secrets_config = secrets_config
+    def  __init__(self):
         self.services = {}
-        self.services[cloudlanguagetools.constants.Service.Azure.name] = cloudlanguagetools.azure.AzureService()
-        self.services[cloudlanguagetools.constants.Service.Google.name] = cloudlanguagetools.google.GoogleService()
-        self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name] = cloudlanguagetools.easypronunciation.EasyPronunciationService()
-        self.services[cloudlanguagetools.constants.Service.Watson.name] = cloudlanguagetools.watson.WatsonService()
-        self.services[cloudlanguagetools.constants.Service.Naver.name] = cloudlanguagetools.naver.NaverService()
-        self.services[cloudlanguagetools.constants.Service.Amazon.name] = cloudlanguagetools.amazon.AmazonService()
-        self.services[cloudlanguagetools.constants.Service.Forvo.name] = cloudlanguagetools.forvo.ForvoService()
-        self.services[cloudlanguagetools.constants.Service.CereProc.name] = cloudlanguagetools.cereproc.CereProcService()
-        self.services[cloudlanguagetools.constants.Service.Epitran.name] = cloudlanguagetools.epitran.EpitranService()
-        self.services[cloudlanguagetools.constants.Service.DeepL.name] = cloudlanguagetools.deepl.DeepLService()
-        self.services[cloudlanguagetools.constants.Service.VocalWare.name] = cloudlanguagetools.vocalware.VocalWareService()
-        self.services[cloudlanguagetools.constants.Service.FptAi.name] = cloudlanguagetools.fptai.FptAiService()
-        self.services[cloudlanguagetools.constants.Service.Voicen.name] = cloudlanguagetools.voicen.VoicenService()
-        if self.secrets_config['load_nlp_models']:
-            logging.info('loading nlp models')
-            self.services[cloudlanguagetools.constants.Service.PyThaiNLP.name] = cloudlanguagetools.pythainlp.PyThaiNLPService()
-            self.services[cloudlanguagetools.constants.Service.Spacy.name] = cloudlanguagetools.spacy.SpacyService()
-            self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
+        # self.services[cloudlanguagetools.constants.Service.Azure.name] = cloudlanguagetools.azure.AzureService()
+        # self.services[cloudlanguagetools.constants.Service.Google.name] = cloudlanguagetools.google.GoogleService()
+        # self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name] = cloudlanguagetools.easypronunciation.EasyPronunciationService()
+        # self.services[cloudlanguagetools.constants.Service.Watson.name] = cloudlanguagetools.watson.WatsonService()
+        # self.services[cloudlanguagetools.constants.Service.Naver.name] = cloudlanguagetools.naver.NaverService()
+        # self.services[cloudlanguagetools.constants.Service.Amazon.name] = cloudlanguagetools.amazon.AmazonService()
+        # self.services[cloudlanguagetools.constants.Service.Forvo.name] = cloudlanguagetools.forvo.ForvoService()
+        # self.services[cloudlanguagetools.constants.Service.CereProc.name] = cloudlanguagetools.cereproc.CereProcService()
+        # self.services[cloudlanguagetools.constants.Service.Epitran.name] = cloudlanguagetools.epitran.EpitranService()
+        # self.services[cloudlanguagetools.constants.Service.DeepL.name] = cloudlanguagetools.deepl.DeepLService()
+        # self.services[cloudlanguagetools.constants.Service.VocalWare.name] = cloudlanguagetools.vocalware.VocalWareService()
+        # self.services[cloudlanguagetools.constants.Service.FptAi.name] = cloudlanguagetools.fptai.FptAiService()
+        # self.services[cloudlanguagetools.constants.Service.Voicen.name] = cloudlanguagetools.voicen.VoicenService()
+        # if self.secrets_config['load_nlp_models']:
+        #     logging.info('loading nlp models')
+        #     self.services[cloudlanguagetools.constants.Service.PyThaiNLP.name] = cloudlanguagetools.pythainlp.PyThaiNLPService()
+        #     self.services[cloudlanguagetools.constants.Service.Spacy.name] = cloudlanguagetools.spacy.SpacyService()
+        #     self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
 
     def configure(self):
         # azure
@@ -63,55 +62,67 @@ class ServiceManager():
             f.close()
         self.configure_google(google_key_filename)
 
-        # easypronunciation
-        self.configure_easypronunciation(self.secrets_config['services']['easypronunciation'])
+        # # easypronunciation
+        # self.configure_easypronunciation(self.secrets_config['services']['easypronunciation'])
 
-        # watson
-        watson_translator_api_key = os.environ['WATSON_TRANSLATOR_API_KEY']
-        watson_translator_url = os.environ['WATSON_TRANSLATOR_URL']
-        watson_speech_api_key = os.environ['WATSON_SPEECH_API_KEY']
-        watson_speech_url = os.environ['WATSON_SPEECH_URL']
-        self.configure_watson(watson_translator_api_key, watson_translator_url, watson_speech_api_key, watson_speech_url)
+        # # watson
+        # watson_translator_api_key = os.environ['WATSON_TRANSLATOR_API_KEY']
+        # watson_translator_url = os.environ['WATSON_TRANSLATOR_URL']
+        # watson_speech_api_key = os.environ['WATSON_SPEECH_API_KEY']
+        # watson_speech_url = os.environ['WATSON_SPEECH_URL']
+        # self.configure_watson(watson_translator_api_key, watson_translator_url, watson_speech_api_key, watson_speech_url)
 
-        # naver
-        naver_client_id = os.environ['NAVER_CLIENT_ID']
-        naver_client_secret = os.environ['NAVER_CLIENT_SECRET']
-        self.configure_naver(naver_client_id, naver_client_secret)
+        # # naver
+        # naver_client_id = os.environ['NAVER_CLIENT_ID']
+        # naver_client_secret = os.environ['NAVER_CLIENT_SECRET']
+        # self.configure_naver(naver_client_id, naver_client_secret)
 
-        # forvo
-        self.configure_forvo()
+        # # forvo
+        # self.configure_forvo()
 
-        # cereproc
-        self.services[cloudlanguagetools.constants.Service.CereProc.name].configure()
+        # # cereproc
+        # self.services[cloudlanguagetools.constants.Service.CereProc.name].configure()
 
-        self.services[cloudlanguagetools.constants.Service.DeepL.name].configure()
+        # self.services[cloudlanguagetools.constants.Service.DeepL.name].configure()
 
-        # vocalware
-        self.services[cloudlanguagetools.constants.Service.VocalWare.name].configure(
-            self.secrets_config['services']['vocalware']['secret_phrase'],
-            self.secrets_config['services']['vocalware']['account_id'],
-            self.secrets_config['services']['vocalware']['api_id']
-        )
+        # # vocalware
+        # self.services[cloudlanguagetools.constants.Service.VocalWare.name].configure(
+        #     self.secrets_config['services']['vocalware']['secret_phrase'],
+        #     self.secrets_config['services']['vocalware']['account_id'],
+        #     self.secrets_config['services']['vocalware']['api_id']
+        # )
 
-        # fpt.ai
-        self.services[cloudlanguagetools.constants.Service.FptAi.name].configure(
-            self.secrets_config['services']['fptai']['api_key']
-        )
+        # # fpt.ai
+        # self.services[cloudlanguagetools.constants.Service.FptAi.name].configure(
+        #     self.secrets_config['services']['fptai']['api_key']
+        # )
 
-        # voicen
-        self.services[cloudlanguagetools.constants.Service.Voicen.name].configure(
-            self.secrets_config['services']['voicen']['api_key']
-        )
+        # # voicen
+        # self.services[cloudlanguagetools.constants.Service.Voicen.name].configure(
+        #     self.secrets_config['services']['voicen']['api_key']
+        # )
 
-        # for AWS, the boto3 library will read environment variables itself
+        # # for AWS, the boto3 library will read environment variables itself
 
-        self.translation_language_list = self.get_translation_language_list()
+        # self.translation_language_list = self.get_translation_language_list()
 
     def configure_azure(self, region, key):
+        self.services[cloudlanguagetools.constants.Service.Azure.name] = cloudlanguagetools.azure.AzureService()        
         self.services[cloudlanguagetools.constants.Service.Azure.name].configure(key, region)
 
-    def configure_google(self, credentials_path):
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
+    def configure_google(self, google_key):
+        data_bytes = base64.b64decode(google_key)
+        data_str = data_bytes.decode('utf-8')    
+        # write to file
+        # note: temp file needs to be a member so it doesn't get collected
+        self.google_key_temp_file = tempfile.NamedTemporaryFile()  
+        google_key_filename = self.google_key_temp_file.name
+        with open(google_key_filename, 'w') as f:
+            f.write(data_str)    
+            f.close()
+
+        self.services[cloudlanguagetools.constants.Service.Google.name] = cloudlanguagetools.google.GoogleService()        
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = google_key_filename
         self.services[cloudlanguagetools.constants.Service.Google.name].configure()
 
     def configure_easypronunciation(self, api_keys):

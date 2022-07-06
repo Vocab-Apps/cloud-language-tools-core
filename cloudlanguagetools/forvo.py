@@ -55,8 +55,8 @@ class ForvoService(cloudlanguagetools.service.Service):
         self.url_base = 'https://apicommercial.forvo.com'
         self.build_audio_language_map()
 
-    def configure(self):
-        self.key = os.environ['FORVO_KEY']
+    def configure(self, key):
+        self.key = key
 
     def get_headers(self):
         # forvo uses cloudflare or something equivalent

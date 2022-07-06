@@ -106,6 +106,9 @@ class ServiceManager():
 
         # self.translation_language_list = self.get_translation_language_list()
 
+    def configure_amazon(self):
+        self.services[cloudlanguagetools.constants.Service.Amazon.name] = cloudlanguagetools.amazon.AmazonService()
+
     def configure_azure(self, region, key):
         self.services[cloudlanguagetools.constants.Service.Azure.name] = cloudlanguagetools.azure.AzureService()        
         self.services[cloudlanguagetools.constants.Service.Azure.name].configure(key, region)
@@ -129,13 +132,20 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name].configure(api_keys)
 
     def configure_watson(self, translator_api_key, translator_url, speech_api_key, speech_url):
+        self.services[cloudlanguagetools.constants.Service.Watson.name] = cloudlanguagetools.watson.WatsonService()
         self.services[cloudlanguagetools.constants.Service.Watson.name].configure(translator_api_key, translator_url, speech_api_key, speech_url)
 
     def configure_naver(self, naver_client_id, naver_client_secret):
+        self.services[cloudlanguagetools.constants.Service.Naver.name] = cloudlanguagetools.naver.NaverService()        
         self.services[cloudlanguagetools.constants.Service.Naver.name].configure(naver_client_id, naver_client_secret)
 
-    def configure_forvo(self):
-        self.services[cloudlanguagetools.constants.Service.Forvo.name].configure()
+    def configure_forvo(self, key):
+        self.services[cloudlanguagetools.constants.Service.Forvo.name] = cloudlanguagetools.forvo.ForvoService()
+        self.services[cloudlanguagetools.constants.Service.Forvo.name].configure(key)
+
+    def configure_fptai(self, api_key):
+        self.services[cloudlanguagetools.constants.Service.FptAi.name] = cloudlanguagetools.fptai.FptAiService()        
+        self.services[cloudlanguagetools.constants.Service.FptAi.name].configure(api_key)
 
     def get_language_data_json(self):
         # retrieve all language data (tts, translation, transliteration, etc)

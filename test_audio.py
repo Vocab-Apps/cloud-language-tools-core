@@ -17,8 +17,15 @@ from cloudlanguagetools.constants import Service
 
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
+    # configure services
     manager.configure_azure(os.environ['AZURE_REGION'], os.environ['AZURE_KEY'])
     manager.configure_google(os.environ['GOOGLE_KEY'])
+    manager.configure_watson(os.environ['WATSON_TRANSLATOR_API_KEY'], os.environ['WATSON_TRANSLATOR_URL'], os.environ['WATSON_SPEECH_API_KEY'], os.environ['WATSON_SPEECH_URL'])
+    manager.configure_naver(os.environ['NAVER_CLIENT_ID'], os.environ['NAVER_CLIENT_SECRET'])
+    manager.configure_forvo(os.environ['FORVO_KEY'])
+    manager.configure_amazon()
+    manager.configure_fptai(os.environ['FPTAI_KEY'])
+
     return manager
 
 class TestAudio(unittest.TestCase):

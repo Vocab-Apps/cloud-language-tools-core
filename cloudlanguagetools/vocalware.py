@@ -68,12 +68,15 @@ class VocalWareService(cloudlanguagetools.service.Service):
         retry_count = 3
         while retry_count > 0:
             logger.debug(f'retrieving url {url}, retry_count: {retry_count}')
-            response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
-            logger.debug(f'response.status_code: {response.status_code}')
-            if response.status_code == 200:
-                with open(output_temp_filename, 'wb') as audio:
-                    audio.write(response.content)
-                return output_temp_file
+            try:
+                response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
+                logger.debug(f'response.status_code: {response.status_code}')
+                if response.status_code == 200:
+                    with open(output_temp_filename, 'wb') as audio:
+                        audio.write(response.content)
+                    return output_temp_file
+            except requests.exceptions.ConnectionError as exception:
+                pass # allow the retry logic to proceed
             retry_count -= 1
             time.sleep(0.5)
 

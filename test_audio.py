@@ -83,7 +83,23 @@ class TestAudio(unittest.TestCase):
 
     def verify_voice(self, voice, text, recognition_language):
         voice_key = voice['voice_key']
-        audio_temp_file = self.manager.get_tts_audio(text, voice['service'], voice_key, {})
+
+        max_tries = 3
+        num_tries = max_tries
+        get_tts_audio_success = False
+
+        while get_tts_audio_success != True and num_tries >= 0:
+            num_tries -= 1
+            try:
+                logging.info(f"attempting to retrieve audio from {voice['service']}, attempts: {num_tries}")
+                audio_temp_file = self.manager.get_tts_audio(text, voice['service'], voice_key, {})
+                get_tts_audio_success = True
+            except cloudlanguagetools.errors.TimeoutError as exception:
+                pass # allow retry
+
+        if num_tries < 0:
+            raise Exception(f"could not retrieve audio from {voice['service']} after {max_tries} tries")
+
         # check MIME type
         mime_type = magic.from_file(audio_temp_file.name)
         self.assertIn('MPEG ADTS, layer III', mime_type)

@@ -5,6 +5,9 @@ class ApiKeyNotFoundError(ValueError):
 class RequestError(ValueError):
     pass
 
+class TimeoutError(ValueError):
+    pass
+
 class NotFoundError(ValueError):
     pass
 

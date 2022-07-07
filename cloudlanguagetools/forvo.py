@@ -83,22 +83,25 @@ class ForvoService(cloudlanguagetools.service.Service):
 
         url = f'{self.url_base}/key/{self.key}/format/json/action/word-pronunciations/word/{encoded_text}/language/{language}{sex_param}{username_param}/order/rate-desc/limit/1{country_code}'
 
-        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
-        if response.status_code == 200:
-            data = response.json()
-            items = data['items']
-            if len(items) == 0:
-                error_message = f"Pronunciation not found in Forvo for word [{text}], language={language}, country={voice_key['country_code']}"
-                raise cloudlanguagetools.errors.NotFoundError(error_message)
-            audio_url = items[0]['pathmp3']
-            output_temp_file = tempfile.NamedTemporaryFile()
-            output_temp_filename = output_temp_file.name
-            audio_request = requests.get(audio_url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
-            open(output_temp_filename, 'wb').write(audio_request.content)
-            return output_temp_file
-        else:
-            error_message = f'status_code: {response.status_code} response: {response.content}'
-            raise cloudlanguagetools.errors.RequestError(error_message)
+        try:
+            response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+            if response.status_code == 200:
+                data = response.json()
+                items = data['items']
+                if len(items) == 0:
+                    error_message = f"Pronunciation not found in Forvo for word [{text}], language={language}, country={voice_key['country_code']}"
+                    raise cloudlanguagetools.errors.NotFoundError(error_message)
+                audio_url = items[0]['pathmp3']
+                output_temp_file = tempfile.NamedTemporaryFile()
+                output_temp_filename = output_temp_file.name
+                audio_request = requests.get(audio_url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+                open(output_temp_filename, 'wb').write(audio_request.content)
+                return output_temp_file
+            else:
+                error_message = f'status_code: {response.status_code} response: {response.content}'
+                raise cloudlanguagetools.errors.RequestError(error_message)
+        except requests.exceptions.ReadTimeout as exception:
+            raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving forvo audio')
 
 
     def get_language_enum(self, language_id):

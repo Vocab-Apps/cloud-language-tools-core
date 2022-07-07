@@ -133,9 +133,9 @@ class AzureService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.url_translator_base = 'https://api.cognitive.microsofttranslator.com'
 
-    def configure(self, key, region):
-        self.key = key
-        self.region = region
+    def configure(self, config):
+        self.key = config['key']
+        self.region = config['region']
 
     def get_token(self):
         fetch_token_url = f"https://{self.region}.api.cognitive.microsoft.com/sts/v1.0/issueToken"

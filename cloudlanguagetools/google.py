@@ -1,6 +1,7 @@
 import os
 import tempfile
 import html
+import base64
 import logging
 import google.cloud.texttospeech
 import google.cloud.translate_v2
@@ -103,8 +104,17 @@ class GoogleService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass
 
-    def configure(self):
-        pass
+    def configure(self, config):
+        data_bytes = base64.b64decode(config['key'])
+        data_str = data_bytes.decode('utf-8')    
+        # write to file
+        # note: temp file needs to be a member so it doesn't get collected
+        self.google_key_temp_file = tempfile.NamedTemporaryFile()  
+        google_key_filename = self.google_key_temp_file.name
+        with open(google_key_filename, 'w') as f:
+            f.write(data_str)    
+            f.close()
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = google_key_filename
 
     def get_client(self):
         client = google.cloud.texttospeech.TextToSpeechClient()

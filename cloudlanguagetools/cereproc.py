@@ -48,9 +48,9 @@ class CereProcService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass
 
-    def configure(self):
-        self.username = os.environ['CEREPROC_USERNAME']
-        self.password = os.environ['CEREPROC_PASSWORD']
+    def configure(self, config):
+        self.username = config['username']
+        self.password = config['password']
     
 
     def get_access_token(self):

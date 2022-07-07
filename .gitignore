@@ -5,6 +5,4 @@ dist/
 *.mp3
 *.pyc
 __pycache__/
-temp_data_files/
-sound_samples/
-secrets.py
+services_configuration.json

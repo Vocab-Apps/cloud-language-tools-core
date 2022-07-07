@@ -1,6 +1,7 @@
 import json
 import requests
 import tempfile
+import os
 import boto3
 import botocore.exceptions
 import contextlib
@@ -86,6 +87,13 @@ class AmazonTranslationLanguage(cloudlanguagetools.translationlanguage.Translati
 
 class AmazonService(cloudlanguagetools.service.Service):
     def __init__(self):
+        pass
+
+    def configure(self, config):
+        os.environ['AWS_ACCESS_KEY_ID'] = config['AWS_ACCESS_KEY_ID']
+        os.environ['AWS_SECRET_ACCESS_KEY'] = config['AWS_SECRET_ACCESS_KEY']
+        os.environ['AWS_DEFAULT_REGION'] = config['AWS_DEFAULT_REGION']
+
         self.polly_client = boto3.client("polly", 
             config=botocore.config.Config(connect_timeout=cloudlanguagetools.constants.RequestTimeout, read_timeout=cloudlanguagetools.constants.RequestTimeout))
         self.translate_client = boto3.client("translate",

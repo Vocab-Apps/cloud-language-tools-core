@@ -63,9 +63,9 @@ class NaverService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass
 
-    def configure(self, client_id, client_secret):
-        self.client_id = client_id
-        self.client_secret = client_secret
+    def configure(self, config):
+        self.client_id = config['client_id']
+        self.client_secret = config['client_secret']
 
     def get_translation(self, text, from_language_key, to_language_key):
         url = 'https://naveropenapi.apigw.ntruss.com/nmt/v1/translation'

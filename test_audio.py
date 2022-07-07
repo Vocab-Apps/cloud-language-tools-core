@@ -7,6 +7,7 @@ import sys
 import os
 import magic
 import pytest
+import json
 # import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
@@ -18,13 +19,24 @@ from cloudlanguagetools.constants import Service
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
     # configure services
-    manager.configure_azure(os.environ['AZURE_REGION'], os.environ['AZURE_KEY'])
-    manager.configure_google(os.environ['GOOGLE_KEY'])
-    manager.configure_watson(os.environ['WATSON_TRANSLATOR_API_KEY'], os.environ['WATSON_TRANSLATOR_URL'], os.environ['WATSON_SPEECH_API_KEY'], os.environ['WATSON_SPEECH_URL'])
-    manager.configure_naver(os.environ['NAVER_CLIENT_ID'], os.environ['NAVER_CLIENT_SECRET'])
-    manager.configure_forvo(os.environ['FORVO_KEY'])
-    manager.configure_amazon()
-    manager.configure_fptai(os.environ['FPTAI_KEY'])
+    f = open('services_configuration.json')
+    config = json.load(f)
+    f.close()
+    manager.configure_services(config)
+
+    # services_configuration = {
+    #     'Azure': {
+    #         'region': os.environ['AZURE_REGION'],
+    #         'key': os.environ['AZURE_KEY']
+    #     }
+    # }
+    # manager.configure_azure(os.environ['AZURE_REGION'], os.environ['AZURE_KEY'])
+    # manager.configure_google(os.environ['GOOGLE_KEY'])
+    # manager.configure_watson(os.environ['WATSON_TRANSLATOR_API_KEY'], os.environ['WATSON_TRANSLATOR_URL'], os.environ['WATSON_SPEECH_API_KEY'], os.environ['WATSON_SPEECH_URL'])
+    # manager.configure_naver(os.environ['NAVER_CLIENT_ID'], os.environ['NAVER_CLIENT_SECRET'])
+    # manager.configure_forvo(os.environ['FORVO_KEY'])
+    # manager.configure_amazon()
+    # manager.configure_fptai(os.environ['FPTAI_KEY'])
 
     return manager
 
@@ -93,6 +105,7 @@ class TestAudio(unittest.TestCase):
     def verify_service_audio_language(self, text, service, audio_language, recognition_language):
         # logging.info(f'verify_service_audio: service: {service} audio_language: {audio_language}')
         voices = self.get_voice_list_service_audio_language(service, audio_language)
+        self.assertGreaterEqual(len(voices), 1, f'at least one voice for service {service}, language {audio_language}')
         # pick 3 random voices
         max_voices = 3
         if len(voices) > max_voices:

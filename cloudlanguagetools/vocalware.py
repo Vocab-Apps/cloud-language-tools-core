@@ -40,10 +40,10 @@ class VocalWareService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass
 
-    def configure(self, secret_phrase, account_id, api_id):
-        self.secret_phrase = secret_phrase
-        self.account_id = account_id
-        self.api_id = api_id
+    def configure(self, config):
+        self.secret_phrase = config['secret_phrase']
+        self.account_id = config['account_id']
+        self.api_id = config['api_id']
 
     def get_translation(self, text, from_language_key, to_language_key):
         raise cloudlanguagetools.errors.RequestError('not supported')

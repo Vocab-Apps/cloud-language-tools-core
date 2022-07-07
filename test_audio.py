@@ -8,6 +8,7 @@ import os
 import magic
 import pytest
 import json
+import time
 # import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
@@ -48,6 +49,7 @@ class TestAudio(unittest.TestCase):
                 success = True
             except requests.exceptions.ReadTimeout as e:
                 logging.exception(f'could not get voice list, timeout')
+                time.sleep(1)
         
         import http.client as http_client                            
         http_client.HTTPConnection.debuglevel = 1

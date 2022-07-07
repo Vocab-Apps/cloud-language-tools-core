@@ -2,7 +2,7 @@ from setuptools import setup
 
 # build instructions
 # python setup.py sdist
-# python setup.py sdist upload
+# twine upload dist/*
 
 setup(name='cloudlanguagetools',
       version='0.1',

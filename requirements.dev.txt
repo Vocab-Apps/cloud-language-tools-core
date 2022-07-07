@@ -1,15 +1,4 @@
-azure-cognitiveservices-speech
-requests
-google-cloud-texttospeech
-google-cloud-translate
 pytest
 pytest-parallel
 pydub
 python-magic
-boto3
-epitran
-pythainlp[thai2rom,ipa]
-spacy
-jieba
-pinyin_jyutping_sentence
-cryptography

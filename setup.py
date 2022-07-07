@@ -4,13 +4,13 @@ from setuptools import setup
 # python setup.py sdist
 # python setup.py sdist upload
 
-setup(name='cloud-language-tools',
+setup(name='cloudlanguagetools',
       version='0.1',
       description='Interface with various cloud APIs for language processing such as translation, text to speech',
       long_description=open('README.rst', encoding='utf-8').read(),
-      url='https://github.com/lucwastiaux/cloud-language-tools',
-      author='Luc Wastiaux',
-      author_email='lucw@airpost.net',
+      url='https://github.com/Language-Tools/cloud-language-tools-core',
+      author='Luc',
+      author_email='languagetools@mailc.net',
       classifiers=[
         'Programming Language :: Python :: 3.8',
         'Topic :: Text Processing :: Linguistic',

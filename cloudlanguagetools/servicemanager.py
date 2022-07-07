@@ -132,16 +132,19 @@ class ServiceManager():
 
     def get_all_translations(self, text, from_language, to_language):
         global_starttime = timeit.default_timer()
+
+        translation_language_list = self.get_translation_language_list()
+
         result = {}
         for service_name, service in self.services.items():
             # locate from language key
-            from_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == from_language]
+            from_language_entries = [x for x in translation_language_list if x.service.name == service_name and x.get_language_code() == from_language]
             if len(from_language_entries) == 1:
                 starttime = timeit.default_timer()
                 # this service provides the "from" language in translation list
                 from_language_id = from_language_entries[0].get_language_id()
                 # locate to language key
-                to_language_entries = [x for x in self.translation_language_list if x.service.name == service_name and x.get_language_code() == to_language]
+                to_language_entries = [x for x in translation_language_list if x.service.name == service_name and x.get_language_code() == to_language]
                 if len(to_language_entries) == 1:
                     to_language_id = to_language_entries[0].get_language_id()
                     try:

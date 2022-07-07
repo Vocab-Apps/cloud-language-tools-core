@@ -71,7 +71,11 @@ class VocalWareService(cloudlanguagetools.service.Service):
             try:
                 response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
                 logger.debug(f'response.status_code: {response.status_code}')
-                if response.status_code == 200:
+                has_timeout_response_header = False
+                if '408 Request Timeout' in response.headers.get('X-Error', ''):
+                    logger.warn(f"found timeout in response header: {response.headers['X-Error']}, {response.headers['X-ErrorLine']}")
+                    has_timeout_response_header = True
+                if response.status_code == 200 and has_timeout_response_header == False:
                     with open(output_temp_filename, 'wb') as audio:
                         audio.write(response.content)
                     return output_temp_file

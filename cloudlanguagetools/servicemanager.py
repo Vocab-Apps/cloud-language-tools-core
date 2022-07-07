@@ -22,6 +22,7 @@ import cloudlanguagetools.fptai
 import cloudlanguagetools.voicen
 import cloudlanguagetools.pythainlp
 import cloudlanguagetools.spacy
+import cloudlanguagetools.encryption
 
 class ServiceManager():
     def  __init__(self):
@@ -42,6 +43,10 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.PyThaiNLP.name] = cloudlanguagetools.pythainlp.PyThaiNLPService()
         self.services[cloudlanguagetools.constants.Service.Spacy.name] = cloudlanguagetools.spacy.SpacyService()
         self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
+
+    def configure_default(self):
+        # use the stored keys to configure services
+        self.configure_services(cloudlanguagetools.encryption.decrypt())
 
     def configure_services(self, config):
         for service_name, value in config.items():

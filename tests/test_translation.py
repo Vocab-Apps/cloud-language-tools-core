@@ -10,23 +10,17 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
-import cloudlanguagetools.encryption
 from cloudlanguagetools.languages import Language
 from cloudlanguagetools.constants import Service
 import cloudlanguagetools.errors
 
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
-    manager.configure_services(cloudlanguagetools.encryption.decrypt())
+    manager.configure_default()
     return manager
 
 class TestTranslation(unittest.TestCase):
     def setUp(self):
-        logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
-                            datefmt='%Y%m%d-%H:%M:%S',
-                            stream=sys.stdout,
-                            level=logging.DEBUG)
-
         self.manager = get_manager()
         self.language_list = self.manager.get_language_list()
         self.translation_language_list = self.manager.get_translation_language_list_json()

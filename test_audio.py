@@ -12,6 +12,7 @@ import time
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.options
+import cloudlanguagetools.encryption
 from cloudlanguagetools.languages import Language
 from cloudlanguagetools.languages import AudioLanguage
 from cloudlanguagetools.constants import Service
@@ -21,10 +22,10 @@ logger = logging.getLogger(__name__)
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
     # configure services
-    f = open('services_configuration.json')
-    config = json.load(f)
-    f.close()
-    manager.configure_services(config)
+    # f = open('services_configuration.json')
+    # config = json.load(f)
+    # f.close()
+    manager.configure_services(cloudlanguagetools.encryption.decrypt())
 
     return manager
 

@@ -1,8 +1,8 @@
 import sys
 import logging
 import unittest
+import json
 import pprint
-import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 from cloudlanguagetools.languages import Language
@@ -10,8 +10,11 @@ from cloudlanguagetools.constants import Service
 import cloudlanguagetools.errors
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
-    manager.configure()    
+    manager = cloudlanguagetools.servicemanager.ServiceManager()
+    f = open('services_configuration.json')
+    config = json.load(f)
+    f.close()
+    manager.configure_services(config)    
     return manager
 
 class TestTranslation(unittest.TestCase):

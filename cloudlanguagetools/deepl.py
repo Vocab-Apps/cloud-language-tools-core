@@ -27,8 +27,8 @@ class DeepLService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.base_url = 'https://api.deepl.com/v2/translate'
 
-    def configure(self):
-        self.api_key = os.environ['DEEPL_KEY']
+    def configure(self, config):
+        self.api_key = config['key']
     
     def get_tts_voice_list(self):
         return []

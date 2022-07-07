@@ -39,16 +39,16 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.url_base = 'https://easypronunciation.com'
 
-    def configure(self, api_keys):
+    def configure(self, config):
         self.api_keys = {
-            'french': api_keys['french_api_key'],
-            'english': api_keys['english_api_key'],
-            'italian': api_keys['italian_api_key'],
-            'portuguese': api_keys['portuguese_api_key'],
-            'japanese': api_keys['japanese_api_key'],
-            'spanish': api_keys['spanish_api_key'],
-            'german': api_keys['german_api_key'],
-            'russian': api_keys['russian_api_key']
+            'french': config['french_api_key'],
+            'english': config['english_api_key'],
+            'italian': config['italian_api_key'],
+            'portuguese': config['portuguese_api_key'],
+            'japanese': config['japanese_api_key'],
+            'spanish': config['spanish_api_key'],
+            'german': config['german_api_key'],
+            'russian': config['russian_api_key']
         }
 
     def get_tts_voice_list(self):

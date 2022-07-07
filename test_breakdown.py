@@ -2,6 +2,8 @@ import sys
 import logging
 import unittest
 import pprint
+import requests
+import time
 import json
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
@@ -26,7 +28,19 @@ class TestBreakdown(unittest.TestCase):
                             level=logging.DEBUG)
 
         cls.manager = get_manager()
-        cls.language_data = cls.manager.get_language_data_json()
+
+        num_tries = 3
+        success = False
+        while success == False and num_tries >= 0:
+            num_tries -= 1
+            try:
+                cls.language_data = cls.manager.get_language_data_json()
+                success = True
+            except requests.exceptions.ReadTimeout as e:
+                logging.exception(f'could not get language data, timeout')
+                time.sleep(1)
+
+        
 
     def test_language_list(self):
         self.assertTrue(len(self.language_data['language_list']) > 0)

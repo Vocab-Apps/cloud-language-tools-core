@@ -201,7 +201,7 @@ class TestAudio(unittest.TestCase):
 
     def test_vietnamese_fptai(self):
         # pytest test_audio.py -k test_vietnamese_fptai
-        source_text = 'Tôi bị mất cái ví.'
+        source_text = 'thì giá là bao nhiêu'
         self.verify_service_audio_language(source_text, Service.FptAi, AudioLanguage.vi_VN, 'vi-VN')
 
     def test_english_naver(self):

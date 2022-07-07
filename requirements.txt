@@ -8,4 +8,5 @@ pythainlp[thai2rom,ipa]
 spacy
 jieba
 pinyin_jyutping_sentence
+argostranslate
 cryptography

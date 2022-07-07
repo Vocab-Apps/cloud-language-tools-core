@@ -17,6 +17,8 @@ def post_installation():
     spacy.cli.download('ru_core_news_lg')
     spacy.cli.download('pl_core_news_lg')
     spacy.cli.download('it_core_news_lg')    
+    import cloudlanguagetools.argostranslate
+    cloudlanguagetools.argostranslate.install_all_packages()
 
 
 class PostInstallCommand(install):
@@ -51,6 +53,7 @@ setup(name='cloudlanguagetools',
           'spacy',
           'jieba',
           'pinyin_jyutping_sentence',
+          'argostranslate',
           'cryptography'
       ],
       cmdclass={

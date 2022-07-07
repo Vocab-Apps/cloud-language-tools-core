@@ -7,16 +7,14 @@ import time
 import json
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.encryption
 from cloudlanguagetools.languages import Language
 from cloudlanguagetools.constants import Service
 import cloudlanguagetools.errors
 
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
-    f = open('services_configuration.json')
-    config = json.load(f)
-    f.close()
-    manager.configure_services(config)    
+    manager.configure_services(cloudlanguagetools.encryption.decrypt())    
     return manager
 
 class TestBreakdown(unittest.TestCase):

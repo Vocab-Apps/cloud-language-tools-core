@@ -21,10 +21,6 @@ logger = logging.getLogger(__name__)
 
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
-    # configure services
-    # f = open('services_configuration.json')
-    # config = json.load(f)
-    # f.close()
     manager.configure_services(cloudlanguagetools.encryption.decrypt())
 
     return manager

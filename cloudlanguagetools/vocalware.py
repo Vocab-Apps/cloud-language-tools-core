@@ -3,6 +3,7 @@ import urllib
 import hashlib
 import tempfile
 import time
+import logging
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -11,6 +12,8 @@ import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
+
+logger = logging.getLogger(__name__)
 
 class VocalWareVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, audio_language, name, gender, language_id, voice_id, engine_id):
@@ -64,7 +67,9 @@ class VocalWareService(cloudlanguagetools.service.Service):
 
         retry_count = 3
         while retry_count > 0:
+            logger.debug(f'retrieving url {url}, retry_count: {retry_count}')
             response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
+            logger.debug(f'response.status_code: {response.status_code}')
             if response.status_code == 200:
                 with open(output_temp_filename, 'wb') as audio:
                     audio.write(response.content)

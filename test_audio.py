@@ -9,13 +9,14 @@ import magic
 import pytest
 import json
 import time
-# import secrets
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.options
 from cloudlanguagetools.languages import Language
 from cloudlanguagetools.languages import AudioLanguage
 from cloudlanguagetools.constants import Service
+
+logger = logging.getLogger(__name__)
 
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
@@ -33,11 +34,6 @@ class TestAudio(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
-                            datefmt='%Y%m%d-%H:%M:%S',
-                            stream=sys.stdout,
-                            level=logging.DEBUG)
-
         cls.manager = get_manager()
         cls.language_list = cls.manager.get_language_list()
         num_tries = 3

@@ -27,6 +27,9 @@ def get_manager():
     return manager
 
 class TestAudio(unittest.TestCase):
+
+    FRENCH_INPUT_TEXT = "On m'a volé mes affaires."
+
     @classmethod
     def setUpClass(cls):
         logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -100,19 +103,19 @@ class TestAudio(unittest.TestCase):
             self.verify_voice(voice, text, recognition_language)
 
     def test_french_google(self):
-        source_text = 'Je ne suis pas intéressé.'
+        source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.fr_FR, 'fr-FR')
 
     def test_french_azure(self):
-        source_text = 'Je ne suis pas intéressé.'
+        source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.fr_FR, 'fr-FR')
 
     def test_french_watson(self):
-        source_text = 'Je ne suis pas intéressé.'
+        source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.Watson, AudioLanguage.fr_FR, 'fr-FR')
 
     def test_french_vocalware(self):
-        source_text = 'Je ne suis pas intéressé.'
+        source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.VocalWare, AudioLanguage.fr_FR, 'fr-FR')        
 
     def test_english_amazon(self):
@@ -120,7 +123,7 @@ class TestAudio(unittest.TestCase):
         self.verify_service_audio_language(source_text, Service.Amazon, AudioLanguage.en_GB, 'en-GB')
 
     def test_french_amazon(self):
-        source_text = 'Je ne suis pas intéressé.'
+        source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.Amazon, AudioLanguage.fr_FR, 'fr-FR')        
 
     def test_mandarin_google(self):
@@ -275,7 +278,7 @@ class TestAudio(unittest.TestCase):
 
     def test_azure_options(self):
         service = 'Azure'
-        source_text = 'Je ne suis pas intéressé.'
+        source_text = self.FRENCH_INPUT_TEXT
 
         voice_key = {
             "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
@@ -289,7 +292,7 @@ class TestAudio(unittest.TestCase):
 
     def test_azure_format_ogg(self):
         service = 'Azure'
-        source_text = 'Je ne suis pas intéressé.'
+        source_text = self.FRENCH_INPUT_TEXT
 
         voice_key = {
             "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
@@ -307,7 +310,7 @@ class TestAudio(unittest.TestCase):
 
     def test_google_format_ogg(self):
         service = 'Google'
-        source_text = 'Je ne suis pas intéressé.'
+        source_text = self.FRENCH_INPUT_TEXT
 
         voice_key = {
             'language_code': 'fr-FR', 
@@ -327,7 +330,7 @@ class TestAudio(unittest.TestCase):
 
     def test_amazon_format_ogg(self):
         service = 'Amazon'
-        source_text = 'Je ne suis pas intéressé.'
+        source_text = self.FRENCH_INPUT_TEXT
 
         voice_key = {'engine': 'neural', 'voice_id': 'Gabrielle'}
 

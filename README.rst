@@ -15,3 +15,16 @@ pip freeze | grep -v -E 'en-core-web-trf|zh-core-web-trf|fr-dep-news-trf|de-dep-
 
 # for building
 see package.sh
+
+
+# additional modules for spacy
+
+python -m spacy download zh_core_web_trf
+python -m spacy download en_core_web_trf
+python -m spacy download fr_dep_news_trf
+python -m spacy download ja_core_news_lg
+python -m spacy download de_dep_news_trf
+python -m spacy download es_dep_news_trf
+python -m spacy download ru_core_news_lg
+python -m spacy download pl_core_news_lg
+python -m spacy download it_core_news_lg

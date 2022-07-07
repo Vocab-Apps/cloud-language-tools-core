@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 import unittest
@@ -5,6 +6,9 @@ import pprint
 import requests
 import time
 import json
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.encryption

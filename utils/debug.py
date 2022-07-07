@@ -18,6 +18,7 @@ import redisdb
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)

@@ -18,5 +18,15 @@ setup(name='cloudlanguagetools',
       license='GPL',
       packages=['cloudlanguagetools'],
       install_requires=[
-          #'jieba',
+          'azure-cognitiveservices-speech',
+          'requests',
+          'google-cloud-texttospeech',
+          'google-cloud-translate',
+          'boto3',
+          'epitran',
+          'pythainlp[thai2rom,ipa]',
+          'spacy',
+          'jieba',
+          'pinyin_jyutping_sentence',
+          'cryptography'
       ])

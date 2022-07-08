@@ -139,6 +139,8 @@ class TestTranslation(unittest.TestCase):
         self.translate_text(Service.DeepL, 'Je ne suis pas intéressé.', Language.fr, Language.en, ["""I'm not interested.""", 'i am not interested'])
         self.translate_text(Service.DeepL, '送外卖的人', Language.zh_cn, Language.en, ['delivery person', 'takeaway delivery people'])
 
+    def test_translate_chinese_argos(self):
+        self.translate_text(Service.ArgosTranslate, '中国有很多外国人', Language.zh_cn, Language.en, 'there are many foreigners in china')
 
     def test_translate_all(self):
         # pytest test_translation.py -rPP -k test_translate_all

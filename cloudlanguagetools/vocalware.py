@@ -82,7 +82,7 @@ class VocalWareService(cloudlanguagetools.service.Service):
             except requests.exceptions.ConnectionError as exception:
                 pass # allow the retry logic to proceed
             retry_count -= 1
-            time.sleep(0.5)
+            time.sleep(1)
 
         response_data = response.content
         error_message = f'Status code: {response.status_code}: {response_data}'

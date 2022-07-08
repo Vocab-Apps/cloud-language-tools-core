@@ -30,7 +30,7 @@ class PostInstallCommand(install):
 
 
 setup(name='cloudlanguagetools',
-      version='0.2',
+      version='0.3',
       description='Interface with various cloud APIs for language processing such as translation, text to speech',
       long_description=open('README.rst', encoding='utf-8').read(),
       url='https://github.com/Language-Tools/cloud-language-tools-core',

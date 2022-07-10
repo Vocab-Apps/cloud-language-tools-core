@@ -5,6 +5,7 @@ import requests
 import re
 import sys
 import os
+import time
 import magic
 import pytest
 import json
@@ -92,7 +93,7 @@ class TestAudio(unittest.TestCase):
                 audio_temp_file = self.manager.get_tts_audio(text, voice['service'], voice_key, {})
                 get_tts_audio_success = True
             except cloudlanguagetools.errors.TimeoutError as exception:
-                pass # allow retry
+                time.sleep(1) # allow retry
 
         if num_tries < 0:
             raise Exception(f"could not retrieve audio from {voice['service']} after {max_tries} tries")

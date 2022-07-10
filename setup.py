@@ -6,17 +6,8 @@ from setuptools.command.install import install
 # twine upload dist/*
 
 def post_installation():
-    import spacy
-    import spacy.cli
-    spacy.cli.download('zh_core_web_trf')
-    spacy.cli.download('en_core_web_trf')
-    spacy.cli.download('fr_dep_news_trf')
-    spacy.cli.download('ja_core_news_lg')
-    spacy.cli.download('de_dep_news_trf')
-    spacy.cli.download('es_dep_news_trf')
-    spacy.cli.download('ru_core_news_lg')
-    spacy.cli.download('pl_core_news_lg')
-    spacy.cli.download('it_core_news_lg')    
+    import cloudlanguagetools.spacy
+    cloudlanguagetools.spacy.install_all_packages()
     import cloudlanguagetools.argostranslate
     cloudlanguagetools.argostranslate.install_all_packages()
 

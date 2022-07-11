@@ -3,7 +3,6 @@ import requests
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import secrets
-import pinyin_jyutping_sentence
 
 class MandarinCantoneseTransliteration(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, language, conversion_type, tone_numbers, spaces):
@@ -51,6 +50,7 @@ class MandarinCantoneseService(cloudlanguagetools.service.Service):
         return result
 
     def get_transliteration(self, text, transliteration_key):
+        import pinyin_jyutping_sentence
 
         if transliteration_key['conversion_type'] == 'pinyin':
             return pinyin_jyutping_sentence.pinyin(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])

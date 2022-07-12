@@ -28,6 +28,7 @@ setup(name='cloudlanguagetools',
       author='Luc',
       author_email='languagetools@mailc.net',
       classifiers=[
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Topic :: Text Processing :: Linguistic',
       ],      

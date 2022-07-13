@@ -21,7 +21,7 @@ class PostInstallCommand(install):
 
 
 setup(name='cloudlanguagetools',
-      version='0.5',
+      version='0.6',
       description='Interface with various cloud APIs for language processing such as translation, text to speech',
       long_description=open('README.rst', encoding='utf-8').read(),
       url='https://github.com/Language-Tools/cloud-language-tools-core',
@@ -46,7 +46,8 @@ setup(name='cloudlanguagetools',
           'jieba',
           'pinyin_jyutping_sentence',
           'argostranslate',
-          'cryptography'
+          'cryptography',
+          'pydub'
       ],
       cmdclass={
           'install': PostInstallCommand

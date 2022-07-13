@@ -10,3 +10,4 @@ jieba
 pinyin_jyutping_sentence
 argostranslate
 cryptography
+pydub

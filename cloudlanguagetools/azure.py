@@ -121,6 +121,10 @@ class AzureTransliterationLanguage(cloudlanguagetools.transliterationlanguage.Tr
         result = f'{self.language.lang_name} ({self.from_script_name} to {self.to_script_name}), {self.service.name}'
         return result
 
+    def get_transliteration_shortname(self):
+        result = f'{self.from_script_name} to {self.to_script_name}, {self.service.name}'
+        return result        
+
     def get_transliteration_key(self):
         return {
             'language_id': self.language_id,

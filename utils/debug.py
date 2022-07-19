@@ -10,19 +10,20 @@ import unittest
 import pydub
 import pydub.playback
 import epitran
-import pandas
+# import pandas
 import requests
 import re
-import secrets
-import redisdb
+# import secrets
+# import redisdb
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager(secrets.config)
-    manager.configure()    
+    manager = cloudlanguagetools.servicemanager.ServiceManager()
+    manager.configure_default()    
     return manager
 
 
@@ -732,7 +733,7 @@ if __name__ == '__main__':
     # test_google_audio()
     # play_google_audio()
     # play_azure_audio()
-    get_voice_list()
+    # get_voice_list()
     # get_voice_list_awesometts()
     # get_watson_voice_list()
     # get_amazon_voice_list()
@@ -751,7 +752,7 @@ if __name__ == '__main__':
     # dictionary_examples_azure()
     # end_to_end_test()
     # transliterate_azure()
-    # get_transliteration_language_list()
+    get_transliteration_language_list()
     # print_all_languages()
     # print_all_audio_languages()
     # cereproc_authentication()

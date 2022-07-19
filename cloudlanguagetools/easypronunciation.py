@@ -25,6 +25,12 @@ class EasyPronunciationTransliterationLanguage(cloudlanguagetools.transliteratio
             result = f'{self.language.lang_name} ({self.variant}), {self.service.name}'
         return result
 
+    def get_transliteration_shortname(self):
+        result = f'IPA Pronunciation, {self.service.name}'
+        if self.variant != None:
+            result = f'{self.variant}, {self.service.name}'
+        return result        
+
     def get_transliteration_key(self):
         key = {
             'url_path': self.url_path,

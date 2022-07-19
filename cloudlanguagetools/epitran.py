@@ -17,6 +17,10 @@ class EpitranTransliterationLanguage(cloudlanguagetools.transliterationlanguage.
         result = f'{self.language.lang_name} (IPA Pronunciation), {self.service.name} ({self.epitran_language_code})'
         return result
 
+    def get_transliteration_shortname(self):
+        result = f'IPA Pronunciation, {self.service.name} ({self.epitran_language_code})'
+        return result        
+
     def get_transliteration_key(self):
         key = {
             'language_code': self.epitran_language_code

@@ -24,6 +24,10 @@ class PyThaiNLPTransliterationLanguage(cloudlanguagetools.transliterationlanguag
         result = f'{self.language.lang_name} ({self.mode.name}), {self.service.name}'
         return result
 
+    def get_transliteration_shortname(self):
+        result = f'{self.mode.name}, {self.service.name}'
+        return result        
+
     def get_transliteration_key(self):
         return {
             'mode': self.mode.name

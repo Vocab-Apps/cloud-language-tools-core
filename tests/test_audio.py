@@ -100,7 +100,14 @@ class TestAudio(unittest.TestCase):
 
         # check MIME type
         mime_type = magic.from_file(audio_temp_file.name)
-        self.assertIn('MPEG ADTS, layer III', mime_type)
+        expected_mime_type_str = 'MPEG ADTS, layer III'
+        if 'ASCII text' in mime_type:
+            logger.error(f'found mime type: {mime_type}')
+            # dump file to console
+            f = open(audio_temp_file.name, "r")
+            print(f.read())
+
+        self.assertIn(expected_mime_type_str, mime_type)
         audio_text = self.speech_to_text(audio_temp_file, recognition_language)
         assert_text = f"service {voice['service']} voice_key: {voice['voice_key']}"
         self.assertEqual(self.sanitize_recognized_text(text), self.sanitize_recognized_text(audio_text), msg=assert_text)

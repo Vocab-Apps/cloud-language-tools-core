@@ -5,21 +5,6 @@ from setuptools.command.install import install
 # python setup.py sdist
 # twine upload dist/*
 
-def post_installation():
-    import cloudlanguagetools.spacy
-    cloudlanguagetools.spacy.install_all_packages()
-    import cloudlanguagetools.argostranslate
-    cloudlanguagetools.argostranslate.install_all_packages()
-
-
-class PostInstallCommand(install):
-    """Post-installation for installation mode."""
-
-    def run(self):
-        install.run(self)
-        post_installation()
-
-
 setup(name='cloudlanguagetools',
       version='0.8',
       description='Interface with various cloud APIs for language processing such as translation, text to speech',
@@ -42,14 +27,11 @@ setup(name='cloudlanguagetools',
           'boto3',
           'epitran',
           'pythainlp[thai2rom,ipa]',
-          'spacy',
+          'clt_spacy',
           'jieba',
           'pinyin_jyutping_sentence',
-          'argostranslate',
+          'clt_argostranslate',
           'cryptography',
           'pydub'
       ],
-      cmdclass={
-          'install': PostInstallCommand
-      }      
       )

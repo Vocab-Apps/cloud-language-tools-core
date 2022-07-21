@@ -1,13 +1,3 @@
-azure-cognitiveservices-speech
-requests
-google-cloud-texttospeech
-google-cloud-translate
-boto3
-epitran
-pythainlp[thai2rom,ipa]
-spacy
-jieba
-pinyin_jyutping_sentence
-argostranslate
-cryptography
-pydub
+clt_spacy
+clt_argostranslate
+clt_requirements

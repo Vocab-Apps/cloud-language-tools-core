@@ -20,18 +20,8 @@ setup(name='cloudlanguagetools',
       license='GPL',
       packages=['cloudlanguagetools'],
       install_requires=[
-          'azure-cognitiveservices-speech',
-          'requests',
-          'google-cloud-texttospeech',
-          'google-cloud-translate',
-          'boto3',
-          'epitran',
-          'pythainlp[thai2rom,ipa]',
           'clt_spacy',
-          'jieba',
-          'pinyin_jyutping_sentence',
           'clt_argostranslate',
-          'cryptography',
-          'pydub'
+          'clt_requirements'
       ],
       )

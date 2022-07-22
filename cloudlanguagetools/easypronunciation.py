@@ -75,12 +75,13 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'spell_numbers':1
             }, 'french'),
 
+            # docs https://easypronunciation.com/en/ipa-phonetic-converter-rest-api-tutorial
             EasyPronunciationTransliterationLanguage('/english-api.php', cloudlanguagetools.languages.Language.en,
             {
                 'version': 1,
                 'english_phonetics_algorithm': 'american_miscellaneous_sources',
                 'Convert_to_english':'ipa',
-                'add_aspiration_symbol': 1,
+                'add_aspiration_symbol': 0,
                 'narrow_transcription':1,
                 'r_replacement':1,
                 'cot_caught_merger':1,

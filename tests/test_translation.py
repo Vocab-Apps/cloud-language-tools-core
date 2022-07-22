@@ -237,6 +237,19 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('ngǒ cēothêoi ló jěsik', result)
 
+    def verify_easypronunciation_english(self, input, expected_output):
+        service = cloudlanguagetools.constants.Service.EasyPronunciation.name
+
+        source_text = input
+        from_language = Language.en.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual(expected_output, result)
+
 
     def test_transliteration_easypronunciation(self):
         # pytest test_translation.py -rPP -k test_transliteration_easypronunciation
@@ -269,6 +282,10 @@ class TestTranslation(unittest.TestCase):
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('ˈduː ˈjuː ˈhæv ə ˈbɔɪˌfɹɛnd', result)        
+
+        self.verify_easypronunciation_english('take', 'ˈteɪk')
+        self.verify_easypronunciation_english('poor', 'ˈpʊr')
+        # self.verify_easypronunciation_english('self', 'self')
 
         # italian
         source_text = 'Piacere di conoscerla.'

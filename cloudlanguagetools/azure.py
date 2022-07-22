@@ -19,11 +19,17 @@ import cloudlanguagetools.errors
 import azure.cognitiveservices.speech
 import azure.cognitiveservices.speech.audio
 
+AUDIO_LOCALE_OVERRIDE_MAP = {
+    'zh-CN-liaoning': 'zh_CN',
+    'zh-CN-sichuan': 'zh_CN',
+}
+
 class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         # print(voice_data)
         self.service = cloudlanguagetools.constants.Service.Azure
         locale = voice_data['Locale']
+        locale = AUDIO_LOCALE_OVERRIDE_MAP.get(locale, locale)
         language_enum_name = locale.replace('-', '_')
         self.audio_language = cloudlanguagetools.languages.AudioLanguage[language_enum_name]
         self.name = voice_data['Name']

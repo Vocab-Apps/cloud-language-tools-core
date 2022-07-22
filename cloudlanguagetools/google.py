@@ -84,7 +84,8 @@ def get_translation_language_enum(language_id):
         'tlh-Piqd': 'tlh_piqd',
         'zh-CN': 'zh_cn',
         'zh-TW': 'zh_tw',
-        'zh': 'zh_cn'
+        'zh': 'zh_cn',
+        'mni-Mtei': 'mni',
     }
     if language_id in google_language_id_map:
         language_id = google_language_id_map[language_id]

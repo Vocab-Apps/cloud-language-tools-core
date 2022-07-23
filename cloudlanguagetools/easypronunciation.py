@@ -82,7 +82,7 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'english_phonetics_algorithm': 'american_miscellaneous_sources',
                 'Convert_to_english':'ipa',
                 'add_aspiration_symbol': 0,
-                'narrow_transcription':1,
+                'narrow_transcription':0,
                 'r_replacement':1,
                 'cot_caught_merger':1,
                 'er_replacement':1,

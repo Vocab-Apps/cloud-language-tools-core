@@ -285,7 +285,7 @@ class TestTranslation(unittest.TestCase):
 
         self.verify_easypronunciation_english('take', 'ˈteɪk')
         self.verify_easypronunciation_english('poor', 'ˈpʊr')
-        # self.verify_easypronunciation_english('self', 'self')
+        self.verify_easypronunciation_english('self', 'ˈsɛlf')
 
         # italian
         source_text = 'Piacere di conoscerla.'

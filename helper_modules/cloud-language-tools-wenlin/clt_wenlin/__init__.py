@@ -5,9 +5,10 @@ class DictionaryEntry():
         self.pinyin = None
         self.simplified = None
         self.traditional = None
+        self.definitions = []
 
     def add_definition(self, definition):
-        pass
+        self.definitions.append(definition)
 
 def process_characters(chars):
     m = re.match('([^\]]+)\[(.*)\]', chars)
@@ -49,9 +50,11 @@ def read_dictionary_file(filepath):
             current_entry.simplified = simplified
             current_entry.traditional = traditional
 
-        m = re.match('[0-9]*df\s+([^\s]+)')
+        m = re.match('[0-9]*df\s+([^\s]+)', line)
         if m != None:
             definition = process_definition(m.groups()[0])
+            if definition != None:
+                current_entry.add_definition(definition)
 
         lines_read += 1
         if lines_read % 10000 == 0:

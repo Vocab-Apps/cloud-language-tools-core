@@ -6,9 +6,14 @@ class DictionaryEntry():
         self.simplified = None
         self.traditional = None
         self.definitions = []
+        self.measure_word = None
+        self.part_of_speech = None
 
     def add_definition(self, definition):
         self.definitions.append(definition)
+
+
+
 
 def process_characters(chars):
     m = re.match('([^\]]+)\[(.*)\]', chars)
@@ -44,17 +49,25 @@ def read_dictionary_file(filepath):
                 entries.append(current_entry)
             current_entry = DictionaryEntry()
             current_entry.pinyin = pinyin
-        m = re.match('char\s+([^\s]+)', line)
+        m = re.match('char\s+(.+)$', line)
         if m != None:
             simplified, traditional = process_characters(m.groups()[0])
             current_entry.simplified = simplified
             current_entry.traditional = traditional
 
-        m = re.match('[0-9]*df\s+([^\s]+)', line)
+        m = re.match('[0-9]*df\s+(.+)$', line)
         if m != None:
             definition = process_definition(m.groups()[0])
             if definition != None:
                 current_entry.add_definition(definition)
+
+        m = re.match('mw\s+(.+)$', line)
+        if m != None:
+            current_entry.measure_word = m.groups()[0]
+
+        m = re.match('ps\s+(.+)$', line)
+        if m != None:
+            current_entry.part_of_speech = m.groups()[0]
 
         lines_read += 1
         if lines_read % 10000 == 0:

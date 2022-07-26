@@ -51,4 +51,8 @@ class TestWenlinParser(unittest.TestCase):
         self.assertEqual(entry.definitions, ['be seated', 'be destined/doomed'])
         self.assertEqual(entry.part_of_speech, 'r.v.')
 
-                
+        entry = simplified_dict['来']
+        self.assertEqual(entry.pinyin, '¹lái*')
+        self.assertEqual(len(entry.definitions), 18)
+        self.assertEqual(entry.definitions[0:2], ['come; arrive', 'crop up; take place'])
+

@@ -33,26 +33,33 @@ class TestWenlinParser(unittest.TestCase):
 
 
         # do some checks
-        self.assertEqual(len(simplified_dict['组织者'].definitions), 1)
-        self.assertEqual(simplified_dict['组织者'].definitions[0], 'organizer')
-        self.assertEqual(simplified_dict['组织者'].measure_word, '²wèi [位]')
+        self.assertEqual(len(simplified_dict['组织者'].parts_of_speech), 1)
+        self.assertEqual(len(simplified_dict['组织者'].parts_of_speech[0].definitions), 1)
+        self.assertEqual(simplified_dict['组织者'].parts_of_speech[0].definitions[0], 'organizer')
+        self.assertEqual(simplified_dict['组织者'].parts_of_speech[0].measure_word, '²wèi [位]')
 
         entry = simplified_dict['坐地铁']
         self.assertEqual(entry.simplified, '坐地铁')
         self.assertEqual(entry.traditional, '坐地鐵')
-        self.assertEqual(entry.definitions[0], 'ride in a subway train')
-        self.assertEqual(len(entry.definitions), 1)
-        self.assertEqual(entry.part_of_speech, 'v.o.')
+        self.assertEqual(entry.parts_of_speech[0].part_of_speech, 'v.o.')
+        self.assertEqual(entry.parts_of_speech[0].definitions[0], 'ride in a subway train')
+        self.assertEqual(len(entry.parts_of_speech[0].definitions), 1)
 
         entry = simplified_dict['坐定']
         self.assertEqual(entry.simplified, '坐定')
         self.assertEqual(entry.traditional, '坐定')
-        self.assertEqual(len(entry.definitions), 2)
-        self.assertEqual(entry.definitions, ['be seated', 'be destined/doomed'])
-        self.assertEqual(entry.part_of_speech, 'r.v.')
+        self.assertEqual(len(entry.parts_of_speech), 1)
+        self.assertEqual(len(entry.parts_of_speech[0].definitions), 2)
+        self.assertEqual(entry.parts_of_speech[0].definitions, ['be seated', 'be destined/doomed'])
+        self.assertEqual(entry.parts_of_speech[0].part_of_speech, 'r.v.')
 
         entry = simplified_dict['来']
         self.assertEqual(entry.pinyin, '¹lái*')
-        self.assertEqual(len(entry.definitions), 18)
-        self.assertEqual(entry.definitions[0:2], ['come; arrive', 'crop up; take place'])
+        self.assertEqual(len(entry.parts_of_speech), 6)
+        # self.assertEqual(len(entry.definitions), 18)
+        self.assertEqual(entry.parts_of_speech[0].definitions, 
+            ['come; arrive', 
+             'crop up; take place',
+             'bring',
+             'do (specific meaning depending on context)'])
 

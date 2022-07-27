@@ -90,7 +90,7 @@ def read_dictionary_file(filepath):
                 if definition != None:
                     current_entry.add_definition(definition)
 
-            m = re.match('mw\s+(.+)$', line)
+            m = re.match('[0-9]*mw\s+(.+)$', line)
             if m != None:
                 current_entry.add_measure_word(m.groups()[0])
 

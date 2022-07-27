@@ -63,3 +63,11 @@ class TestWenlinParser(unittest.TestCase):
              'bring',
              'do (specific meaning depending on context)'])
 
+
+        entry = simplified_dict['爱']
+        self.assertEqual(len(entry.parts_of_speech), 3)
+        self.assertEqual(entry.parts_of_speech[0].measure_word, None)
+        self.assertEqual(entry.parts_of_speech[1].measure_word, 'zhǒng/²chǎng [种/场]')
+        self.assertEqual(entry.parts_of_speech[2].measure_word, None)
+
+

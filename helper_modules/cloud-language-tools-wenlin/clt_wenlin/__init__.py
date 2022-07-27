@@ -13,6 +13,9 @@ class PartOfSpeech():
             raise Exception('already set')
         self.measure_word = measure_word
 
+    def add_definition(self, definition):
+        self.definitions.append(definition)
+
 
 class DictionaryEntry():
     def __init__(self):
@@ -33,7 +36,7 @@ class DictionaryEntry():
         if len(self.parts_of_speech) == 0:
             # raise Exception(f'unknown part of speech for {definition}')
             self.add_part_of_speech(None)
-        self.parts_of_speech[-1].definitions.append(definition)
+        self.parts_of_speech[-1].add_definition(definition)
         
     def add_measure_word(self, measure_word):
         self.parts_of_speech[-1].add_measure_word(measure_word)

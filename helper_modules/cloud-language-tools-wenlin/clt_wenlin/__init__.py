@@ -1,5 +1,9 @@
 import re
 
+class Definition():
+    def __init__(self, definition):
+        self.definition = definition
+
 
 class PartOfSpeech():
     def __init__(self, entry, part_of_speech):
@@ -14,8 +18,7 @@ class PartOfSpeech():
         self.measure_word = measure_word
 
     def add_definition(self, definition):
-        self.definitions.append(definition)
-
+        self.definitions.append(Definition(definition))
 
 class DictionaryEntry():
     def __init__(self):

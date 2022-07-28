@@ -65,6 +65,14 @@ class TestWenlinParser(unittest.TestCase):
         self.assertEqual(entry.parts_of_speech[0].definitions[1].definition, 
              'crop up; take place')             
 
+        part_of_speech = entry.parts_of_speech[1]
+        self.assertEqual(part_of_speech.part_of_speech, 'suf.')
+        self.assertEqual(part_of_speech.definitions[0].definition, 'ability')
+        self.assertEqual(part_of_speech.definitions[0].example_pinyin, 'zuòbu∼')
+        self.assertEqual(part_of_speech.definitions[0].example_chinese, '作不∼')
+        self.assertEqual(part_of_speech.definitions[0].example_translation, "don't know how to do it")
+
+
 
         entry = simplified_dict['爱']
         self.assertEqual(len(entry.parts_of_speech), 3)

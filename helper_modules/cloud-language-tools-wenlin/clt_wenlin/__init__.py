@@ -87,12 +87,11 @@ def process_definition(definition):
     definition = definition.replace('[en] ', '')
     return definition
 
-def read_dictionary_file(filepath):
-    f = open(filepath, 'r')
-    lines_read = 0
+def iterate_lines(lines):
     current_entry = None
-    entries = []
-    for line in f:
+    lines_read = 0    
+    entries = []    
+    for line in lines:
         try:
             m = re.match('\.py\s+([^\s]+)', line)
             if m != None:
@@ -133,15 +132,18 @@ def read_dictionary_file(filepath):
             if m != None:
                 current_entry.add_example_translation(m.groups()[0])
 
-            
-
             lines_read += 1
             if lines_read % 10000 == 0:
                 print(f'read {lines_read} lines')
         except Exception as e:
             print(line)
             print(e)
-            raise e
+            # raise e
+    return entries
+
+def read_dictionary_file(filepath):
+    f = open(filepath, 'r')
+    entries = iterate_lines(f)
     f.close()
 
     return entries

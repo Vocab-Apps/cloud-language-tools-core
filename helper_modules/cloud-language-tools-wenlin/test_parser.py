@@ -24,6 +24,10 @@ class TestWenlinParser(unittest.TestCase):
         self.assertEqual(clt_wenlin.process_definition('[en] respectful address for an elderly man'), 'respectful address for an elderly man')
         self.assertEqual(clt_wenlin.process_definition("[fr] façon respectueuse de s'adresser à un homme plus âgé que soi"), None)
 
+
+    def test_parse_sections(self):
+        pass
+
     
     def test_parse_full_file(self):
         entries = clt_wenlin.read_dictionary_file('/home/luc/cpp/wenlin/server/cidian.u8')

@@ -111,9 +111,9 @@ def read_dictionary_file(filepath):
             if m != None:
                 current_entry.add_part_of_speech(m.groups()[0])
 
-            m = re.match('[0-9]*df\s+(.+)$', line)
+            m = re.match('[0-9]*(df|psx)\s+(.+)$', line)
             if m != None:
-                definition = process_definition(m.groups()[0])
+                definition = process_definition(m.groups()[1])
                 if definition != None:
                     current_entry.add_definition(definition)
 
@@ -141,7 +141,7 @@ def read_dictionary_file(filepath):
         except Exception as e:
             print(line)
             print(e)
-            # raise e
+            raise e
     f.close()
 
     return entries

@@ -60,6 +60,8 @@ class TestWenlinParser(unittest.TestCase):
         # self.assertEqual(len(entry.definitions), 18)
         self.assertEqual(entry.parts_of_speech[0].definitions[0].definition, 
             'come; arrive')
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].example_chinese, '到这边(儿)∼。')
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].example_translation, 'Come over here.')
         self.assertEqual(entry.parts_of_speech[0].definitions[1].definition, 
              'crop up; take place')             
 

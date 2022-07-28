@@ -3,6 +3,9 @@ import re
 class Definition():
     def __init__(self, definition):
         self.definition = definition
+        self.example_pinyin = None
+        self.example_chinese = None
+        self.example_translation = None
 
 
 class PartOfSpeech():
@@ -19,6 +22,15 @@ class PartOfSpeech():
 
     def add_definition(self, definition):
         self.definitions.append(Definition(definition))
+
+    def add_example_pinyin(self, example_pinyin):
+        self.definitions[-1].example_pinyin = example_pinyin
+
+    def add_example_chinese(self, example_chinese):
+        self.definitions[-1].example_chinese = example_chinese
+
+    def add_example_translation(self, example_translation):
+        self.definitions[-1].example_translation = example_translation
 
 class DictionaryEntry():
     def __init__(self):
@@ -43,6 +55,15 @@ class DictionaryEntry():
         
     def add_measure_word(self, measure_word):
         self.parts_of_speech[-1].add_measure_word(measure_word)
+
+    def add_example_pinyin(self, example_pinyin):
+        self.parts_of_speech[-1].add_example_pinyin(example_pinyin)
+
+    def add_example_chinese(self, example_chinese):
+        self.parts_of_speech[-1].add_example_chinese(example_chinese)
+
+    def add_example_translation(self, example_translation):
+        self.parts_of_speech[-1].add_example_translation(example_translation)
 
 
 def process_characters(chars):
@@ -99,6 +120,20 @@ def read_dictionary_file(filepath):
             m = re.match('[0-9]*mw\s+(.+)$', line)
             if m != None:
                 current_entry.add_measure_word(m.groups()[0])
+
+            m = re.match('[0-9]*ex\s+(.+)$', line)
+            if m != None:
+                current_entry.add_example_pinyin(m.groups()[0])                
+
+            m = re.match('[0-9]*hz\s+(.+)$', line)
+            if m != None:
+                current_entry.add_example_chinese(m.groups()[0])
+
+            m = re.match('[0-9]*tr\s+(.+)$', line)
+            if m != None:
+                current_entry.add_example_translation(m.groups()[0])
+
+            
 
             lines_read += 1
             if lines_read % 10000 == 0:

@@ -1,12 +1,12 @@
 import re
 
+
 class Definition():
     def __init__(self, definition):
         self.definition = definition
         self.example_pinyin = None
         self.example_chinese = None
         self.example_translation = None
-
 
 class PartOfSpeech():
     def __init__(self, entry, part_of_speech):

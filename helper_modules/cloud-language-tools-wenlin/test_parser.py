@@ -25,7 +25,7 @@ class TestWenlinParser(unittest.TestCase):
         self.assertEqual(clt_wenlin.process_definition("[fr] façon respectueuse de s'adresser à un homme plus âgé que soi"), None)
 
 
-    def test_parse_sections(self):
+    def test_parse_sections_1(self):
         pass
         input = """.py   a*
 char   啊
@@ -82,6 +82,38 @@ timestamp 2015-12-18T09:57:26Z"""
         self.assertEqual(entry.parts_of_speech[0].definitions[1].example_chinese, '钱∼, 书∼, 表∼, 我都丢了。')
         self.assertEqual(entry.parts_of_speech[0].definitions[1].example_translation, 'Money, books, watch, I lost everything.')
 
+
+    def test_parse_sections_2(self):
+        pass
+        input = """.py   āizhe
+char   挨着[-著]
+ser   1000039833
+gr   *
+ref   61
+1ps   v.
+1df   be next to; get close to
+2ps   adv.
+2df@   one by one
+2ex   yī gè ∼ yī gè guòqu
+2hz   一个∼一个过去
+2tr   pass one by one
+--meta--
+timestamp 2015-06-25T14:46:25Z"""
+        lines = input.split('\n')
+        entries = clt_wenlin.iterate_lines(lines)
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+
+        self.assertEqual(entry.simplified, '挨着')
+        self.assertEqual(entry.traditional, '挨著')
+        self.assertEqual(len(entry.parts_of_speech), 2)
+        self.assertEqual(len(entry.parts_of_speech[0].definitions), 1)
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].definition, 'be next to; get close to')
+        self.assertEqual(entry.parts_of_speech[1].definitions[0].definition, 'one by one')
+        self.assertEqual(entry.parts_of_speech[1].definitions[0].example_pinyin, 'yī gè ∼ yī gè guòqu')
+        self.assertEqual(entry.parts_of_speech[1].definitions[0].example_chinese, '一个∼一个过去')
+        self.assertEqual(entry.parts_of_speech[1].definitions[0].example_translation, 'pass one by one')
 
     
     def test_parse_full_file(self):

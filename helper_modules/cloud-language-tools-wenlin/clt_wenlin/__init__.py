@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 class Definition():
     def __init__(self, definition):
-        logger.debug(f'creating Definition [{definition}]')
+        # logger.debug(f'creating Definition [{definition}]')
         self.definition = definition
         self.example_pinyin = None
         self.example_chinese = None
@@ -13,7 +13,7 @@ class Definition():
 
 class PartOfSpeech():
     def __init__(self, entry, part_of_speech):
-        logger.debug(f'creating PartOfSpeech [{part_of_speech}]')
+        # logger.debug(f'creating PartOfSpeech [{part_of_speech}]')
         self.entry = entry
         self.part_of_speech = part_of_speech
         self.measure_word = None
@@ -25,12 +25,9 @@ class PartOfSpeech():
         self.measure_word = measure_word
 
     def add_definition(self, definition):
-        print(f'*** added definition {definition}')
         self.definitions.append(Definition(definition))
-        print(f'*** added definition: {len(self.definitions)} {self} {self.entry}')
 
     def add_example_pinyin(self, example_pinyin):
-        print(f'*** adding example_pinyin {len(self.definitions)} {self} {self.entry}')
         self.definitions[-1].example_pinyin = example_pinyin
 
     def add_example_chinese(self, example_chinese):
@@ -145,10 +142,9 @@ def iterate_lines(lines):
 
             lines_read += 1
             if lines_read % 10000 == 0:
-                print(f'read {lines_read} lines')
+                logger.debug(f'read {lines_read} lines')
         except Exception as e:
-            print(line)
-            print(e)
+            logger.exception(f'while processing {line}')
             # raise e
 
     entries.append(current_entry)

@@ -319,6 +319,37 @@ timestamp 2015-12-16T22:08:52Z"""
         self.assertEqual(entry.parts_of_speech[1].definitions[0].definition, 'love')
         self.assertEqual(entry.parts_of_speech[1].definitions[0].measure_word, 'zhǒng/²chǎng [种/场]')
 
+    def test_parse_sections_8(self):
+        pass
+        input = """.py   E
+rem@TB2004.03.22   Changed "e" to "E" in hw band; otherwise the implication is that pinyin uses lowercase where Hanzi uses uppercase, which is dubious; in fact the given pinyin example sentence below has capital E. OK? cw: OK.
+rem   .hw e
+char   E
+ser   1019310241
+gr   *
+ps   ab.
+ab   electronic
+rem@TB2004.03.22   Ordinarily in CE "ab." means a Chinese abbreviation of a Chinese word, and the "ab" band contains pinyin. In this unique case, it's an abbreviation of an English word. Wouldn't it be more appropriate to have "ps attr." and "en loan"?
+rem@yjc/cw2004.09.02   Agree with Tom.(YY and John's responses need to be confirmed.)
+1ex   Gěi wǒ fā yī ge ∼-mail.
+1hz   给我发一个 ∼-mail。
+rem@TB2004.03.22   Inserted hyphen before "mail" (to make hz band consistent with ex and tr). Also changed tilde (∼) to "E" in tr band, can use tilde in ex and hz band, never in tr band; maybe shouldn't use tilde here at all?
+rem@yjc/cw2004.09.02   YY & JDF's responses need to be confirmed.Not solved yet.
+1tr   Send me an email.
+2ex   ∼ shídài
+rem@TB2004.03.22   Inserted space before "shi2dai4". Or should it be a hyphen?
+rem@yjc2004.09.01   The space is ok.(YY's note)
+2hz   ∼ 时代
+2tr   electronic age
+rem@yjc200312   added the whole entry. (V.H.Mair & J.D.F's note)
+--meta--
+timestamp 2015-06-25T14:46:25Z"""
+        lines = input.split('\n')
+        entries = clt_wenlin.iterate_lines(lines)
+
+        self.assertEqual(len(entries), 0)
+
+
 
     def test_parse_full_file(self):
         entries = clt_wenlin.read_dictionary_file('/home/luc/cpp/wenlin/server/cidian.u8')

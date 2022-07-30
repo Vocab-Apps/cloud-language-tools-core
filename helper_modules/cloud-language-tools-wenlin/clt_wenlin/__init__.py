@@ -95,6 +95,7 @@ def process_definition(definition):
 
 def iterate_lines(lines):
     current_entry = None
+    ignore_current_entry = False
     lines_read = 0    
     entries = []    
     for line in lines:
@@ -102,8 +103,9 @@ def iterate_lines(lines):
             m = re.match('\.py\s+([^\s]+)', line)
             if m != None:
                 pinyin = m.groups()[0]
-                if current_entry != None:
+                if current_entry != None and ignore_current_entry == False:
                     entries.append(current_entry)
+                ignore_current_entry = False
                 current_entry = DictionaryEntry()
                 current_entry.pinyin = pinyin
             m = re.match('char\s+(.+)$', line)
@@ -147,9 +149,11 @@ def iterate_lines(lines):
                 logger.debug(f'read {lines_read} lines')
         except Exception as e:
             logger.exception(f'while processing {[line.strip()]}, {current_entry}')
+            ignore_current_entry = True
             # raise e
 
-    entries.append(current_entry)
+    if ignore_current_entry == False:
+        entries.append(current_entry)
     return entries
 
 def read_dictionary_file(filepath):

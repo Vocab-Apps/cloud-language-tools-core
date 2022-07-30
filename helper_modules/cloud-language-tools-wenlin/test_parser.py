@@ -27,6 +27,61 @@ class TestWenlinParser(unittest.TestCase):
 
     def test_parse_sections(self):
         pass
+        input = """.py   a*
+char   啊
+gr   A
+rem@yy200307   Added gr A.
+ser   1000000063
+ref   1
+ps   m.p.
+psx   [en] used as phrase suffix
+psx   [fr] utilisé comme suffixe de phrase
+1psx   [en] in enumeration
+1psx   [fr] dans les énumérations
+1ex   Qián ∼, shū ∼, biǎo ∼, wǒ dōu diū le.
+1hz   钱∼, 书∼, 表∼, 我都丢了。
+1tr   [en] Money, books, watch, I lost everything.
+1tr   [fr] J'ai tout perdu : de l'argent, des livres et ma montre.
+2psx   [en] in direct address and exclamation
+2psx   [fr] pour s'adresser directement à quelqu'un ou pour une exclamation
+2ex   Lǎo Wáng ∼, zhè kě bùxíng ∼!
+2hz   老王∼, 这可不行∼!
+2tr   [en] Wang, this won't do!
+2tr   [fr] Wang, ça ne marchera pas !
+rem@2004.05.24   ?missing: {wang} cw: Ignore. Proper N.
+3psx   [en] indicating obviousness/impatience
+3psx   [fr] indique une évidence / une impatience
+3ex   Lái ∼!
+3hz   来∼!
+3tr   [en] Come on!
+3tr   [fr] Aller !
+4psx   [en] for confirmation
+4psx   [fr] pour une confirmation
+4ex   Nǐ bù lái ∼?
+4hz   你不来∼?
+4tr   [en] So you're not coming?
+4tr   [fr] Tu ne viens pas alors ?
+hh   ¹ā [1000000160]
+hh   á [1000000354]
+hh   ǎ [1000000451]
+hh   à [1000000548]
+freq   609.7 [XHPC:1102]
+--meta--
+timestamp 2015-12-18T09:57:26Z"""
+        lines = input.split('\n')
+        entries = clt_wenlin.iterate_lines(lines)
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+
+        self.assertEqual(len(entry.parts_of_speech), 1)
+        self.assertEqual(len(entry.parts_of_speech[0].definitions), 5)
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].definition, 'used as phrase suffix')
+        self.assertEqual(entry.parts_of_speech[0].definitions[1].definition, 'in enumeration')
+        self.assertEqual(entry.parts_of_speech[0].definitions[1].example_pinyin, 'Qián ∼, shū ∼, biǎo ∼, wǒ dōu diū le.')
+        self.assertEqual(entry.parts_of_speech[0].definitions[1].example_chinese, '钱∼, 书∼, 表∼, 我都丢了。')
+        self.assertEqual(entry.parts_of_speech[0].definitions[1].example_translation, 'Money, books, watch, I lost everything.')
+
 
     
     def test_parse_full_file(self):

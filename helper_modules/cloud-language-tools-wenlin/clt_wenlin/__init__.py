@@ -1,8 +1,11 @@
 import re
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Definition():
     def __init__(self, definition):
+        logger.debug(f'creating Definition [{definition}]')
         self.definition = definition
         self.example_pinyin = None
         self.example_chinese = None
@@ -10,6 +13,7 @@ class Definition():
 
 class PartOfSpeech():
     def __init__(self, entry, part_of_speech):
+        logger.debug(f'creating PartOfSpeech [{part_of_speech}]')
         self.entry = entry
         self.part_of_speech = part_of_speech
         self.measure_word = None
@@ -21,9 +25,12 @@ class PartOfSpeech():
         self.measure_word = measure_word
 
     def add_definition(self, definition):
+        print(f'*** added definition {definition}')
         self.definitions.append(Definition(definition))
+        print(f'*** added definition: {len(self.definitions)} {self} {self.entry}')
 
     def add_example_pinyin(self, example_pinyin):
+        print(f'*** adding example_pinyin {len(self.definitions)} {self} {self.entry}')
         self.definitions[-1].example_pinyin = example_pinyin
 
     def add_example_chinese(self, example_chinese):
@@ -106,15 +113,17 @@ def iterate_lines(lines):
                 current_entry.simplified = simplified
                 current_entry.traditional = traditional
 
-            m = re.match('[0-9]*ps.{0,1}\s+(.+)$', line)
-            if m != None:
-                current_entry.add_part_of_speech(m.groups()[0])
-
             m = re.match('[0-9]*(df|psx)\s+(.+)$', line)
             if m != None:
                 definition = process_definition(m.groups()[1])
                 if definition != None:
                     current_entry.add_definition(definition)
+                continue
+
+            m = re.match('[0-9]*ps.{0,1}\s+(.+)$', line)
+            if m != None:
+                current_entry.add_part_of_speech(m.groups()[0])
+                continue
 
             m = re.match('[0-9]*mw\s+(.+)$', line)
             if m != None:
@@ -130,7 +139,9 @@ def iterate_lines(lines):
 
             m = re.match('[0-9]*tr\s+(.+)$', line)
             if m != None:
-                current_entry.add_example_translation(m.groups()[0])
+                translation = process_definition(m.groups()[0])
+                if translation != None:
+                    current_entry.add_example_translation(translation)
 
             lines_read += 1
             if lines_read % 10000 == 0:
@@ -139,6 +150,8 @@ def iterate_lines(lines):
             print(line)
             print(e)
             # raise e
+
+    entries.append(current_entry)
     return entries
 
 def read_dictionary_file(filepath):

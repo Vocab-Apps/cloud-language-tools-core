@@ -115,6 +115,42 @@ timestamp 2015-06-25T14:46:25Z"""
         self.assertEqual(entry.parts_of_speech[1].definitions[0].example_chinese, '一个∼一个过去')
         self.assertEqual(entry.parts_of_speech[1].definitions[0].example_translation, 'pass one by one')
 
+    def test_parse_sections_3(self):
+        pass
+        input = """.py   ¹ànlǐ*
+char   按理
+ser   1000069612
+gr   E
+ref   260
+ps   adv.
+1df@fd7a5   [en] according to reason; in ordinary course of events; normally; theoretically; in principle
+1df@fd7a5   [fr] raisonnablement ; dans le cours normal des événements ; normalement ; théoriquement ; en principe
+1ex@JDF   ∼, xiàtiān shì zuì rè de jìjié.
+1hz   ∼, 夏天是最热的季节。
+1tr   [en] Normally, summer is the hottest season.
+1tr   [fr] Normalement, l'été est la saison la plus chaude.
+2df@vj   [en] by rights
+2df@vj   [fr] par droit
+freq   5 [gr:E]
+--meta--
+timestamp 2015-12-21T15:44:55Z"""
+        lines = input.split('\n')
+        entries = clt_wenlin.iterate_lines(lines)
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+
+        self.assertEqual(entry.simplified, '按理')
+        self.assertEqual(entry.traditional, '按理')
+        self.assertEqual(len(entry.parts_of_speech), 1)
+        self.assertEqual(len(entry.parts_of_speech[0].definitions), 2)
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].definition, 'according to reason; in ordinary course of events; normally; theoretically; in principle')
+        self.assertEqual(entry.parts_of_speech[0].definitions[1].definition, 'by rights')
+        # self.assertEqual(entry.parts_of_speech[1].definitions[0].definition, 'one by one')
+        # self.assertEqual(entry.parts_of_speech[1].definitions[0].example_pinyin, 'yī gè ∼ yī gè guòqu')
+        # self.assertEqual(entry.parts_of_speech[1].definitions[0].example_chinese, '一个∼一个过去')
+        # self.assertEqual(entry.parts_of_speech[1].definitions[0].example_translation, 'pass one by one')        
+
     
     def test_parse_full_file(self):
         entries = clt_wenlin.read_dictionary_file('/home/luc/cpp/wenlin/server/cidian.u8')

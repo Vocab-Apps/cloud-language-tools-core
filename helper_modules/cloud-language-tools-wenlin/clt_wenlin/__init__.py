@@ -110,7 +110,7 @@ def iterate_lines(lines):
                 current_entry.simplified = simplified
                 current_entry.traditional = traditional
 
-            m = re.match('[0-9]*(df.{0,1}|psx)\s+(.+)$', line)
+            m = re.match('[0-9]*(df[^\s]*|psx)\s+(.+)$', line)
             if m != None:
                 definition = process_definition(m.groups()[1])
                 if definition != None:

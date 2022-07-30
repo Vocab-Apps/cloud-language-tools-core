@@ -353,6 +353,9 @@ timestamp 2015-06-25T14:46:25Z"""
 
     def test_parse_full_file(self):
         entries = clt_wenlin.read_dictionary_file('/home/luc/cpp/wenlin/server/cidian.u8')
+
+        self.assertGreater(len(entries), 202000)
+
         simplified_dict = {}
         for entry in entries:
             simplified_dict[entry.simplified] = entry

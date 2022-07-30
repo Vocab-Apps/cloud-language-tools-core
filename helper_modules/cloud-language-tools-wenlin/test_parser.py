@@ -146,12 +146,180 @@ timestamp 2015-12-21T15:44:55Z"""
         self.assertEqual(len(entry.parts_of_speech[0].definitions), 2)
         self.assertEqual(entry.parts_of_speech[0].definitions[0].definition, 'according to reason; in ordinary course of events; normally; theoretically; in principle')
         self.assertEqual(entry.parts_of_speech[0].definitions[1].definition, 'by rights')
-        # self.assertEqual(entry.parts_of_speech[1].definitions[0].definition, 'one by one')
-        # self.assertEqual(entry.parts_of_speech[1].definitions[0].example_pinyin, 'yī gè ∼ yī gè guòqu')
-        # self.assertEqual(entry.parts_of_speech[1].definitions[0].example_chinese, '一个∼一个过去')
-        # self.assertEqual(entry.parts_of_speech[1].definitions[0].example_translation, 'pass one by one')        
 
     
+    def test_parse_sections_4(self):
+        pass
+        input = """.py   ¹báiyú
+char   白鱼[-魚]
+ser   1000223260
+gr   *
+ref   vfe924c5
+ps   n.
+1df   whitefish
+1mw   tiáo [条]
+2df   insect which eats clothing/paper
+2mw   ²zhī [只]
+--meta--
+timestamp 2015-06-25T14:46:25Z"""
+        lines = input.split('\n')
+        entries = clt_wenlin.iterate_lines(lines)
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+
+        self.assertEqual(entry.simplified, '白鱼')
+        self.assertEqual(entry.traditional, '白魚')
+        self.assertEqual(len(entry.parts_of_speech), 1)
+        self.assertEqual(len(entry.parts_of_speech[0].definitions), 2)
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].definition, 'whitefish')
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].measure_word, 'tiáo [条]')
+        self.assertEqual(entry.parts_of_speech[0].definitions[1].definition, 'insect which eats clothing/paper')
+        self.assertEqual(entry.parts_of_speech[0].definitions[1].measure_word, '²zhī [只]')
+
+    def test_parse_sections_5(self):
+        pass
+        input = """.py   zhūniǎo
+char   朱鸟[-鳥]
+ser   1018027804
+gr   *
+ref   vwei1341a8
+ps   n.
+see   zhūquè [1018068544]
+mw   ²zhī [只]
+--meta--
+timestamp 2015-06-25T14:46:25Z"""
+        lines = input.split('\n')
+        entries = clt_wenlin.iterate_lines(lines)
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+
+        self.assertEqual(entry.simplified, '朱鸟')
+        self.assertEqual(entry.traditional, '朱鳥')
+        self.assertEqual(len(entry.parts_of_speech), 1)
+        self.assertEqual(len(entry.parts_of_speech[0].definitions), 0)
+
+
+    def test_parse_sections_6(self):
+        pass
+        input = """.py   ²bǎzi
+char   把子
+ser   1000439085
+gr   E
+ref   561
+1ps@   n.
+11df   [en] bundle
+11df   [fr] paquet
+12df   [en] theatrical weapon
+12df   [fr] arme factice
+13df   [en] movement involving theatrical weapons
+13df   [fr] mouvement implicant une arme factice
+14df   [en] gang brother
+14df   [fr] frères jurés (dans un gang)
+2ps   m.
+rem@TB2001.08   Added 2ps per Hawaii.
+2psx@   [en] for certain abstract ideas
+2psx@   [fr] pour certaines idées abstraites
+2ex   jiā ∼ jìnr
+2hz   加∼劲儿
+2tr   [en] make an extra effort
+2tr   [fr] faire un effort supplémentaire
+hh   ²bàzi [1000439279]
+freq   5 [gr:E]
+--meta--
+timestamp 2016-01-13T12:32:27Z"""
+        lines = input.split('\n')
+        entries = clt_wenlin.iterate_lines(lines)
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+
+        self.assertEqual(entry.simplified, '把子')
+        self.assertEqual(entry.traditional, '把子')
+        self.assertEqual(len(entry.parts_of_speech), 2)
+        self.assertEqual(len(entry.parts_of_speech[0].definitions), 4)
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].definition, 'bundle')
+        self.assertEqual(entry.parts_of_speech[0].definitions[1].definition, 'theatrical weapon')
+        self.assertEqual(entry.parts_of_speech[0].definitions[2].definition, 'movement involving theatrical weapons')
+        self.assertEqual(entry.parts_of_speech[0].definitions[3].definition, 'gang brother')
+
+    def test_parse_sections_7(self):
+        pass
+        input = """.py   ¹ài*
+char   爱[愛]
+gr   A
+ser   1000004816
+ref   122
+1ps   v.
+11df   [en] love
+11df   [fr] aimer
+11ex@JDF   Nǐ ∼ tā ma?
+11hz   你∼她吗?
+11tr   [en] Do you love her?
+11tr   [fr] Tu l'aimes ?
+12df   [en] like; be fond of; be keen on
+12df   [fr] aimer ; être fan de ; apprécier
+12ex@JDF   Tā ∼ shuōhuà.
+12hz   他∼说话。
+12tr   [en] He likes to talk.
+12tr   [fr] Il aime parler.
+12ex@JDF   Wǒ bù ∼ chī zhūròu.
+12hz   我不∼吃猪肉。
+12tr   [en] I don't like to eat pork.
+12tr   [fr] Je n'aime pas le porc.
+13df   [en] cherish
+13df   [fr] chérir
+14df   [en] be apt to
+14df   [fr] avoir tendance à
+2ps   n.
+2df   [en] love
+2df   [fr] amour
+2mw   zhǒng/²chǎng [种/场]
+3ps   cons.
+31cons   ∼ V bù V
+rem@TB2004.10   Changed "v.1" to "V": more consistent with 32cons below, and there is only one verb (no v.2)
+rem@TB2009年03月25日   More changes to cons bands throughout; always use uppercase letters, no periods.
+31df   [en] V or not as you please
+31df   [fr] V ou V+nég comme il te plaît
+31ex   Nǐ ∼ lái bù lái.
+rem@yjc/yy200307   Separated ∼ from lai2, and separated 'lai2 bu4 lai2'.
+31hz   你∼来不来。
+31tr   [en] I don't care if you come or not.
+31tr   [fr] Que tu viennes ou non m'importe peu.
+32cons@   ∼ A ³shèng B
+32df@   [en] hold A dearer than B
+32df@   [fr] Chérir A plus que B
+rem@TB2001.08   Revised 32ex (Mair proof).
+32ex@   ∼ rén shèng jǐ
+rem@yjc/yy200307   Separated 'sheng4ji3'. In fact 'ai4ren2sheng4ji3' can be treated as a lexical item?
+rem@TB2004.03.27   -- If you want to add an entry for it; but the implication of "cons." is that this is a productive grammatical construction, not limited to fixed expressions. It seems OK as it stands.
+32hz   ∼人胜己
+32tr   [en] love others more than oneself
+32tr   [fr] aimer les autres plus que soi-même
+freq   342.5 [XHPC:619]
+--meta--
+timestamp 2015-12-16T22:08:52Z"""
+        lines = input.split('\n')
+        entries = clt_wenlin.iterate_lines(lines)
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+
+        self.assertEqual(entry.simplified, '爱')
+        self.assertEqual(entry.traditional, '愛')
+        self.assertEqual(len(entry.parts_of_speech), 3)
+        self.assertEqual(len(entry.parts_of_speech[0].definitions), 4)
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].definition, 'love')
+        self.assertEqual(entry.parts_of_speech[0].definitions[1].definition, 'like; be fond of; be keen on')
+        self.assertEqual(entry.parts_of_speech[0].definitions[2].definition, 'cherish')
+        self.assertEqual(entry.parts_of_speech[0].definitions[3].definition, 'be apt to')
+
+        self.assertEqual(len(entry.parts_of_speech[1].definitions), 1)
+        self.assertEqual(entry.parts_of_speech[1].definitions[0].definition, 'love')
+        self.assertEqual(entry.parts_of_speech[1].definitions[0].measure_word, 'zhǒng/²chǎng [种/场]')
+
+
     def test_parse_full_file(self):
         entries = clt_wenlin.read_dictionary_file('/home/luc/cpp/wenlin/server/cidian.u8')
         simplified_dict = {}
@@ -163,7 +331,7 @@ timestamp 2015-12-21T15:44:55Z"""
         self.assertEqual(len(simplified_dict['组织者'].parts_of_speech), 1)
         self.assertEqual(len(simplified_dict['组织者'].parts_of_speech[0].definitions), 1)
         self.assertEqual(simplified_dict['组织者'].parts_of_speech[0].definitions[0].definition, 'organizer')
-        self.assertEqual(simplified_dict['组织者'].parts_of_speech[0].measure_word, '²wèi [位]')
+        self.assertEqual(simplified_dict['组织者'].parts_of_speech[0].definitions[0].measure_word, '²wèi [位]')
 
         entry = simplified_dict['坐地铁']
         self.assertEqual(entry.simplified, '坐地铁')
@@ -203,8 +371,7 @@ timestamp 2015-12-21T15:44:55Z"""
 
         entry = simplified_dict['爱']
         self.assertEqual(len(entry.parts_of_speech), 3)
-        self.assertEqual(entry.parts_of_speech[0].measure_word, None)
-        self.assertEqual(entry.parts_of_speech[1].measure_word, 'zhǒng/²chǎng [种/场]')
-        self.assertEqual(entry.parts_of_speech[2].measure_word, None)
+        self.assertEqual(entry.parts_of_speech[0].definitions[0].measure_word, None)
+        self.assertEqual(entry.parts_of_speech[1].definitions[0].measure_word, 'zhǒng/²chǎng [种/场]')
 
 

@@ -10,6 +10,7 @@ class Definition():
         self.example_pinyin = None
         self.example_chinese = None
         self.example_translation = None
+        self.measure_word = None
 
 class PartOfSpeech():
     def __init__(self, entry, part_of_speech):
@@ -20,9 +21,8 @@ class PartOfSpeech():
         self.definitions = []        
 
     def add_measure_word(self, measure_word):
-        if self.measure_word != None:
-            raise Exception('already set')
-        self.measure_word = measure_word
+        if len(self.definitions) > 0:
+            self.definitions[-1].measure_word = measure_word
 
     def add_definition(self, definition):
         self.definitions.append(Definition(definition))
@@ -69,6 +69,8 @@ class DictionaryEntry():
     def add_example_translation(self, example_translation):
         self.parts_of_speech[-1].add_example_translation(example_translation)
 
+    def __str__(self):
+        return f'simplified: {self.simplified}'
 
 def process_characters(chars):
     m = re.match('([^\]]+)\[(.*)\]', chars)
@@ -110,7 +112,7 @@ def iterate_lines(lines):
                 current_entry.simplified = simplified
                 current_entry.traditional = traditional
 
-            m = re.match('[0-9]*(df[^\s]*|psx)\s+(.+)$', line)
+            m = re.match('[0-9]*(df[^\s]*|psx.{0,1})\s+(.+)$', line)
             if m != None:
                 definition = process_definition(m.groups()[1])
                 if definition != None:
@@ -144,7 +146,7 @@ def iterate_lines(lines):
             if lines_read % 10000 == 0:
                 logger.debug(f'read {lines_read} lines')
         except Exception as e:
-            logger.exception(f'while processing {line}')
+            logger.exception(f'while processing {[line.strip()]}, {current_entry}')
             # raise e
 
     entries.append(current_entry)

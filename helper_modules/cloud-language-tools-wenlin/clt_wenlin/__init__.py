@@ -98,6 +98,7 @@ def iterate_lines(lines):
     ignore_current_entry = False
     lines_read = 0    
     entries = []    
+    ignored_entries = []
     for line in lines:
         try:
             m = re.match('\.py\s+([^\s]+)', line)
@@ -105,6 +106,8 @@ def iterate_lines(lines):
                 pinyin = m.groups()[0]
                 if current_entry != None and ignore_current_entry == False:
                     entries.append(current_entry)
+                if ignore_current_entry == True:
+                    ignored_entries.append(current_entry)
                 ignore_current_entry = False
                 current_entry = DictionaryEntry()
                 current_entry.pinyin = pinyin
@@ -154,6 +157,9 @@ def iterate_lines(lines):
 
     if ignore_current_entry == False:
         entries.append(current_entry)
+
+    logger.error(f'ignored entries: {len(ignored_entries)}')
+
     return entries
 
 def read_dictionary_file(filepath):

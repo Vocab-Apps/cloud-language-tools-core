@@ -122,9 +122,11 @@ timestamp 2015-12-18T09:57:26Z"""
                                             'part_of_speech': 'm.p.'}
                                         ],
         'simplified': '啊',
-        'traditional': '啊'}
+        'traditional': '啊',
+        'pinyin': 'a*'}
 
         # pprint.pprint(entry.to_dict())
+        self.maxDiff = None
         self.assertEqual(entry.to_dict(), expected_dict)
 
 

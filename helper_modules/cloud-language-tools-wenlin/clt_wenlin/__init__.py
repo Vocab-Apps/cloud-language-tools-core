@@ -103,6 +103,7 @@ class DictionaryEntry():
         return {
             'simplified': self.simplified,
             'traditional': self.traditional,
+            'pinyin': self.pinyin,
             'parts_of_speech': [x.to_dict() for x in self.parts_of_speech]
         }
 

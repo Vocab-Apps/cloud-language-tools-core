@@ -347,11 +347,16 @@ def transliterate_azure():
     print(result)
 
 
+def azure_dictionary_lookup_list():
+    manager = get_manager()
+    result = manager.services[cloudlanguagetools.constants.Service.Azure.name].get_dictionary_lookup_list()
+
 
 def dictionary_lookup_azure():
-    text = '出事'
+    text = '放松'
     manager = get_manager()
-    manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_lookup(text, 'zh-Hans', 'en')
+    result = manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_lookup(text, 'zh-Hans', 'en')
+    pprint.pprint(result)
 
 def dictionary_examples_azure():
     text = '饥不择食'
@@ -757,6 +762,7 @@ if __name__ == '__main__':
     # detect_language()
     # translate_google()
     # translate_azure()
+    azure_dictionary_lookup_list()
     # dictionary_lookup_azure()
     # dictionary_examples_azure()
     # end_to_end_test()
@@ -773,4 +779,4 @@ if __name__ == '__main__':
     # thai_tokenization()
     # test_get_language_data()
     # test_get_language_data_redis()
-    test_wenlin_lookup()
+    # test_wenlin_lookup()

@@ -32,6 +32,23 @@ class TestDictionaryLookup(unittest.TestCase):
         cls.manager = get_manager()
         cls.dictionary_lookup_list = cls.manager.get_dictionary_lookup_options()
         
+    def test_service_list(self):
+        definitions_lookup_options = [x for x in self.dictionary_lookup_list if 
+            x.language == Language.zh_cn and 
+            x.target_language == Language.en and
+            x.lookup_type == DictionaryLookupType.Definitions]        
+
+        self.assertEqual(len(definitions_lookup_options), 2)
+
+        pprint.pprint(definitions_lookup_options)
+
+        lookup_option_azure = [x for x in definitions_lookup_options if x.service == Service.Azure][0]
+        self.assertEqual(lookup_option_azure.get_lookup_name(), 'Azure (Chinese (Simplified) to English), Definitions')
+
+        lookup_option_azure = [x for x in definitions_lookup_options if x.service == Service.Wenlin][0]
+        self.assertEqual(lookup_option_azure.get_lookup_name(), 'Wenlin (Chinese (Simplified) to English), Definitions')
+
+
     def test_wenlin_definitions(self):
         service = Service.Wenlin
 

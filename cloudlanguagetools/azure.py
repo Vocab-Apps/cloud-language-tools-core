@@ -5,6 +5,7 @@ import uuid
 import operator
 import pydub
 import logging
+import pprint
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -13,6 +14,7 @@ import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
+import cloudlanguagetools.dictionarylookup
 import cloudlanguagetools.errors
 
 
@@ -138,6 +140,28 @@ class AzureTransliterationLanguage(cloudlanguagetools.transliterationlanguage.Tr
             'to_script': self.to_script
         }
 
+class AzureDictionaryLookup(cloudlanguagetools.dictionarylookup.DictionaryLookup):
+    def __init__(self, source_language_code, target_language_code, lookup_type):
+        self.service = cloudlanguagetools.constants.Service.Azure
+        self.language = get_translation_language_enum(source_language_code)
+        self.target_language = get_translation_language_enum(target_language_code)
+        self.source_language_code = source_language_code
+        self.target_language_code = target_language_code
+        self.lookup_type = lookup_type
+
+    def get_lookup_key(self):
+        return {
+            'source_language_code': self.source_language_code,
+            'target_language_code': self.target_language_code,
+            'language': self.language.name,
+            'lookup_type': self.lookup_type.name
+        }        
+
+    def get_lookup_name(self):
+        return f'{self.service.name} ({self.language.lang_name} to {self.target_language.lang_name}), {self.lookup_type.name}'
+
+    def get_lookup_shortname(self):
+        return f'{self.service.name}, {self.language.lang_name}, {self.lookup_type.name}'
 
 class AzureService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -382,6 +406,21 @@ class AzureService(cloudlanguagetools.service.Service):
 
         raise "unknown error"
 
+    def get_dictionary_lookup_list(self):
+        result = []
+
+        azure_data = self.get_supported_languages()
+        for source_language_id, data in azure_data['dictionary'].items():
+            for translation in data['translations']:
+                target_language_id = translation['code']
+                result.append(AzureDictionaryLookup(source_language_id, 
+                                target_language_id, 
+                                cloudlanguagetools.constants.DictionaryLookupType.Definitions))
+            # pprint.pprint(language_id)
+            # pprint.pprint(data)
+
+        return result
+
     def dictionary_lookup(self, input_text, from_language_key, to_language_key):
         base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'
         params = f'&to={to_language_key}&from={from_language_key}'
@@ -395,6 +434,8 @@ class AzureService(cloudlanguagetools.service.Service):
         }]
         request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
         response = request.json()
+
+        pprint.pprint(response)
 
         translation_entries = response[0]['translations']
         translations = [entry['displayTarget'] for entry in translation_entries]

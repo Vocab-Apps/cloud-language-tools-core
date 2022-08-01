@@ -75,6 +75,7 @@ timestamp 2015-12-18T09:57:26Z"""
         self.assertEqual(len(entries), 1)
         entry = entries[0]
 
+        self.assertEqual(entry.entry_id, 1000000063)
         self.assertEqual(len(entry.parts_of_speech), 1)
         self.assertEqual(len(entry.parts_of_speech[0].definitions), 5)
         self.assertEqual(entry.parts_of_speech[0].definitions[0].definition, 'used as phrase suffix')

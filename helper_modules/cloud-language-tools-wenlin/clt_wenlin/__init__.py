@@ -62,6 +62,7 @@ class DictionaryEntry():
         self.pinyin = None
         self.simplified = None
         self.traditional = None
+        self.entry_id = None
         # https://wenlin.co/wow/Project:Ci_Chinese_Parts_of_Speech_and_Other_Entry_Labels
         self.parts_of_speech = []
 
@@ -143,6 +144,10 @@ def iterate_lines(lines):
                 simplified, traditional = process_characters(m.groups()[0])
                 current_entry.simplified = simplified
                 current_entry.traditional = traditional
+
+            m = re.match('ser\s+([0-9]+)$', line)
+            if m != None:
+                current_entry.entry_id = int(m.groups()[0])
 
             m = re.match('[0-9]*(df[^\s]*|psx.{0,1})\s+(.+)$', line)
             if m != None:

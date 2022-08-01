@@ -6,8 +6,8 @@ from setuptools.command.install import install
 # twine upload dist/*
 
 def post_installation():
-    # todo
-    pass
+    import clt_wenlin
+    clt_wenlin.download_wenlin_db()
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""

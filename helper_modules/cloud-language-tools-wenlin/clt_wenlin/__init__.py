@@ -215,6 +215,10 @@ def create_sqlite_file(dict_filepath, sqlite_filepath):
 
     connection = sqlite3.connect(sqlite_filepath)
     cur = connection.cursor()
+
+    # add word entries (lookup from chinese characters)
+    # =================================================
+
     cur.execute('''CREATE TABLE words (simplified text, traditional text, entry text, entry_id integer)''')
 
     for entry in entries:
@@ -222,6 +226,7 @@ def create_sqlite_file(dict_filepath, sqlite_filepath):
         # query = f"""INSERT INTO words VALUES ('{entry.simplified}', '{entry.traditional}', '{json_string}')"""
         cur.execute("INSERT INTO words VALUES (?, ?, ?, ?)", 
                     (entry.simplified, entry.traditional, json_string, entry.entry_id))
+    connection.commit()
         
     # add indices
     create_index_query = """CREATE INDEX idx_simplified ON words (simplified);"""
@@ -232,4 +237,16 @@ def create_sqlite_file(dict_filepath, sqlite_filepath):
     cur.execute(create_index_query)    
 
     connection.commit()
+
+    # add definitions
+    # ===============
+    cur.execute('''CREATE VIRTUAL TABLE definitions USING FTS5(definition, entry_id);''')
+    connection.commit()
+
+    for entry in entries:
+        definitions = entry.get_all_definitions()
+        for definition in definitions:
+            cur.execute("INSERT INTO definitions VALUES (?, ?)", (definition, entry.entry_id))
+    connection.commit()
+
     connection.close()

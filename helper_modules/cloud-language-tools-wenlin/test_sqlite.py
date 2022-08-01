@@ -62,7 +62,8 @@ class TestWenlinSqlite(unittest.TestCase):
                                             'part_of_speech': 'm.p.'}
                                         ],
         'simplified': '啊',
-        'traditional': '啊'}        
+        'traditional': '啊',
+        'pinyin': 'a*'}        
 
         self.maxDiff = None
         self.assertEqual(entry_dict, expected_entry_dict)

@@ -83,5 +83,8 @@ class TestDictionaryLookup(unittest.TestCase):
         result = self.manager.get_dictionary_lookup('仓库', service.name, lookup_option.get_lookup_key())
         self.assertEqual(result, ['⁴zuò [座]'])
 
+        result = self.manager.get_dictionary_lookup('学生', service.name, lookup_option.get_lookup_key())
+        self.assertEqual(result, ['ge/míng/²wèi [个/名/位]'])
+
 
 

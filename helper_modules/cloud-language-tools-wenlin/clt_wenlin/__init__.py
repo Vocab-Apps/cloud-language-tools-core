@@ -256,7 +256,7 @@ def create_sqlite_file(dict_filepath, sqlite_filepath):
     connection.close()
 
 def get_wenlin_db_path():
-    return os.path.join(os.path.dirname(os.path.realpath(__file__)), 'wenlin.db')
+    return os.path.join(os.environ['HOME'], 'clt_data', 'wenlin.db')
 
 def download_wenlin_db():
     url = 'https://cloud-language-tools-storage.nyc3.digitaloceanspaces.com/wenlin.db.gpg'
@@ -268,6 +268,10 @@ def download_wenlin_db():
         raise Exception(f'could not run {command_line}')
     # decrypt into the right path
     output_file = get_wenlin_db_path()
+    # create directories
+    dirname = os.path.dirname(output_file)
+    if not os.path.isdir(dirname):
+        os.mkdir(dirname)
     command_line = f"gpg --batch --yes --passphrase {os.environ['GPG_PASSPHRASE']} --output {output_file}  --decrypt {temp_file.name}"
     print(f'running command line: {command_line}')
     exit_status = os.system(command_line)

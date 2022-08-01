@@ -74,3 +74,4 @@ class Gender(enum.Enum):
 
 class DictionaryLookupType(enum.Enum):
     Definitions = enum.auto()
+    PartOfSpeech = enum.auto()

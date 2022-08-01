@@ -56,10 +56,18 @@ class WenlinService(cloudlanguagetools.service.Service):
         raise Exception('not supported')
 
     def get_dictionary_lookup_list(self):
-        return [
-            WenlinDictionaryLookup(cloudlanguagetools.languages.Language.zh_cn, 
-                                   cloudlanguagetools.constants.DictionaryLookupType.Definitions)
-        ]
+        result = []
+        for language in [
+            cloudlanguagetools.languages.Language.zh_cn,
+            cloudlanguagetools.languages.Language.zh_tw,
+            cloudlanguagetools.languages.Language.yue
+        ]:
+            result.extend([
+                WenlinDictionaryLookup(language, 
+                    cloudlanguagetools.constants.DictionaryLookupType.Definitions)
+            ])
+
+        return result
 
     def get_connection(self):
         db_filepath = clt_wenlin.get_wenlin_db_path()

@@ -21,6 +21,8 @@ import cloudlanguagetools.errors
 import azure.cognitiveservices.speech
 import azure.cognitiveservices.speech.audio
 
+logger = logging.getLogger(__name__)
+
 AUDIO_LOCALE_OVERRIDE_MAP = {
     'zh-CN-liaoning': 'zh_CN',
     'zh-CN-sichuan': 'zh_CN',
@@ -420,6 +422,33 @@ class AzureService(cloudlanguagetools.service.Service):
             # pprint.pprint(data)
 
         return result
+
+    def get_dictionary_lookup(self, text, lookup_key):
+        from_language_code = lookup_key['source_language_code']
+        to_language_code = lookup_key['target_language_code']
+        base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'
+        params = f'&to={to_language_code}&from={from_language_code}'
+        url = base_url + params
+
+        logger.info(f'querying url for dictionary lookup: {url}')
+
+        # You can pass more than one object in body.
+        body = [{
+            'text': text
+        }]
+        request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
+        response = request.json()
+
+        lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
+        if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.Definitions:
+            if len(response) > 1:
+                raise Exception(f'more than one response entries, {url}, {text}')
+            translation_entries = response[0]['translations']
+            translations = [entry['displayTarget'] for entry in translation_entries]
+
+            return translations
+
+        return None
 
     def dictionary_lookup(self, input_text, from_language_key, to_language_key):
         base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'

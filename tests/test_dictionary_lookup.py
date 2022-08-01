@@ -71,3 +71,17 @@ class TestDictionaryLookup(unittest.TestCase):
         self.assertEqual(result,  ['intj.', 'm.p.'])
 
 
+    def test_wenlin_measure_word(self):
+        service = Service.Wenlin
+
+        definitions_lookup_options = [x for x in self.dictionary_lookup_list if x.service == service and
+            x.language == Language.zh_cn and 
+            x.lookup_type == DictionaryLookupType.MeasureWord]
+        self.assertEqual(len(definitions_lookup_options), 1)
+        lookup_option = definitions_lookup_options[0]
+
+        result = self.manager.get_dictionary_lookup('仓库', service.name, lookup_option.get_lookup_key())
+        self.assertEqual(result, ['⁴zuò [座]'])
+
+
+

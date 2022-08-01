@@ -65,7 +65,8 @@ class WenlinService(cloudlanguagetools.service.Service):
         ]:
             result.extend([
                 WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.Definitions),
-                WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech)
+                WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech),
+                WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.MeasureWord)
             ])
 
         return result
@@ -102,10 +103,17 @@ class WenlinService(cloudlanguagetools.service.Service):
             if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech:
                 for part_of_speech in entry_json['parts_of_speech']:
                     result.append(part_of_speech['part_of_speech'])
+            if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.MeasureWord:
+                for part_of_speech in entry_json['parts_of_speech']:
+                    for definition in part_of_speech['definitions']:
+                        if 'measure_word' in definition:
+                            result.append(definition['measure_word'])
 
         connection.close()
 
-        if lookup_type in [cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech]:
+        if lookup_type in [cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech,
+            cloudlanguagetools.constants.DictionaryLookupType.MeasureWord
+        ]:
             # retain unique
             result = list(set(result))
 

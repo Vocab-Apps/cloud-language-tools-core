@@ -1,7 +1,9 @@
 import re
+import os
 import logging
 import sqlite3
 import json
+import tempfile
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +125,7 @@ def process_characters(chars):
         else:
             final_traditional += traditional_char
     return simplified, final_traditional
+
 
 def process_definition(definition):
     if '[fr]' in definition:
@@ -251,3 +254,18 @@ def create_sqlite_file(dict_filepath, sqlite_filepath):
     connection.commit()
 
     connection.close()
+
+def get_wenlin_db_path():
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)), 'wenlin.db')
+
+def download_wenlin_db():
+    url = 'https://cloud-language-tools-storage.nyc3.digitaloceanspaces.com/wenlin.db.gpg'
+    temp_file = tempfile.NamedTemporaryFile(prefix='wenlin', suffix='.gpg')
+    logger.info(f'downloading {url}')
+    os.system(f'wget --output-document={temp_file.name} {url}')
+    # decrypt into the right path
+    output_file = get_wenlin_db_path()
+    command_line = f"gpg --batch --yes --passphrase {os.environ['GPG_PASSPHRASE']} --output {output_file}  --decrypt {temp_file.name}"
+    logger.info(f'running command line: {command_line}')
+    os.system(command_line)
+    logger.info(f'decrypted into {output_file}')

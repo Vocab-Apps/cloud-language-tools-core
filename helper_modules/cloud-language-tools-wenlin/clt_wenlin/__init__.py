@@ -1,5 +1,6 @@
 import re
 import logging
+import sqlite3
 
 logger = logging.getLogger(__name__)
 
@@ -12,12 +13,25 @@ class Definition():
         self.example_translation = None
         self.measure_word = None
 
+    def to_dict(self):
+        result = {
+            'definition': self.definition
+        }
+        if self.example_pinyin != None:
+            result['example_pinyin'] = self.example_pinyin
+        if self.example_chinese != None:
+            result['example_chinese'] = self.example_chinese
+        if self.example_translation != None:
+            result['example_translation'] = self.example_translation
+        if self.measure_word != None:
+            result['measure_word'] = self.measure_word
+        return result
+
 class PartOfSpeech():
     def __init__(self, entry, part_of_speech):
         # logger.debug(f'creating PartOfSpeech [{part_of_speech}]')
         self.entry = entry
         self.part_of_speech = part_of_speech
-        self.measure_word = None
         self.definitions = []        
 
     def add_measure_word(self, measure_word):
@@ -36,12 +50,17 @@ class PartOfSpeech():
     def add_example_translation(self, example_translation):
         self.definitions[-1].example_translation = example_translation
 
+    def to_dict(self):
+        return {
+            'part_of_speech': self.part_of_speech,
+            'definitions': [x.to_dict() for x in self.definitions]
+        }
+
 class DictionaryEntry():
     def __init__(self):
         self.pinyin = None
         self.simplified = None
         self.traditional = None
-        self.measure_word = None
         # https://wenlin.co/wow/Project:Ci_Chinese_Parts_of_Speech_and_Other_Entry_Labels
         self.parts_of_speech = []
 
@@ -68,6 +87,13 @@ class DictionaryEntry():
 
     def add_example_translation(self, example_translation):
         self.parts_of_speech[-1].add_example_translation(example_translation)
+
+    def to_dict(self):
+        return {
+            'simplified': self.simplified,
+            'traditional': self.traditional,
+            'parts_of_speech': [x.to_dict() for x in self.parts_of_speech]
+        }
 
     def __str__(self):
         return f'simplified: {self.simplified}'
@@ -168,3 +194,12 @@ def read_dictionary_file(filepath):
     f.close()
 
     return entries
+
+def create_sqlite_file(dict_filepath, sqlite_filepath):
+    connection = sqlite3.connect(sqlite_filepath)
+    cur = connection.cursor()
+    cur.execute('''CREATE TABLE words (simplified text, traditional text, entry text)''')
+
+
+    connection.commit()
+    connection.close()

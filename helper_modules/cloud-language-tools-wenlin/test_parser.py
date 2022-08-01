@@ -1,5 +1,6 @@
 import unittest
 import clt_wenlin
+import pprint
 
 
 class TestWenlinParser(unittest.TestCase):
@@ -81,6 +82,41 @@ timestamp 2015-12-18T09:57:26Z"""
         self.assertEqual(entry.parts_of_speech[0].definitions[1].example_pinyin, 'Qián ∼, shū ∼, biǎo ∼, wǒ dōu diū le.')
         self.assertEqual(entry.parts_of_speech[0].definitions[1].example_chinese, '钱∼, 书∼, 表∼, 我都丢了。')
         self.assertEqual(entry.parts_of_speech[0].definitions[1].example_translation, 'Money, books, watch, I lost everything.')
+
+        expected_dict = {'parts_of_speech': [
+                                    {'definitions': [
+                                                {'definition': 'used as phrase suffix'},
+                                                {'definition': 'in enumeration',
+                                                'example_chinese': '钱∼, 书∼, 表∼, 我都丢了。',
+                                                'example_pinyin': 'Qián ∼, shū ∼, biǎo '
+                                                                    '∼, wǒ dōu diū le.',
+                                                'example_translation': 'Money, books, '
+                                                                        'watch, I lost '
+                                                                        'everything.'},
+                                                {'definition': 'in direct address and '
+                                                                'exclamation',
+                                                'example_chinese': '老王∼, 这可不行∼!',
+                                                'example_pinyin': 'Lǎo Wáng ∼, zhè kě '
+                                                                    'bùxíng ∼!',
+                                                'example_translation': 'Wang, this '
+                                                                        "won't do!"},
+                                                {'definition': 'indicating '
+                                                                'obviousness/impatience',
+                                                'example_chinese': '来∼!',
+                                                'example_pinyin': 'Lái ∼!',
+                                                'example_translation': 'Come on!'},
+                                                {'definition': 'for confirmation',
+                                                'example_chinese': '你不来∼?',
+                                                'example_pinyin': 'Nǐ bù lái ∼?',
+                                                'example_translation': "So you're not "
+                                                                        'coming?'}],
+                                            'part_of_speech': 'm.p.'}
+                                        ],
+        'simplified': '啊',
+        'traditional': '啊'}
+
+        # pprint.pprint(entry.to_dict())
+        self.assertEqual(entry.to_dict(), expected_dict)
 
 
     def test_parse_sections_2(self):

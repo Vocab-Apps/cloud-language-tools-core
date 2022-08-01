@@ -42,6 +42,17 @@ class TestDictionaryLookup(unittest.TestCase):
         lookup_option = definitions_lookup_options[0]
 
         result = self.manager.get_dictionary_lookup('仓库', service.name, lookup_option.get_lookup_key())
-
         self.assertEqual(result, ['warehouse; storehouse'])
+
+        result = self.manager.get_dictionary_lookup('啊', service.name, lookup_option.get_lookup_key())
+        self.assertEqual(result,  ['used as phrase suffix',
+            'in enumeration',
+            'in direct address and exclamation',
+            'indicating obviousness/impatience',
+            'for confirmation',
+            'indicating elation',
+            'indicating doubt or questioning',
+            'indicating puzzled surprise',
+            'indicating agreement/approval'])        
+
 

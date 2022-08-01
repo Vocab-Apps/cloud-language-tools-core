@@ -116,5 +116,6 @@ class WenlinService(cloudlanguagetools.service.Service):
         ]:
             # retain unique
             result = list(set(result))
+            result.sort()
 
         return result

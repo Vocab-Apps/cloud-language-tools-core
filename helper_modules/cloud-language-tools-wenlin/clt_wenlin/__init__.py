@@ -261,7 +261,7 @@ def get_wenlin_db_path():
 def download_wenlin_db():
     url = 'https://cloud-language-tools-storage.nyc3.digitaloceanspaces.com/wenlin.db.gpg'
     temp_file = tempfile.NamedTemporaryFile(prefix='wenlin', suffix='.gpg')
-    logger.info(f'downloading {url}')
+    print(f'downloading {url}')
     command_line = f'wget --output-document={temp_file.name} {url}'
     exit_status = os.system(command_line)
     if exit_status != 0:
@@ -269,8 +269,8 @@ def download_wenlin_db():
     # decrypt into the right path
     output_file = get_wenlin_db_path()
     command_line = f"gpg --batch --yes --passphrase {os.environ['GPG_PASSPHRASE']} --output {output_file}  --decrypt {temp_file.name}"
-    logger.info(f'running command line: {command_line}')
+    print(f'running command line: {command_line}')
     exit_status = os.system(command_line)
     if exit_status != 0:
         raise Exception(f'could not run {command_line}')    
-    logger.info(f'decrypted into {output_file}')
+    print(f'decrypted into {output_file}')

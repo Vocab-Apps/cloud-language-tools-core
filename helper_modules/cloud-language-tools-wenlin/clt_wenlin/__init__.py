@@ -206,19 +206,21 @@ def create_sqlite_file(dict_filepath, sqlite_filepath):
 
     connection = sqlite3.connect(sqlite_filepath)
     cur = connection.cursor()
-    cur.execute('''CREATE TABLE words (simplified text, traditional text, entry text)''')
+    cur.execute('''CREATE TABLE words (simplified text, traditional text, entry text, entry_id integer)''')
 
     for entry in entries:
         json_string = json.dumps(entry.to_dict())
         # query = f"""INSERT INTO words VALUES ('{entry.simplified}', '{entry.traditional}', '{json_string}')"""
-        cur.execute("INSERT INTO words VALUES (?, ?, ?)", 
-                    (entry.simplified, entry.traditional, json_string))
+        cur.execute("INSERT INTO words VALUES (?, ?, ?, ?)", 
+                    (entry.simplified, entry.traditional, json_string, entry.entry_id))
         
     # add indices
     create_index_query = """CREATE INDEX idx_simplified ON words (simplified);"""
     cur.execute(create_index_query)
     create_index_query = """CREATE INDEX idx_traditional ON words (traditional);"""
     cur.execute(create_index_query)
+    create_index_query = """CREATE UNIQUE INDEX idx_entry_id ON words (entry_id);"""
+    cur.execute(create_index_query)    
 
     connection.commit()
     connection.close()

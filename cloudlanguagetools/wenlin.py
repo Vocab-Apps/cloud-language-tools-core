@@ -20,6 +20,7 @@ class WenlinDictionaryLookup(cloudlanguagetools.dictionarylookup.DictionaryLooku
 
     def get_lookup_key(self):
         return {
+            'language': self.language.name,
             'lookup_type': self.lookup_type.name
         }        
 
@@ -63,8 +64,8 @@ class WenlinService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.Language.yue
         ]:
             result.extend([
-                WenlinDictionaryLookup(language, 
-                    cloudlanguagetools.constants.DictionaryLookupType.Definitions)
+                WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.Definitions),
+                WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech)
             ])
 
         return result
@@ -77,14 +78,35 @@ class WenlinService(cloudlanguagetools.service.Service):
     def get_dictionary_lookup(self, text, lookup_key):
         result = []
         connection = self.get_connection()
-        query = f"""SELECT entry FROM words WHERE simplified='{text}'"""
+
+        language = cloudlanguagetools.languages.Language[lookup_key['language']]
+        column_map = {
+            cloudlanguagetools.languages.Language.zh_cn: 'simplified',
+            cloudlanguagetools.languages.Language.zh_tw: 'traditional',
+            cloudlanguagetools.languages.Language.yue: 'traditional',
+        }
+        column = column_map[language]
+        lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
+
+        query = f"""SELECT entry FROM words WHERE {column}='{text}'"""
         cur = connection.cursor()
         for row in cur.execute(query):
             entry_json_str = row[0]
             entry_json = json.loads(entry_json_str)
-            for part_of_speech in entry_json['parts_of_speech']:
-                for definition in part_of_speech['definitions']:
-                    result.append(definition['definition'])
+            
+            # definitions
+            if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.Definitions:
+                for part_of_speech in entry_json['parts_of_speech']:
+                    for definition in part_of_speech['definitions']:
+                        result.append(definition['definition'])
+            if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech:
+                for part_of_speech in entry_json['parts_of_speech']:
+                    result.append(part_of_speech['part_of_speech'])
+
         connection.close()
+
+        if lookup_type in [cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech]:
+            # retain unique
+            result = list(set(result))
 
         return result

@@ -16,6 +16,9 @@ class TestWenlinSqlite(unittest.TestCase):
         connection = sqlite3.connect(sqlite_tempfile.name)
         cur = connection.cursor()
 
+        # lookup by chinese characters
+        # ============================
+
         query = """SELECT entry, entry_id FROM words WHERE simplified='啊'"""
         results = []
         for row in cur.execute(query):
@@ -63,5 +66,31 @@ class TestWenlinSqlite(unittest.TestCase):
 
         self.maxDiff = None
         self.assertEqual(entry_dict, expected_entry_dict)
+
+        # lookup by definitions
+        # =====================
+
+        query = """SELECT definition, entry_id FROM definitions WHERE definitions MATCH 'confirmation'"""
+        results = []
+        for row in cur.execute(query):
+            print(row)
+            results.append(row)        
+
+        expected_results = [
+            ('for confirmation', 1000000063),
+            ('confirmation', 1000344607),
+            ('wait in prison (for confirmation of death sentence)', 1005750902),
+            ('confirmation', 1005838396),
+            ('empirical confirmation', 1006395370),
+            ('seek confirmation', 1010373340),
+            ('letter of confirmation; confirming order; confirmation note', 1010507879),
+            ("be subject to one's confirmation", 1010507976),
+            ('confirmation of an oracle', 1017161691),
+            ('confirmation; definite note', 1018032266)
+        ]
+
+        self.assertEqual(results, expected_results)
+
+
 
 

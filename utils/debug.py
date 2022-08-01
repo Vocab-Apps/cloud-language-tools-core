@@ -719,6 +719,15 @@ def test_voicen():
 
     print(json.dumps(response.json(), indent=4, sort_keys=True))    
 
+def test_wenlin_lookup():
+    manager = get_manager()
+    wenlin_service = manager.services[cloudlanguagetools.constants.Service.Wenlin.name]    
+
+    lookup_result = wenlin_service.get_dictionary_lookup('仓库', {})
+    print(lookup_result)
+    lookup_result = wenlin_service.get_dictionary_lookup('岁数', {})
+    print(lookup_result)    
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     while logger.hasHandlers():
@@ -762,5 +771,6 @@ if __name__ == '__main__':
     # test_debounce()
     # load_vocalware_voices()
     # thai_tokenization()
-    test_get_language_data()
+    # test_get_language_data()
     # test_get_language_data_redis()
+    test_wenlin_lookup()

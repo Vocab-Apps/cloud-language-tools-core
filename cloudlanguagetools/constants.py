@@ -64,9 +64,13 @@ class Service(enum.Enum):
     PyThaiNLP = enum.auto()
     Spacy = enum.auto()
     ArgosTranslate = enum.auto()
+    Wenlin = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()
     Female = enum.auto()
     Any = enum.auto()
 
+
+class DictionaryLookupType(enum.Enum):
+    Definitions = enum.auto()

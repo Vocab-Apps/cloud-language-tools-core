@@ -23,6 +23,7 @@ import cloudlanguagetools.voicen
 import cloudlanguagetools.pythainlp
 import cloudlanguagetools.spacy
 import cloudlanguagetools.argostranslate
+import cloudlanguagetools.wenlin
 import cloudlanguagetools.encryption
 
 class ServiceManager():
@@ -45,6 +46,7 @@ class ServiceManager():
         self.services[cloudlanguagetools.constants.Service.Spacy.name] = cloudlanguagetools.spacy.SpacyService()
         self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
         self.services[cloudlanguagetools.constants.Service.ArgosTranslate.name] = cloudlanguagetools.argostranslate.ArgosTranslateService()
+        self.services[cloudlanguagetools.constants.Service.Wenlin.name] = cloudlanguagetools.wenlin.WenlinService()
 
     def configure_default(self):
         # use the stored keys to configure services

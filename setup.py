@@ -22,6 +22,7 @@ setup(name='cloudlanguagetools',
       install_requires=[
           'clt_spacy',
           'clt_argostranslate',
+          'clt_wenlin',
           'clt_requirements'
       ],
       )

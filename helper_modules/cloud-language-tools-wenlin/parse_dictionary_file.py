@@ -2,5 +2,7 @@
 
 import clt_wenlin
 
-entries = clt_wenlin.read_dictionary_file('/home/luc/cpp/wenlin/server/cidian.u8')
+sqlite_filepath = 'wenlin.db'
+dict_filepath = '/home/luc/cpp/wenlin/server/cidian.u8'
+clt_wenlin.create_sqlite_file(dict_filepath, sqlite_filepath)
 

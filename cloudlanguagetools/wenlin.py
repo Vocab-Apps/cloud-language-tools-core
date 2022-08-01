@@ -13,6 +13,7 @@ import cloudlanguagetools.dictionarylookup
 
 class WenlinDictionaryLookup(cloudlanguagetools.dictionarylookup.DictionaryLookup):
     def __init__(self, source_language, lookup_type):
+        self.service = cloudlanguagetools.constants.Service.Wenlin
         self.target_language = cloudlanguagetools.languages.Language.en
         self.language = source_language
         self.lookup_type = lookup_type
@@ -21,6 +22,13 @@ class WenlinDictionaryLookup(cloudlanguagetools.dictionarylookup.DictionaryLooku
         return {
             'lookup_type': self.lookup_type.name
         }        
+
+    def get_lookup_name(self):
+        return f'Wenlin ({self.language.lang_name} to {self.target_language.lang_name}), {self.lookup_type.name}'
+
+    def get_lookup_shortname(self):
+        return f'Wenlin, {self.lookup_type.name}'
+
 
 class WenlinService(cloudlanguagetools.service.Service):
     def __init__(self):

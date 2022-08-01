@@ -130,6 +130,18 @@ class ServiceManager():
         tokenization_list = self.get_tokenization_options()
         return [tokenization_option.json_obj() for tokenization_option in tokenization_list]
 
+    # dictionary lookups
+
+    def get_dictionary_lookup_options(self):
+        result = []
+        for key, service in self.services.items():
+            result.extend(service.get_dictionary_lookup_list())
+        return result
+
+    def get_dictionary_lookup_options_json(self):
+        dictionary_lookup_list = self.get_dictionary_lookup_options()
+        return [dict_lookup_option.json_obj() for dict_lookup_option in dictionary_lookup_list]
+
     def get_tts_audio(self, text, service, voice_id, options):
         service = self.services[service]
         return service.get_tts_audio(text, voice_id, options)
@@ -173,6 +185,10 @@ class ServiceManager():
     def get_tokenization(self, text, service, tokenization_key):
         service = self.services[service]
         return service.get_tokenization(text, tokenization_key)
+
+    def get_dictionary_lookup(self, text, service, lookup_key):
+        service = self.services[service]
+        return service.get_dictionary_lookup(text, lookup_key)
 
     def get_breakdown(self, text, tokenization_option, translation_option, transliteration_option):
         

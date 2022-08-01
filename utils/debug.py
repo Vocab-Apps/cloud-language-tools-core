@@ -725,7 +725,7 @@ def test_wenlin_lookup():
 
     lookup_result = wenlin_service.get_dictionary_lookup('仓库', {})
     print(lookup_result)
-    lookup_result = wenlin_service.get_dictionary_lookup('岁数', {})
+    lookup_result = wenlin_service.get_dictionary_lookup('啊', {})
     print(lookup_result)    
 
 if __name__ == '__main__':

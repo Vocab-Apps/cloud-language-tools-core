@@ -18,3 +18,6 @@ class Service():
 
     def get_tokenization_options(self):
         return []
+
+    def get_dictionary_lookup_list(self):
+        return []

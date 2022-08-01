@@ -51,6 +51,9 @@ class PartOfSpeech():
     def add_example_translation(self, example_translation):
         self.definitions[-1].example_translation = example_translation
 
+    def get_all_definitions(self):
+        return [x.definition for x in self.definitions]
+
     def to_dict(self):
         return {
             'part_of_speech': self.part_of_speech,
@@ -89,6 +92,12 @@ class DictionaryEntry():
 
     def add_example_translation(self, example_translation):
         self.parts_of_speech[-1].add_example_translation(example_translation)
+
+    def get_all_definitions(self):
+        result = []
+        for part_of_speech in self.parts_of_speech:
+            result.extend(part_of_speech.get_all_definitions())
+        return result
 
     def to_dict(self):
         return {

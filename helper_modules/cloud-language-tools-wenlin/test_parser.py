@@ -84,6 +84,14 @@ timestamp 2015-12-18T09:57:26Z"""
         self.assertEqual(entry.parts_of_speech[0].definitions[1].example_chinese, '钱∼, 书∼, 表∼, 我都丢了。')
         self.assertEqual(entry.parts_of_speech[0].definitions[1].example_translation, 'Money, books, watch, I lost everything.')
 
+        self.assertEqual(entry.get_all_definitions(), [
+            'used as phrase suffix',
+            'in enumeration',
+            'in direct address and exclamation',
+            'indicating obviousness/impatience',
+            'for confirmation'
+        ])
+
         expected_dict = {'parts_of_speech': [
                                     {'definitions': [
                                                 {'definition': 'used as phrase suffix'},

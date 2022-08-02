@@ -485,7 +485,7 @@ class AzureService(cloudlanguagetools.service.Service):
         return lookup_fn(generator)
 
 
-    def dictionary_lookup(self, input_text, from_language_key, to_language_key):
+    def custom_dictionary_lookup(self, input_text, from_language_key, to_language_key):
         base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'
         params = f'&to={to_language_key}&from={from_language_key}'
         url = base_url + params

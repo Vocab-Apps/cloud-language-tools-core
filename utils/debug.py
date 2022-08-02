@@ -355,7 +355,7 @@ def azure_dictionary_lookup_list():
 def dictionary_lookup_azure():
     text = '放松'
     manager = get_manager()
-    result = manager.services[cloudlanguagetools.constants.Service.Azure.name].dictionary_lookup(text, 'zh-Hans', 'en')
+    result = manager.services[cloudlanguagetools.constants.Service.Azure.name].custom_dictionary_lookup(text, 'zh-Hans', 'en')
     pprint.pprint(result)
 
 def dictionary_examples_azure():

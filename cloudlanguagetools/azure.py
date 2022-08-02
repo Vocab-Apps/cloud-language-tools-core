@@ -418,8 +418,9 @@ class AzureService(cloudlanguagetools.service.Service):
                 result.append(AzureDictionaryLookup(source_language_id, 
                                 target_language_id, 
                                 cloudlanguagetools.constants.DictionaryLookupType.Definitions))
-            # pprint.pprint(language_id)
-            # pprint.pprint(data)
+                result.append(AzureDictionaryLookup(source_language_id, 
+                                target_language_id, 
+                                cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech))
 
         return result
 
@@ -438,15 +439,22 @@ class AzureService(cloudlanguagetools.service.Service):
         }]
         request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
         response = request.json()
+        if len(response) > 1:
+            raise Exception(f'more than one response entries, {url}, {text}')
 
         lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
         if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.Definitions:
-            if len(response) > 1:
-                raise Exception(f'more than one response entries, {url}, {text}')
             translation_entries = response[0]['translations']
             translations = [entry['displayTarget'] for entry in translation_entries]
 
             return translations
+        if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech:
+            translation_entries = response[0]['translations']
+            result = [entry['posTag'].lower() for entry in translation_entries]
+            result = list(set(result))
+            result.sort()            
+
+            return result
 
         return None
 

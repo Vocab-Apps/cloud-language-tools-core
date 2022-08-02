@@ -421,6 +421,9 @@ class AzureService(cloudlanguagetools.service.Service):
                 result.append(AzureDictionaryLookup(source_language_id, 
                                 target_language_id, 
                                 cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech))
+                result.append(AzureDictionaryLookup(source_language_id, 
+                                target_language_id, 
+                                cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeechDefinitions))
 
         return result
 
@@ -460,51 +463,27 @@ class AzureService(cloudlanguagetools.service.Service):
         result.sort()
         return result
 
+    def collect_partofspeech_definitions(self, generator):
+        result = {}
+        for entry in generator:
+            part_of_speech = entry['posTag'].lower()
+            if part_of_speech not in result:
+                result[part_of_speech] = []
+            result[part_of_speech].append(entry['displayTarget'])
+        return result        
+
     def get_dictionary_lookup(self, text, lookup_key):
         lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
         lookup_type_fn_map = {
             cloudlanguagetools.constants.DictionaryLookupType.Definitions: self.collect_definitions,
             cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech: self.collect_partofspeech,
-            # cloudlanguagetools.constants.DictionaryLookupType.MeasureWord: self.collect_measureword,
-            # cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeechDefinitions: self.collect_partofspeech_definitions,
+            cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeechDefinitions: self.collect_partofspeech_definitions,
         }
         lookup_fn = lookup_type_fn_map[lookup_type]
         generator = self.iterate_dictionary_results(text, lookup_key)
 
         return lookup_fn(generator)
 
-        from_language_code = lookup_key['source_language_code']
-        to_language_code = lookup_key['target_language_code']
-        base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'
-        params = f'&to={to_language_code}&from={from_language_code}'
-        url = base_url + params
-
-        logger.info(f'querying url for dictionary lookup: {url}')
-
-        # You can pass more than one object in body.
-        body = [{
-            'text': text
-        }]
-        request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
-        response = request.json()
-        if len(response) > 1:
-            raise Exception(f'more than one response entries, {url}, {text}')
-
-        lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
-        if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.Definitions:
-            translation_entries = response[0]['translations']
-            translations = [entry['displayTarget'] for entry in translation_entries]
-
-            return translations
-        if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech:
-            translation_entries = response[0]['translations']
-            result = [entry['posTag'].lower() for entry in translation_entries]
-            result = list(set(result))
-            result.sort()            
-
-            return result
-
-        return None
 
     def dictionary_lookup(self, input_text, from_language_key, to_language_key):
         base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'

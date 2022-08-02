@@ -146,6 +146,18 @@ class TestDictionaryLookup(unittest.TestCase):
         result = self.manager.get_dictionary_lookup('啊', service.name, lookup_option.get_lookup_key())
         self.assertEqual(result,  ['noun', 'prep'])
 
+    def test_azure_partofspeech_definitions(self):
+        service = Service.Azure
+
+        definitions_lookup_options = [x for x in self.dictionary_lookup_list if x.service == service and
+            x.language == Language.zh_cn and 
+            x.lookup_type == DictionaryLookupType.PartOfSpeechDefinitions]
+        self.assertEqual(len(definitions_lookup_options), 1)
+        lookup_option = definitions_lookup_options[0]
+
+        result = self.manager.get_dictionary_lookup('学生', service.name, lookup_option.get_lookup_key())
+        self.assertEqual(result, {'noun': ['students', 'pupils', 'college students']})
+
 
     def test_azure_french(self):
         service = Service.Azure

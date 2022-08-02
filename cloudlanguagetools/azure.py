@@ -424,7 +424,55 @@ class AzureService(cloudlanguagetools.service.Service):
 
         return result
 
+    def iterate_dictionary_results(self, text, lookup_key):
+        from_language_code = lookup_key['source_language_code']
+        to_language_code = lookup_key['target_language_code']
+        base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'
+        params = f'&to={to_language_code}&from={from_language_code}'
+        url = base_url + params
+
+        logger.info(f'querying url for dictionary lookup: {url}')
+
+        # You can pass more than one object in body.
+        body = [{
+            'text': text
+        }]
+        request = requests.post(url, headers=self.get_translator_headers(), json=body, timeout=cloudlanguagetools.constants.RequestTimeout)
+        response = request.json()
+        if len(response) > 1:
+            raise Exception(f'more than one response entries, {url}, {text}')
+
+        translation_entries = response[0]['translations']
+        for translation_entry in translation_entries:
+            yield translation_entry
+
+    def collect_definitions(self, generator):
+        result = []
+        for entry in generator:
+            result.append(entry['displayTarget'])
+        return result
+
+    def collect_partofspeech(self, generator):
+        result = []
+        for entry in generator:
+            result.append(entry['posTag'].lower())
+        result = list(set(result))
+        result.sort()
+        return result
+
     def get_dictionary_lookup(self, text, lookup_key):
+        lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
+        lookup_type_fn_map = {
+            cloudlanguagetools.constants.DictionaryLookupType.Definitions: self.collect_definitions,
+            cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech: self.collect_partofspeech,
+            # cloudlanguagetools.constants.DictionaryLookupType.MeasureWord: self.collect_measureword,
+            # cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeechDefinitions: self.collect_partofspeech_definitions,
+        }
+        lookup_fn = lookup_type_fn_map[lookup_type]
+        generator = self.iterate_dictionary_results(text, lookup_key)
+
+        return lookup_fn(generator)
+
         from_language_code = lookup_key['source_language_code']
         to_language_code = lookup_key['target_language_code']
         base_url = f'{self.url_translator_base}/dictionary/lookup?api-version=3.0'

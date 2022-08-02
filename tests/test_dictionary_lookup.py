@@ -103,6 +103,17 @@ class TestDictionaryLookup(unittest.TestCase):
         result = self.manager.get_dictionary_lookup('学生', service.name, lookup_option.get_lookup_key())
         self.assertEqual(result, ['ge/míng/²wèi [个/名/位]'])
 
+    def test_wenlin_part_of_speech_definitions(self):
+        service = Service.Wenlin
+
+        definitions_lookup_options = [x for x in self.dictionary_lookup_list if x.service == service and
+            x.language == Language.zh_cn and 
+            x.lookup_type == DictionaryLookupType.PartOfSpeechDefinitions]
+        self.assertEqual(len(definitions_lookup_options), 1)
+        lookup_option = definitions_lookup_options[0]
+
+        result = self.manager.get_dictionary_lookup('学生', service.name, lookup_option.get_lookup_key())
+        self.assertEqual(result, {'n.': ['student; pupil', 'disciple; follower', 'boy; lad']})
 
 
     def test_azure_definitions(self):
@@ -134,6 +145,7 @@ class TestDictionaryLookup(unittest.TestCase):
 
         result = self.manager.get_dictionary_lookup('啊', service.name, lookup_option.get_lookup_key())
         self.assertEqual(result,  ['noun', 'prep'])
+
 
     def test_azure_french(self):
         service = Service.Azure

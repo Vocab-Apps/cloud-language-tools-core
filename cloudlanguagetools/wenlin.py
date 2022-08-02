@@ -66,7 +66,8 @@ class WenlinService(cloudlanguagetools.service.Service):
             result.extend([
                 WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.Definitions),
                 WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech),
-                WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.MeasureWord)
+                WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.MeasureWord),
+                WenlinDictionaryLookup(language, cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeechDefinitions),
             ])
 
         return result
@@ -124,8 +125,17 @@ class WenlinService(cloudlanguagetools.service.Service):
                         result.append(definition['measure_word'])
         result = list(set(result))
         result.sort()                
-        return result                        
+        return result                      
 
+    def collect_partofspeech_definitions(self, generator):
+        result = {}
+        for entry in generator:
+            for part_of_speech in entry['parts_of_speech']:
+                if part_of_speech['part_of_speech'] not in result:
+                    result[part_of_speech['part_of_speech']] = []
+                for definition in part_of_speech['definitions']:
+                    result[part_of_speech['part_of_speech']].append(definition['definition'])
+        return result
 
     def get_dictionary_lookup(self, text, lookup_key):
         lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
@@ -133,6 +143,7 @@ class WenlinService(cloudlanguagetools.service.Service):
             cloudlanguagetools.constants.DictionaryLookupType.Definitions: self.collect_definitions,
             cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech: self.collect_partofspeech,
             cloudlanguagetools.constants.DictionaryLookupType.MeasureWord: self.collect_measureword,
+            cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeechDefinitions: self.collect_partofspeech_definitions,
         }
 
         collect_result_fn = lookup_type_fn_map[lookup_type]

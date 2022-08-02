@@ -70,6 +70,8 @@ class ServiceManager():
         tts_voice_list = self.get_tts_voice_list()
         logging.info('retrieving tokenization options')
         tokenization_options = self.get_tokenization_options()
+        logging.info('retrieving dictionary lookup options')
+        dictionary_lookup_options = self.get_dictionary_lookup_options()        
 
         return {
             'language_list': language_list,
@@ -77,6 +79,7 @@ class ServiceManager():
             'transliteration_options': [option.json_obj() for option in transliteration_language_list],
             'voice_list': [voice.json_obj() for voice in tts_voice_list],
             'tokenization_options': [option.json_obj() for option in tokenization_options],
+            'dictionary_lookup_options': [option.json_obj() for option in dictionary_lookup_options],
         }
         
 

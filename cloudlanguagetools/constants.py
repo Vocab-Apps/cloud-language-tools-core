@@ -76,3 +76,4 @@ class DictionaryLookupType(enum.Enum):
     Definitions = enum.auto()
     PartOfSpeech = enum.auto()
     MeasureWord = enum.auto()
+    PartOfSpeechDefinitions = enum.auto()

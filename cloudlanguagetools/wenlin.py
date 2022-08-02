@@ -76,8 +76,7 @@ class WenlinService(cloudlanguagetools.service.Service):
         connection = sqlite3.connect(db_filepath)
         return connection
 
-    def get_dictionary_lookup(self, text, lookup_key):
-        result = []
+    def iterate_dictionary_results(self, text, lookup_key):
         connection = self.get_connection()
 
         language = cloudlanguagetools.languages.Language[lookup_key['language']]
@@ -87,35 +86,56 @@ class WenlinService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.Language.yue: 'traditional',
         }
         column = column_map[language]
-        lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
 
         query = f"""SELECT entry FROM words WHERE {column}='{text}'"""
         cur = connection.cursor()
         for row in cur.execute(query):
             entry_json_str = row[0]
             entry_json = json.loads(entry_json_str)
-            
-            # definitions
-            if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.Definitions:
-                for part_of_speech in entry_json['parts_of_speech']:
-                    for definition in part_of_speech['definitions']:
-                        result.append(definition['definition'])
-            if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech:
-                for part_of_speech in entry_json['parts_of_speech']:
-                    result.append(part_of_speech['part_of_speech'])
-            if lookup_type == cloudlanguagetools.constants.DictionaryLookupType.MeasureWord:
-                for part_of_speech in entry_json['parts_of_speech']:
-                    for definition in part_of_speech['definitions']:
-                        if 'measure_word' in definition:
-                            result.append(definition['measure_word'])
+            yield entry_json
 
         connection.close()
 
-        if lookup_type in [cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech,
-            cloudlanguagetools.constants.DictionaryLookupType.MeasureWord
-        ]:
-            # retain unique
-            result = list(set(result))
-            result.sort()
-
+    def collect_definitions(self, generator):
+        result = []
+        for entry in generator:
+            # definitions
+            for part_of_speech in entry['parts_of_speech']:
+                for definition in part_of_speech['definitions']:
+                    result.append(definition['definition'])        
         return result
+
+    def collect_partofspeech(self, generator):
+        result = []
+        for entry in generator:
+            for part_of_speech in entry['parts_of_speech']:
+                result.append(part_of_speech['part_of_speech'])
+
+        result = list(set(result))
+        result.sort()                
+        return result
+
+    def collect_measureword(self, generator):
+        result = []
+        for entry in generator:
+            for part_of_speech in entry['parts_of_speech']:
+                for definition in part_of_speech['definitions']:
+                    if 'measure_word' in definition:
+                        result.append(definition['measure_word'])
+        result = list(set(result))
+        result.sort()                
+        return result                        
+
+
+    def get_dictionary_lookup(self, text, lookup_key):
+        lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
+        lookup_type_fn_map = {
+            cloudlanguagetools.constants.DictionaryLookupType.Definitions: self.collect_definitions,
+            cloudlanguagetools.constants.DictionaryLookupType.PartOfSpeech: self.collect_partofspeech,
+            cloudlanguagetools.constants.DictionaryLookupType.MeasureWord: self.collect_measureword,
+        }
+
+        collect_result_fn = lookup_type_fn_map[lookup_type]
+        generator = self.iterate_dictionary_results(text, lookup_key)
+
+        return collect_result_fn(generator)

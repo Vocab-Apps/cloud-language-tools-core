@@ -272,7 +272,7 @@ def download_wenlin_db():
     dirname = os.path.dirname(output_file)
     if not os.path.isdir(dirname):
         os.mkdir(dirname)
-    command_line = f"gpg --batch --yes --passphrase {os.environ['GPG_PASSPHRASE']} --output {output_file}  --decrypt {temp_file.name}"
+    command_line = f"gpg --batch --yes --passphrase-file /secrets/gpg_passphrase_file --output {output_file}  --decrypt {temp_file.name}"
     print(f'running command line: {command_line}')
     exit_status = os.system(command_line)
     if exit_status != 0:

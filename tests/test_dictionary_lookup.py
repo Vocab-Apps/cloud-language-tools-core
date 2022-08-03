@@ -72,6 +72,19 @@ class TestDictionaryLookup(unittest.TestCase):
             'indicating puzzled surprise',
             'indicating agreement/approval'])        
 
+    def test_wenlin_not_found(self):
+        service = Service.Wenlin
+
+        definitions_lookup_options = [x for x in self.dictionary_lookup_list if x.service == service and
+            x.language == Language.zh_cn and 
+            x.lookup_type == DictionaryLookupType.Definitions]
+        self.assertEqual(len(definitions_lookup_options), 1)
+        lookup_option = definitions_lookup_options[0]
+
+        self.assertRaises(cloudlanguagetools.errors.NotFoundError, 
+            self.manager.get_dictionary_lookup, '仓库仓库', service.name, lookup_option.get_lookup_key())
+
+
     def test_wenlin_part_of_speech(self):
         service = Service.Wenlin
 

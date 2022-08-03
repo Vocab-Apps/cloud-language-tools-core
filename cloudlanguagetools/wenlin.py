@@ -137,6 +137,20 @@ class WenlinService(cloudlanguagetools.service.Service):
                     result[part_of_speech['part_of_speech']].append(definition['definition'])
         return result
 
+    def collect_result_check_empty(self, generator, collect_result_fn, text):
+        result = collect_result_fn(generator)
+
+        not_found_error_msg = f'Wenlin: no results found for {text}'
+
+        if type(result) is list:
+            if len(result) == 0:
+                raise cloudlanguagetools.errors.NotFoundError(not_found_error_msg)
+        if type(result) is dict:
+            if len(result.keys()) == 0:
+                raise cloudlanguagetools.errors.NotFoundError(not_found_error_msg)
+
+        return result
+
     def get_dictionary_lookup(self, text, lookup_key):
         lookup_type = cloudlanguagetools.constants.DictionaryLookupType[lookup_key['lookup_type']]
         lookup_type_fn_map = {
@@ -149,4 +163,4 @@ class WenlinService(cloudlanguagetools.service.Service):
         collect_result_fn = lookup_type_fn_map[lookup_type]
         generator = self.iterate_dictionary_results(text, lookup_key)
 
-        return collect_result_fn(generator)
+        return self.collect_result_check_empty(generator, collect_result_fn, text)

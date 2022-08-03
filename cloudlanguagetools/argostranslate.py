@@ -2,6 +2,9 @@ import cloudlanguagetools.service
 import cloudlanguagetools.translationlanguage
 
 import logging
+# configure argos package location before importing argos
+import clt_argostranslate
+clt_argostranslate.configure_package_dir()
 import argostranslate
 import argostranslate.package
 import argostranslate.translate

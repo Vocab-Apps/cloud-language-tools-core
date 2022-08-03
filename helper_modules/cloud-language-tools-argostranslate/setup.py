@@ -18,7 +18,7 @@ class PostInstallCommand(install):
 
 
 setup(name='clt_argostranslate',
-      version='0.3',
+      version='0.4',
       description='Helper module for Cloud Language Tools, install ArgosTranslate and language packages',
       url='https://github.com/Language-Tools/cloud-language-tools-core',
       author='Luc',

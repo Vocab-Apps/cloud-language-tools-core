@@ -2,7 +2,7 @@ import os
 
 def configure_package_dir():
     argos_packages_dir = '/clt_data/argos'
-    os.makedirs(argos_packages_dir)
+    os.makedirs(argos_packages_dir, exist_ok=True)
     os.environ['ARGOS_PACKAGES_DIR'] = argos_packages_dir
 
 

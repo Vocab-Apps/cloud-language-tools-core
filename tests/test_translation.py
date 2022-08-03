@@ -124,7 +124,8 @@ class TestTranslation(unittest.TestCase):
 
         self.translate_text(Service.Naver, '천천히 말해 주십시오', Language.ko, Language.fr, 
         [ "s'il vous plaît, parlez lentement", 
-          "parlez lentement, s'il vous plaît"])
+          "parlez lentement, s'il vous plaît",
+          'parlez lentement'])
 
         self.translate_text(Service.Naver, 'Veuillez parler lentement.', Language.fr, Language.ko, '천천히 말씀해 주세요')        
 

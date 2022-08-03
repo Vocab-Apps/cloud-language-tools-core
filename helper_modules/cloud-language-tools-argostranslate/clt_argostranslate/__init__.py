@@ -1,4 +1,10 @@
+import os
+
+def configure_package_dir():
+    os.environ['ARGOS_PACKAGES_DIR'] = '/clt_data/argos'
+
 def install_all_packages():
+    configure_package_dir()
     print('install all packages for argos translate')
     import argostranslate.package
     argostranslate.package.update_package_index()

@@ -1,11 +1,15 @@
 import re
 import os
+import shutil
 import logging
 import sqlite3
 import json
 import tempfile
+import hashlib
 
 logger = logging.getLogger(__name__)
+
+WENLIN_DB_REV = 'revA'
 
 class Definition():
     def __init__(self, definition):
@@ -256,25 +260,28 @@ def create_sqlite_file(dict_filepath, sqlite_filepath):
     connection.close()
 
 def get_wenlin_db_path():
-    return os.path.join(os.environ['HOME'], 'clt_data', 'wenlin.db')
+    return os.path.join(os.environ['HOME'], 'clt_data', f'wenlin_{WENLIN_DB_REV}.db')
+
+def get_wenlin_db_download_filename():
+    hash_str = hashlib.sha224(f'wenlin_db_{WENLIN_DB_REV}'.encode('utf-8')).hexdigest()
+    filename = f'wenlin_{hash_str}_{WENLIN_DB_REV}.db'
+    return filename
 
 def download_wenlin_db():
-    url = 'https://cloud-language-tools-storage.nyc3.digitaloceanspaces.com/wenlin.db.gpg'
-    temp_file = tempfile.NamedTemporaryFile(prefix='wenlin', suffix='.gpg')
+    url = f'https://cloud-language-tools-storage.nyc3.digitaloceanspaces.com/{get_wenlin_db_download_filename()}'
+    temp_file = tempfile.NamedTemporaryFile(prefix='wenlin', suffix='.db')
     print(f'downloading {url}')
     command_line = f'wget --output-document={temp_file.name} {url}'
     exit_status = os.system(command_line)
     if exit_status != 0:
         raise Exception(f'could not run {command_line}')
-    # decrypt into the right path
+    
+    # move into the right path
     output_file = get_wenlin_db_path()
     # create directories
     dirname = os.path.dirname(output_file)
     if not os.path.isdir(dirname):
         os.mkdir(dirname)
-    command_line = f"gpg --batch --yes --passphrase-file /secrets/gpg_passphrase_file --output {output_file}  --decrypt {temp_file.name}"
-    print(f'running command line: {command_line}')
-    exit_status = os.system(command_line)
-    if exit_status != 0:
-        raise Exception(f'could not run {command_line}')    
-    print(f'decrypted into {output_file}')
+    
+    shutil.copy(temp_file.name, output_file)
+    print(f'moved file to {output_file}')

@@ -260,7 +260,7 @@ def create_sqlite_file(dict_filepath, sqlite_filepath):
     connection.close()
 
 def get_wenlin_db_path():
-    return os.path.join(os.environ['HOME'], 'clt_data', f'wenlin_{WENLIN_DB_REV}.db')
+    return os.path.join('/', 'clt_data', f'wenlin_{WENLIN_DB_REV}.db')
 
 def get_wenlin_db_download_filename():
     hash_str = hashlib.sha224(f'wenlin_db_{WENLIN_DB_REV}'.encode('utf-8')).hexdigest()

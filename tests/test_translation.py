@@ -161,6 +161,21 @@ class TestTranslation(unittest.TestCase):
         self.assertIn(result['Google'], ['à bas prix', 'Faible coût', 'À bas prix', 'faible coût'])
         self.assertEqual(result['Watson'], 'Le coût est très bas.')
 
+    def test_translate_all_bug_vi(self):
+        # pytest test_translation.py -rPP -k test_translate_all_bug_vi
+        # pytest test_translation.py --capture=no --log-cli-level=INFO -k test_translate_all
+
+        source_text = '<b><span style="font-weight: 400;">Thấy ghê … sao ám tui hoài vậy?</span></b>'
+        from_language = Language.vi.name
+        to_language =  Language.en.name
+        result = self.manager.get_all_translations(source_text, from_language, to_language)
+        pprint.pprint(result)
+        self.assertTrue('Azure' in result)
+        self.assertTrue('Google' in result)
+        self.assertTrue('Watson' in result)
+        self.assertTrue
+        self.assertEqual(result['Watson'], "<b><span style=\"font-weight: 400;\">What's wrong with you?</span></b>")
+
     def test_transliteration(self):
         # pytest test_translation.py -k test_transliteration
         

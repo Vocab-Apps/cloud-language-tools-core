@@ -175,6 +175,9 @@ class ServiceManager():
                         result[service_name] = self.get_translation(text, service_name, from_language_id, to_language_id)
                     except cloudlanguagetools.errors.RequestError:
                         pass # don't do anything
+                    except Exception as e:
+                        # default exception handler
+                        logging.exception(f'could not retrieve translation for service {service_name}, text: {text}')
                     time_diff = timeit.default_timer() - starttime
                     logging.info(f'get_all_translation processing time for {service_name}: {time_diff:.1f}')
         global_time_diff = timeit.default_timer() - global_starttime

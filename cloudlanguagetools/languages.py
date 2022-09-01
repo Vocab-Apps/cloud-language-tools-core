@@ -352,7 +352,8 @@ AudioLanguageDefaults = {
     Language.nl: AudioLanguage.nl_NL,
     Language.sw: AudioLanguage.sw_TZ,
     Language.ta: AudioLanguage.ta_IN,
-    Language.ur: AudioLanguage.ur_PK
+    Language.ur: AudioLanguage.ur_PK,
+    Language.zh_cn: AudioLanguage.zh_CN
 }
 
 # if only one locale is available, make that the default

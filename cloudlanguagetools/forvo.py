@@ -204,6 +204,14 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.ba_RU: 'RUS',
             cloudlanguagetools.languages.AudioLanguage.eu: 'ESP',
             cloudlanguagetools.languages.AudioLanguage.en_CB: 'VGB',
+            
+            cloudlanguagetools.languages.AudioLanguage.zh_CN: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.zh_CN_henan: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.zh_CN_liaoning: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.zh_CN_shaanxi: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.zh_CN_shandong: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.zh_CN_sichuan: 'CHN',
+
         }
         if audio_language not in country_code_map:
             logging.error(f'no country code found for {audio_language}')

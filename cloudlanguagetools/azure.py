@@ -24,11 +24,6 @@ import azure.cognitiveservices.speech.audio
 logger = logging.getLogger(__name__)
 
 AUDIO_LOCALE_OVERRIDE_MAP = {
-    'zh-CN-liaoning': 'zh_CN',
-    'zh-CN-sichuan': 'zh_CN',
-    'zh-CN-henan': 'zh_CN',
-    'zh-CN-shaanxi': 'zh_CN',
-    'zh-CN-shandong': 'zh_CN'
 }
 
 class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):

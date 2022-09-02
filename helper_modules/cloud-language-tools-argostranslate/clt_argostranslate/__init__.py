@@ -5,6 +5,12 @@ def configure_package_dir():
     os.makedirs(argos_packages_dir, exist_ok=True)
     os.environ['ARGOS_PACKAGES_DIR'] = argos_packages_dir
 
+def delete_cache_dir():
+    import shutil
+    import argostranslate.settings
+    cache_dir = argostranslate.settings.cache_dir
+    print(f'deleting {cache_dir}')
+    shutil.rmtree(cache_dir)
 
 def install_all_packages():
     configure_package_dir()
@@ -17,4 +23,5 @@ def install_all_packages():
         print(f'installing {available_package}')
         download_path = available_package.download()
         argostranslate.package.install_from_path(download_path)
+    delete_cache_dir()
     

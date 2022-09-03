@@ -90,13 +90,19 @@ class AmazonService(cloudlanguagetools.service.Service):
         pass
 
     def configure(self, config):
-        os.environ['AWS_ACCESS_KEY_ID'] = config['AWS_ACCESS_KEY_ID']
-        os.environ['AWS_SECRET_ACCESS_KEY'] = config['AWS_SECRET_ACCESS_KEY']
-        os.environ['AWS_DEFAULT_REGION'] = config['AWS_DEFAULT_REGION']
+        aws_access_key_id = config['AWS_ACCESS_KEY_ID']
+        aws_secret_access_key = config['AWS_SECRET_ACCESS_KEY']
+        region_name = config['AWS_DEFAULT_REGION']
 
         self.polly_client = boto3.client("polly", 
+            region_name=region_name,
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
             config=botocore.config.Config(connect_timeout=cloudlanguagetools.constants.RequestTimeout, read_timeout=cloudlanguagetools.constants.RequestTimeout))
         self.translate_client = boto3.client("translate",
+            region_name=region_name,
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,        
             config=botocore.config.Config(connect_timeout=cloudlanguagetools.constants.RequestTimeout, read_timeout=cloudlanguagetools.constants.RequestTimeout))
 
     def get_translation(self, text, from_language_key, to_language_key):

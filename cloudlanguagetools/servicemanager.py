@@ -16,6 +16,7 @@ import cloudlanguagetools.cereproc
 import cloudlanguagetools.vocalware
 import cloudlanguagetools.fptai
 import cloudlanguagetools.voicen
+import cloudlanguagetools.libretranslate
 import cloudlanguagetools.encryption
 
 LOAD_NLP_MODELS = os.environ.get('CLOUDLANGUAGETOOLS_CORE_LOAD_NLP', 'yes') == 'yes'
@@ -53,6 +54,7 @@ class ServiceManager():
             self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
             self.services[cloudlanguagetools.constants.Service.ArgosTranslate.name] = cloudlanguagetools.argostranslate.ArgosTranslateService()
             self.services[cloudlanguagetools.constants.Service.Wenlin.name] = cloudlanguagetools.wenlin.WenlinService()
+            self.services[cloudlanguagetools.constants.Service.LibreTranslate.name] = cloudlanguagetools.libretranslate.LibreTranslateService()
 
     def configure_default(self):
         # use the stored keys to configure services

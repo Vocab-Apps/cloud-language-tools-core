@@ -65,6 +65,7 @@ class Service(enum.Enum):
     Spacy = enum.auto()
     ArgosTranslate = enum.auto()
     Wenlin = enum.auto()
+    LibreTranslate = enum.auto()
 
 class Gender(enum.Enum):
     Male = enum.auto()

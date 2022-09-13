@@ -146,6 +146,9 @@ class TestTranslation(unittest.TestCase):
     def test_translate_french_argos(self):
         self.translate_text(Service.ArgosTranslate, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement.')
 
+    def test_translate_french_libretranslate(self):
+        self.translate_text(Service.LibreTranslate, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement.')        
+
     def test_translate_all(self):
         # pytest test_translation.py -rPP -k test_translate_all
         # pytest test_translation.py --capture=no --log-cli-level=INFO -k test_translate_all

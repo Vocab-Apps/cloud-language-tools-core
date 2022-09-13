@@ -18,7 +18,7 @@ class PostInstallCommand(install):
 
 
 setup(name='clt_wenlin',
-      version='0.7',
+      version='0.8',
       description='Helper module for Cloud Language Tools, download wenlin data',
       url='https://github.com/Language-Tools/cloud-language-tools-core',
       author='Luc',

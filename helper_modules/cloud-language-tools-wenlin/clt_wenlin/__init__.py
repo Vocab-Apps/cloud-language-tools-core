@@ -284,4 +284,5 @@ def download_wenlin_db():
         os.mkdir(dirname)
     
     shutil.copy(temp_file.name, output_file)
+    os.chmod(output_file , 0o644)
     print(f'moved file to {output_file}')

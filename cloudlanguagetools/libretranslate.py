@@ -59,7 +59,7 @@ class LibreTranslateService(cloudlanguagetools.service.Service):
             return response_data['translatedText']
 
         error_message = f'LibreTranslate: could not translate text [{text}] from {from_language_key} to {to_language_key} ({response_data})'
-        raise cloudlanguagetools.errors.RequestError(error_message)        
+        raise cloudlanguagetools.errors.RequestError(error_message)
 
     def get_transliteration(self, text, transliteration_key):
         raise Exception('not supported')

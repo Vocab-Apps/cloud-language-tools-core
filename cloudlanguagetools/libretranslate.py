@@ -51,7 +51,7 @@ class LibreTranslateService(cloudlanguagetools.service.Service):
             'source': from_language_key,
             'target': to_language_key
         }
-        logger.info(f'translating using parameters: {data}')
+        logger.debug(f'translating using parameters: {data}')
         response = requests.post(self.BASE_URL + '/translate', data=data, timeout=cloudlanguagetools.constants.RequestTimeout)
         response_data = response.json()        
 

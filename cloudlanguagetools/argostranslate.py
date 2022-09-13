@@ -33,7 +33,7 @@ class ArgosTranslationLanguage(cloudlanguagetools.translationlanguage.Translatio
     def get_language_id(self):
         return self.language_id
 
-
+# NOTE: this service is disabled
 class ArgosTranslateService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass

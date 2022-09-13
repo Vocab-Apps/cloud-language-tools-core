@@ -140,11 +140,13 @@ class TestTranslation(unittest.TestCase):
         self.translate_text(Service.DeepL, 'Je ne suis pas intéressé.', Language.fr, Language.en, ["""I'm not interested.""", 'i am not interested'])
         self.translate_text(Service.DeepL, '送外卖的人', Language.zh_cn, Language.en, ['delivery person', 'takeaway delivery people'])
 
-    def test_translate_chinese_argos(self):
-        self.translate_text(Service.ArgosTranslate, '中国有很多外国人', Language.zh_cn, Language.en, 'there are many foreigners in china')
+    
+    # 2022/09/13: argos service disabled
+    # def test_translate_chinese_argos(self):
+    #     self.translate_text(Service.ArgosTranslate, '中国有很多外国人', Language.zh_cn, Language.en, 'there are many foreigners in china')
 
-    def test_translate_french_argos(self):
-        self.translate_text(Service.ArgosTranslate, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement.')
+    # def test_translate_french_argos(self):
+    #     self.translate_text(Service.ArgosTranslate, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement.')
 
     def test_translate_french_libretranslate(self):
         self.translate_text(Service.LibreTranslate, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement.')        

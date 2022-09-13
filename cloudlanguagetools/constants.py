@@ -63,7 +63,6 @@ class Service(enum.Enum):
     FptAi = enum.auto()
     PyThaiNLP = enum.auto()
     Spacy = enum.auto()
-    ArgosTranslate = enum.auto()
     Wenlin = enum.auto()
     LibreTranslate = enum.auto()
 

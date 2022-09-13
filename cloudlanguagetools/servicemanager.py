@@ -16,7 +16,6 @@ import cloudlanguagetools.cereproc
 import cloudlanguagetools.vocalware
 import cloudlanguagetools.fptai
 import cloudlanguagetools.voicen
-import cloudlanguagetools.libretranslate
 import cloudlanguagetools.encryption
 
 LOAD_NLP_MODELS = os.environ.get('CLOUDLANGUAGETOOLS_CORE_LOAD_NLP', 'yes') == 'yes'
@@ -28,8 +27,8 @@ if LOAD_NLP_MODELS:
     import cloudlanguagetools.easypronunciation
     import cloudlanguagetools.pythainlp
     import cloudlanguagetools.spacy
-    import cloudlanguagetools.argostranslate
     import cloudlanguagetools.wenlin
+    import cloudlanguagetools.libretranslate    
 
 class ServiceManager():
     def  __init__(self):
@@ -52,7 +51,6 @@ class ServiceManager():
             self.services[cloudlanguagetools.constants.Service.PyThaiNLP.name] = cloudlanguagetools.pythainlp.PyThaiNLPService()
             self.services[cloudlanguagetools.constants.Service.Spacy.name] = cloudlanguagetools.spacy.SpacyService()
             self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
-            self.services[cloudlanguagetools.constants.Service.ArgosTranslate.name] = cloudlanguagetools.argostranslate.ArgosTranslateService()
             self.services[cloudlanguagetools.constants.Service.Wenlin.name] = cloudlanguagetools.wenlin.WenlinService()
             self.services[cloudlanguagetools.constants.Service.LibreTranslate.name] = cloudlanguagetools.libretranslate.LibreTranslateService()
 

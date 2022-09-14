@@ -1,3 +1,4 @@
+from asyncio import constants
 import os
 import base64
 import tempfile
@@ -249,3 +250,24 @@ class ServiceManager():
         service = self.services[cloudlanguagetools.constants.Service.Azure.name]
         result = service.detect_language(text_list)
         return result
+
+    def service_cost(self, text, service_name, request_type: cloudlanguagetools.constants.RequestType):
+        """return the cost of using a service, in characters"""
+        service = cloudlanguagetools.constants.Service[service_name]
+        character_length = len(text)
+        
+        FREE_SERVICES = [
+            cloudlanguagetools.constants.Service.MandarinCantonese,
+            cloudlanguagetools.constants.Service.LibreTranslate,
+            cloudlanguagetools.constants.Service.Epitran,
+            cloudlanguagetools.constants.Service.Wenlin,
+            cloudlanguagetools.constants.Service.PyThaiNLP,
+        ]
+
+        if service in FREE_SERVICES:
+            return 0
+
+        if service == cloudlanguagetools.constants.Service.Naver and request_type == cloudlanguagetools.constants.RequestType.audio:
+            return 6 * character_length
+
+        return character_length

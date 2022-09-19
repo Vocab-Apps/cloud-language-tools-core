@@ -1,3 +1,2 @@
-clt_spacy
 clt_wenlin
 clt_requirements

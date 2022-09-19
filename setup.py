@@ -20,7 +20,6 @@ setup(name='cloudlanguagetools',
       license='GPL',
       packages=['cloudlanguagetools'],
       install_requires=[
-          'clt_spacy',
           'clt_wenlin',
           'clt_requirements'
       ],

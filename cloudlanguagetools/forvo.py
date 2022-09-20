@@ -25,6 +25,7 @@ class ForvoVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, language_code, country_code, audio_language, gender):
         # print(voice_data)
         self.service = cloudlanguagetools.constants.Service.Forvo
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.language_code = language_code
         self.country_code = country_code
         self.audio_language = audio_language

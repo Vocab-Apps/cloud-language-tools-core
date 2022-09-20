@@ -20,6 +20,7 @@ NAVER_VOICE_PITCH_DEFAULT = 0
 class NaverVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, audio_language, name, gender, description, voice_type):
         self.service = cloudlanguagetools.constants.Service.Naver
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.audio_language = audio_language
         self.name = name
         self.gender = gender

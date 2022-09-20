@@ -10,6 +10,7 @@ import cloudlanguagetools.transliterationlanguage
 class EpitranTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, language, epitran_language_code):
         self.service = cloudlanguagetools.constants.Service.Epitran
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.free
         self.language = language
         self.epitran_language_code = epitran_language_code
 

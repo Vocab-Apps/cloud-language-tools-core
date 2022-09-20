@@ -37,5 +37,6 @@ class TransliterationLanguage(abc.ABC):
             'transliteration_name': self.get_transliteration_name(),
             'transliteration_shortname': self.get_transliteration_shortname(),
             'transliteration_key': self.get_transliteration_key(),
-            'transliteration_id': self.get_transliteration_id()
+            'transliteration_id': self.get_transliteration_id(),
+            'service_fee': self.service_fee.name
         } 

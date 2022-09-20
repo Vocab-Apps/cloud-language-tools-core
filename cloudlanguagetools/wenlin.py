@@ -14,6 +14,7 @@ import cloudlanguagetools.dictionarylookup
 class WenlinDictionaryLookup(cloudlanguagetools.dictionarylookup.DictionaryLookup):
     def __init__(self, source_language, lookup_type):
         self.service = cloudlanguagetools.constants.Service.Wenlin
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.free
         self.target_language = cloudlanguagetools.languages.Language.en
         self.language = source_language
         self.lookup_type = lookup_type

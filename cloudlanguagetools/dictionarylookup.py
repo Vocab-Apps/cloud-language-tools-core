@@ -43,5 +43,6 @@ class DictionaryLookup(abc.ABC):
             'lookup_name': self.get_lookup_name(),
             'lookup_shortname': self.get_lookup_shortname(),
             'lookup_key': self.get_lookup_key(),
-            'lookup_id': self.get_lookup_id()
+            'lookup_id': self.get_lookup_id(),
+            'service_fee': self.service_fee.name
         } 

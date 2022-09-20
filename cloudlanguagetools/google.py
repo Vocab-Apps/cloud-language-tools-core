@@ -25,6 +25,7 @@ def language_code_to_enum(language_code):
 class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         self.service = cloudlanguagetools.constants.Service.Google
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.name = voice_data.name
         self.google_ssml_gender = google.cloud.texttospeech.SsmlVoiceGender(voice_data.ssml_gender)
         gender_str = self.google_ssml_gender.name.lower().capitalize()

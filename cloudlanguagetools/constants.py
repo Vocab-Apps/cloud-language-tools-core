@@ -8,6 +8,7 @@ class RequestType(enum.Enum):
     transliteration = enum.auto()
     audio = enum.auto()
     breakdown = enum.auto()
+    dictionary = enum.auto()
 
 class UsageScope(enum.Enum):
     def __init__(self, key_str):
@@ -33,6 +34,10 @@ class Client(enum.Enum):
     languagetools = enum.auto()
     hypertts = enum.auto()
     test = enum.auto()
+
+class ServiceFee(enum.Enum):
+    free = enum.auto()
+    paid = enum.auto()
 
 # what triggered this request (batch / on the fly / editor)
 class RequestMode(enum.Enum):

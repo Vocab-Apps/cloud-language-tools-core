@@ -30,6 +30,7 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         # print(voice_data)
         self.service = cloudlanguagetools.constants.Service.Azure
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         locale = voice_data['Locale']
         locale = AUDIO_LOCALE_OVERRIDE_MAP.get(locale, locale)
         language_enum_name = locale.replace('-', '_')
@@ -109,6 +110,7 @@ def get_translation_language_enum(language_id):
 class AzureTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language_id):
         self.service = cloudlanguagetools.constants.Service.Azure
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.language_id = language_id
         self.language = get_translation_language_enum(language_id)
 
@@ -118,6 +120,7 @@ class AzureTranslationLanguage(cloudlanguagetools.translationlanguage.Translatio
 class AzureTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, language_id, from_script, to_script, from_script_name, to_script_name):
         self.service = cloudlanguagetools.constants.Service.Azure
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.language_id = language_id
         self.language = get_translation_language_enum(language_id)
         self.from_script = from_script
@@ -143,6 +146,7 @@ class AzureTransliterationLanguage(cloudlanguagetools.transliterationlanguage.Tr
 class AzureDictionaryLookup(cloudlanguagetools.dictionarylookup.DictionaryLookup):
     def __init__(self, source_language_code, target_language_code, lookup_type):
         self.service = cloudlanguagetools.constants.Service.Azure
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.language = get_translation_language_enum(source_language_code)
         self.target_language = get_translation_language_enum(target_language_code)
         self.source_language_code = source_language_code

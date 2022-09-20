@@ -13,6 +13,7 @@ VARIANT_JAPANESE_KANA = 'Kana'
 class EasyPronunciationTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, url_path, language, api_params, api_key, variant = None):
         self.service = cloudlanguagetools.constants.Service.EasyPronunciation
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.url_path = url_path
         self.language = language
         self.api_params = api_params

@@ -15,6 +15,7 @@ import cloudlanguagetools.errors
 class VoicenVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_id, audio_language, gender, name):
         self.service = cloudlanguagetools.constants.Service.Voicen
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.audio_language = audio_language
         self.name = name
         self.gender = gender

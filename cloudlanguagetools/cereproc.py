@@ -27,6 +27,7 @@ def get_audio_language_enum(language_iso, country_iso):
 class CereProcVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         self.service = cloudlanguagetools.constants.Service.CereProc
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.audio_language = get_audio_language_enum(voice_data['language_iso'], voice_data['country_iso'])
         self.name = voice_data['name']
         self.region = voice_data['region']

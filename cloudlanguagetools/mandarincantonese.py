@@ -8,6 +8,7 @@ import pinyin_jyutping_sentence
 class MandarinCantoneseTransliteration(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, language, conversion_type, tone_numbers, spaces):
         self.service = cloudlanguagetools.constants.Service.MandarinCantonese
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.free
         self.language = language
         self.conversion_type = conversion_type
         self.tone_numbers = tone_numbers

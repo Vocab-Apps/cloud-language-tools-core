@@ -19,6 +19,7 @@ FPTAI_VOICE_SPEED_DEFAULT = 0
 class FptAiVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, audio_language, voice_id, name, gender, region):
         self.service = cloudlanguagetools.constants.Service.FptAi
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.audio_language = audio_language
         self.voice_id = voice_id
         self.name = name

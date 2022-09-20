@@ -13,6 +13,7 @@ class SpacyTokenization(cloudlanguagetools.tokenization.Tokenization):
     def __init__(self, language, model_name, variant=None):
         self.language = language
         self.service = cloudlanguagetools.constants.Service.Spacy
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.free
         self.model_name = model_name
         self.variant = variant
 

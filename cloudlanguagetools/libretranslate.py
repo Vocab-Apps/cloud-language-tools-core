@@ -23,6 +23,7 @@ def get_translation_language_enum(language_id):
 class LibreTranslateLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language_id):
         self.service = cloudlanguagetools.constants.Service.LibreTranslate
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.free
         self.language_id = language_id
         self.language = get_translation_language_enum(language_id)
 

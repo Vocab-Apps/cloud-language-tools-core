@@ -35,6 +35,7 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         # print(voice_data)
         # {'Gender': 'Female', 'Id': 'Lotte', 'LanguageCode': 'nl-NL', 'LanguageName': 'Dutch', 'Name': 'Lotte', 'SupportedEngines': ['standard']}
         self.service = cloudlanguagetools.constants.Service.Amazon
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.gender = cloudlanguagetools.constants.Gender[voice_data['Gender']]
         self.voice_id = voice_data['Id']
         self.name = voice_data['Name']

@@ -16,6 +16,7 @@ import cloudlanguagetools.errors
 class DeepLTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language, language_id):
         self.service = cloudlanguagetools.constants.Service.DeepL
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.language = language
         self.language_id = language_id
 

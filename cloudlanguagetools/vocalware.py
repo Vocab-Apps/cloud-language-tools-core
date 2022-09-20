@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 class VocalWareVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, audio_language, name, gender, language_id, voice_id, engine_id):
         self.service = cloudlanguagetools.constants.Service.VocalWare
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.audio_language = audio_language
         self.name = name
         self.gender = gender

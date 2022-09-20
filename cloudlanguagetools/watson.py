@@ -38,6 +38,7 @@ def get_audio_language_enum(voice_language):
 class WatsonTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language_id):
         self.service = cloudlanguagetools.constants.Service.Watson
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.language_id = language_id
         self.language = get_translation_language_enum(language_id)
 
@@ -47,6 +48,7 @@ class WatsonTranslationLanguage(cloudlanguagetools.translationlanguage.Translati
 class WatsonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         self.service = cloudlanguagetools.constants.Service.Watson
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.audio_language = get_audio_language_enum(voice_data['language'])
         self.name = voice_data['name']
         self.description = voice_data['description']

@@ -14,5 +14,6 @@ class TranslationLanguage():
             'service': self.service.name,
             'language_code': self.get_language_code(),
             'language_name': self.get_language_name(),
-            'language_id': self.get_language_id()
+            'language_id': self.get_language_id(),
+            'service_fee': self.service_fee.name
         }    

@@ -18,6 +18,7 @@ class PyThaiNLPTransliterationLanguage(cloudlanguagetools.transliterationlanguag
     def __init__(self, mode):
         self.language = cloudlanguagetools.languages.Language.th
         self.service = cloudlanguagetools.constants.Service.PyThaiNLP
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.free
         self.mode = mode
 
     def get_transliteration_name(self):
@@ -37,6 +38,7 @@ class PyThaiNLPTokenization(cloudlanguagetools.tokenization.Tokenization):
     def __init__(self, mode):
         self.language = cloudlanguagetools.languages.Language.th
         self.service = cloudlanguagetools.constants.Service.PyThaiNLP
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.free
         self.mode = mode
 
     def get_tokenization_name(self):

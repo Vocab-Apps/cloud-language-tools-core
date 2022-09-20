@@ -90,6 +90,39 @@ class ServiceManager():
         }
         
 
+    def get_language_data_json_v2(self):
+        # retrieve all language data (tts, translation, transliteration, etc), sort by free/free+paid
+        logging.info('retrieving language data')
+        
+        logging.info('retrieving translation list')
+        translation_language_list = self.get_translation_language_list()
+        logging.info('retrieving transliteration language list')
+        transliteration_language_list = self.get_transliteration_language_list()
+        logging.info('retrieving tts voice list')
+        tts_voice_list = self.get_tts_voice_list()
+        logging.info('retrieving tokenization options')
+        tokenization_options = self.get_tokenization_options()
+        logging.info('retrieving dictionary lookup options')
+        dictionary_lookup_options = self.get_dictionary_lookup_options()        
+
+        return {
+            'premium': {
+                'translation_options': [option.json_obj() for option in translation_language_list],
+                'transliteration_options': [option.json_obj() for option in transliteration_language_list],
+                'voice_list': [voice.json_obj() for voice in tts_voice_list],
+                'tokenization_options': [option.json_obj() for option in tokenization_options],
+                'dictionary_lookup_options': [option.json_obj() for option in dictionary_lookup_options],
+            },
+            'free': {
+                'translation_options': [option.json_obj() for option in translation_language_list if option.service_fee == cloudlanguagetools.constants.ServiceFee.free],
+                'transliteration_options': [option.json_obj() for option in transliteration_language_list if option.service_fee == cloudlanguagetools.constants.ServiceFee.free],
+                'voice_list': [voice.json_obj() for voice in tts_voice_list if voice.service_fee == cloudlanguagetools.constants.ServiceFee.free],
+                'tokenization_options': [option.json_obj() for option in tokenization_options if option.service_fee == cloudlanguagetools.constants.ServiceFee.free],
+                'dictionary_lookup_options': [option.json_obj() for option in dictionary_lookup_options if option.service_fee == cloudlanguagetools.constants.ServiceFee.free],
+            }
+        }
+                
+
     def get_language_list(self):
         result_dict = {}
         for language in cloudlanguagetools.languages.Language:

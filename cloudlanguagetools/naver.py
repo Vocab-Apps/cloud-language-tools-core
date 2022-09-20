@@ -54,6 +54,7 @@ class NaverVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 class NaverTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language, language_id):
         self.service = cloudlanguagetools.constants.Service.Naver
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.language = language
         self.language_id = language_id
 

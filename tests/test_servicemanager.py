@@ -32,3 +32,18 @@ class TestTranslation(unittest.TestCase):
         self.assertEqual(self.manager.service_cost('abcd', 'Naver', cloudlanguagetools.constants.RequestType.audio), 24)
         self.assertEqual(self.manager.service_cost('abcd', 'MandarinCantonese', cloudlanguagetools.constants.RequestType.transliteration), 0)
 
+
+    def test_language_data_json_v2(self):
+        language_data = self.manager.get_language_data_json_v2()
+        
+        # check free translation services
+        free_translation_options = language_data['free']['translation_options']
+        # check that libretranslate is there
+        free_translation_services = list(set([option['service'] for option in free_translation_options]))
+        self.assertEqual(free_translation_services, ['LibreTranslate'])
+
+        # check free transliteration services
+        free_transliteration_options = language_data['free']['transliteration_options']
+        free_transliteration_services = list(set([option['service'] for option in free_transliteration_options]))
+        free_transliteration_services.sort()
+        self.assertEqual(free_transliteration_services, ['Epitran', 'MandarinCantonese', 'PyThaiNLP'])

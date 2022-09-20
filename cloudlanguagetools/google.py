@@ -95,6 +95,7 @@ def get_translation_language_enum(language_id):
 class GoogleTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language_id):
         self.service = cloudlanguagetools.constants.Service.Google
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.language_id = language_id
         self.language = get_translation_language_enum(language_id)
 

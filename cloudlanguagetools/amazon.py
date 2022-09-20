@@ -21,7 +21,8 @@ DEFAULT_VOICE_RATE = 100
 def get_audio_language_enum(language_code):
     language_map = {
         'arb': 'ar_XA',
-        'cmn-CN': 'zh_CN'
+        'cmn-CN': 'zh_CN',
+        'yue-CN': 'zh_HK'
     }
 
     language_enum_name = language_code.replace('-', '_')

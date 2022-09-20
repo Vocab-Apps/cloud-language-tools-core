@@ -6,7 +6,6 @@ import sqlite3
 import json
 import tempfile
 import hashlib
-import pathlib
 
 logger = logging.getLogger(__name__)
 
@@ -261,8 +260,7 @@ def create_sqlite_file(dict_filepath, sqlite_filepath):
     connection.close()
 
 def get_wenlin_db_path():
-    home_dir = pathlib.Path.home()
-    return os.path.join(home_dir, 'clt_data', f'wenlin_{WENLIN_DB_REV}.db')
+    return os.path.join('/clt_data', f'wenlin_{WENLIN_DB_REV}.db')
 
 def get_wenlin_db_download_filename():
     hash_str = hashlib.sha224(f'wenlin_db_{WENLIN_DB_REV}'.encode('utf-8')).hexdigest()

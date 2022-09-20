@@ -20,7 +20,7 @@ setup(name='cloudlanguagetools',
       license='GPL',
       packages=['cloudlanguagetools'],
       install_requires=[
-          'clt_wenlin>=0.9',
+          'clt_wenlin>=1.0',
           'clt_requirements>=0.2'
       ],
       )

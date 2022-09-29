@@ -67,6 +67,7 @@ class VocalWareService(cloudlanguagetools.service.Service):
         url = f"""http://www.vocalware.com/tts/gen.php?{url_parameters}"""
 
         retry_count = 3
+        has_timeout_response_header = False
         while retry_count > 0:
             logger.debug(f'retrieving url {url}, retry_count: {retry_count}')
             try:
@@ -87,6 +88,9 @@ class VocalWareService(cloudlanguagetools.service.Service):
 
         response_data = response.content
         error_message = f'Status code: {response.status_code}: {response_data}'
+
+        if has_timeout_response_header:
+            raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving VocalWare audio')
 
         # reformat certain error messages
         if response.status_code == 503:

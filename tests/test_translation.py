@@ -379,7 +379,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('a ˈke ˈoɾa u̯sˈtɛð ˈsjɛra', result)
+        self.assertIn(result, ['a ˈke ˈoɾa u̯sˈtɛð ˈsjɛra', 'a ˈke ˈoɾa wsˈteð ˈsjera'])
 
         # german
         source_text = 'Können Sie mir das auf der Karte zeigen?'

@@ -203,7 +203,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.es_VE: 'VEN', 
 
             cloudlanguagetools.languages.AudioLanguage.ba_RU: 'RUS',
-            cloudlanguagetools.languages.AudioLanguage.eu: 'ESP',
+            cloudlanguagetools.languages.AudioLanguage.eu_ES: 'ESP',
             cloudlanguagetools.languages.AudioLanguage.en_CB: 'VGB',
             
             cloudlanguagetools.languages.AudioLanguage.zh_CN: 'CHN',

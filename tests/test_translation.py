@@ -401,6 +401,35 @@ class TestTranslation(unittest.TestCase):
         self.assertIn(result, ['mɐ.ˈɡu ˈjæ pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ', 'mɐ.ˈɡu ˈja pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ'])
 
 
+    def test_transliteration_easypronunciation_english_british_american(self):
+        # pytest tests/test_translation.py -rPP -k test_transliteration_easypronunciation_english_british_american
+
+        service = cloudlanguagetools.constants.Service.EasyPronunciation.name
+
+        # british english
+        # ===============
+
+        from_language = Language.en.name
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language \
+            and x['service'] == service \
+            and x['transliteration_key'].get('variant', None) == 'British']
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+
+        source_text = 'car'
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ˈkɑː', result)
+        
+        source_text = 'lot'
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ˈlɒt', result)
+
+        source_text = 'aluminium'
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ˌæljəˈmɪniəm', result)
+
 
     def verify_transliteration(self, source_text, transliteration_option, expected_output):
         service = transliteration_option['service']

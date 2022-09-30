@@ -93,6 +93,54 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
                 'spell_numbers':1
             }, 'english'),
 
+            EasyPronunciationTransliterationLanguage('/english-api.php', cloudlanguagetools.languages.Language.en,
+            {
+                'version': 1,
+                'english_phonetics_algorithm': 'american_miscellaneous_sources',
+                'Convert_to_english':'ipa',
+                'add_aspiration_symbol': 0,
+                'narrow_transcription':0,
+                'r_replacement':1,
+                'cot_caught_merger':1,
+                'er_replacement':1,
+                'elongation_symbol_after_i_and_u':'always',
+                'only_i_for_es_ed_endings':0,
+                'show_rare_pronunciations':1,
+                'spell_numbers':1
+            }, 'english', 'American'),            
+
+            EasyPronunciationTransliterationLanguage('/english-api.php', cloudlanguagetools.languages.Language.en,
+            {
+                'version': 1,
+                'english_phonetics_algorithm': 'british_miscellaneous_sources',
+                'Convert_to_english':'ipa',
+                'add_aspiration_symbol': 0,
+                'narrow_transcription':0,
+                'r_replacement':1,
+                'cot_caught_merger':1,
+                'er_replacement':1,
+                'elongation_symbol_after_i_and_u':'always',
+                'only_i_for_es_ed_endings':0,
+                'show_rare_pronunciations':1,
+                'spell_numbers':1
+            }, 'english', 'British'),
+
+            EasyPronunciationTransliterationLanguage('/english-api.php', cloudlanguagetools.languages.Language.en,
+            {
+                'version': 1,
+                'english_phonetics_algorithm': 'australian',
+                'Convert_to_english':'ipa',
+                'add_aspiration_symbol': 0,
+                'narrow_transcription':0,
+                'r_replacement':1,
+                'cot_caught_merger':1,
+                'er_replacement':1,
+                'elongation_symbol_after_i_and_u':'always',
+                'only_i_for_es_ed_endings':0,
+                'show_rare_pronunciations':1,
+                'spell_numbers':1
+            }, 'english', 'Australian'),
+
             EasyPronunciationTransliterationLanguage('/italian-api.php', cloudlanguagetools.languages.Language.it,
             {
                 'version':1,

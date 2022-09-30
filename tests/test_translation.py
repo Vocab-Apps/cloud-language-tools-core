@@ -405,11 +405,11 @@ class TestTranslation(unittest.TestCase):
         # pytest tests/test_translation.py -rPP -k test_transliteration_easypronunciation_english_british_american
 
         service = cloudlanguagetools.constants.Service.EasyPronunciation.name
+        from_language = Language.en.name
 
         # british english
         # ===============
 
-        from_language = Language.en.name
         transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language \
             and x['service'] == service \
             and x['transliteration_key'].get('variant', None) == 'British']
@@ -429,6 +429,29 @@ class TestTranslation(unittest.TestCase):
         source_text = 'aluminium'
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('ˌæljəˈmɪniəm', result)
+
+        # american english
+        # ================
+
+        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language \
+            and x['service'] == service \
+            and x['transliteration_key'].get('variant', None) == 'American']
+        self.assertTrue(len(transliteration_candidates) == 1)
+        transliteration_option = transliteration_candidates[0]
+        service = transliteration_option['service']
+        transliteration_key = transliteration_option['transliteration_key']
+
+        source_text = 'car'
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ˈkɑːr', result)
+        
+        source_text = 'lot'
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ˈlɑːt', result)
+
+        source_text = 'aluminium'
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertEqual('ˌæljəˈmɪniːəm', result)
 
 
     def verify_transliteration(self, source_text, transliteration_option, expected_output):

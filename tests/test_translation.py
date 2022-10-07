@@ -142,6 +142,14 @@ class TestTranslation(unittest.TestCase):
         self.translate_text(Service.DeepL, 'Je ne suis pas intéressé.', Language.fr, Language.en, ["""I'm not interested.""", 'i am not interested'])
         self.translate_text(Service.DeepL, '送外卖的人', Language.zh_cn, Language.en, ['delivery person', 'takeaway delivery people'])
 
+    def test_translate_portuguese_deepl(self):
+        # pytest tests/test_translation.py -rPP -k test_translate_portuguese_deepl
+        self.translate_text(Service.DeepL, 'Please speak slowly', Language.en, Language.pt_pt, 'por favor, fale devagar')
+        self.translate_text(Service.DeepL, 'Please speak slowly', Language.en, Language.pt_br, 'por favor, fale devagar')
+
+        self.translate_text(Service.DeepL, 'por favor, fale devagar', Language.pt_pt, Language.fr, 'veuillez parler lentement')
+        self.translate_text(Service.DeepL, 'por favor, fale devagar', Language.pt_br, Language.fr, 'veuillez parler lentement')        
+
     
     # 2022/09/13: argos service disabled
     # def test_translate_chinese_argos(self):

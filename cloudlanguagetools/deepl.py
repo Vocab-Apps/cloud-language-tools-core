@@ -55,7 +55,8 @@ class DeepLService(cloudlanguagetools.service.Service):
             DeepLTranslationLanguage(language.lv, 'LV'),
             DeepLTranslationLanguage(language.nl, 'NL'),
             DeepLTranslationLanguage(language.pl, 'PL'),
-            DeepLTranslationLanguage(language.pt_pt, 'PT'),
+            DeepLTranslationLanguage(language.pt_pt, 'PT-PT'),
+            DeepLTranslationLanguage(language.pt_br, 'PT-BR'),
             DeepLTranslationLanguage(language.ro, 'RO'),
             DeepLTranslationLanguage(language.ru, 'RU'),
             DeepLTranslationLanguage(language.sk, 'SK'),
@@ -75,6 +76,14 @@ class DeepLService(cloudlanguagetools.service.Service):
         return []
 
     def get_translation(self, text, from_language_key, to_language_key):
+
+        override_source_language_map = {
+            'PT-PT': 'PT',
+            'PT-BR': 'PT'
+        }
+        from_language_key = override_source_language_map.get(from_language_key, from_language_key)
+
+
         params = {
             'auth_key': self.api_key,
             'text': text,

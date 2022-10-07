@@ -49,6 +49,7 @@ class DeepLService(cloudlanguagetools.service.Service):
             DeepLTranslationLanguage(language.fi, 'FI'),
             DeepLTranslationLanguage(language.fr, 'FR'),
             DeepLTranslationLanguage(language.hu, 'HU'),
+            DeepLTranslationLanguage(language.id_, 'ID'),
             DeepLTranslationLanguage(language.it, 'IT'),
             DeepLTranslationLanguage(language.ja, 'JA'),
             DeepLTranslationLanguage(language.lt, 'LT'),
@@ -62,6 +63,8 @@ class DeepLService(cloudlanguagetools.service.Service):
             DeepLTranslationLanguage(language.sk, 'SK'),
             DeepLTranslationLanguage(language.sl, 'SL'),
             DeepLTranslationLanguage(language.sv, 'SV'),
+            DeepLTranslationLanguage(language.tr, 'TR'),
+            DeepLTranslationLanguage(language.uk, 'UK'),
             DeepLTranslationLanguage(language.zh_cn, 'ZH'),
         ]
         return result        

@@ -40,6 +40,7 @@ class ServiceManager():
 
         if LOAD_TEST_SERVICES_ONLY:
             self.services[cloudlanguagetools.constants.Service.TestServiceA.name] = cloudlanguagetools.test_services.TestServiceA()
+            self.services[cloudlanguagetools.constants.Service.TestServiceB.name] = cloudlanguagetools.test_services.TestServiceB()
         else:
             self.services[cloudlanguagetools.constants.Service.Azure.name] = cloudlanguagetools.azure.AzureService()
             self.services[cloudlanguagetools.constants.Service.Google.name] = cloudlanguagetools.google.GoogleService()

@@ -50,6 +50,10 @@ class TestMockServices(unittest.TestCase):
         }
         self.assertEqual(translated_text_obj, translated_text_expected)
 
+        translated_text_str = manager.get_translation('text_input', 'TestServiceB', 'fr', 'en')
+        translated_text_obj = json.loads(translated_text_str)
+        self.assertEqual(translated_text_obj, translated_text_expected)
+
     def test_transliteration(self):
         if os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', 'no') != 'yes':
             return

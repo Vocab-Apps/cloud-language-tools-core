@@ -1,5 +1,4 @@
 import json
-import requests
 import logging
 
 import cloudlanguagetools.service
@@ -12,9 +11,6 @@ import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.dictionarylookup
 import cloudlanguagetools.errors
 
-
-import azure.cognitiveservices.speech
-import azure.cognitiveservices.speech.audio
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +128,8 @@ class TestServiceA(cloudlanguagetools.service.Service):
     def get_translation_language_list(self):
         result = []
         result.append(TestServiceATranslationLanguage(cloudlanguagetools.languages.Language.fr, 'fr'))
+        result.append(TestServiceATranslationLanguage(cloudlanguagetools.languages.Language.en, 'en'))
+        result.append(TestServiceATranslationLanguage(cloudlanguagetools.languages.Language.zh_cn, 'zh'))
         return result
 
     def get_transliteration_language_list(self):

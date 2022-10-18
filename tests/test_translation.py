@@ -100,7 +100,7 @@ class TestTranslation(unittest.TestCase):
     def test_translate_chinese(self):
         # pytest test_translation.py -k test_translate_chinese
         self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, ['the person who delivers the takeaway', 
-        'people who deliver takeaways', 'the person who delivered the takeaway'])
+        'people who deliver takeaways', 'the person who delivered the takeaway', 'food delivery people'])
         self.translate_text(Service.Google, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
         self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
         self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, ["Changer la carte d'embarquement", "changer de carte d'embarquement", "changer la carte d'embarquement"])

@@ -143,11 +143,16 @@ class TestServiceBase(cloudlanguagetools.service.Service):
     def get_dictionary_lookup_list(self):
         result = []
         result.append(TestServiceDictionaryLookup(cloudlanguagetools.languages.Language.fr, 'French', 'french', self.SERVICE, self.SERVICE_FEE))
+        result.append(TestServiceDictionaryLookup(cloudlanguagetools.languages.Language.zh_cn, 'Chinese', 'zh', self.SERVICE, self.SERVICE_FEE))
         return result
 
 
     def get_dictionary_lookup(self, text, lookup_key):
-        return f'dictionary: {text}'
+        return json.dumps({
+            'type': 'dictionary',
+            'text': text,
+            'lookup_key': lookup_key
+        })
 
 
 class TestServiceA(TestServiceBase):

@@ -48,3 +48,22 @@ class TestMockServices(unittest.TestCase):
             'to_language_key': 'en'
         }
         self.assertEqual(translated_text_obj, translated_text_expected)
+
+    def test_transliteration(self):
+        if os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', 'no') != 'yes':
+            return
+
+        manager = get_manager()
+        language_data = manager.get_language_data_json_v2()
+        translation_options = language_data['free']['transliteration_options']
+        # pprint.pprint(translation_options)
+        translation_options_zh = [x for x in translation_options if x['language_code'] == 'zh_cn']
+        self.assertEqual(len(translation_options_zh), 1)
+
+        transliterated_text_str = manager.get_transliteration('text_input', 'TestServiceA', translation_options_zh[0]['transliteration_key'])
+        transliterated_text_obj = json.loads(transliterated_text_str)
+        transliterated_text_expected = {
+            'text': 'text_input',
+            'transliteration_key': 'pinyin'
+        }
+        self.assertEqual(transliterated_text_obj, transliterated_text_expected)

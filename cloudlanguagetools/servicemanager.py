@@ -303,6 +303,7 @@ class ServiceManager():
             cloudlanguagetools.constants.Service.Epitran,
             cloudlanguagetools.constants.Service.Wenlin,
             cloudlanguagetools.constants.Service.PyThaiNLP,
+            cloudlanguagetools.constants.Service.TestServiceA,
         ]
 
         if service in FREE_SERVICES:

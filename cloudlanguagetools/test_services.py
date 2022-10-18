@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 class TestServiceVoice(cloudlanguagetools.ttsvoice.TtsVoice):
-    def __init__(self, audio_language, voice_name, voice_id, service_fee):
+    def __init__(self, audio_language, voice_name, voice_id, service, service_fee):
         self.audio_language = audio_language
         self.gender = cloudlanguagetools.constants.Gender.Female
         self.voice_name = voice_name
         self.voice_id = voice_id
-        self.service = cloudlanguagetools.constants.Service.TestServiceA
+        self.service = service
         self.service_fee = service_fee
 
     def get_voice_key(self):
@@ -37,8 +37,8 @@ class TestServiceVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         return {}
 
 class TestServiceTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
-    def __init__(self, language, language_id, service_fee):
-        self.service = cloudlanguagetools.constants.Service.TestServiceA
+    def __init__(self, language, language_id, service, service_fee):
+        self.service = service
         self.service_fee = service_fee
         self.language = language
         self.language_id = language_id
@@ -47,8 +47,8 @@ class TestServiceTranslationLanguage(cloudlanguagetools.translationlanguage.Tran
         return self.language_id
 
 class TestServiceTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
-    def __init__(self, language, name, transliteration_key, service_fee):
-        self.service = cloudlanguagetools.constants.Service.TestServiceA
+    def __init__(self, language, name, transliteration_key, service, service_fee):
+        self.service = service
         self.service_fee = service_fee
         self.language = language
         self.transliteration_key = transliteration_key
@@ -64,8 +64,8 @@ class TestServiceTransliterationLanguage(cloudlanguagetools.transliterationlangu
         return self.transliteration_key
 
 class TestServiceDictionaryLookup(cloudlanguagetools.dictionarylookup.DictionaryLookup):
-    def __init__(self, language, name, lookup_key, service_fee):
-        self.service = cloudlanguagetools.constants.Service.TestServiceA
+    def __init__(self, language, name, lookup_key, service, service_fee):
+        self.service = service
         self.service_fee = service_fee
         self.language = language
         self.name = name
@@ -108,7 +108,8 @@ class TestServiceBase(cloudlanguagetools.service.Service):
 
     def get_tts_voice_list(self):
         result = []
-        result.append(TestServiceVoice(cloudlanguagetools.languages.AudioLanguage.fr_FR, 'Paul', 'paul', self.SERVICE_FEE))
+        result.append(TestServiceVoice(cloudlanguagetools.languages.AudioLanguage.fr_FR, 'Paul', 'paul', 
+            self.SERVICE, self.SERVICE_FEE))
         return result
 
     def get_translation(self, text, from_language_key, to_language_key):
@@ -128,20 +129,20 @@ class TestServiceBase(cloudlanguagetools.service.Service):
 
     def get_translation_language_list(self):
         result = []
-        result.append(TestServiceTranslationLanguage(cloudlanguagetools.languages.Language.fr, 'fr', self.SERVICE_FEE))
-        result.append(TestServiceTranslationLanguage(cloudlanguagetools.languages.Language.en, 'en', self.SERVICE_FEE))
-        result.append(TestServiceTranslationLanguage(cloudlanguagetools.languages.Language.zh_cn, 'zh', self.SERVICE_FEE))
+        result.append(TestServiceTranslationLanguage(cloudlanguagetools.languages.Language.fr, 'fr', self.SERVICE, self.SERVICE_FEE))
+        result.append(TestServiceTranslationLanguage(cloudlanguagetools.languages.Language.en, 'en', self.SERVICE, self.SERVICE_FEE))
+        result.append(TestServiceTranslationLanguage(cloudlanguagetools.languages.Language.zh_cn, 'zh', self.SERVICE, self.SERVICE_FEE))
         return result
 
     def get_transliteration_language_list(self):
         result = []
-        result.append(TestServiceTransliterationLanguage(cloudlanguagetools.languages.Language.zh_cn, 'Pinyin', 'pinyin', self.SERVICE_FEE))
+        result.append(TestServiceTransliterationLanguage(cloudlanguagetools.languages.Language.zh_cn, 'Pinyin', 'pinyin', self.SERVICE, self.SERVICE_FEE))
         return result
 
 
     def get_dictionary_lookup_list(self):
         result = []
-        result.append(TestServiceDictionaryLookup(cloudlanguagetools.languages.Language.fr, 'French', 'french', self.SERVICE_FEE))
+        result.append(TestServiceDictionaryLookup(cloudlanguagetools.languages.Language.fr, 'French', 'french', self.SERVICE, self.SERVICE_FEE))
         return result
 
 
@@ -150,9 +151,11 @@ class TestServiceBase(cloudlanguagetools.service.Service):
 
 
 class TestServiceA(TestServiceBase):
+    SERVICE = cloudlanguagetools.constants.Service.TestServiceA
     SERVICE_FEE = cloudlanguagetools.constants.ServiceFee.free
 
 class TestServiceB(TestServiceBase):
+    SERVICE = cloudlanguagetools.constants.Service.TestServiceB
     SERVICE_FEE = cloudlanguagetools.constants.ServiceFee.paid
 
 

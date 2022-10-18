@@ -25,8 +25,9 @@ class TestMockServices(unittest.TestCase):
             return
 
         manager = get_manager()
-        language_data = manager.get_language_data_json()
-        self.assertTrue(len(language_data) > 0)
+        language_data = manager.get_language_data_json_v2()
+        self.assertTrue(len(language_data['premium']) > 0)
+        self.assertTrue(len(language_data['free']) > 0)
 
 
     def test_translation(self):

@@ -6,7 +6,7 @@ from setuptools.command.install import install
 # twine upload dist/*
 
 setup(name='cloudlanguagetools',
-      version='4.0',
+      version='4.1',
       description='Interface with various cloud APIs for language processing such as translation, text to speech',
       long_description=open('README.rst', encoding='utf-8').read(),
       url='https://github.com/Language-Tools/cloud-language-tools-core',

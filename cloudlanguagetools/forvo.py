@@ -207,6 +207,9 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.en_CB: 'VGB',
             
             cloudlanguagetools.languages.AudioLanguage.zh_CN: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.zh_HK: 'HKG',
+            cloudlanguagetools.languages.AudioLanguage.yue_CN: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.wuu_CN: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_henan: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_liaoning: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_shaanxi: 'CHN',

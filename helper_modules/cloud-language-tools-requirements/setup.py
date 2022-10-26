@@ -18,7 +18,7 @@ setup(name='clt_requirements',
       license='GPL',
       packages=['clt_requirements'],
       install_requires=[
-          'azure-cognitiveservices-speech',
+          'azure-cognitiveservices-speech==1.23.0',
           'requests',
           'google-cloud-texttospeech',
           'google-cloud-translate',

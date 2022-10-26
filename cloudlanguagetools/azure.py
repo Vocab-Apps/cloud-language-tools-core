@@ -264,7 +264,7 @@ class AzureService(cloudlanguagetools.service.Service):
             voice_list = json.loads(response.content)
             result = []
             for voice_data in voice_list:
-                # print(voice_data)
+                # print(voice_data['Status'])
                 try:
                     result.append(AzureVoice(voice_data))
                 except KeyError:

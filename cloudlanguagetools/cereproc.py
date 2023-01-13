@@ -62,6 +62,7 @@ class CereProcService(cloudlanguagetools.service.Service):
         auth_url = 'https://api.cerevoice.com/v2/auth'
         response = requests.get(auth_url, headers=headers, 
             timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
 
         access_token = response.json()['access_token']        
         return access_token

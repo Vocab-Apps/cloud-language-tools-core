@@ -103,7 +103,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             return output_temp_file
         except requests.exceptions.ReadTimeout as exception:
             raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving forvo audio')
-        except Exception as exception:
+        except requests.exceptions.RequestException as exception:
             logger.exception('could not retrieve forvo audio')
             raise cloudlanguagetools.errors.RequestError('Unable to retrieve audio from Forvo')
 

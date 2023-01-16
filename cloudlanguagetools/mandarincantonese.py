@@ -2,7 +2,7 @@ import json
 import requests
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
-import pinyin_jyutping_sentence
+import pinyin_jyutping
 
 
 class MandarinCantoneseTransliteration(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
@@ -43,7 +43,7 @@ class MandarinCantoneseTransliteration(cloudlanguagetools.transliterationlanguag
 
 class MandarinCantoneseService(cloudlanguagetools.service.Service):
     def __init__(self):
-        pass
+        self.pinyin_jyutping = pinyin_jyutping.PinyinJyutping()
 
 
     def get_tts_voice_list(self):
@@ -63,8 +63,8 @@ class MandarinCantoneseService(cloudlanguagetools.service.Service):
 
     def get_transliteration(self, text, transliteration_key):
         if transliteration_key['conversion_type'] == 'pinyin':
-            return pinyin_jyutping_sentence.pinyin(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])
+            return self.pinyin_jyutping.pinyin(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])[0]
         elif transliteration_key['conversion_type'] == 'jyutping':
-            return pinyin_jyutping_sentence.jyutping(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])
+            return self.pinyin_jyutping.jyutping(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])[0]
 
         raise Exception(f"unsupported conversion type: {transliteration_key['conversion_type']}")

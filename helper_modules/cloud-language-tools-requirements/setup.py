@@ -27,6 +27,7 @@ setup(name='clt_requirements',
           'pythainlp[thai2rom,ipa]',
           'jieba',
           'pinyin_jyutping_sentence',
+          'pinyin_jyutping',
           'cryptography',
           'pydub'
       ],

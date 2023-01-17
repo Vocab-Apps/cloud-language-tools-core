@@ -222,6 +222,47 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertEqual('prathetthai', result)
 
+    def test_pinyin_jyutping(self):
+        # pytest tests/test_translation.py -k test_pinyin_jyutping
+        # test direct access to the pinyin and jyuting functions (special case)
+
+
+        # pinyin
+        # ------
+
+        source_text = '成本很低'
+        result = self.manager.get_pinyin(source_text, False, False)
+        self.assertEqual(result, ['chéngběn hěn dī'])
+
+        # try with corrections
+        corrections = [
+            {
+                'chinese': '低',
+                'pinyin': 'di4'
+            }
+        ]
+        result = self.manager.get_pinyin(source_text, False, False, corrections=corrections)
+        self.assertEqual(result, ['chéngběn hěn dì', 'chéngběn hěn dī'])
+
+        # jyutping
+        # --------
+
+        source_text = '全身按摩'
+        expected_result = 'cyùnsān ônmō'
+        result = self.manager.get_jyutping(source_text, False, False)
+        self.assertEqual(result, [expected_result])
+
+        # try with corrections
+        corrections = [
+            {
+                'chinese': '按摩',
+                'jyutping': 'on1mo1'
+            }
+        ]        
+        result = self.manager.get_jyutping(source_text, False, False, corrections=corrections)
+        self.assertEqual(result, ['cyùnsān ōnmō', 'cyùnsān ônmō'])
+
+
     def test_transliteration_mandarincantonese(self):
         # pytest test_translation.py -k test_transliteration_mandarincantonese
         

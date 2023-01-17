@@ -284,7 +284,25 @@ class ServiceManager():
         
         return result
 
+    # special handling for pinyin and jyutping
+    # ========================================
+    
+    def get_pinyin_supported_languages(self):
+        return [
+            cloudlanguagetools.languages.Language.zh_cn,
+            cloudlanguagetools.languages.Language.zh_tw,
+        ]
 
+    def get_jyutping_supported_languages(self):
+        return [
+            cloudlanguagetools.languages.Language.yue
+        ]        
+
+    def get_pinyin(self, text, tone_numbers, spaces, corrections=[]):
+        return self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name].get_pinyin(text, tone_numbers, spaces, corrections)
+
+    def get_jyutping(self, text, tone_numbers, spaces, corrections=[]):
+        return self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name].get_jyutping(text, tone_numbers, spaces, corrections)
 
     def detect_language(self, text_list):
         """returns an enum from languages.Language"""

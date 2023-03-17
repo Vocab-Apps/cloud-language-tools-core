@@ -101,7 +101,10 @@ def get_translation_language_enum(language_id):
         'lzh': 'zh_lit',
         'mn-Cyrl': 'mn_cyrl',
         'mn-Mong': 'mn',
-        'iu-Latn': 'iu_latn'
+        'iu-Latn': 'iu_latn',
+        'lug': 'lg',
+        'nya': 'ny',
+        'run': 'rn'
     }
     if language_id in azure_language_id_map:
         language_id = azure_language_id_map[language_id]

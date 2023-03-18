@@ -112,6 +112,23 @@ def test_google_audio():
     print(f'tts result: {permanent_file_name}')
 
 
+def test_forvo_audio_tokipona():
+    manager = get_manager()
+
+    service = 'Forvo'
+    text = 'kulupu'
+
+    voice_key = {
+        'language_code': "tok",
+        'country_code': 'ANY'
+    }    
+
+    result = manager.get_tts_audio(text, service, voice_key, {})
+    permanent_file_name = 'google_output.mp3'
+    shutil.copyfile(result.name, permanent_file_name)
+    print(f'tts result: {permanent_file_name}')    
+
+
 def play_google_audio():
     manager = get_manager()
 
@@ -745,6 +762,7 @@ if __name__ == '__main__':
     # generate_video_audio()
     # test_azure_audio()
     # test_google_audio()
+    test_forvo_audio_tokipona()
     # play_google_audio()
     # play_azure_audio()
     # get_voice_list()
@@ -777,6 +795,6 @@ if __name__ == '__main__':
     # test_debounce()
     # load_vocalware_voices()
     # thai_tokenization()
-    test_get_language_data()
+    # test_get_language_data()
     # test_get_language_data_redis()
     # test_wenlin_lookup()

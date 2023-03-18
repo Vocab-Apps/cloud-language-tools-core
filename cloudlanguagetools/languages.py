@@ -134,6 +134,7 @@ class Language(enum.Enum):
     tr = ("Turkish")
     ts = ("Tsonga")
     tk = ("Turkmen")
+    tok = ("Toki Pona")
     uk = ("Ukrainian")
     ur = ("Urdu")
     ug = ("Uyghur")

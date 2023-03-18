@@ -110,6 +110,12 @@ for line in naver_voice_list.splitlines():
         voice_name = m.group(2)
         language = m.group(3)
         voice_type = m.group(4)
+        gender = None
+        if 'female' in voice_type.lower():
+            gender = 'Female'        
+        elif 'male' in voice_type.lower():
+            gender = 'Male'
+        
         #print(f'voice_id: {voice_id}, name: {voice_name} language: {language}, voice_type: {voice_type}')
-        print(f"NaverVoice(cloudlanguagetools.languages.AudioLanguage.{LANGUAGE_MAP[language]}, '{voice_id}', cloudlanguagetools.constants.Gender.Female, '{voice_name}', 'Premium'),")
+        print(f"NaverVoice(cloudlanguagetools.languages.AudioLanguage.{LANGUAGE_MAP[language]}, '{voice_id}', cloudlanguagetools.constants.Gender.{gender}, '{voice_name}', 'Premium'),")
 

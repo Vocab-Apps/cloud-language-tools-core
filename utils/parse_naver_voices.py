@@ -100,6 +100,19 @@ LANGUAGE_MAP = {
     'Korean + English (US)': 'ko_KR',
 }
 
+VOICE_TYPE_MAP = {
+    'clara': 'General',
+    'djoey': 'General',
+    'matt': 'General',
+    'carmen': 'General',
+    'jose': 'General',
+    'shinji': 'General',
+    'jinho': 'General',
+    'mijin': 'General',
+    'liangliang': 'General',
+    'meimei': 'General',
+}
+
 for line in naver_voice_list.splitlines():
     if len(line) > 1:
         # print(f'[{line}]')
@@ -107,6 +120,7 @@ for line in naver_voice_list.splitlines():
         if m == None:
             raise Exception(f'could not parse {line}')
         voice_id = m.group(1)
+        voice_id = voice_id.strip()
         voice_name = m.group(2)
         language = m.group(3)
         voice_type = m.group(4)
@@ -116,6 +130,11 @@ for line in naver_voice_list.splitlines():
         elif 'male' in voice_type.lower():
             gender = 'Male'
         
+        actual_voice_type = VOICE_TYPE_MAP.get(voice_id, 'Premium')
+        if 'child' in voice_type.lower():
+            actual_voice_type += ' (Child)'
+        
+
         #print(f'voice_id: {voice_id}, name: {voice_name} language: {language}, voice_type: {voice_type}')
-        print(f"NaverVoice(cloudlanguagetools.languages.AudioLanguage.{LANGUAGE_MAP[language]}, '{voice_id}', cloudlanguagetools.constants.Gender.{gender}, '{voice_name}', 'Premium'),")
+        print(f"            NaverVoice(cloudlanguagetools.languages.AudioLanguage.{LANGUAGE_MAP[language]}, '{voice_id}', cloudlanguagetools.constants.Gender.{gender}, '{voice_name}', '{actual_voice_type}'),")
 

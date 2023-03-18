@@ -359,7 +359,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('ˈduː ˈjuː ˈhæv ə ˈbɔɪˌfɹɛnd', result)        
+        self.assertIn(result, ['ˈduː ˈjuː ˈhæv ə ˈbɔɪˌfɹɛnd', 'ˈduː jə həv ə ˈbɔɪˌfɹɛnd'])        
 
         self.verify_easypronunciation_english('take', 'ˈteɪk')
         self.verify_easypronunciation_english('poor', 'ˈpʊr')

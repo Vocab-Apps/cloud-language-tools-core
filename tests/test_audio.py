@@ -383,7 +383,7 @@ class TestAudio(unittest.TestCase):
 
     def test_fptai_options(self):
         service = 'FptAi'
-        source_text = 'Tôi bị mất cái ví.'
+        source_text = 'xin chào bạn của tôi'
 
         voice_key = {
             "voice_id": "leminh"

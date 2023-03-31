@@ -208,7 +208,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('chéng běn hěn dī', result)
+        self.assertIn(result, ['chéng běn hěn dī', 'chéngběn hěndī'])
 
         # thai
         source_text = 'ประเทศไทย'

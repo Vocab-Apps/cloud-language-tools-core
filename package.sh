@@ -8,5 +8,7 @@ git tag -a ${GIT_TAG} -m "version ${GIT_TAG}"
 git push origin ${GIT_TAG}
 
 # build python module , upload to pypi
+# get twice user/password
+source ~/secrets/python/twine.sh
 python setup.py sdist
 twine upload dist/*

@@ -776,10 +776,43 @@ thai: ครับ romanization: (khap): english: polite particle used by male s
             ]
 
         messages = [
-            {"role": 'user', 'content': 'Convince someone to subscribe to AwesomeTTS Plus, a premium service to generate audio flashcards in Japanese using Anki.'}
+            {"role": 'user', 'content': 'When do we use this ? 大曬 (The attitude of "I\'m the boss!") provide some examples with jyutping'}
+        ]
+
+        messages = [
+            {"role": 'user', 'content': 'Write funny and witty copy for someone to subscribe to AwesomeTTS Plus, a service to generate Japanese audio flashcards using Anki.'}
+        ]        
+
+        # https://platform.openai.com/examples
+        prompt = """Convert text toe programmatic command:
+
+Example: Add the above text to Cantonese table
+Output: add_above('Cantonese')
+
+Example: Translate this to Japanese: 'blabla'
+Output: translate('blabla', Japanese)
+
+Example: Add French audio to Sound column
+Output: add_audio(French, Sound)
+
+Example: pronounce 'blala' in chinese
+Ouput: pronounce('blala', chinese)
+
+Put Chinese text to Mandarin table, add Mandarin audio to Pronunciation field, translate to italian: 'yo my friend'.
+
+how to pronounce this in korean ? 'yaya'
+
+Please put Cantonese text in Yue table.
+"""
+
+        # prompt = "can you explain the cultural significance of this Cantonese saying: 男尊女卑"
+
+        messages = [
+            {'role': 'user', 'content': prompt}
         ]
 
         # https://platform.openai.com/docs/guides/chat
+        # https://platform.openai.com/docs/guides/chat/introduction
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages

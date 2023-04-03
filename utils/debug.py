@@ -750,6 +750,43 @@ def test_wenlin_lookup():
     lookup_result = wenlin_service.get_dictionary_lookup('啊', {})
     print(lookup_result)    
 
+def openai_test():
+    import openai
+
+    # Load your API key from an environment variable or secret management service
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+
+    list_models = False
+    if list_models:
+        models = openai.Model.list()
+        model_id_list = [model['id'] for model in models['data']]
+        print(f'models: {model_id_list}')
+
+
+    chat_completion = True
+    if chat_completion:
+        messages=[
+                {"role": "system", "content": "You will translate and explain Thai text, showing a word by word breakdown with romanization"},
+                {"role": "user", "content": "คนขับรถแท็กซี่: ถึงแล้วครับ 165 บาท ครับ"},
+                {"role": "assistant", "content": 
+                """thai: คนขับรถแท็กซซี่ romanization: (khon khap rot taeksi): english: Taxi driver
+thai: ถึงแล้วครับ romanization: (thueang laeo khap): english: Here we are, sir
+thai: 165 บาท romanization: (nueng roi hok sip ha baht): english: 165 baht
+thai: ครับ romanization: (khap): english: polite particle used by male speakers at the end of a sentence"""},
+            ]
+
+        messages = [
+            {"role": 'user', 'content': 'Convince someone to subscribe to AwesomeTTS Plus, a premium service to generate audio flashcards in Japanese using Anki.'}
+        ]
+
+        # https://platform.openai.com/docs/guides/chat
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages
+        )    
+        print(response)
+        print(response['choices'][0]['message']['content'])
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     while logger.hasHandlers():
@@ -762,7 +799,7 @@ if __name__ == '__main__':
     # generate_video_audio()
     # test_azure_audio()
     # test_google_audio()
-    test_forvo_audio_tokipona()
+    # test_forvo_audio_tokipona()
     # play_google_audio()
     # play_azure_audio()
     # get_voice_list()
@@ -798,3 +835,4 @@ if __name__ == '__main__':
     # test_get_language_data()
     # test_get_language_data_redis()
     # test_wenlin_lookup()
+    openai_test()

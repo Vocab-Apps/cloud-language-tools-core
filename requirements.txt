@@ -1,2 +1,2 @@
 clt_wenlin
-clt_requirements
+clt_requirements>=0.7

@@ -2,6 +2,7 @@ import json
 import requests
 import tempfile
 import logging
+import pprint
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -10,6 +11,8 @@ import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
+
+logger = logging.getLogger(__name__)
 
 def get_translation_language_enum(language_id):
     # print(f'language_id: {language_id}')
@@ -104,6 +107,7 @@ class WatsonService(cloudlanguagetools.service.Service):
     def list_voices(self):
         response = requests.get(self.speech_url + '/v1/voices', auth=('apikey', self.speech_key), timeout=cloudlanguagetools.constants.RequestTimeout)
         data = response.json()
+        logger.debug(f'voices: {data}')
         return data['voices']
 
     def get_tts_voice_list(self):
@@ -113,6 +117,7 @@ class WatsonService(cloudlanguagetools.service.Service):
         for voice in voice_list:
             try:
                 result.append(WatsonVoice(voice))
+                logger.debug(f'added voice {voice}')
             except KeyError:
                 logging.error(f'could not process voice for {voice}', exc_info=True)
 

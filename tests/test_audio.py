@@ -155,7 +155,9 @@ class TestAudio(unittest.TestCase):
         source_text = '你好'
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_CN, 'zh-CN') 
 
+    @pytest.mark.skip('watson does not support chinese anymore')
     def test_mandarin_watson(self):
+        # pytest tests/test_audio.py -s --log-cli-level=DEBUG -k test_mandarin_watson
         source_text = '老人家'
         self.verify_service_audio_language(source_text, Service.Watson, AudioLanguage.zh_CN, 'zh-CN')
 

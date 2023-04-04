@@ -48,7 +48,7 @@ class TestTranslation(unittest.TestCase):
         messages.append(new_message)
         messages.append({
             'role': 'user',
-            'content': 'Please take the last message, and translate it into french'
+            'content': 'Translate the last message into French.'
         })
         response = self.manager.openai_full_query(messages)
         pprint.pprint(response)

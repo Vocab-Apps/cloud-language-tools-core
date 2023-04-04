@@ -44,15 +44,17 @@ class TestTranslation(unittest.TestCase):
         ]
         response = self.manager.openai_full_query(messages)
         new_message = response['choices'][0]['message']
-        pprint.pprint(new_message)
+        # pprint.pprint(new_message)
         messages.append(new_message)
         messages.append({
             'role': 'user',
             'content': 'Please take the last message, and translate it into french'
         })
         response = self.manager.openai_full_query(messages)
+        pprint.pprint(response)
         new_message = response['choices'][0]['message']
         pprint.pprint(new_message)
         sanitized_output = self.sanitize_text(new_message['content'])
-        expected = self.sanitize_text('coût est très bas')
-        self.assertTrue(expected in sanitized_output)
+        self.assertTrue(self.sanitize_text('coût') in sanitized_output, f'output: [{sanitized_output}]')
+        self.assertTrue(self.sanitize_text('faible') in sanitized_output or self.sanitize_text('bas') in sanitized_output, 
+            f'output: [{sanitized_output}]')

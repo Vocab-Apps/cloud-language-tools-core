@@ -36,3 +36,18 @@ class OpenAIService(cloudlanguagetools.service.Service):
         tokens_used = response['usage']['total_tokens']
         response_text = response['choices'][0]['message']['content']
         return response_text, tokens_used
+
+    def full_query(self, messages, max_tokens):
+        if max_tokens != None:
+            response = openai.ChatCompletion.create(
+                model=self.chatbot_model,
+                messages=messages,
+                max_tokens=max_tokens
+            )    
+        else:
+            response = openai.ChatCompletion.create(
+                model=self.chatbot_model,
+                messages=messages
+            )    
+        logger.debug(pprint.pformat(response))
+        return response

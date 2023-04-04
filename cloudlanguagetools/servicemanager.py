@@ -312,6 +312,9 @@ class ServiceManager():
     def openai_single_prompt(self, text, max_tokens=None):
         return self.services[cloudlanguagetools.constants.Service.OpenAI.name].single_prompt(text, max_tokens)
 
+    def openai_full_query(self, messages, max_tokens=None):
+        return self.services[cloudlanguagetools.constants.Service.OpenAI.name].full_query(messages, max_tokens)
+
     def detect_language(self, text_list):
         """returns an enum from languages.Language"""
         service = self.services[cloudlanguagetools.constants.Service.Azure.name]

@@ -36,3 +36,23 @@ class TestTranslation(unittest.TestCase):
         prompt = 'translate to French: speak slowly please.'
         response, tokens = self.manager.openai_single_prompt(prompt)
         self.assertEqual(self.sanitize_text("Parlez lentement s'il vous plaît."), self.sanitize_text(response))
+
+    def test_full_query(self):
+        messages = [
+                {"role": "system", "content": "You are a friendly assistant who will translate languages"},
+                {"role": "user", "content": "translate into english: 成本很低"},
+        ]
+        response = self.manager.openai_full_query(messages)
+        new_message = response['choices'][0]['message']
+        pprint.pprint(new_message)
+        messages.append(new_message)
+        messages.append({
+            'role': 'user',
+            'content': 'Please take the last message, and translate it into french'
+        })
+        response = self.manager.openai_full_query(messages)
+        new_message = response['choices'][0]['message']
+        pprint.pprint(new_message)
+        sanitized_output = self.sanitize_text(new_message['content'])
+        expected = self.sanitize_text('coût est très bas')
+        self.assertTrue(expected in sanitized_output)

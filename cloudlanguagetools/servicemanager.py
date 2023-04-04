@@ -33,6 +33,7 @@ if LOAD_NLP_MODELS:
     import cloudlanguagetools.spacy
     import cloudlanguagetools.wenlin
     import cloudlanguagetools.libretranslate
+    import cloudlanguagetools.openai
 
 class ServiceManager():
     def  __init__(self):
@@ -62,6 +63,7 @@ class ServiceManager():
                 self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
                 self.services[cloudlanguagetools.constants.Service.Wenlin.name] = cloudlanguagetools.wenlin.WenlinService()
                 self.services[cloudlanguagetools.constants.Service.LibreTranslate.name] = cloudlanguagetools.libretranslate.LibreTranslateService()
+                self.services[cloudlanguagetools.constants.Service.OpenAI.name] = cloudlanguagetools.openai.OpenAIService()
 
     def configure_default(self):
         # use the stored keys to configure services
@@ -303,6 +305,12 @@ class ServiceManager():
 
     def get_jyutping(self, text, tone_numbers, spaces, corrections=[]):
         return self.services[cloudlanguagetools.constants.Service.MandarinCantonese.name].get_jyutping(text, tone_numbers, spaces, corrections)
+
+    # LLM APIs
+    # ========
+
+    def openai_single_prompt(self, text, max_tokens=None):
+        return self.services[cloudlanguagetools.constants.Service.OpenAI.name].single_prompt(text, max_tokens)
 
     def detect_language(self, text_list):
         """returns an enum from languages.Language"""

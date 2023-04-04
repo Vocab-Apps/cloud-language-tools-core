@@ -56,6 +56,7 @@ class Service(enum.Enum):
     Google = enum.auto()
     MandarinCantonese = enum.auto()
     EasyPronunciation = enum.auto()
+    OpenAI = enum.auto()
     Watson = enum.auto()
     Naver = enum.auto()
     Amazon = enum.auto()

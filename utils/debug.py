@@ -807,6 +807,8 @@ Please put Cantonese text in Yue table.
 
         # prompt = "can you explain the cultural significance of this Cantonese saying: 男尊女卑"
 
+        prompt = 'In the context of relationships, what does this Chinese sentence mean, and what is its litteral meaning ? 两个一起磨合'
+
         messages = [
             {'role': 'user', 'content': prompt}
         ]

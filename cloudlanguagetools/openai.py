@@ -15,6 +15,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
 
     def configure(self, config):
         self.api_key = config['api_key']
+        openai.api_key = self.api_key
 
     def single_prompt(self, prompt, max_tokens):
         messages = [

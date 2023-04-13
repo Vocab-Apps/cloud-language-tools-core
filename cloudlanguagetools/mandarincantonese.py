@@ -63,25 +63,25 @@ class MandarinCantoneseService(cloudlanguagetools.service.Service):
 
     def get_transliteration(self, text, transliteration_key):
         if transliteration_key['conversion_type'] == 'pinyin':
-            return self.pinyin_jyutping.pinyin(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])[0]
+            return self.pinyin_jyutping.pinyin(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])
         elif transliteration_key['conversion_type'] == 'jyutping':
-            return self.pinyin_jyutping.jyutping(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])[0]
+            return self.pinyin_jyutping.jyutping(text, tone_numbers=transliteration_key['tone_numbers'], spaces=transliteration_key['spaces'])
 
         raise Exception(f"unsupported conversion type: {transliteration_key['conversion_type']}")
 
     # full access, return all results
     def get_pinyin(self, text, tone_numbers, spaces, corrections):
         if len(corrections) == 0:
-            return self.pinyin_jyutping.pinyin(text, tone_numbers, spaces)
+            return self.pinyin_jyutping.pinyin_all_solutions(text, tone_numbers, spaces)
         else:
             with_corrections = pinyin_jyutping.PinyinJyutping()
             with_corrections.load_pinyin_corrections(corrections)
-            return with_corrections.pinyin(text, tone_numbers, spaces)
+            return with_corrections.pinyin_all_solutions(text, tone_numbers, spaces)
 
     def get_jyutping(self, text, tone_numbers, spaces, corrections):
         if len(corrections) == 0:
-            return self.pinyin_jyutping.jyutping(text, tone_numbers, spaces)
+            return self.pinyin_jyutping.jyutping_all_solutions(text, tone_numbers, spaces)
         else:
             with_corrections = pinyin_jyutping.PinyinJyutping()
             with_corrections.load_jyutping_corrections(corrections)
-            return with_corrections.jyutping(text, tone_numbers, spaces)
+            return with_corrections.jyutping_all_solutions(text, tone_numbers, spaces)

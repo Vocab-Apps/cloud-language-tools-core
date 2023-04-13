@@ -232,7 +232,7 @@ class TestTranslation(unittest.TestCase):
 
         source_text = '成本很低'
         result = self.manager.get_pinyin(source_text, False, False)
-        self.assertEqual(result, ['chéngběn hěn dī'])
+        self.assertEqual(result, [['chéngběn'], ['hěn'], ['dī']])
 
         # try with corrections
         corrections = [
@@ -242,15 +242,15 @@ class TestTranslation(unittest.TestCase):
             }
         ]
         result = self.manager.get_pinyin(source_text, False, False, corrections=corrections)
-        self.assertEqual(result, ['chéngběn hěn dì', 'chéngběn hěn dī'])
+        self.assertEqual(result, [['chéngběn'], ['hěn'], ['dì', 'dī']])
 
         # jyutping
         # --------
 
         source_text = '全身按摩'
-        expected_result = 'cyùnsān ônmō'
+        expected_result = [['cyùnsān'], ['ônmō']]
         result = self.manager.get_jyutping(source_text, False, False)
-        self.assertEqual(result, [expected_result])
+        self.assertEqual(result, expected_result)
 
         # try with corrections
         corrections = [
@@ -260,11 +260,11 @@ class TestTranslation(unittest.TestCase):
             }
         ]        
         result = self.manager.get_jyutping(source_text, False, False, corrections=corrections)
-        self.assertEqual(result, ['cyùnsān ōnmō', 'cyùnsān ônmō'])
+        self.assertEqual(result, [['cyùnsān'], ['ōnmō', 'ônmō']])
 
 
     def test_transliteration_mandarincantonese(self):
-        # pytest test_translation.py -k test_transliteration_mandarincantonese
+        # pytest tests/test_translation.py -k test_transliteration_mandarincantonese
         
         # chinese
         source_text = '成本很低'

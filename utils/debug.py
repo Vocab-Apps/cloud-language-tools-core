@@ -807,7 +807,13 @@ Please put Cantonese text in Yue table.
 
         # prompt = "can you explain the cultural significance of this Cantonese saying: 男尊女卑"
 
-        prompt = 'In the context of relationships, what does this Chinese sentence mean, and what is its litteral meaning ? 两个一起磨合'
+        #prompt = 'In the context of relationships, what does this Chinese sentence mean, and what is its litteral meaning ? 两个一起磨合'
+#         prompt = """Write funny witty email in English to encourage someone to subscribe to an audio flashcard service called AwesomeTTS Plus, for making Language Learning audio flashcards.
+# Include funny email subject line with emoji and email body and call to action on a button"""
+
+        # prompt = 'Find funny and witty call to action in English, including an emoji, to encourage someone to subscribe to an audio flashcard service called AwesomeTTS Plus, for making Chinese language audio flashcards.'
+        prompt = 'Write a joke about learning languages.'
+
 
         messages = [
             {'role': 'user', 'content': prompt}

@@ -21,6 +21,7 @@ setup(name='cloudlanguagetools',
       packages=['cloudlanguagetools'],
       install_requires=[
           'clt_wenlin>=1.0',
-          'clt_requirements>=0.8'
+          'clt_requirements>=0.8',
+          'pinyin_jyutping>=0.8',
       ],
       )

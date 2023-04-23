@@ -26,7 +26,6 @@ setup(name='clt_requirements',
           'epitran==1.22',
           'pythainlp[thai2rom,ipa]',
           'jieba',
-          'pinyin_jyutping>=0.7',
           'cryptography',
           'pydub',
           'openai'

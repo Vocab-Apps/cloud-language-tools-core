@@ -50,6 +50,7 @@ class TestTranslation(unittest.TestCase):
             'role': 'user',
             'content': 'take the last message  and translate into French.'
         })
+        pprint.pprint(messages)
         response = self.manager.openai_full_query(messages)
         pprint.pprint(response)
         new_message = response['choices'][0]['message']

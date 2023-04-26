@@ -302,7 +302,7 @@ class AzureService(cloudlanguagetools.service.Service):
             try:
                 result.append(AzureTranslationLanguage(language_id))
             except KeyError:
-                logging.error(f'could not process translation language for {language_id}, {data}', exc_info=True)
+                logging.warning(f'could not process translation language for {language_id}, {data}', exc_info=True)
         return result
 
     def get_transliteration_language_list(self):

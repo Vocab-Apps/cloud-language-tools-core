@@ -32,7 +32,10 @@ class CereProcVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.name = voice_data['name']
         self.region = voice_data['region']
         self.accent = voice_data['accent']
-        self.gender = cloudlanguagetools.constants.Gender[voice_data['gender'].capitalize()]
+        gender_str = voice_data['gender'].capitalize()
+        if gender_str == 'Neutral':
+            gender_str = 'Male'
+        self.gender = cloudlanguagetools.constants.Gender[gender_str]
 
     def get_voice_shortname(self):
         return f'{self.name} ({self.accent})'

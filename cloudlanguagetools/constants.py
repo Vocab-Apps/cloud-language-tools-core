@@ -71,6 +71,7 @@ class Service(enum.Enum):
     Spacy = enum.auto()
     Wenlin = enum.auto()
     LibreTranslate = enum.auto()
+    ElevenLabs = enum.auto()
     TestServiceA = enum.auto()
     TestServiceB = enum.auto()
 

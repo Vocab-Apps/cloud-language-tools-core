@@ -16,6 +16,7 @@ import cloudlanguagetools.cereproc
 import cloudlanguagetools.vocalware
 import cloudlanguagetools.fptai
 import cloudlanguagetools.voicen
+import cloudlanguagetools.elevenlabs
 import cloudlanguagetools.encryption
 
 LOAD_NLP_MODELS = os.environ.get('CLOUDLANGUAGETOOLS_CORE_LOAD_NLP', 'yes') == 'yes'
@@ -53,6 +54,7 @@ class ServiceManager():
             self.services[cloudlanguagetools.constants.Service.VocalWare.name] = cloudlanguagetools.vocalware.VocalWareService()
             self.services[cloudlanguagetools.constants.Service.FptAi.name] = cloudlanguagetools.fptai.FptAiService()
             self.services[cloudlanguagetools.constants.Service.Voicen.name] = cloudlanguagetools.voicen.VoicenService()
+            self.services[cloudlanguagetools.constants.Service.ElevenLabs.name] = cloudlanguagetools.elevenlabs.ElevenLabsService()
 
             if LOAD_NLP_MODELS:
                 self.services[cloudlanguagetools.constants.Service.EasyPronunciation.name] = cloudlanguagetools.easypronunciation.EasyPronunciationService()

@@ -205,6 +205,16 @@ def get_amazon_voice_list_awesometts():
         code = f"AmazonVoice(Language.{voice.audio_language.name}, Gender.{voice.gender.name}, '{voice.name}', '{voice.voice_id}', '{voice.engine}'),"
         print(code)
 
+def get_elevenlabs_voice_list_awesometts():
+    manager = get_manager()
+    voice_list = manager.services[cloudlanguagetools.constants.Service.ElevenLabs.name].get_tts_voice_list()
+    pprint.pprint(voice_list)
+    return
+    # print(voice_list)
+    for voice in voice_list:
+        code = f"AmazonVoice(Language.{voice.audio_language.name}, Gender.{voice.gender.name}, '{voice.name}', '{voice.voice_id}', '{voice.engine}'),"
+        print(code)        
+
 def print_all_languages():
     languages = [language for language in cloudlanguagetools.languages.Language]
     languages = sorted(languages, key = lambda x: x.lang_name)
@@ -843,8 +853,9 @@ if __name__ == '__main__':
     # test_forvo_audio_tokipona()
     # play_google_audio()
     # play_azure_audio()
-    get_voice_list()
+    # get_voice_list()
     # get_voice_list_awesometts()
+    get_elevenlabs_voice_list_awesometts()
     # get_watson_voice_list()
     # get_amazon_voice_list()
     # get_forvo_voice_list()

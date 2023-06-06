@@ -15,8 +15,9 @@ import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
 
-DEFAULT_VOICE_PITCH = 0
-DEFAULT_VOICE_RATE = 100
+
+DEFAULT_STABILITY = 0.75
+DEFAULT_SIMILARITY_BOOST = 0.75
 
 
 GENDER_MAP = {
@@ -54,6 +55,18 @@ class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
     def get_options(self):
         return {
+            'stability' : {
+                'type': cloudlanguagetools.options.ParameterType.number.name,
+                'min': 0.0,
+                'max': 1.0,
+                'default': DEFAULT_STABILITY
+            },
+            'similarity_boost' : {
+                'type': cloudlanguagetools.options.ParameterType.number.name,
+                'min': 0.0,
+                'max': 1.0,
+                'default': DEFAULT_SIMILARITY_BOOST
+            },                        
         }
 
 class ElevenLabsService(cloudlanguagetools.service.Service):
@@ -84,8 +97,8 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             "text": text,
             "model_id": voice_key['model_id'],
             "voice_settings": {
-                "stability": 0.5,
-                "similarity_boost": 0.5
+                "stability": options.get('stability', DEFAULT_STABILITY),
+                "similarity_boost": options.get('similarity_boost', DEFAULT_SIMILARITY_BOOST)
             }
         }
 

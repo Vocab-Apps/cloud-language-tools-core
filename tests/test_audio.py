@@ -400,5 +400,9 @@ class TestAudio(unittest.TestCase):
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
 
     def test_elevenlabs_english(self):
-        source_text = 'I am not interested.'
+        source_text = 'This is the best restaurant in town.'
         self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.en_US, 'en-US')
+
+    def test_elevenlabs_french(self):
+        source_text = self.FRENCH_INPUT_TEXT
+        self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.fr_FR, 'fr-FR')

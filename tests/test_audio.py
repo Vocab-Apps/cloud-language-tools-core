@@ -410,4 +410,12 @@ class TestAudio(unittest.TestCase):
 
     def test_elevenlabs_spanish(self):
         source_text = 'No me gusta la comida.'
-        self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.es_ES, 'es-ES')        
+        self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.es_ES, 'es-ES')
+
+    def test_elevenlabs_italian(self):
+        source_text = 'Non mi piace il cibo.'
+        self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.it_IT, 'it-IT')
+
+    def test_elevenlabs_german(self):
+        source_text = 'Ich mag das Essen nicht.'
+        self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.de_DE, 'de-DE')

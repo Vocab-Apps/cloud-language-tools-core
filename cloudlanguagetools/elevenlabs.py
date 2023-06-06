@@ -3,9 +3,8 @@ import pprint
 import requests
 import tempfile
 import os
-import boto3
-import botocore.exceptions
 import contextlib
+from typing import List
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -21,7 +20,15 @@ DEFAULT_VOICE_RATE = 100
 
 
 GENDER_MAP = {
-    'Rachel': cloudlanguagetools.constants.Gender.Female
+    'Rachel': cloudlanguagetools.constants.Gender.Female,
+    'Domi': cloudlanguagetools.constants.Gender.Female,
+    'Bella': cloudlanguagetools.constants.Gender.Female,
+    'Antoni': cloudlanguagetools.constants.Gender.Male,
+    'Elli': cloudlanguagetools.constants.Gender.Female,
+    'Josh': cloudlanguagetools.constants.Gender.Male,
+    'Arnold': cloudlanguagetools.constants.Gender.Male,
+    'Adam': cloudlanguagetools.constants.Gender.Male,
+    'Sam': cloudlanguagetools.constants.Gender.Male
 }
 
 
@@ -47,37 +54,7 @@ class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
     def get_options(self):
         return {
-            'rate' : {
-                'type': 'number',
-                'min': 20,
-                'max': 200,
-                'default': DEFAULT_VOICE_RATE
-            },
-            'pitch': {
-                'type': 'number',
-                'min': -50,
-                'max': 50,
-                'default': DEFAULT_VOICE_PITCH
-            },
-            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
-                'type': cloudlanguagetools.options.ParameterType.list.name,
-                'values': [
-                    cloudlanguagetools.options.AudioFormat.mp3.name,
-                    cloudlanguagetools.options.AudioFormat.ogg_vorbis.name,
-                ],
-                'default': cloudlanguagetools.options.AudioFormat.mp3.name
-            }            
         }
-
-class AmazonTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
-    def __init__(self, language, language_id):
-        self.service = cloudlanguagetools.constants.Service.Amazon
-        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
-        self.language = language
-        self.language_id = language_id
-
-    def get_language_id(self):
-        return self.language_id
 
 class ElevenLabsService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -93,52 +70,37 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         }
 
     def get_tts_audio(self, text, voice_key, options):
-        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
-        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
+        import requests
 
-        audio_format_map = {
-            cloudlanguagetools.options.AudioFormat.mp3: 'mp3',
-            cloudlanguagetools.options.AudioFormat.ogg_vorbis: 'ogg_vorbis'
+        CHUNK_SIZE = 1024
+        voice_id = voice_key['voice_id']
+        url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'
+
+        headers = self.get_headers()
+        headers['Accept'] = "audio/mpeg"
+
+
+        data = {
+            "text": text,
+            "model_id": voice_key['model_id'],
+            "voice_settings": {
+                "stability": 0.5,
+                "similarity_boost": 0.5
+            }
         }
 
+        response = requests.post(url, json=data, headers=headers)
+        response.raise_for_status()
+        
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
 
-        pitch = options.get('pitch', DEFAULT_VOICE_PITCH)
-        pitch_str = f'{pitch:+.0f}%'
-        rate = options.get('rate', DEFAULT_VOICE_RATE)
-        rate_str = f'{rate:0.0f}%'
+        with open(output_temp_filename, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+                if chunk:
+                    f.write(chunk)
 
-        prosody_tags = f'pitch="{pitch_str}" rate="{rate_str}"'
-        if voice_key['engine'] == 'neural':
-            # pitch not supported on neural voices
-            prosody_tags = f'rate="{rate_str}"'
-
-
-        ssml_str = f"""<speak>
-    <prosody {prosody_tags} >
-        {text}
-    </prosody>
-</speak>"""
-
-        try:
-            response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=audio_format_map[audio_format], VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
-        except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
-            raise cloudlanguagetools.errors.RequestError(str(error))
-
-        if "AudioStream" in response:
-            # Note: Closing the stream is important because the service throttles on the
-            # number of parallel connections. Here we are using contextlib.closing to
-            # ensure the close method of the stream object will be called automatically
-            # at the end of the with statement's scope.
-            with contextlib.closing(response["AudioStream"]) as stream:
-                with open(output_temp_filename, 'wb') as audio:
-                    audio.write(stream.read())
-                return output_temp_file
-
-        else:
-            # The response didn't contain audio data, exit gracefully
-            raise cloudlanguagetools.errors.RequestError('no audio stream')
+        return output_temp_file
 
 
     def get_audio_language(self, language_id):
@@ -148,10 +110,10 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         if language_id in override_map:
             return override_map[language_id]
         language_enum = cloudlanguagetools.languages.Language[language_id]
-        audio_language_enum = cloudlanguagetools.languages.language_map_to_audio_language[language_enum]
+        audio_language_enum = cloudlanguagetools.languages.AudioLanguageDefaults[language_enum]
         return audio_language_enum
 
-    def get_tts_voice_list(self):
+    def get_tts_voice_list(self) -> List[ElevenLabsVoice]:
         result = []
 
         # first, get all models to get list of languages

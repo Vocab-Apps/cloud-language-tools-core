@@ -208,7 +208,10 @@ def get_amazon_voice_list_awesometts():
 def get_elevenlabs_voice_list():
     manager = get_manager()
     voice_list = manager.services[cloudlanguagetools.constants.Service.ElevenLabs.name].get_tts_voice_list()
-    pprint.pprint(voice_list)
+    # pprint.pprint(voice_list)
+    # print names of voices in voice_list
+    for voice in voice_list:
+        print(voice.name)
 
 
 def elevenlabs_api_test():

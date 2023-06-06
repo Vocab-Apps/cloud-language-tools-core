@@ -398,3 +398,7 @@ class TestAudio(unittest.TestCase):
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
         audio_text = self.speech_to_text(audio_temp_file, 'vi-VN')
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
+
+    def test_elevenlabs_english(self):
+        source_text = 'I am not interested.'
+        self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.en_US, 'en-US')

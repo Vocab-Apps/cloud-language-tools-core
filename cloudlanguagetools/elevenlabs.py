@@ -34,12 +34,13 @@ GENDER_MAP = {
 
 
 class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
-    def __init__(self, voice_data, language, model_id):
+    def __init__(self, voice_data, language, model_id, model_short_name):
         # pprint.pprint(voice_data)
         self.service = cloudlanguagetools.constants.Service.ElevenLabs
         self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.voice_id = voice_data['voice_id']
         self.model_id = model_id
+        self.model_short_name = model_short_name
         self.name = voice_data['name']
         self.gender = GENDER_MAP.get(self.name, cloudlanguagetools.constants.Gender.Male)
         self.audio_language = language
@@ -51,7 +52,7 @@ class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         }
 
     def get_voice_shortname(self):
-        return f'{self.name}'
+        return f'{self.name} ({self.model_short_name})'
 
     def get_options(self):
         return {
@@ -161,9 +162,6 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         # 'name': 'Eleven Multilingual v1',
         # 'token_cost_factor': 1.0}]
         #         
-        # keep only the model which has multiple language entries
-        multilingual_model_data = [model for model in model_data if len(model['languages']) > 1][0]
-        model_id = multilingual_model_data['model_id']
 
 
         # now, retrieve voice list
@@ -175,11 +173,15 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
         data = response.json()
 
-        for language_record in multilingual_model_data['languages']:
-            language_id = language_record['language_id']
-            audio_language_enum = self.get_audio_language(language_id)
-            for voice_data in data['voices']:
-                result.append(ElevenLabsVoice(voice_data, audio_language_enum, model_id))
+        for model in model_data:
+            model_id = model['model_id']
+            model_name = model['name']
+            model_short_name = model_name.replace('Eleven ', '').replace('v1', '').strip()
+            for language_record in model['languages']:
+                language_id = language_record['language_id']
+                audio_language_enum = self.get_audio_language(language_id)
+                for voice_data in data['voices']:
+                    result.append(ElevenLabsVoice(voice_data, audio_language_enum, model_id, model_short_name))
 
         return result
 

@@ -406,3 +406,8 @@ class TestAudio(unittest.TestCase):
     def test_elevenlabs_french(self):
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.fr_FR, 'fr-FR')
+
+
+    def test_elevenlabs_spanish(self):
+        source_text = 'No me gusta la comida.'
+        self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.es_ES, 'es-ES')        

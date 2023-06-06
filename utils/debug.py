@@ -13,7 +13,7 @@ import epitran
 # import pandas
 import requests
 import re
-# import secrets
+import secrets
 # import redisdb
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -205,15 +205,27 @@ def get_amazon_voice_list_awesometts():
         code = f"AmazonVoice(Language.{voice.audio_language.name}, Gender.{voice.gender.name}, '{voice.name}', '{voice.voice_id}', '{voice.engine}'),"
         print(code)
 
-def get_elevenlabs_voice_list_awesometts():
+def get_elevenlabs_voice_list():
     manager = get_manager()
     voice_list = manager.services[cloudlanguagetools.constants.Service.ElevenLabs.name].get_tts_voice_list()
     pprint.pprint(voice_list)
-    return
-    # print(voice_list)
-    for voice in voice_list:
-        code = f"AmazonVoice(Language.{voice.audio_language.name}, Gender.{voice.gender.name}, '{voice.name}', '{voice.voice_id}', '{voice.engine}'),"
-        print(code)        
+
+
+def elevenlabs_api_test():
+    config = cloudlanguagetools.encryption.decrypt()
+    # pprint.pprint(config)
+    api_key = config['ElevenLabs']['api_key']
+
+    url = "https://api.elevenlabs.io/v1/models"
+
+    headers = {
+        "Accept": "application/json",
+        "xi-api-key": api_key
+    }
+
+    response = requests.get(url, headers=headers)
+    pprint.pprint(response.json())
+
 
 def print_all_languages():
     languages = [language for language in cloudlanguagetools.languages.Language]
@@ -855,7 +867,8 @@ if __name__ == '__main__':
     # play_azure_audio()
     # get_voice_list()
     # get_voice_list_awesometts()
-    get_elevenlabs_voice_list_awesometts()
+    get_elevenlabs_voice_list()
+    # elevenlabs_api_test()
     # get_watson_voice_list()
     # get_amazon_voice_list()
     # get_forvo_voice_list()

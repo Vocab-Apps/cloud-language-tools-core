@@ -1,4 +1,5 @@
 import json
+import pprint
 import requests
 import tempfile
 import os
@@ -18,41 +19,31 @@ import cloudlanguagetools.errors
 DEFAULT_VOICE_PITCH = 0
 DEFAULT_VOICE_RATE = 100
 
-def get_audio_language_enum(language_code):
-    language_map = {
-        'arb': 'ar_XA',
-        'cmn-CN': 'zh_CN',
-        'yue-CN': 'zh_HK'
-    }
 
-    language_enum_name = language_code.replace('-', '_')
-    if language_code in language_map:
-        language_enum_name = language_map[language_code]
+GENDER_MAP = {
+    'Rachel': cloudlanguagetools.constants.Gender.Female
+}
 
-    return cloudlanguagetools.languages.AudioLanguage[language_enum_name]
 
-class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
-    def __init__(self, voice_data):
-        # print(voice_data)
-        # {'Gender': 'Female', 'Id': 'Lotte', 'LanguageCode': 'nl-NL', 'LanguageName': 'Dutch', 'Name': 'Lotte', 'SupportedEngines': ['standard']}
-        self.service = cloudlanguagetools.constants.Service.Amazon
+class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
+    def __init__(self, voice_data, language, model_id):
+        # pprint.pprint(voice_data)
+        self.service = cloudlanguagetools.constants.Service.ElevenLabs
         self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
-        self.gender = cloudlanguagetools.constants.Gender[voice_data['Gender']]
-        self.voice_id = voice_data['Id']
-        self.name = voice_data['Name']
-        self.audio_language = get_audio_language_enum(voice_data['LanguageCode'])
-        self.engine = 'standard'
-        if 'neural' in voice_data['SupportedEngines']:
-            self.engine = 'neural'
+        self.voice_id = voice_data['voice_id']
+        self.model_id = model_id
+        self.name = voice_data['name']
+        self.gender = GENDER_MAP.get(self.name, cloudlanguagetools.constants.Gender.Male)
+        self.audio_language = language
 
     def get_voice_key(self):
         return {
             'voice_id': self.voice_id,
-            'engine': self.engine
+            'model_id': self.model_id
         }
 
     def get_voice_shortname(self):
-        return f'{self.name} ({self.engine.capitalize()})'
+        return f'{self.name}'
 
     def get_options(self):
         return {
@@ -95,10 +86,11 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
     def configure(self, config):
         self.api_key = config['api_key']
 
-    def get_translation(self, text, from_language_key, to_language_key):
-        result = self.translate_client.translate_text(Text=text, 
-                    SourceLanguageCode=from_language_key, TargetLanguageCode=to_language_key)
-        return result.get('TranslatedText')
+    def get_headers(self):
+        return {
+            "Accept": "application/json",
+            "xi-api-key": self.api_key
+        }
 
     def get_tts_audio(self, text, voice_key, options):
         audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
@@ -149,19 +141,70 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             raise cloudlanguagetools.errors.RequestError('no audio stream')
 
 
+    def get_audio_language(self, language_id):
+        override_map = {
+            'pt': cloudlanguagetools.languages.AudioLanguage.pt_PT,
+        }
+        if language_id in override_map:
+            return override_map[language_id]
+        language_enum = cloudlanguagetools.languages.Language[language_id]
+        audio_language_enum = cloudlanguagetools.languages.language_map_to_audio_language[language_enum]
+        return audio_language_enum
+
     def get_tts_voice_list(self):
         result = []
+
+        # first, get all models to get list of languages
+        url = "https://api.elevenlabs.io/v1/models"
+        response = requests.get(url, headers=self.get_headers())
+        response.raise_for_status()
+        model_data = response.json()
+        # model_data: 
+        # [{'can_be_finetuned': True,
+        # 'can_do_text_to_speech': True,
+        # 'can_do_voice_conversion': False,
+        # 'description': 'Use our standard English language model to generate speech '
+        #                 'in a variety of voices, styles and moods.',
+        # 'languages': [{'language_id': 'en', 'name': 'English'}],
+        # 'model_id': 'eleven_monolingual_v1',
+        # 'name': 'Eleven Monolingual v1',
+        # 'token_cost_factor': 1.0},
+        # {'can_be_finetuned': True,
+        # 'can_do_text_to_speech': True,
+        # 'can_do_voice_conversion': True,
+        # 'description': 'Generate lifelike speech in multiple languages and create '
+        #                 'content that resonates with a broader audience. ',
+        # 'languages': [{'language_id': 'en', 'name': 'English'},
+        #                 {'language_id': 'de', 'name': 'German'},
+        #                 {'language_id': 'pl', 'name': 'Polish'},
+        #                 {'language_id': 'es', 'name': 'Spanish'},
+        #                 {'language_id': 'it', 'name': 'Italian'},
+        #                 {'language_id': 'fr', 'name': 'French'},
+        #                 {'language_id': 'pt', 'name': 'Portuguese'},
+        #                 {'language_id': 'hi', 'name': 'Hindi'}],
+        # 'model_id': 'eleven_multilingual_v1',
+        # 'name': 'Eleven Multilingual v1',
+        # 'token_cost_factor': 1.0}]
+        #         
+        # keep only the model which has multiple language entries
+        multilingual_model_data = [model for model in model_data if len(model['languages']) > 1][0]
+        model_id = multilingual_model_data['model_id']
+
+
+        # now, retrieve voice list
         # call elevenlabs API to list TTS voices
         url = "https://api.elevenlabs.io/v1/voices"
 
-        headers = {
-            "Accept": "application/json",
-            "xi-api-key": self.api_key
-        }
+        response = requests.get(url, headers=self.get_headers())
+        response.raise_for_status()
 
-        response = requests.get(url, headers=headers)
+        data = response.json()
 
-        print(response.text)
+        for language_record in multilingual_model_data['languages']:
+            language_id = language_record['language_id']
+            audio_language_enum = self.get_audio_language(language_id)
+            for voice_data in data['voices']:
+                result.append(ElevenLabsVoice(voice_data, audio_language_enum, model_id))
 
         return result
 

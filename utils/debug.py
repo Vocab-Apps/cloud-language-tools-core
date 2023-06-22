@@ -853,6 +853,33 @@ Please put Cantonese text in Yue table.
         print(response)
         print(response['choices'][0]['message']['content'])
 
+def microsoft_openai_test():
+    #Note: The openai-python library support for Azure OpenAI is in preview.
+    import os
+    import openai
+
+    azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+
+    openai.api_type = "azure"
+    openai.api_base = azure_openai_config['azure_endpoint']
+    openai.api_version = "2023-05-15"
+    openai.api_key = azure_openai_config['azure_api_key']
+
+    deployment_name=azure_openai_config['azure_deployment_name'] #This will correspond to the custom name you chose for your deployment when you deployed a model. 
+
+    response = openai.ChatCompletion.create(
+        engine=deployment_name, # engine = "deployment_name".
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Does Azure OpenAI support customer managed keys?"},
+            {"role": "assistant", "content": "Yes, customer managed keys are supported by Azure OpenAI."},
+            {"role": "user", "content": "Do other Azure Cognitive Services support this too?"}
+        ]
+    )
+
+    print(response)
+    print(response['choices'][0]['message']['content'])    
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     while logger.hasHandlers():
@@ -868,7 +895,7 @@ if __name__ == '__main__':
     # test_forvo_audio_tokipona()
     # play_google_audio()
     # play_azure_audio()
-    get_voice_list()
+    # get_voice_list()
     # get_voice_list_awesometts()
     # get_elevenlabs_voice_list()
     # elevenlabs_api_test()
@@ -904,3 +931,4 @@ if __name__ == '__main__':
     # test_get_language_data_redis()
     # test_wenlin_lookup()
     # openai_test()
+    microsoft_openai_test()

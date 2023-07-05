@@ -880,6 +880,41 @@ def microsoft_openai_test():
     print(response)
     print(response['choices'][0]['message']['content'])    
 
+def microsoft_openai_functioncalls():
+    import openai
+
+    azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+
+    openai.api_key = azure_openai_config['api_key']
+
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-0613",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "What's the weather in Miami?"},
+        ],
+        functions= [
+            {
+                'name': "getCityWeather",
+                'description': "Get the weather in a given city",
+                'parameters': {
+                    'type': "object",
+                    'properties': {
+                    'city': { 'type': "string", 'description': "The city" },
+                    'unit': { 'type': "string", 'enum': ["C", "F"] },
+                    },
+                    'required': ["city"],
+                },
+            },
+        ],
+        function_call= "auto"
+    )
+
+    # print(response)
+    # print(response['choices'][0]['message']['content'])        
+    pprint.pprint(response)
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     while logger.hasHandlers():
@@ -931,4 +966,5 @@ if __name__ == '__main__':
     # test_get_language_data_redis()
     # test_wenlin_lookup()
     # openai_test()
-    microsoft_openai_test()
+    # microsoft_openai_test()
+    microsoft_openai_functioncalls()

@@ -69,8 +69,8 @@ class ServiceManager():
 
     def configure_services(self, config):
         for service_name, value in config.items():
-            if service_name in self.services:
-                service_enum = cloudlanguagetools.constants.Service[service_name]
+            service_enum = cloudlanguagetools.constants.Service[service_name]
+            if service_enum in self.services:
                 self.services[service_enum].configure(value)
 
     def get_language_data_json(self):

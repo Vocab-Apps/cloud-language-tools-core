@@ -64,7 +64,7 @@ class TestAudio(unittest.TestCase):
         return subset        
 
     def speech_to_text(self, audio_temp_file, language, audio_format=cloudlanguagetools.options.AudioFormat.mp3):
-        result = self.manager.services[Service.Azure.name].speech_to_text(audio_temp_file.name, language, audio_format)
+        result = self.manager.services[Service.Azure].speech_to_text(audio_temp_file.name, language, audio_format)
         return result
     
     def sanitize_recognized_text(self, recognized_text):

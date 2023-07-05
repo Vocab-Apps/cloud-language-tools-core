@@ -110,7 +110,8 @@ class TestTranslation(unittest.TestCase):
              "carte d'embarquement", 
              "modifier la carte d'embarquement", 
              "changer la carte d'embarquement",
-             "échangez votre carte d'embarquement"])
+             "échangez votre carte d'embarquement",
+             "modifiez votre carte d'embarquement"])
 
     def test_translate_chinese_watson(self):
         self.translate_text(Service.Watson, '中国有很多外国人', Language.zh_cn, Language.en, 'There are a lot of foreigners in China.')

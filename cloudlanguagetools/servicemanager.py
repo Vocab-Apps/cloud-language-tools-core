@@ -212,7 +212,8 @@ class ServiceManager():
         translation_language_list = self.get_translation_language_list()
 
         result = {}
-        for service_name, service in self.services.items():
+        for service_enum, service in self.services.items():
+            service_name = service_enum.name
             # locate from language key
             from_language_entries = [x for x in translation_language_list if x.service.name == service_name and x.get_language_code() == from_language]
             if len(from_language_entries) == 1:

@@ -19,6 +19,7 @@ import secrets
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.languages
 
 
 def get_manager():
@@ -998,6 +999,105 @@ def openai_function_calls_telegram_bot():
     # print(response['choices'][0]['message']['content'])        
     pprint.pprint(response)
 
+
+def openai_detect_language():
+    import openai
+
+    manager = get_manager()
+
+    openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+    openai.api_key = openai_config['api_key']
+
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-0613",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
+            {"role": "system", "content": "Detect the language of the sentence provided"},
+            {"role": "user", "content": "Bonjour mes amis"},
+        ],
+        functions= [
+            {
+                'name': "detect_language",
+                'description': "Detect the language of input text",
+                'parameters': {
+                    'type': "object",
+                    'properties': {
+                        'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
+                    },
+                    'required': ['text'],
+                },
+            },            
+        ],
+        function_call= "auto"
+    )
+
+    def detect_language(text):
+        return manager.detect_language([text])
+
+    pprint.pprint(response)    
+
+    message = response['choices'][0]['message']
+    if message['function_call'] != None:
+        function_name = message['function_call']['name']
+        arguments = json.loads(message["function_call"]["arguments"])
+        if function_name == 'detect_language':
+            text = arguments['text']
+            detected_language = detect_language(text)
+            print(f'detected language: {detected_language}')
+
+    # print(response)
+    # print(response['choices'][0]['message']['content'])        
+
+def openai_guess_from_to_language():
+    import openai
+    import pydantic
+
+    manager = get_manager()
+
+    openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+    openai.api_key = openai_config['api_key']
+
+
+    from typing import List
+    from pydantic import BaseModel
+
+    class TranslateQuery(BaseModel):
+        input_text: str
+        source_language: cloudlanguagetools.languages.Language
+        target_language: cloudlanguagetools.languages.Language
+
+
+    pprint.pprint(TranslateQuery.model_json_schema())
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-0613",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
+            {"role": "system", "content": "Translate from cantonese to french"},
+            # {"role": "user", "content": "Bonjour mes amis"},
+            {"role": "user", "content": "挨向後"},
+        ],
+        functions= [
+            {
+                'name': "translate",
+                'description': "Translate input text from source language to target language",
+                'parameters': TranslateQuery.model_json_schema(),
+            },            
+        ],
+        function_call= "auto"
+    )
+
+    pprint.pprint(response)    
+
+    message = response['choices'][0]['message']
+    if message['function_call'] != None:
+        function_name = message['function_call']['name']
+        arguments = json.loads(message["function_call"]["arguments"])
+        translate_query = TranslateQuery(**arguments)
+        print(f'translate query: {translate_query}')    
+
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     while logger.hasHandlers():
@@ -1051,4 +1151,5 @@ if __name__ == '__main__':
     # openai_test()
     # microsoft_openai_test()
     # openai_functioncalls_simple_example()
-    openai_function_calls_telegram_bot()
+    # openai_detect_language()
+    openai_guess_from_to_language()

@@ -880,7 +880,7 @@ def microsoft_openai_test():
     print(response)
     print(response['choices'][0]['message']['content'])    
 
-def microsoft_openai_functioncalls():
+def openai_functioncalls_simple_example():
     import openai
 
     azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
@@ -907,6 +907,89 @@ def microsoft_openai_functioncalls():
                     'required': ["city"],
                 },
             },
+        ],
+        function_call= "auto"
+    )
+
+    # print(response)
+    # print(response['choices'][0]['message']['content'])        
+    pprint.pprint(response)
+
+def openai_function_calls_telegram_bot():
+    import openai
+
+    azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+
+    openai.api_key = azure_openai_config['api_key']
+
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-0613",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
+            # {"role": "system", "content": "When I give you a French sentence, I want you to translate it to English, and also pronounce the audio."},
+            # {"role": "system", "content": "When I give you an English sentence, I want you to translate it to French, and also pronounce the audio."},
+            # {"role": "system", "content": "When I give you a French sentence, I want you to translate it to English"},
+            # {"role": "system", "content": "When I give you an English sentence, I want you to translate it to French"},            
+            {"role": "system", "content": "When I give you a French sentence, I want you to pronounce it"},
+            {"role": "system", "content": "When I give you an English sentence, I want you to pronounce it"},
+            {"role": "user", "content": "Bonjour mes amis"},
+            # {"role": "user", "content": "Please also translate this sentence to English"},
+        ],
+        functions= [
+            # {
+            #     'name': "translate",
+            #     'description': "Translate given text from one language to another",
+            #     'parameters': {
+            #         'type': "object",
+            #         'properties': {
+            #         'text': { 'type': "string", 'description': "The input text the user wishes to translate" },
+            #         'source_language': { 'type': "string", 'description': 'the language to translate from', 'enum': ['fr', 'en'] },
+            #         'target_language': { 'type': "string", 'description': 'the language to translate to', 'enum': ['fr', 'en'] },
+            #         },
+            #         'required': ['text', 'source_language', 'target_language'],
+            #     },
+            # },
+            # {
+            #     'name': "audio",
+            #     'description': "Generate audio to pronounce given text, using text to speech",
+            #     'parameters': {
+            #         'type': "object",
+            #         'properties': {
+            #         'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
+            #         'language': { 'type': "string", 'description': 'the language of the input text to be pronounced', 'enum': ['fr', 'en'] },
+            #         },
+            #         'required': ['text', 'language'],
+            #     },
+            # },            
+            # {
+            #     'name': "translate_and_audio",
+            #     'description': "Translate a sentence, and then pronounce it",
+            #     'parameters': {
+            #         'type': "object",
+            #         'properties': {
+            #         'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
+            #         'source_language': { 'type': "string", 'description': 'the language of the input text to be translated', 'enum': ['fr', 'en'] },
+            #         'target_language': { 'type': "string", 'description': 'the target language to pronounce in', 'enum': ['fr', 'en'] },
+            #         },
+            #         'required': ['text', 'source_language', 'target_language'],
+            #     },
+            # },
+            {
+                'name': "process_sentence",
+                'description': "Process a sentence, by translating it and generating audio, depending on parameters",
+                'parameters': {
+                    'type': "object",
+                    'properties': {
+                        'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
+                        'source_language': { 'type': "string", 'description': 'the language of the input text to be translated', 'enum': ['fr', 'en'] },
+                        'target_language': { 'type': "string", 'description': 'the target language to pronounce in', 'enum': ['fr', 'en'] },
+                        'translate': { 'type': "boolean", 'description': 'whether to translate the input text' },
+                        'audio': { 'type': "boolean", 'description': 'whether to generate audio for the input text' },
+                    },
+                    'required': ['text', 'source_language', 'target_language', 'translate', 'audio'],
+                },
+            },            
         ],
         function_call= "auto"
     )
@@ -967,4 +1050,5 @@ if __name__ == '__main__':
     # test_wenlin_lookup()
     # openai_test()
     # microsoft_openai_test()
-    microsoft_openai_functioncalls()
+    # openai_functioncalls_simple_example()
+    openai_function_calls_telegram_bot()

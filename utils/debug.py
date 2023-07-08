@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.languages
+import cloudlanguagetools.constants
 
 
 def get_manager():
@@ -1066,6 +1067,7 @@ def openai_guess_from_to_language():
         input_text: str
         source_language: cloudlanguagetools.languages.Language
         target_language: cloudlanguagetools.languages.Language
+        service: cloudlanguagetools.constants.Service = cloudlanguagetools.constants.Service.Azure
 
 
     pprint.pprint(TranslateQuery.model_json_schema())
@@ -1074,7 +1076,7 @@ def openai_guess_from_to_language():
         model="gpt-3.5-turbo-0613",
         messages=[
             {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
-            {"role": "system", "content": "Translate from cantonese to french"},
+            {"role": "system", "content": "Translate from cantonese to french, using watson"},
             # {"role": "user", "content": "Bonjour mes amis"},
             {"role": "user", "content": "挨向後"},
         ],

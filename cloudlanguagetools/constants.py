@@ -1,4 +1,5 @@
 import enum
+from strenum import StrEnum
 
 # usage/account related constants 
 # ===============================
@@ -51,29 +52,29 @@ class RequestMode(enum.Enum):
 RequestTimeout = 10 # 10 seconds max
 ReadTimeout = 3 # 3 seconds read timeout
 
-class Service(enum.Enum):
-    Azure = enum.auto()
-    Google = enum.auto()
-    MandarinCantonese = enum.auto()
-    EasyPronunciation = enum.auto()
-    OpenAI = enum.auto()
-    Watson = enum.auto()
-    Naver = enum.auto()
-    Amazon = enum.auto()
-    Forvo = enum.auto()
-    CereProc = enum.auto()
-    Epitran = enum.auto()
-    DeepL = enum.auto()
-    VocalWare = enum.auto()
-    Voicen = enum.auto()
-    FptAi = enum.auto()
-    PyThaiNLP = enum.auto()
-    Spacy = enum.auto()
-    Wenlin = enum.auto()
-    LibreTranslate = enum.auto()
-    ElevenLabs = enum.auto()
-    TestServiceA = enum.auto()
-    TestServiceB = enum.auto()
+class Service(StrEnum):
+    Azure = 'Azure'
+    Google = 'Google'
+    MandarinCantonese = 'MandarinCantonese'
+    EasyPronunciation = 'EasyPronunciation'
+    OpenAI = 'OpenAI'
+    Watson = 'Watson'
+    Naver = 'Naver'
+    Amazon = 'Amazon'
+    Forvo = 'Forvo'
+    CereProc = 'CereProc'
+    Epitran = 'Epitran'
+    DeepL = 'DeepL'
+    VocalWare = 'VocalWare'
+    Voicen = 'Voicen'
+    FptAi = 'FptAi'
+    PyThaiNLP = 'PyThaiNLP'
+    Spacy = 'Spacy'
+    Wenlin =    'Wenlin'
+    LibreTranslate = 'LibreTranslate'
+    ElevenLabs = 'ElevenLabs'
+    TestServiceA = 'TestServiceA'
+    TestServiceB = 'TestServiceB'
 
 class Gender(enum.Enum):
     Male = enum.auto()

@@ -1,3 +1,4 @@
 clt_wenlin
 clt_requirements>=0.8
 pinyin_jyutping>=0.9
+StrEnum

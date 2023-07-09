@@ -3,6 +3,7 @@ import base64
 import tempfile
 import logging
 import timeit
+import cachetools
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import cloudlanguagetools.errors
@@ -139,6 +140,7 @@ class ServiceManager():
             result_dict[language.name] = language.lang_name
         return result_dict
 
+    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
     def get_tts_voice_list(self):
         result = []
         for key, service in self.services.items():
@@ -150,6 +152,7 @@ class ServiceManager():
         tts_voice_list = self.get_tts_voice_list()
         return [voice.json_obj() for voice in tts_voice_list]
 
+    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
     def get_translation_language_list(self):
         result = []
         for key, service in self.services.items():
@@ -161,6 +164,7 @@ class ServiceManager():
         language_list = self.get_translation_language_list()
         return [language.json_obj() for language in language_list]
 
+    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
     def get_transliteration_language_list(self):
         result = []
         for key, service in self.services.items():
@@ -172,6 +176,7 @@ class ServiceManager():
         language_list = self.get_transliteration_language_list()
         return [language.json_obj() for language in language_list]
 
+    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
     def get_tokenization_options(self):
         result = []
         for key, service in self.services.items():
@@ -185,6 +190,7 @@ class ServiceManager():
 
     # dictionary lookups
 
+    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
     def get_dictionary_lookup_options(self):
         result = []
         for key, service in self.services.items():

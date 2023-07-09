@@ -52,6 +52,8 @@ class RequestMode(enum.Enum):
 RequestTimeout = 10 # 10 seconds max
 ReadTimeout = 3 # 3 seconds read timeout
 
+TTLCacheTimeout = 86400 # 24 hours
+
 class Service(StrEnum):
     Azure = 'Azure'
     Google = 'Google'

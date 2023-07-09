@@ -4,6 +4,7 @@ import tempfile
 import logging
 import timeit
 import cachetools
+from typing import List
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import cloudlanguagetools.errors
@@ -28,6 +29,7 @@ import cloudlanguagetools.wenlin
 import cloudlanguagetools.libretranslate
 import cloudlanguagetools.openai
 import cloudlanguagetools.encryption
+import cloudlanguagetools.translationlanguage
 
 LOAD_TEST_SERVICES_ONLY = os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', 'no') == 'yes'
 
@@ -153,7 +155,7 @@ class ServiceManager():
         return [voice.json_obj() for voice in tts_voice_list]
 
     @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
-    def get_translation_language_list(self):
+    def get_translation_language_list(self) -> List[cloudlanguagetools.translationlanguage.TranslationLanguage]:
         result = []
         for key, service in self.services.items():
             result.extend(service.get_translation_language_list())

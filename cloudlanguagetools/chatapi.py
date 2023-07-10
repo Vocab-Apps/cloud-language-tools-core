@@ -15,7 +15,12 @@ class TranslateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to translate")
     source_language: cloudlanguagetools.languages.Language = Field(description="language to translate from")
     target_language: cloudlanguagetools.languages.Language = Field(description="language to translate to")
-    service: cloudlanguagetools.constants.Service = cloudlanguagetools.constants.Service.DeepL
+    service: cloudlanguagetools.constants.Service = Field(default=cloudlanguagetools.constants.Service.DeepL, description='service to use for translation')
+
+class TransliterateQuery(pydantic.BaseModel):
+    input_text: str = Field(description="text to transliterate")
+    language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
+    service: cloudlanguagetools.constants.Service = Field(default=cloudlanguagetools.constants.Service.EasyPronunciation, description='service to use for transliteration')
 
 class ChatAPI():
     def __init__(self):
@@ -44,7 +49,7 @@ class ChatAPI():
         while service_preference[0] not in common_service_list:
             service_preference.pop(0)
             if len(service_preference) == 0:
-                raise RuntimeError(f'no service found for translation from {query.source_language} to {query.target_language}')
+                return f'No service found for translation from {query.source_language} to {query.target_language}'
 
         service = service_preference[0]
         source_language_key = [x for x in source_translation_language_list if x.service == service][0].get_language_id()
@@ -60,4 +65,40 @@ class ChatAPI():
         return translated_text
 
 
+    def transliterate(self, query: TranslateQuery):
+        transliteration_option_list = self.manager.get_transliteration_language_list()
+        candidates = [x for x in transliteration_option_list if x.language == query.language]
+        if len(candidates) == 0:
+            return f'No transliteration service found for language {query.language.lang_name}'
+
+        service_list = set([x.service for x in candidates])
+
+        service_preference = [
+            query.service,
+            cloudlanguagetools.constants.Service.MandarinCantonese, # in case input text is chinese
+            cloudlanguagetools.constants.Service.EasyPronunciation,
+            cloudlanguagetools.constants.Service.Azure,
+            cloudlanguagetools.constants.Service.PyThaiNLP,
+        ]
+
+        while service_preference[0] not in service_list:
+            service_preference.pop(0)
+            if len(service_preference) == 0:
+                raise RuntimeError(f'No service found for transliteration of {query.language.lang_name}')
+            
+        service = service_preference[0]
+        final_candidates = [x for x in candidates if x.service == service]
+
+        if service == cloudlanguagetools.constants.Service.MandarinCantonese:
+            final_candidates = [x for x in candidates if 
+                                x.service == service and x.get_transliteration_key()['tone_numbers'] == False and
+                                x.service == service and x.get_transliteration_key()['spaces'] == False]
+        transliteration_option = final_candidates[0]
+
+        transliterated_text = self.manager.get_transliteration(
+            query.input_text,
+            service,
+            transliteration_option.get_transliteration_key()
+        )
+        return transliterated_text
         

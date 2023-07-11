@@ -10,6 +10,9 @@ it will try to find the ideal service and parameters for the given request,
 but sometimes parameters will be overriden to ensure an output is produced.
 """
 
+class NoDataFoundException(Exception):
+    pass
+
 
 class TranslateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to translate")
@@ -49,7 +52,7 @@ class ChatAPI():
         while service_preference[0] not in common_service_list:
             service_preference.pop(0)
             if len(service_preference) == 0:
-                return f'No service found for translation from {query.source_language} to {query.target_language}'
+                raise NoDataFoundException(f'No service found for translation from {query.source_language} to {query.target_language}')
 
         service = service_preference[0]
         source_language_key = [x for x in source_translation_language_list if x.service == service][0].get_language_id()
@@ -69,7 +72,7 @@ class ChatAPI():
         transliteration_option_list = self.manager.get_transliteration_language_list()
         candidates = [x for x in transliteration_option_list if x.language == query.language]
         if len(candidates) == 0:
-            return f'No transliteration service found for language {query.language.lang_name}'
+            raise NoDataFoundException(f'No transliteration service found for language {query.language.lang_name}')
 
         service_list = set([x.service for x in candidates])
 
@@ -84,7 +87,7 @@ class ChatAPI():
         while service_preference[0] not in service_list:
             service_preference.pop(0)
             if len(service_preference) == 0:
-                raise RuntimeError(f'No service found for transliteration of {query.language.lang_name}')
+                raise NoDataFoundException(f'No service found for transliteration of {query.language.lang_name}')
             
         service = service_preference[0]
         final_candidates = [x for x in candidates if x.service == service]

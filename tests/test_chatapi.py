@@ -48,7 +48,7 @@ class TestChatAPI(unittest.TestCase):
         self.assertIn(self.sanitize_text(result), possible_translations)
 
 
-    def test_transliterate(self):
+    def test_transliterate_chinese(self):
         # chinese
         query = cloudlanguagetools.chatapi.TransliterateQuery(
             input_text='你好',
@@ -57,9 +57,27 @@ class TestChatAPI(unittest.TestCase):
         result = self.chatapi.transliterate(query)
         self.assertEqual(result, 'nǐhǎo')
 
+    def test_transliterate_japanese(self):
         # japanese
         query = cloudlanguagetools.chatapi.TransliterateQuery(
             input_text='おはようございます',
             language=Language.ja
         )
         self.assertEqual(self.chatapi.transliterate(query), 'ohayo– gozaimasu')
+
+    def test_transliterate_french(self):
+        # french
+        query = cloudlanguagetools.chatapi.TransliterateQuery(
+            input_text='l’herbe est plus verte ailleurs',
+            language=Language.fr
+        )
+        self.assertEqual(self.chatapi.transliterate(query), 'lɛʁb‿ ɛ ply vɛʁt‿ ajœʁ')
+
+
+    def test_transliterate_thai(self):
+        # thai
+        query = cloudlanguagetools.chatapi.TransliterateQuery(
+            input_text='สวัสดี',
+            language=Language.th
+        )
+        self.assertEqual(self.chatapi.transliterate(query), 'sawatdi')

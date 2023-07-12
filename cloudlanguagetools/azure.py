@@ -26,6 +26,12 @@ logger = logging.getLogger(__name__)
 AUDIO_LOCALE_OVERRIDE_MAP = {
 }
 
+GENDER_MAP = {
+    'Female': cloudlanguagetools.constants.Gender.Female,
+    'Male': cloudlanguagetools.constants.Gender.Male,
+    'Neutral': cloudlanguagetools.constants.Gender.Any,
+}
+
 class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         # print(voice_data)
@@ -39,7 +45,7 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.display_name = voice_data['DisplayName']
         self.local_name = voice_data['LocalName']
         self.short_name = voice_data['ShortName']
-        self.gender = cloudlanguagetools.constants.Gender[voice_data['Gender']]
+        self.gender = GENDER_MAP[voice_data['Gender']]
 
         self.locale = locale
         self.voice_type = voice_data['VoiceType']

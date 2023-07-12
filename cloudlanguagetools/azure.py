@@ -24,6 +24,7 @@ import azure.cognitiveservices.speech.audio
 logger = logging.getLogger(__name__)
 
 AUDIO_LOCALE_OVERRIDE_MAP = {
+    'sr-Latn-RS': 'sr_RS'
 }
 
 GENDER_MAP = {

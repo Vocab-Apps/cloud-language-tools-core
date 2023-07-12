@@ -28,21 +28,28 @@ class TestChatModel(unittest.TestCase):
         cls.manager = get_manager()
 
     def setUp(self):
+        self.message_list = []
         self.chat_model = cloudlanguagetools.chatmodel.ChatModel(self.manager)
+        self.chat_model.set_send_message_callback(self.send_message_fn)        
 
+    def send_message_fn(self, message):
+        self.message_list.append(message)
     
-    def test_translation(self):
-        # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_translation
-
-        message_list = []
-        def get_send_message_lambda():
-            def send_message(message):
-                message_list.append(message)
-            return send_message
+    def test_french_translation(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_french_translation
 
         instruction = "When given a sentence in French, translate it to English"
         self.chat_model.set_instruction(instruction)
-        self.chat_model.set_send_message_callback(get_send_message_lambda())
 
         self.chat_model.process_message("Je ne suis pas intéressé.")
-        self.assertEquals(message_list, ["I'm not interested."])
+        self.assertEquals(self.message_list, ["I'm not interested."])
+
+
+    def test_chinese_translation_transliteration(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_chinese_translation_transliteration
+
+        instruction = "When given a sentence in Chinese, translate it to English, then transliterate the Chinese"
+        self.chat_model.set_instruction(instruction)
+
+        self.chat_model.process_message("成本很低")
+        self.assertEquals(self.message_list, ["The cost is low.", 'chéngběn hěn dī'])

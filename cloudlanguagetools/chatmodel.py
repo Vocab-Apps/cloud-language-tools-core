@@ -16,6 +16,7 @@ holds an instance of a conversation
 """
 class ChatModel():
     FUNCTION_NAME_TRANSLATE = 'translate'
+    FUNCTION_NAME_TRANSLITERATE = 'transliterate'
     FUNCTION_NAME_FINISH = 'finish'
 
     def __init__(self, manager):
@@ -77,14 +78,17 @@ class ChatModel():
                 continue_processing = False
 
     def process_function_call(self, function_name, arguments):
-        if function_name == self.FUNCTION_NAME_TRANSLATE:
-            translate_query = cloudlanguagetools.chatapi.TranslateQuery(**arguments)
-            try:
-                translate_result = self.chatapi.translate(translate_query)
-            except cloudlanguagetools.chatapi.NoDataFoundException as e:
-                translate_result = str(e)
-            self.message_history.append({"role": "function", "name":self.FUNCTION_NAME_TRANSLATE, "content": translate_result})
-            self.send_message(translate_result)        
+        try:
+            if function_name == self.FUNCTION_NAME_TRANSLATE:
+                translate_query = cloudlanguagetools.chatapi.TranslateQuery(**arguments)
+                result = self.chatapi.translate(translate_query)
+            elif function_name == self.FUNCTION_NAME_TRANSLITERATE:
+                query = cloudlanguagetools.chatapi.TransliterateQuery(**arguments)
+                result = self.chatapi.transliterate(query)
+        except cloudlanguagetools.chatapi.NoDataFoundException as e:
+            result = str(e)
+        self.message_history.append({"role": "function", "name": function_name, "content": result})
+        self.send_message(result)
 
     def get_openai_functions(self):
         return [
@@ -93,6 +97,11 @@ class ChatModel():
                 'description': "Translate input text from source language to target language",
                 'parameters': cloudlanguagetools.chatapi.TranslateQuery.model_json_schema(),
             },
+            {
+                'name': self.FUNCTION_NAME_TRANSLITERATE,
+                'description': "Transliterate the input text in the given language",
+                'parameters': cloudlanguagetools.chatapi.TransliterateQuery.model_json_schema(),
+            },            
             # {
             #     'name': "pronounce",
             #     'description': "Pronounce input text in the given language",

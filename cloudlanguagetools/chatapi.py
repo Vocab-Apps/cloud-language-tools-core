@@ -101,6 +101,38 @@ class ChatAPI():
         }
         return translation_option
 
+    def select_transliteration_option(self, preferred_service: cloudlanguagetools.constants.Service,
+            language: cloudlanguagetools.languages.Language):
+        transliteration_option_list = self.manager.get_transliteration_language_list()
+        candidates = [x for x in transliteration_option_list if x.language == language]
+        if len(candidates) == 0:
+            raise NoDataFoundException(f'No transliteration service found for language {language.lang_name}')
+
+        service_list = set([x.service for x in candidates])
+
+        service_preference = self.get_service_preference([
+            cloudlanguagetools.constants.Service.MandarinCantonese, # in case input text is chinese
+            cloudlanguagetools.constants.Service.EasyPronunciation,
+            cloudlanguagetools.constants.Service.Azure,
+            cloudlanguagetools.constants.Service.PyThaiNLP,
+        ], preferred_service)
+
+        while service_preference[0] not in service_list:
+            service_preference.pop(0)
+            if len(service_preference) == 0:
+                raise NoDataFoundException(f'No service found for transliteration of {language.lang_name}')
+            
+        service = service_preference[0]
+        final_candidates = [x for x in candidates if x.service == service]
+
+        if service == cloudlanguagetools.constants.Service.MandarinCantonese:
+            final_candidates = [x for x in candidates if 
+                                x.service == service and x.get_transliteration_key()['tone_numbers'] == False and
+                                x.service == service and x.get_transliteration_key()['spaces'] == False]
+        transliteration_option = final_candidates[0]
+
+        return transliteration_option
+
     def translate(self, query: TranslateQuery):
 
         translation_option = self.select_translation_option(query.service, query.source_language, query.target_language)
@@ -116,37 +148,10 @@ class ChatAPI():
 
 
     def transliterate(self, query: TranslateQuery):
-        transliteration_option_list = self.manager.get_transliteration_language_list()
-        candidates = [x for x in transliteration_option_list if x.language == query.language]
-        if len(candidates) == 0:
-            raise NoDataFoundException(f'No transliteration service found for language {query.language.lang_name}')
-
-        service_list = set([x.service for x in candidates])
-
-        service_preference = self.get_service_preference([
-            cloudlanguagetools.constants.Service.MandarinCantonese, # in case input text is chinese
-            cloudlanguagetools.constants.Service.EasyPronunciation,
-            cloudlanguagetools.constants.Service.Azure,
-            cloudlanguagetools.constants.Service.PyThaiNLP,
-        ], query.service)
-
-        while service_preference[0] not in service_list:
-            service_preference.pop(0)
-            if len(service_preference) == 0:
-                raise NoDataFoundException(f'No service found for transliteration of {query.language.lang_name}')
-            
-        service = service_preference[0]
-        final_candidates = [x for x in candidates if x.service == service]
-
-        if service == cloudlanguagetools.constants.Service.MandarinCantonese:
-            final_candidates = [x for x in candidates if 
-                                x.service == service and x.get_transliteration_key()['tone_numbers'] == False and
-                                x.service == service and x.get_transliteration_key()['spaces'] == False]
-        transliteration_option = final_candidates[0]
-
+        transliteration_option = self.select_transliteration_option(query.service, query.language)
         transliterated_text = self.manager.get_transliteration(
             query.input_text,
-            service,
+            transliteration_option.service,
             transliteration_option.get_transliteration_key()
         )
         return transliterated_text

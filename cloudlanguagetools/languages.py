@@ -24,6 +24,7 @@ class Language(enum.Enum):
     ceb = ("Cebuano")
     ckb = ("Kurdish (Sorani)")
     doi = ("Dogri")
+    dsb = ("Lower Sorbian")
     ny = ("Chichewa")
     co = ("Corsican")
     hr = ("Croatian")

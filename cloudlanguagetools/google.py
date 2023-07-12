@@ -11,6 +11,8 @@ import cloudlanguagetools.constants
 import cloudlanguagetools.options
 import cloudlanguagetools.languages
 
+logger = logging.getLogger(__name__)
+
 def language_code_to_enum(language_code):
     override_map = {
         'cmn-TW': cloudlanguagetools.languages.AudioLanguage.zh_TW,
@@ -22,15 +24,21 @@ def language_code_to_enum(language_code):
     language_enum_name = language_code.replace('-', '_')
     return cloudlanguagetools.languages.AudioLanguage[language_enum_name]
 
+GENDER_MAP = {
+    google.cloud.texttospeech.SsmlVoiceGender.SSML_VOICE_GENDER_UNSPECIFIED: cloudlanguagetools.constants.Gender.Any,
+    google.cloud.texttospeech.SsmlVoiceGender.NEUTRAL: cloudlanguagetools.constants.Gender.Any,
+    google.cloud.texttospeech.SsmlVoiceGender.MALE: cloudlanguagetools.constants.Gender.Male,
+    google.cloud.texttospeech.SsmlVoiceGender.FEMALE: cloudlanguagetools.constants.Gender.Female,
+}
+
 class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
+        logger.debug(f'processing voice {voice_data}')
         self.service = cloudlanguagetools.constants.Service.Google
         self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.name = voice_data.name
         self.google_ssml_gender = google.cloud.texttospeech.SsmlVoiceGender(voice_data.ssml_gender)
-        gender_str = self.google_ssml_gender.name.lower().capitalize()
-        self.gender = cloudlanguagetools.constants.Gender[gender_str]
-        assert len(voice_data.language_codes) == 1
+        self.gender = GENDER_MAP[self.google_ssml_gender]
         self.google_language_code = voice_data.language_codes[0]
         self.audio_language = language_code_to_enum(self.google_language_code)
 

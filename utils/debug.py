@@ -1107,7 +1107,7 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
                         stream=sys.stdout,
-                        level=logging.INFO)    
+                        level=logging.INFO)
 
     # generate_video_audio()
     # test_azure_audio()
@@ -1147,11 +1147,11 @@ if __name__ == '__main__':
     # test_debounce()
     # load_vocalware_voices()
     # thai_tokenization()
-    # test_get_language_data()
+    test_get_language_data()
     # test_get_language_data_redis()
     # test_wenlin_lookup()
     # openai_test()
     # microsoft_openai_test()
     # openai_functioncalls_simple_example()
     # openai_detect_language()
-    openai_guess_from_to_language()
+    # openai_guess_from_to_language()

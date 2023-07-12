@@ -81,3 +81,24 @@ class TestChatAPI(unittest.TestCase):
             language=Language.th
         )
         self.assertEqual(self.chatapi.transliterate(query), 'sawatdi')
+
+    def test_dictionary_lookup_french(self):
+        # french
+        query = cloudlanguagetools.chatapi.DictionaryLookup(
+            input_text='bonjour',
+            language=Language.fr,
+        )
+        result = self.chatapi.dictionary_lookup(query)
+        self.assertEqual(result, 'hello')
+
+    def test_dictionary_lookup_chinese(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_dictionary_lookup_chinese
+
+        # chinese
+        query = cloudlanguagetools.chatapi.DictionaryLookup(
+            input_text='彩虹',
+            language=Language.zh_cn,
+            service=cloudlanguagetools.constants.Service.Wenlin
+        )
+        result = self.chatapi.dictionary_lookup(query)
+        self.assertEqual(result, 'rainbow')

@@ -1,6 +1,10 @@
 import pydantic
+import logging
+import pprint
 from pydantic import Field
 import cloudlanguagetools.servicemanager
+
+logger = logging.getLogger(__name__)
 
 """
 This API is meant to interface with chatbots such as ChatGPT. 
@@ -24,6 +28,11 @@ class TransliterateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to transliterate")
     language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
     service: cloudlanguagetools.constants.Service = Field(default=cloudlanguagetools.constants.Service.EasyPronunciation, description='service to use for transliteration')
+
+class DictionaryLookup(pydantic.BaseModel):
+    input_text: str = Field(description="text lookup in the dictionary")
+    language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
+    service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for dictionary lookup')
 
 class ChatAPI():
     def __init__(self):
@@ -104,4 +113,38 @@ class ChatAPI():
             transliteration_option.get_transliteration_key()
         )
         return transliterated_text
+
+    def dictionary_lookup(self, query: DictionaryLookup):
+        dictionary_option_list = self.manager.get_dictionary_lookup_options()
+        candidates = [x for x in dictionary_option_list if x.language == query.language]
+        if len(candidates) == 0:
+            raise NoDataFoundException(f'No dictionary service found for language {query.language.lang_name}')
+
+        service_list = set([x.service for x in candidates])
+
+        service_preference = [
+            cloudlanguagetools.constants.Service.Wenlin,
+            cloudlanguagetools.constants.Service.Azure,
+        ]
+        if query.service != None:
+            service_preference = [query.service] + service_preference
+
+        while service_preference[0] not in service_list:
+            service_preference.pop(0)
+            if len(service_preference) == 0:
+                raise NoDataFoundException(f'No service found for dictionary lookup of {query.language.lang_name}')
+            
+        service = service_preference[0]
+        final_candidates = [x for x in candidates if x.service == service]
+
+        dictionary_option = final_candidates[0]
+        logger.debug(f'Using dictionary option {pprint.pformat(dictionary_option.json_obj())}')
+
+        dictionary_result = self.manager.get_dictionary_lookup(
+            query.input_text,
+            service,
+            dictionary_option.get_lookup_key()
+        )
+        result = ' / '.join(dictionary_result)
+        return result
         

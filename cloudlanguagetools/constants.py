@@ -78,10 +78,10 @@ class Service(StrEnum):
     TestServiceA = 'TestServiceA'
     TestServiceB = 'TestServiceB'
 
-class Gender(enum.Enum):
-    Male = enum.auto()
-    Female = enum.auto()
-    Any = enum.auto()
+class Gender(StrEnum):
+    Male = 'Male'
+    Female = 'Male'
+    Any = 'Any'
 
 
 class DictionaryLookupType(enum.Enum):

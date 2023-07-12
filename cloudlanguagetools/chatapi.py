@@ -1,8 +1,11 @@
 import pydantic
 import logging
 import pprint
+import pydub
+import tempfile
 from pydantic import Field
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.options
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +36,12 @@ class DictionaryLookup(pydantic.BaseModel):
     input_text: str = Field(description="text lookup in the dictionary")
     language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
     service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for dictionary lookup')
+
+class AudioQuery(pydantic.BaseModel):
+    input_text: str = Field(description="text to pronounce")
+    language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
+    service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use audio pronunciation')
+    gender: cloudlanguagetools.constants.Gender = Field(default=None, description='gender of the voice to pronounce the text in')
 
 class ChatAPI():
     def __init__(self):
@@ -150,3 +159,83 @@ class ChatAPI():
         result = ' / '.join(dictionary_result)
         return result
         
+
+    def audio(self, query: AudioQuery, format: cloudlanguagetools.options.AudioFormat):
+        # get full voice list, filter down to correct language
+        # ====================================================
+        voice_list = self.manager.get_voice_list()
+        candidates = [x for x in voice_list if x.audio_language.lang == query.language]
+
+        # select service
+        # ==============
+
+        service_list = set([x.service for x in candidates])
+        service_preference = self.get_service_preference([
+            cloudlanguagetools.constants.Service.Azure,
+            cloudlanguagetools.constants.Service.Amazon,
+            cloudlanguagetools.constants.Service.Google,
+            cloudlanguagetools.constants.Service.Watson,
+            cloudlanguagetools.constants.Service.Naver,
+            cloudlanguagetools.constants.Service.CereProc,
+            cloudlanguagetools.constants.Service.VocalWare,
+            cloudlanguagetools.constants.Service.FptAi,
+        ], query.service)
+
+        while service_preference[0] not in service_list:
+            service_preference.pop(0)
+            if len(service_preference) == 0:
+                raise NoDataFoundException(f'No service found for audio pronouncation of {query.language.lang_name}')
+
+        # restrict to candidates for that service
+        service = service_preference[0]
+        candidates = [x for x in candidates if x.service == service]
+
+        # select gender
+        # =============
+
+        gender_list = set([x.gender for x in candidates])
+        gender_preference = [
+            cloudlanguagetools.constants.Gender.Female,
+            cloudlanguagetools.constants.Gender.Male,
+            cloudlanguagetools.constants.Gender.Any
+        ]
+        if query.gender != None:
+            gender_preference = [query.gender] + gender_preference
+
+        while gender_preference[0] not in gender_list:
+            gender_preference.pop(0)
+        gender = gender_preference[0]
+
+        candidates = [x for x in candidates if x.gender == gender]
+
+        # pick the first candidate and generate audio
+        # ===========================================
+
+        voice = candidates[0]
+        options = {}
+        convert_mp3_to_ogg = False
+        # by default, the format is mp3. if the request format is ogg, then we need to convert
+        if format == cloudlanguagetools.options.AudioFormat.ogg_opus:
+            convert_mp3_to_ogg = True
+            if cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER in voice.get_options():
+                if format.name in voice.get_options()[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER].values:
+                    # native ogg opus supported
+                    options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER] = format.name
+                    convert_mp3_to_ogg = False
+
+        # generate audio
+        audio_temp_file = self.manager.get_audio(
+            query.input_text,
+            service,
+            voice.get_voice_key(),
+            options
+        )
+
+        if convert_mp3_to_ogg:
+            audio = pydub.AudioSegment.from_mp3(audio_temp_file.name)
+            ogg_audio_temp_file = tempfile.NamedTemporaryFile(prefix='cloudlanguagetools_chatapi', suffix='.ogg')
+            audio.export(ogg_audio_temp_file.name, format="ogg", codec="libopus")
+            audio_temp_file = ogg_audio_temp_file
+
+        return audio_temp_file
+

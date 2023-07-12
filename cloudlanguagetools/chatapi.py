@@ -243,3 +243,8 @@ class ChatAPI():
 
         return audio_temp_file
 
+    def recognize_audio(self, sound_temp_file: tempfile.NamedTemporaryFile, audio_format: cloudlanguagetools.options.AudioFormat):
+        # logger.debug(f'processing audio query: {query}')
+        # result = self.manager.services[cloudlanguagetools.constants.Service.Azure].speech_to_text(sound_temp_file.name, audio_format)
+        result = self.manager.services[cloudlanguagetools.constants.Service.OpenAI].speech_to_text(sound_temp_file.name, audio_format)
+        return result

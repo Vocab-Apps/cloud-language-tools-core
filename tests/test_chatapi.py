@@ -126,3 +126,12 @@ class TestChatAPI(unittest.TestCase):
         self.assert_audio_matches(audio_temp_file, '老人家', 'zh-CN')
 
         
+    def test_audio_recognition(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_audio_recognition
+        query = cloudlanguagetools.chatapi.AudioQuery(
+            input_text='老人家',
+            language=Language.zh_cn
+        )
+        audio_temp_file = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
+        recognized_text = self.chatapi.recognize_audio(audio_temp_file, cloudlanguagetools.options.AudioFormat.mp3)
+        self.assertEqual(recognized_text, '老人家')

@@ -5,6 +5,7 @@ import logging
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
+import cloudlanguagetools.options
 import cloudlanguagetools.transliterationlanguage
 
 logger = logging.getLogger(__name__)
@@ -52,3 +53,9 @@ class OpenAIService(cloudlanguagetools.service.Service):
             )    
         logger.debug(pprint.pformat(response))
         return response
+
+    def speech_to_text(self, filepath, audio_format: cloudlanguagetools.options.AudioFormat):
+        logger.debug(f'opening file {filepath}')
+        audio_file= open(filepath, "rb")
+        transcript = openai.Audio.transcribe("whisper-1", audio_file)
+        return transcript['text']

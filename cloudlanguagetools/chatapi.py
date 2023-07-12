@@ -189,7 +189,7 @@ class ChatAPI():
         return result
         
 
-    def audio(self, query: AudioQuery, format: cloudlanguagetools.options.AudioFormat):
+    def audio(self, query: AudioQuery, format: cloudlanguagetools.options.AudioFormat) -> tempfile.NamedTemporaryFile:
         logger.debug(f'processing audio query: {query}')
         # get full voice list, filter down to correct language
         # ====================================================

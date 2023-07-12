@@ -36,8 +36,9 @@ class ChatModel():
 
     def call_openai(self):
         messages = [
-            {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
-            {"role": "system", "content": self.instruction}        
+            {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning."},
+            {"role": "system", "content": self.instruction},
+            {"role": "system", "content": "When all tasks are done, call the finish function."}
         ]
         messages.extend(self.message_history)
 
@@ -68,6 +69,7 @@ class ChatModel():
             message = response['choices'][0]['message']
             if 'function_call' in message:
                 function_name = message['function_call']['name']
+                logger.info(f'function_call: function_name: {function_name}')
                 arguments = json.loads(message["function_call"]["arguments"])
                 if function_name == self.FUNCTION_NAME_FINISH:
                     continue_processing = False
@@ -87,6 +89,7 @@ class ChatModel():
                 result = self.chatapi.transliterate(query)
         except cloudlanguagetools.chatapi.NoDataFoundException as e:
             result = str(e)
+        logger.info(f'function: {function_name} result: {result}')
         self.message_history.append({"role": "function", "name": function_name, "content": result})
         self.send_message(result)
 

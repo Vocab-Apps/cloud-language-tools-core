@@ -84,16 +84,16 @@ class TestAudio(unittest.TestCase):
         if num_tries < 0:
             raise Exception(f"could not retrieve audio from {voice['service']} after {max_tries} tries")
 
-        # check MIME type
-        mime_type = magic.from_file(audio_temp_file.name)
-        expected_mime_type_str = 'MPEG ADTS, layer III'
-        if 'ASCII text' in mime_type:
+        # check file format
+        is_mp3 = audio_utils.is_mp3_format(audio_temp_file.name)
+        if not is_mp3:
+            mime_type = magic.from_file(audio_temp_file.name)
             logger.error(f'found mime type: {mime_type}')
             # dump file to console
             f = open(audio_temp_file.name, "r")
             print(f.read())
 
-        self.assertIn(expected_mime_type_str, mime_type)
+        self.assertTrue(is_mp3)
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, recognition_language)
         assert_text = f"service {voice['service']} voice_key: {voice['voice_key']}"
         self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text), msg=assert_text)
@@ -317,8 +317,7 @@ class TestAudio(unittest.TestCase):
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
 
-        file_type = magic.from_file(audio_temp_file.name)
-        self.assertIn('Ogg data, Opus', file_type)
+        self.assertTrue(audio_utils.is_ogg_opus_format(audio_temp_file.name))
         
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        

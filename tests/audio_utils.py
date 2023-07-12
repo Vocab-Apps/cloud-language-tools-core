@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import magic
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -22,3 +23,13 @@ def sanitize_recognized_text(recognized_text):
         replace(',', '').\
         replace(':', '').lower()
     return result_text
+
+def is_mp3_format(filename):
+    mime_type = magic.from_file(filename)
+    expected_mime_type_str = 'MPEG ADTS, layer III'    
+    return expected_mime_type_str in mime_type
+
+def is_ogg_opus_format(filename):
+    mime_type = magic.from_file(filename)
+    expected_mime_type_str = 'Ogg data, Opus audio,'
+    return expected_mime_type_str in mime_type

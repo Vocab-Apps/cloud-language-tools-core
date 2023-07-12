@@ -65,18 +65,6 @@ class TestAudio(unittest.TestCase):
         subset = [x for x in self.voice_list if x['audio_language_code'] == audio_language.name and x['service'] == service.name]
         return subset        
 
-    def sanitize_recognized_text(self, recognized_text):
-        recognized_text = re.sub('<[^<]+?>', '', recognized_text)
-        result_text = recognized_text.replace('.', '').\
-            replace('。', '').\
-            replace('?', '').\
-            replace('？', '').\
-            replace('您', '你').\
-            replace('&', 'and').\
-            replace(',', '').\
-            replace(':', '').lower()
-        return result_text
-
     def verify_voice(self, voice, text, recognition_language):
         voice_key = voice['voice_key']
 
@@ -108,7 +96,7 @@ class TestAudio(unittest.TestCase):
         self.assertIn(expected_mime_type_str, mime_type)
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, recognition_language)
         assert_text = f"service {voice['service']} voice_key: {voice['voice_key']}"
-        self.assertEqual(self.sanitize_recognized_text(text), self.sanitize_recognized_text(audio_text), msg=assert_text)
+        self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text), msg=assert_text)
 
     def verify_service_audio_language(self, text, service, audio_language, recognition_language):
         # logging.info(f'verify_service_audio: service: {service} audio_language: {audio_language}')
@@ -274,7 +262,7 @@ class TestAudio(unittest.TestCase):
         options = {}
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'en-GB')
-        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
+        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))
 
     def test_french_forvo(self):
         # pytest test_audio.py -k test_french_forvo
@@ -315,7 +303,7 @@ class TestAudio(unittest.TestCase):
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR')
-        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
+        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))
 
     def test_azure_format_ogg(self):
         service = 'Azure'
@@ -333,7 +321,7 @@ class TestAudio(unittest.TestCase):
         self.assertIn('Ogg data, Opus', file_type)
         
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
-        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
+        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
 
     def test_google_format_ogg(self):
         service = 'Google'
@@ -353,7 +341,7 @@ class TestAudio(unittest.TestCase):
         self.assertIn('Ogg data, Opus', file_type)
         
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
-        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
+        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
 
     def test_amazon_format_ogg(self):
         service = 'Amazon'
@@ -369,7 +357,7 @@ class TestAudio(unittest.TestCase):
         self.assertIn('Ogg data', file_type)
         
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_vorbis)
-        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
+        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
 
     def test_azure_ampersand(self):
         service = 'Azure'
@@ -381,7 +369,7 @@ class TestAudio(unittest.TestCase):
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, {})
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'en-US')
-        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
+        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
 
     def test_fptai_options(self):
         service = 'FptAi'
@@ -395,7 +383,7 @@ class TestAudio(unittest.TestCase):
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'vi-VN')
-        self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
+        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))
 
     def test_elevenlabs_english(self):
         source_text = 'This is the best restaurant in town.'

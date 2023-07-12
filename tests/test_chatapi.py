@@ -166,3 +166,19 @@ class TestChatAPI(unittest.TestCase):
 很: hěn, very much
 低: dī, lower (one's head)"""
         self.assertEqual(result, expected_output)
+
+    def test_breakdown_english(self):
+        query = cloudlanguagetools.chatapi.BreakdownQuery(
+            input_text="I was reading today's paper.",
+            language=Language.en,
+            translation_language=Language.fr
+        )
+        result = self.chatapi.breakdown(query)
+        expected_output = """I: ˈaɪ, I (pronoun, personal)
+was: /be ˈwəz, être (verb, past tense)
+reading: /read ˈɹiːdɪŋ, lire (verb, gerund or present participle)
+today: təˈdeɪ, aujourd'hui (noun, singular or mass)
+'s: (possessive ending)
+paper: ˈpeɪpɚ, papier (noun, singular or mass)
+.: (punctuation mark, sentence closer)"""
+        self.assertEqual(result, expected_output)        

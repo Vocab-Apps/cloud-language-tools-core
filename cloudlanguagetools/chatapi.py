@@ -314,13 +314,20 @@ class ChatAPI():
 
         lines = []
         for entry in breakdown_result:
-            line = entry['token'] + ': '
+            line_components = []
+            line_components.append(entry['token'] + ':')
             if 'lemma' in entry and entry['lemma'] != entry['token']:
-                line += '/' + entry['lemma'] + ' '
-            line += entry['transliteration'] + ', '
-            line += entry['translation']
+                line_components.append('/' + entry['lemma'])
+            
+            if 'transliteration' in entry:
+                line_components.append(entry['transliteration'] + ',')
+
+            if 'translation' in entry:
+                line_components.append(entry['translation'])
+
             if 'pos_description' in entry:
-                line += ' (' + entry['pos_description'] + ')'
-            lines.append(line)
+                line_components.append('(' + entry['pos_description'] + ')')
+            
+            lines.append(' '.join(line_components))
 
         return '\n'.join(lines)

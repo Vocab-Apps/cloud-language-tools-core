@@ -22,12 +22,12 @@ class TranslateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to translate")
     source_language: cloudlanguagetools.languages.Language = Field(description="language to translate from")
     target_language: cloudlanguagetools.languages.Language = Field(description="language to translate to")
-    service: cloudlanguagetools.constants.Service = Field(default=cloudlanguagetools.constants.Service.DeepL, description='service to use for translation')
+    service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for translation')
 
 class TransliterateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to transliterate")
     language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
-    service: cloudlanguagetools.constants.Service = Field(default=cloudlanguagetools.constants.Service.EasyPronunciation, description='service to use for transliteration')
+    service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for transliteration')
 
 class DictionaryLookup(pydantic.BaseModel):
     input_text: str = Field(description="text lookup in the dictionary")
@@ -39,15 +39,20 @@ class ChatAPI():
         self.manager = cloudlanguagetools.servicemanager.ServiceManager()
         self.manager.configure_default()
 
+    def get_service_preference(self, preferred_service_list, default_service):
+        if default_service != None:
+            return [default_service] + preferred_service_list
+        else:
+            return preferred_service_list
+
     def translate(self, query: TranslateQuery):
-        service_preference = [
-            query.service,
+        service_preference = self.get_service_preference([
             cloudlanguagetools.constants.Service.DeepL,
             cloudlanguagetools.constants.Service.Azure,
             cloudlanguagetools.constants.Service.Google,
             cloudlanguagetools.constants.Service.Amazon,
-            cloudlanguagetools.constants.Service.Watson
-        ]
+            cloudlanguagetools.constants.Service.Watson            
+        ], query.service)
 
         # get list of translation options
         translation_language_list = self.manager.get_translation_language_list()
@@ -85,13 +90,12 @@ class ChatAPI():
 
         service_list = set([x.service for x in candidates])
 
-        service_preference = [
-            query.service,
+        service_preference = self.get_service_preference([
             cloudlanguagetools.constants.Service.MandarinCantonese, # in case input text is chinese
             cloudlanguagetools.constants.Service.EasyPronunciation,
             cloudlanguagetools.constants.Service.Azure,
             cloudlanguagetools.constants.Service.PyThaiNLP,
-        ]
+        ], query.service)
 
         while service_preference[0] not in service_list:
             service_preference.pop(0)
@@ -122,12 +126,10 @@ class ChatAPI():
 
         service_list = set([x.service for x in candidates])
 
-        service_preference = [
+        service_preference = self.get_service_preference([
             cloudlanguagetools.constants.Service.Wenlin,
             cloudlanguagetools.constants.Service.Azure,
-        ]
-        if query.service != None:
-            service_preference = [query.service] + service_preference
+        ], query.service)
 
         while service_preference[0] not in service_list:
             service_preference.pop(0)

@@ -18,10 +18,13 @@ class InteractiveChatbot():
         self.manager = cloudlanguagetools.servicemanager.ServiceManager()
         self.manager.configure_default()
         self.chat_model = cloudlanguagetools.chatmodel.ChatModel(self.manager)
-        self.chat_model.set_send_message_callback(self.received_message, self.received_audio)
+        self.chat_model.set_send_message_callback(self.received_message, self.received_audio, self.received_error)
 
     def received_message(self, message: str):
         logger.info(f'received message: {message}')
+
+    def received_error(self, error: str):
+        logger.error(error)
 
     def received_audio(self, audio_tempfile: tempfile.NamedTemporaryFile):
         logger.info(f'playing audio')

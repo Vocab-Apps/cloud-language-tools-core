@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 class FinishQuery(pydantic.BaseModel):
     pass
+class NewSentenceQuery(pydantic.BaseModel):
+    pass
 
 """
 holds an instance of a conversation
@@ -21,7 +23,6 @@ class ChatModel():
     FUNCTION_NAME_DICTIONARY_LOOKUP = 'dictionary_lookup'
     FUNCTION_NAME_BREAKDOWN = 'breakdown'
     FUNCTION_NAME_PRONOUNCE = 'pronounce'
-    FUNCTION_NAME_FINISH = 'finish'
 
     def __init__(self, manager):
         self.manager = manager
@@ -29,19 +30,24 @@ class ChatModel():
         self.instruction = None
         self.message_history = []
         self.total_tokens = 0
+        self.latest_token_usage = 0
     
     def set_instruction(self, instruction):
         self.instruction = instruction
 
-    def set_send_message_callback(self, send_message_fn, send_audio_fn):
+    def set_send_message_callback(self, send_message_fn, send_audio_fn, send_error_fn):
         self.send_message_fn = send_message_fn
         self.send_audio_fn = send_audio_fn
+        self.send_error_fn = send_error_fn
 
     def send_message(self, message):
         self.send_message_fn(message)
 
     def send_audio(self, audio_tempfile):
         self.send_audio_fn(audio_tempfile)
+
+    def send_error(self, error: str):
+        self.send_error_fn(error)        
 
     def call_openai(self):
         # do we have any instructions ?
@@ -51,11 +57,10 @@ class ChatModel():
 
         messages = [
             {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning."}
-        ] + instruction_message_list +\
-        [{"role": "system", "content": "When all tasks are done, call the finish function."}]
+        ] + instruction_message_list
+
 
         messages.extend(self.message_history)
-
 
         logger.debug(f"sending messages to openai: {pprint.pformat(messages)}")
 
@@ -69,12 +74,13 @@ class ChatModel():
             temperature=0.0
         )
 
-        self.total_tokens += response['usage']['total_tokens']
+        self.latest_token_usage = response['usage']['total_tokens']
+        self.total_tokens += self.latest_token_usage
 
         return response
 
     def status(self):
-        return f'total_tokens: {self.total_tokens}'
+        return f'total_tokens: {self.total_tokens}, latest_token_usage: {self.latest_token_usage}'
 
     def process_message(self, message):
     
@@ -87,26 +93,26 @@ class ChatModel():
         # if the processing loop resulted in no functions getting called, see what the bot has to say
         had_function_calls = False
 
-        while continue_processing and max_calls > 0:
-            max_calls -= 1
-            response = self.call_openai()
-            logger.debug(pprint.pformat(response))
-            message = response['choices'][0]['message']
-            if 'function_call' in message:
-                function_name = message['function_call']['name']
-                logger.info(f'function_call: function_name: {function_name}')
-                arguments = json.loads(message["function_call"]["arguments"])
-                if function_name == self.FUNCTION_NAME_FINISH:
-                    continue_processing = False
-                    break
-                else:
+        try:
+            while continue_processing and max_calls > 0:
+                max_calls -= 1
+                response = self.call_openai()
+                logger.debug(pprint.pformat(response))
+                message = response['choices'][0]['message']
+                if 'function_call' in message:
+                    function_name = message['function_call']['name']
+                    logger.info(f'function_call: function_name: {function_name}')
+                    arguments = json.loads(message["function_call"]["arguments"])
                     self.process_function_call(function_name, arguments)
                     had_function_calls = True
-            else:
-                continue_processing = False
-                if had_function_calls == False:
-                    # no functions were called. maybe chatgpt is trying to explain something
-                    self.send_message(message['content'])
+                else:
+                    continue_processing = False
+                    if had_function_calls == False:
+                        # no functions were called. maybe chatgpt is trying to explain something
+                        self.send_message(message['content'])
+        except Exception as e:
+            logger.exception(f'error processing function call')
+            self.send_error(str(e))                
 
     def process_function_call(self, function_name, arguments):
         if function_name == self.FUNCTION_NAME_PRONOUNCE:
@@ -160,11 +166,6 @@ class ChatModel():
                 'name': self.FUNCTION_NAME_PRONOUNCE,
                 'description': "Pronounce input text in the given language (generate text to speech audio)",
                 'parameters': self.process_model_json_schema(cloudlanguagetools.chatapi.AudioQuery.model_json_schema()),
-            },
-            {
-                'name': self.FUNCTION_NAME_FINISH,
-                'description': "Finish the conversation",
-                'parameters': FinishQuery.model_json_schema(),
             },
         ]
 

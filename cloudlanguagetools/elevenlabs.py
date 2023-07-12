@@ -132,7 +132,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
         # first, get all models to get list of languages
         url = "https://api.elevenlabs.io/v1/models"
-        response = requests.get(url, headers=self.get_headers())
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         response.raise_for_status()
         model_data = response.json()
         # model_data: 

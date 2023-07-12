@@ -2,6 +2,9 @@ import sys
 import os
 import logging
 import tempfile
+import pydub
+import pasimple
+import wave
 logger = logging.getLogger(__name__)
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -21,6 +24,21 @@ class InteractiveChatbot():
 
     def received_audio(self, audio_tempfile: tempfile.NamedTemporaryFile):
         print(f'received audio')
+        sound = pydub.AudioSegment.from_mp3(audio_tempfile.name)
+        wav_tempfile = tempfile.NamedTemporaryFile(prefix='clt_interactivechatbot', suffix='.wav')
+        sound.export(wav_tempfile.name, format="wav")
+        
+        # Read a .wav file with its attributes
+        with wave.open(wav_tempfile.name, 'rb') as wave_file:
+            format = pasimple.width2format(wave_file.getsampwidth())
+            channels = wave_file.getnchannels()
+            sample_rate = wave_file.getframerate()
+            audio_data = wave_file.readframes(wave_file.getnframes())
+
+        # Play the file via PulseAudio
+        with pasimple.PaSimple(pasimple.PA_STREAM_PLAYBACK, format, channels, sample_rate) as pa:
+            pa.write(audio_data)
+            pa.drain()        
 
     def run(self):
         while True:

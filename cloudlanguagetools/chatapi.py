@@ -44,6 +44,14 @@ class AudioQuery(pydantic.BaseModel):
     service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use audio pronunciation')
     gender: cloudlanguagetools.constants.Gender = Field(default=None, description='gender of the voice to pronounce the text in')
 
+class BreakdownQuery(pydantic.BaseModel):
+    input_text: str = Field(description="text to breakdown")
+    language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
+    translation_language: cloudlanguagetools.languages.Language = Field(default=cloudlanguagetools.languages.Language.en, description="language to translate into")
+    translation_service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for translation')
+    transliteration_service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for transliteration')
+
+
 class ChatAPI():
     def __init__(self):
         self.manager = cloudlanguagetools.servicemanager.ServiceManager()
@@ -55,19 +63,23 @@ class ChatAPI():
         else:
             return preferred_service_list
 
-    def translate(self, query: TranslateQuery):
+    def select_translation_option(self, preferred_service: cloudlanguagetools.constants.Service,
+            source_language: cloudlanguagetools.languages.Language,
+            target_language: cloudlanguagetools.languages.Language):   
+        """pick appropriate translation service"""
+
         service_preference = self.get_service_preference([
             cloudlanguagetools.constants.Service.DeepL,
             cloudlanguagetools.constants.Service.Azure,
             cloudlanguagetools.constants.Service.Google,
             cloudlanguagetools.constants.Service.Amazon,
             cloudlanguagetools.constants.Service.Watson            
-        ], query.service)
+        ], preferred_service)
 
         # get list of translation options
         translation_language_list = self.manager.get_translation_language_list()
-        source_translation_language_list = [x for x in translation_language_list if x.language == query.source_language]
-        target_translation_language_list = [x for x in translation_language_list if x.language == query.target_language]
+        source_translation_language_list = [x for x in translation_language_list if x.language == source_language]
+        target_translation_language_list = [x for x in translation_language_list if x.language == target_language]
         # get the list of services in common between source_translation_language_list and target_translation_language_list
         source_service_list = set([x.service for x in source_translation_language_list])
         target_service_list = set([x.service for x in target_translation_language_list])
@@ -76,18 +88,29 @@ class ChatAPI():
         while service_preference[0] not in common_service_list:
             service_preference.pop(0)
             if len(service_preference) == 0:
-                raise NoDataFoundException(f'No service found for translation from {query.source_language} to {query.target_language}')
+                raise NoDataFoundException(f'No service found for translation from {source_language} to {target_language}')
 
         service = service_preference[0]
-        source_language_key = [x for x in source_translation_language_list if x.service == service][0].get_language_id()
-        target_language_key = [x for x in target_translation_language_list if x.service == service][0].get_language_id()
+        source_language_id = [x for x in source_translation_language_list if x.service == service][0].get_language_id()
+        target_language_id = [x for x in target_translation_language_list if x.service == service][0].get_language_id()
+
+        translation_option = {
+            'service': service,
+            'source_language_id': source_language_id,
+            'target_language_id': target_language_id
+        }
+        return translation_option
+
+    def translate(self, query: TranslateQuery):
+
+        translation_option = self.select_translation_option(query.service, query.source_language, query.target_language)
 
         # get the translation
         translated_text = self.manager.get_translation(
             query.input_text,
-            service,
-            source_language_key,
-            target_language_key,
+            translation_option['service'],
+            translation_option['source_language_id'],
+            translation_option['target_language_id'],
         )
         return translated_text
 
@@ -256,3 +279,17 @@ class ChatAPI():
         # result = self.manager.services[cloudlanguagetools.constants.Service.Azure].speech_to_text(sound_temp_file.name, audio_format)
         result = self.manager.services[cloudlanguagetools.constants.Service.OpenAI].speech_to_text(sound_temp_file.name, audio_format)
         return result
+
+    def breakdown(self, query: BreakdownQuery):
+        logger.debug(f'processing breakdown query: {query}')
+
+        # locate tokenization option
+        # ==========================
+        tokenization_options = self.manager.get_tokenization_options()
+        tokenization_candidates = [x for x in tokenization_options if x.language == query.language]
+        if len(tokenization_candidates) == 0:
+            raise NoDataFoundException(f'No tokenization options found for language {query.language.lang_name}')
+        tokenization_option = tokenization_candidates[0]
+
+        # locate translation option
+        # =========================

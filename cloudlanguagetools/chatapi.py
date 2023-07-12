@@ -4,6 +4,7 @@ import pprint
 import pydub
 import tempfile
 from pydantic import Field
+from typing import Optional
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.options
 import cloudlanguagetools.languages
@@ -26,30 +27,30 @@ class TranslateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to translate")
     source_language: cloudlanguagetools.languages.Language = Field(description="language to translate from")
     target_language: cloudlanguagetools.languages.Language = Field(description="language to translate to")
-    service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for translation')
+    service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for translation')
 
 class TransliterateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to transliterate")
     language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
-    service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for transliteration')
+    service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for transliteration')
 
 class DictionaryLookup(pydantic.BaseModel):
     input_text: str = Field(description="text lookup in the dictionary")
     language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
-    service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for dictionary lookup')
+    service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for dictionary lookup')
 
 class AudioQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to pronounce")
     language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
-    service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use audio pronunciation')
-    gender: cloudlanguagetools.constants.Gender = Field(default=None, description='gender of the voice to pronounce the text in')
+    service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use audio pronunciation')
+    gender: Optional[cloudlanguagetools.constants.Gender] = Field(default=None, description='gender of the voice to pronounce the text in')
 
 class BreakdownQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to breakdown")
     language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
     translation_language: cloudlanguagetools.languages.Language = Field(default=cloudlanguagetools.languages.Language.en, description="language to translate into")
-    translation_service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for translation')
-    transliteration_service: cloudlanguagetools.constants.Service = Field(default=None, description='service to use for transliteration')
+    translation_service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for translation')
+    transliteration_service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for transliteration')
 
 
 class ChatAPI():

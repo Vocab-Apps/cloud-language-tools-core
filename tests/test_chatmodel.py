@@ -88,7 +88,6 @@ class TestChatModel(unittest.TestCase):
         # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_cantonese_audio
         # pytest --log-cli-level=INFO tests/test_chatmodel.py -k test_cantonese_audio
 
-
         self.chat_model.process_message('pronounce "天氣預報" in cantonese')
 
         self.assertEquals(len(self.audio_list), 1)  

@@ -84,6 +84,9 @@ class ChatModel():
         # message_history contains the most recent request
         self.message_history.append({"role": "user", "content": message})
 
+        # if the processing loop resulted in no functions getting called, see what the bot has to say
+        had_function_calls = False
+
         while continue_processing and max_calls > 0:
             max_calls -= 1
             response = self.call_openai()
@@ -98,8 +101,12 @@ class ChatModel():
                     break
                 else:
                     self.process_function_call(function_name, arguments)
+                    had_function_calls = True
             else:
                 continue_processing = False
+                if had_function_calls == False:
+                    # no functions were called. maybe chatgpt is trying to explain something
+                    self.send_message(message['content'])
 
     def process_function_call(self, function_name, arguments):
         if function_name == self.FUNCTION_NAME_PRONOUNCE:

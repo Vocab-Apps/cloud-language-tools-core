@@ -44,6 +44,7 @@ class InteractiveChatbot():
         while True:
             user_input = input("Enter a message:")
             self.chat_model.process_message(user_input)
+            print(self.chat_model.status())
 
 
 if __name__ == '__main__':

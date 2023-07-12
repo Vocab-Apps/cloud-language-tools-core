@@ -28,6 +28,7 @@ class ChatModel():
         self.chatapi = cloudlanguagetools.chatapi.ChatAPI(self.manager)
         self.instruction = None
         self.message_history = []
+        self.total_tokens = 0
     
     def set_instruction(self, instruction):
         self.instruction = instruction
@@ -66,7 +67,13 @@ class ChatModel():
             function_call= "auto",
             temperature=0.0
         )
+
+        self.total_tokens += response['usage']['total_tokens']
+
         return response
+
+    def status(self):
+        return f'total_tokens: {self.total_tokens}'
 
     def process_message(self, message):
     

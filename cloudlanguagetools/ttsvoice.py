@@ -1,3 +1,4 @@
+import json
 
 class TtsVoice():
     def __init__(self):
@@ -32,3 +33,5 @@ class TtsVoice():
             'service_fee': self.service_fee.name
         }
    
+    def __repr__(self):
+        return json.dumps(self.json_obj(), indent=4, sort_keys=True, ensure_ascii=False)

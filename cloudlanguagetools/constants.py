@@ -80,7 +80,7 @@ class Service(StrEnum):
 
 class Gender(StrEnum):
     Male = 'Male'
-    Female = 'Male'
+    Female = 'Female'
     Any = 'Any'
 
 

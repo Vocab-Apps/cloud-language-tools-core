@@ -115,4 +115,14 @@ class TestChatAPI(unittest.TestCase):
         self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
         self.assert_audio_matches(audio_temp_file, 'bonjour', 'fr-FR')
 
+    def test_audio_chinese(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_audio_chinese
+        query = cloudlanguagetools.chatapi.AudioQuery(
+            input_text='老人家',
+            language=Language.zh_cn
+        )
+        audio_temp_file = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
+        self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
+        self.assert_audio_matches(audio_temp_file, '老人家', 'zh-CN')
+
         

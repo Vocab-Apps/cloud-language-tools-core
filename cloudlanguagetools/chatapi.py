@@ -162,6 +162,7 @@ class ChatAPI():
         
 
     def audio(self, query: AudioQuery, format: cloudlanguagetools.options.AudioFormat):
+        logger.debug(f'processing audio query: {query}')
         # get full voice list, filter down to correct language
         # ====================================================
         voice_list = self.manager.get_tts_voice_list()
@@ -194,7 +195,6 @@ class ChatAPI():
 
         # select gender
         # =============
-
         gender_list = set([x.gender for x in candidates])
         gender_preference = [
             cloudlanguagetools.constants.Gender.Female,
@@ -207,6 +207,7 @@ class ChatAPI():
         while gender_preference[0] not in gender_list:
             gender_preference.pop(0)
         gender = gender_preference[0]
+        logger.debug(f'selected gender: {gender}')
 
         candidates = [x for x in candidates if x.gender == gender]
 

@@ -17,8 +17,10 @@ from cloudlanguagetools.languages import Language
 
 
 class TestChatAPI(unittest.TestCase):
-    def setUp(self):
-        self.chatapi = cloudlanguagetools.chatapi.ChatAPI()
+
+    @classmethod
+    def setUpClass(cls):
+        cls.chatapi = cloudlanguagetools.chatapi.ChatAPI()
 
     def sanitize_text(self, recognized_text):
         result_text = recognized_text.replace('.', '').\

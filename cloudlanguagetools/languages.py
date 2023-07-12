@@ -1,4 +1,5 @@
 import enum
+from strenum import StrEnum
 
 class Language(enum.Enum):
     af = ("Afrikaans")
@@ -174,6 +175,64 @@ class Language(enum.Enum):
 
     def __init__(self, lang_name):
         self.lang_name = lang_name        
+
+# maintain a smaller subset of commonly used languages
+# for chatbot purposes, trimming to the common list of languages saves tokens
+class CommonLanguage(enum.Enum):
+    af = ("Afrikaans")
+    ar = ("Arabic")
+    eu = ("Basque")
+    bg = ("Bulgarian")
+    ca = ("Catalan")
+    hr = ("Croatian")
+    cs = ("Czech")
+    da = ("Danish")
+    nl = ("Dutch")
+    en = ("English")
+    eo = ("Esperanto")
+    et = ("Estonian")
+    tl = ("Filipino")
+    fi = ("Finnish")
+    fr = ("French")
+    de = ("German")
+    el = ("Greek")
+    iw = ("Hebrew")
+    hi = ("Hindi")
+    hu = ("Hungarian")
+    is_ = ("Icelandic")
+    id_ = ("Indonesian")
+    ga = ("Irish")
+    it = ("Italian")
+    ja = ("Japanese")
+    ko = ("Korean")
+    lt = ("Lithuanian")
+    ne = ("Nepali")
+    no = ("Norwegian")
+    pl = ("Polish")
+    pt_br = ("Portuguese (Brazil)")
+    ro = ("Romanian")
+    ru = ("Russian")
+    sk = ("Slovak")
+    sl = ("Slovenian")
+    es = ("Spanish")
+    sv = ("Swedish")
+    th = ("Thai")
+    tr = ("Turkish")
+    uk = ("Ukrainian")
+    vi = ("Vietnamese")
+    cy = ("Welsh")
+    he = ("Hebrew")
+    fil = ("Filipino")
+    pt_pt = ("Portuguese (Portugal)")
+    yue = ("Chinese (Cantonese, Traditional)")
+    zh_cn = ("Chinese (Simplified)")
+    zh_tw = ("Chinese (Traditional)")
+
+    def __init__(self, lang_name):
+        self.lang_name = lang_name        
+
+
+
 
 class AudioLanguage(enum.Enum):
     af_ZA = (Language.af, "Afrikaans (South Africa)")

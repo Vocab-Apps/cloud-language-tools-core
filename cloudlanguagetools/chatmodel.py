@@ -105,7 +105,7 @@ class ChatModel():
         if function_name == self.FUNCTION_NAME_PRONOUNCE:
             query = cloudlanguagetools.chatapi.AudioQuery(**arguments)
             audio_tempfile = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
-            self.message_history.append({"role": "function", "name": function_name, "content": 'sentence has been pronounced'})
+            self.message_history.append({"role": "function", "name": function_name, "content": query.input_text})
             self.send_audio(audio_tempfile)
         else:
             try:

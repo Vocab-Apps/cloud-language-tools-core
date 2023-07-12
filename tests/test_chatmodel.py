@@ -83,3 +83,14 @@ class TestChatModel(unittest.TestCase):
         self.assertEquals(len(self.audio_list), 1)  
         recognized_text = audio_utils.speech_to_text(self.manager, self.audio_list[0], 'zh-CN')
         self.assertEquals(audio_utils.sanitize_recognized_text(recognized_text), '成本很低')
+
+    def test_cantonese_audio(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_cantonese_audio
+        # pytest --log-cli-level=INFO tests/test_chatmodel.py -k test_cantonese_audio
+
+
+        self.chat_model.process_message('pronounce "天氣預報" in cantonese')
+
+        self.assertEquals(len(self.audio_list), 1)  
+        recognized_text = audio_utils.speech_to_text(self.manager, self.audio_list[0], 'zh-HK')
+        self.assertEquals(audio_utils.sanitize_recognized_text(recognized_text), '天氣預報')

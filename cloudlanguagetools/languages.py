@@ -420,7 +420,8 @@ AudioLanguageDefaults = {
     Language.sw: AudioLanguage.sw_TZ,
     Language.ta: AudioLanguage.ta_IN,
     Language.ur: AudioLanguage.ur_PK,
-    Language.zh_cn: AudioLanguage.zh_CN
+    Language.zh_cn: AudioLanguage.zh_CN,
+    Language.yue: AudioLanguage.zh_HK,
 }
 
 # if only one locale is available, make that the default

@@ -372,6 +372,6 @@ class TestBreakdown(unittest.TestCase):
             'lemma': '人',
             'token': '人'}]
 
-        self.assertEqual(self.manager.get_tokenization(text, service, tokenization_options[0]['tokenization_key']), expected_result_chars)
-        self.assertEqual(self.manager.get_tokenization(text, service, tokenization_options[1]['tokenization_key']), expected_result_words)
+        self.assertEqual(self.manager.get_tokenization(text, service, tokenization_options[0]['tokenization_key']), expected_result_words)
+        self.assertEqual(self.manager.get_tokenization(text, service, tokenization_options[1]['tokenization_key']), expected_result_chars)
         self.assertEqual(self.manager.get_tokenization(text, service, tokenization_options[2]['tokenization_key']), expected_result_words)        

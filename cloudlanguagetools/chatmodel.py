@@ -17,6 +17,8 @@ holds an instance of a conversation
 class ChatModel():
     FUNCTION_NAME_TRANSLATE = 'translate'
     FUNCTION_NAME_TRANSLITERATE = 'transliterate'
+    FUNCTION_NAME_DICTIONARY_LOOKUP = 'dictionary_lookup'
+    FUNCTION_NAME_BREAKDOWN = 'breakdown'
     FUNCTION_NAME_FINISH = 'finish'
 
     def __init__(self, manager):
@@ -46,7 +48,8 @@ class ChatModel():
         logger.debug(f"sending messages to openai: {pprint.pformat(messages)}")
 
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-0613",
+            # require larger context
+            model="gpt-3.5-turbo-16k",
             messages=messages,
             functions=self.get_openai_functions(),
             function_call= "auto",
@@ -87,6 +90,12 @@ class ChatModel():
             elif function_name == self.FUNCTION_NAME_TRANSLITERATE:
                 query = cloudlanguagetools.chatapi.TransliterateQuery(**arguments)
                 result = self.chatapi.transliterate(query)
+            elif function_name == self.FUNCTION_NAME_DICTIONARY_LOOKUP:
+                query = cloudlanguagetools.chatapi.DictionaryLookup(**arguments)
+                result = self.chatapi.dictionary_lookup(query)
+            elif function_name == self.FUNCTION_NAME_BREAKDOWN:
+                query = cloudlanguagetools.chatapi.BreakdownQuery(**arguments)
+                result = self.chatapi.breakdown(query)
         except cloudlanguagetools.chatapi.NoDataFoundException as e:
             result = str(e)
         logger.info(f'function: {function_name} result: {result}')
@@ -104,6 +113,16 @@ class ChatModel():
                 'name': self.FUNCTION_NAME_TRANSLITERATE,
                 'description': "Transliterate the input text in the given language",
                 'parameters': cloudlanguagetools.chatapi.TransliterateQuery.model_json_schema(),
+            },
+            {
+                'name': self.FUNCTION_NAME_DICTIONARY_LOOKUP,
+                'description': "Lookup the input word in the given language",
+                'parameters': cloudlanguagetools.chatapi.DictionaryLookup.model_json_schema(),
+            },
+            {
+                'name': self.FUNCTION_NAME_BREAKDOWN,
+                'description': "Breakdown the given sentence into words",
+                'parameters': cloudlanguagetools.chatapi.BreakdownQuery.model_json_schema(),
             },            
             # {
             #     'name': "pronounce",

@@ -53,3 +53,15 @@ class TestChatModel(unittest.TestCase):
 
         self.chat_model.process_message("成本很低")
         self.assertEquals(self.message_list, ["The cost is low.", 'chéngběn hěn dī'])
+
+
+    def test_chinese_translation_breakdown(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_chinese_translation_breakdown
+
+        instruction = "When given a sentence in Chinese, translate it to English, then break it down"
+        self.chat_model.set_instruction(instruction)
+
+        self.chat_model.process_message("成本很低")
+        self.assertEquals(self.message_list, ["The cost is low.", """成本: chéngběn, (manufacturing, production etc) costs
+很: hěn, very much
+低: dī, lower (one's head)"""])

@@ -11,6 +11,8 @@ import pytest
 import json
 import time
 
+import audio_utils
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import cloudlanguagetools
@@ -63,10 +65,6 @@ class TestAudio(unittest.TestCase):
         subset = [x for x in self.voice_list if x['audio_language_code'] == audio_language.name and x['service'] == service.name]
         return subset        
 
-    def speech_to_text(self, audio_temp_file, language, audio_format=cloudlanguagetools.options.AudioFormat.mp3):
-        result = self.manager.services[Service.Azure].speech_to_text(audio_temp_file.name, audio_format, language=language)
-        return result
-    
     def sanitize_recognized_text(self, recognized_text):
         recognized_text = re.sub('<[^<]+?>', '', recognized_text)
         result_text = recognized_text.replace('.', '').\
@@ -108,7 +106,7 @@ class TestAudio(unittest.TestCase):
             print(f.read())
 
         self.assertIn(expected_mime_type_str, mime_type)
-        audio_text = self.speech_to_text(audio_temp_file, recognition_language)
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, recognition_language)
         assert_text = f"service {voice['service']} voice_key: {voice['voice_key']}"
         self.assertEqual(self.sanitize_recognized_text(text), self.sanitize_recognized_text(audio_text), msg=assert_text)
 
@@ -275,7 +273,7 @@ class TestAudio(unittest.TestCase):
         }        
         options = {}
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
-        audio_text = self.speech_to_text(audio_temp_file, 'en-GB')
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'en-GB')
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
 
     def test_french_forvo(self):
@@ -316,7 +314,7 @@ class TestAudio(unittest.TestCase):
         options = {'rate': 0.8, 'pitch': -10}
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR')
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR')
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
 
     def test_azure_format_ogg(self):
@@ -334,7 +332,7 @@ class TestAudio(unittest.TestCase):
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data, Opus', file_type)
         
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_google_format_ogg(self):
@@ -354,7 +352,7 @@ class TestAudio(unittest.TestCase):
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data, Opus', file_type)
         
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_amazon_format_ogg(self):
@@ -370,7 +368,7 @@ class TestAudio(unittest.TestCase):
         file_type = magic.from_file(audio_temp_file.name)
         self.assertIn('Ogg data', file_type)
         
-        audio_text = self.speech_to_text(audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_vorbis)
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_vorbis)
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_azure_ampersand(self):
@@ -382,7 +380,7 @@ class TestAudio(unittest.TestCase):
         }
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, {})
-        audio_text = self.speech_to_text(audio_temp_file, 'en-US')
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'en-US')
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))        
 
     def test_fptai_options(self):
@@ -396,7 +394,7 @@ class TestAudio(unittest.TestCase):
         options = {'speed': -0.5}
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
-        audio_text = self.speech_to_text(audio_temp_file, 'vi-VN')
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'vi-VN')
         self.assertEqual(self.sanitize_recognized_text(source_text), self.sanitize_recognized_text(audio_text))
 
     def test_elevenlabs_english(self):

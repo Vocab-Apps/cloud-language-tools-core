@@ -377,7 +377,7 @@ class AzureService(cloudlanguagetools.service.Service):
         return response[0]['text']
 
     # supported languages: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support#speech-to-text
-    def speech_to_text(self, mp3_filepath, language, audio_format):
+    def speech_to_text(self, mp3_filepath, audio_format, language=None):
         speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
 
         if audio_format == cloudlanguagetools.options.AudioFormat.mp3:
@@ -390,7 +390,12 @@ class AzureService(cloudlanguagetools.service.Service):
         audio_input = azure.cognitiveservices.speech.audio.AudioConfig(filename=wav_filepath)
 
         # Creates a recognizer with the given settings
-        speech_recognizer = azure.cognitiveservices.speech.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input, language=language)
+        if language != None:
+            # we know which language
+            speech_recognizer = azure.cognitiveservices.speech.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input, language=language)
+        else:
+            # language unknown
+            speech_recognizer = azure.cognitiveservices.speech.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input)
 
         # Starts speech recognition, and returns after a single utterance is recognized. The end of a
         # single utterance is determined by listening for silence at the end or until a maximum of 15

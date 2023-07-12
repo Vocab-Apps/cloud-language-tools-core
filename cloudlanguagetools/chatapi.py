@@ -53,9 +53,8 @@ class BreakdownQuery(pydantic.BaseModel):
 
 
 class ChatAPI():
-    def __init__(self):
-        self.manager = cloudlanguagetools.servicemanager.ServiceManager()
-        self.manager.configure_default()
+    def __init__(self, manager):
+        self.manager = manager
 
     def get_service_preference(self, preferred_service_list, default_service):
         if default_service != None:

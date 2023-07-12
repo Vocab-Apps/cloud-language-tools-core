@@ -16,11 +16,17 @@ import cloudlanguagetools.options
 from cloudlanguagetools.languages import Language
 
 
+def get_manager():
+    manager = cloudlanguagetools.servicemanager.ServiceManager()
+    manager.configure_default()
+    return manager
+
 class TestChatAPI(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.chatapi = cloudlanguagetools.chatapi.ChatAPI()
+        cls.manager = get_manager()
+        cls.chatapi = cloudlanguagetools.chatapi.ChatAPI(cls.manager)
 
     def sanitize_text(self, recognized_text):
         result_text = recognized_text.replace('.', '').\

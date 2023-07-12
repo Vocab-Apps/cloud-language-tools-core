@@ -135,3 +135,14 @@ class TestChatAPI(unittest.TestCase):
         audio_temp_file = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
         recognized_text = self.chatapi.recognize_audio(audio_temp_file, cloudlanguagetools.options.AudioFormat.mp3)
         self.assertEqual(recognized_text, '老人家')
+
+    def test_audio_recognition_french_ogg(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_audio_recognition_french_ogg
+        query = cloudlanguagetools.chatapi.AudioQuery(
+            input_text='bonjour',
+            language=Language.fr
+        )
+        audio_temp_file = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.ogg_opus)
+        self.assertTrue(audio_utils.is_ogg_opus_format(audio_temp_file.name))
+        recognized_text = self.chatapi.recognize_audio(audio_temp_file, cloudlanguagetools.options.AudioFormat.ogg_opus)
+        self.assertEqual(audio_utils.sanitize_recognized_text(recognized_text), 'bonjour')

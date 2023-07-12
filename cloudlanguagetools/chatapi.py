@@ -215,14 +215,21 @@ class ChatAPI():
         # ===========================================
 
         voice = candidates[0]
+        logger.debug(f'picked voice: {voice.get_voice_description()}')
+
         options = {}
         convert_mp3_to_ogg = False
         # by default, the format is mp3. if the request format is ogg, then we need to convert
         if format == cloudlanguagetools.options.AudioFormat.ogg_opus:
+            logger.debug(f'requested ogg_opus format')
             convert_mp3_to_ogg = True
             if cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER in voice.get_options():
-                if format.name in voice.get_options()[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER].values:
+                logger.debug(f'voice supports audio format parameter')
+                voice_available_formats = voice.get_options()[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER]['values']
+                logger.debug(f'voice available formats: {voice_available_formats}')
+                if format.name in voice_available_formats:
                     # native ogg opus supported
+                    logger.debug(f'ogg opus natively supported')
                     options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER] = format.name
                     convert_mp3_to_ogg = False
 
@@ -236,6 +243,7 @@ class ChatAPI():
         )
 
         if convert_mp3_to_ogg:
+            logger.debug(f'need to convert from mp3 to ogg_opus')
             audio = pydub.AudioSegment.from_mp3(audio_temp_file.name)
             ogg_audio_temp_file = tempfile.NamedTemporaryFile(prefix='cloudlanguagetools_chatapi', suffix='.ogg')
             audio.export(ogg_audio_temp_file.name, format="ogg", codec="libopus")

@@ -1,6 +1,8 @@
 import openai
 import pprint
 import logging
+import tempfile
+import pydub
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -55,7 +57,16 @@ class OpenAIService(cloudlanguagetools.service.Service):
         return response
 
     def speech_to_text(self, filepath, audio_format: cloudlanguagetools.options.AudioFormat):
+
+        if audio_format in [cloudlanguagetools.options.AudioFormat.ogg_opus, cloudlanguagetools.options.AudioFormat.ogg_vorbis]:
+            # need to convert to wav first
+            sound = pydub.AudioSegment.from_ogg(filepath)
+            wav_tempfile = tempfile.NamedTemporaryFile(prefix='cloudlanguagetools_OpenAI_speech_to_text', suffix='.wav')
+            sound.export(wav_tempfile.name, format="wav")
+            filepath = wav_tempfile.name
+
         logger.debug(f'opening file {filepath}')
         audio_file= open(filepath, "rb")
         transcript = openai.Audio.transcribe("whisper-1", audio_file)
         return transcript['text']
+

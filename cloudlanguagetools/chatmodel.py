@@ -22,6 +22,7 @@ class ChatModel():
         self.manager = manager
         self.chatapi = cloudlanguagetools.chatapi.ChatAPI(self.manager)
         self.instruction = None
+        self.message_history = []
     
     def set_instruction(self, instruction):
         self.instruction = instruction
@@ -32,12 +33,12 @@ class ChatModel():
     def send_message(self, message):
         self.send_message_fn(message)
 
-    def call_openai(self, message_history):
+    def call_openai(self):
         messages = [
             {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
             {"role": "system", "content": self.instruction}        
         ]
-        messages.extend(message_history)    
+        messages.extend(self.message_history)
 
 
         logger.debug(f"sending messages to openai: {pprint.pformat(messages)}")
@@ -57,12 +58,11 @@ class ChatModel():
         continue_processing = True
 
         # message_history contains the most recent request
-        message_history = []
-        message_history.append({"role": "user", "content": message})
+        self.message_history.append({"role": "user", "content": message})
 
         while continue_processing and max_calls > 0:
             max_calls -= 1
-            response = self.call_openai(message_history)
+            response = self.call_openai()
             logger.debug(pprint.pformat(response))
             message = response['choices'][0]['message']
             if 'function_call' in message:
@@ -71,17 +71,20 @@ class ChatModel():
                 if function_name == self.FUNCTION_NAME_FINISH:
                     continue_processing = False
                     break
-                # elif function_name == 'pronounce':
-                #     pronounce_query = PronounceQuery(**arguments)
-                #     pronounce_result = pronounce_function(pronounce_query)
-                #     response_messages.append({"role": "function", "name":"pronounce", "content": pronounce_result})
-                elif function_name == self.FUNCTION_NAME_TRANSLATE:
-                    translate_query = cloudlanguagetools.chatapi.TranslateQuery(**arguments)
-                    translate_result = self.chatapi.translate(translate_query)
-                    message_history.append({"role": "function", "name":self.FUNCTION_NAME_TRANSLATE, "content": translate_result})
-                    self.send_message(translate_result)
+                else:
+                    self.process_function_call(function_name, arguments)
             else:
                 continue_processing = False
+
+    def process_function_call(self, function_name, arguments):
+        if function_name == self.FUNCTION_NAME_TRANSLATE:
+            translate_query = cloudlanguagetools.chatapi.TranslateQuery(**arguments)
+            try:
+                translate_result = self.chatapi.translate(translate_query)
+            except cloudlanguagetools.chatapi.NoDataFoundException as e:
+                translate_result = str(e)
+            self.message_history.append({"role": "function", "name":self.FUNCTION_NAME_TRANSLATE, "content": translate_result})
+            self.send_message(translate_result)        
 
     def get_openai_functions(self):
         return [

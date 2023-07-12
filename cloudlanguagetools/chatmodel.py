@@ -60,8 +60,9 @@ class ChatModel():
         logger.debug(f"sending messages to openai: {pprint.pformat(messages)}")
 
         response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-0613",
             # require larger context
-            model="gpt-3.5-turbo-16k",
+            # model="gpt-3.5-turbo-16k",
             messages=messages,
             functions=self.get_openai_functions(),
             function_call= "auto",

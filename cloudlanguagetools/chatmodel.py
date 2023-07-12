@@ -43,11 +43,16 @@ class ChatModel():
         self.send_audio_fn(audio_tempfile)
 
     def call_openai(self):
+        # do we have any instructions ?
+        instruction_message_list = []
+        if self.instruction != None:
+            instruction_message_list = [{"role": "system", "content": self.instruction}]
+
         messages = [
-            {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning."},
-            {"role": "system", "content": self.instruction},
-            {"role": "system", "content": "When all tasks are done, call the finish function."}
-        ]
+            {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning."}
+        ] + instruction_message_list +\
+        [{"role": "system", "content": "When all tasks are done, call the finish function."}]
+
         messages.extend(self.message_history)
 
 

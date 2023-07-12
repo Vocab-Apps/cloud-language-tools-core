@@ -29,11 +29,15 @@ class TestChatModel(unittest.TestCase):
 
     def setUp(self):
         self.message_list = []
+        self.audio_list = [] # list of tempfile.NamedTemporaryFile
         self.chat_model = cloudlanguagetools.chatmodel.ChatModel(self.manager)
-        self.chat_model.set_send_message_callback(self.send_message_fn)        
+        self.chat_model.set_send_message_callback(self.send_message_fn, self.send_audio_fn)
 
     def send_message_fn(self, message):
         self.message_list.append(message)
+    
+    def send_audio_fn(self, audio_tempfile):
+        self.audio_list.append(audio_tempfile)
     
     def test_french_translation(self):
         # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_french_translation
@@ -65,3 +69,17 @@ class TestChatModel(unittest.TestCase):
         self.assertEquals(self.message_list, ["The cost is low.", """成本: chéngběn, (manufacturing, production etc) costs
 很: hěn, very much
 低: dī, lower (one's head)"""])
+
+
+    def test_chinese_translation_audio(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_chinese_translation_audio
+
+        instruction = "When given a sentence in Chinese, translate it to English, pronounce the chinese"
+        self.chat_model.set_instruction(instruction)
+
+        self.chat_model.process_message("成本很低")
+        self.assertEquals(self.message_list, ["The cost is low."])
+
+        self.assertEquals(len(self.audio_list), 1)  
+        recognized_text = audio_utils.speech_to_text(self.manager, self.audio_list[0], 'zh-CN')
+        self.assertEquals(audio_utils.sanitize_recognized_text(recognized_text), '成本很低')

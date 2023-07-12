@@ -5,6 +5,7 @@ import pprint
 import openai
 import time
 import cloudlanguagetools.chatapi
+import cloudlanguagetools.options
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,7 @@ class ChatModel():
     FUNCTION_NAME_TRANSLITERATE = 'transliterate'
     FUNCTION_NAME_DICTIONARY_LOOKUP = 'dictionary_lookup'
     FUNCTION_NAME_BREAKDOWN = 'breakdown'
+    FUNCTION_NAME_PRONOUNCE = 'pronounce'
     FUNCTION_NAME_FINISH = 'finish'
 
     def __init__(self, manager):
@@ -30,11 +32,15 @@ class ChatModel():
     def set_instruction(self, instruction):
         self.instruction = instruction
 
-    def set_send_message_callback(self, send_message_fn):
+    def set_send_message_callback(self, send_message_fn, send_audio_fn):
         self.send_message_fn = send_message_fn
+        self.send_audio_fn = send_audio_fn
 
     def send_message(self, message):
         self.send_message_fn(message)
+
+    def send_audio(self, audio_tempfile):
+        self.send_audio_fn(audio_tempfile)
 
     def call_openai(self):
         messages = [
@@ -83,24 +89,30 @@ class ChatModel():
                 continue_processing = False
 
     def process_function_call(self, function_name, arguments):
-        try:
-            if function_name == self.FUNCTION_NAME_TRANSLATE:
-                translate_query = cloudlanguagetools.chatapi.TranslateQuery(**arguments)
-                result = self.chatapi.translate(translate_query)
-            elif function_name == self.FUNCTION_NAME_TRANSLITERATE:
-                query = cloudlanguagetools.chatapi.TransliterateQuery(**arguments)
-                result = self.chatapi.transliterate(query)
-            elif function_name == self.FUNCTION_NAME_DICTIONARY_LOOKUP:
-                query = cloudlanguagetools.chatapi.DictionaryLookup(**arguments)
-                result = self.chatapi.dictionary_lookup(query)
-            elif function_name == self.FUNCTION_NAME_BREAKDOWN:
-                query = cloudlanguagetools.chatapi.BreakdownQuery(**arguments)
-                result = self.chatapi.breakdown(query)
-        except cloudlanguagetools.chatapi.NoDataFoundException as e:
-            result = str(e)
-        logger.info(f'function: {function_name} result: {result}')
-        self.message_history.append({"role": "function", "name": function_name, "content": result})
-        self.send_message(result)
+        if function_name == self.FUNCTION_NAME_PRONOUNCE:
+            query = cloudlanguagetools.chatapi.AudioQuery(**arguments)
+            audio_tempfile = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
+            self.message_history.append({"role": "function", "name": function_name, "content": 'sentence has been pronounced'})
+            self.send_audio(audio_tempfile)
+        else:
+            try:
+                if function_name == self.FUNCTION_NAME_TRANSLATE:
+                    translate_query = cloudlanguagetools.chatapi.TranslateQuery(**arguments)
+                    result = self.chatapi.translate(translate_query)
+                elif function_name == self.FUNCTION_NAME_TRANSLITERATE:
+                    query = cloudlanguagetools.chatapi.TransliterateQuery(**arguments)
+                    result = self.chatapi.transliterate(query)
+                elif function_name == self.FUNCTION_NAME_DICTIONARY_LOOKUP:
+                    query = cloudlanguagetools.chatapi.DictionaryLookup(**arguments)
+                    result = self.chatapi.dictionary_lookup(query)
+                elif function_name == self.FUNCTION_NAME_BREAKDOWN:
+                    query = cloudlanguagetools.chatapi.BreakdownQuery(**arguments)
+                    result = self.chatapi.breakdown(query)
+            except cloudlanguagetools.chatapi.NoDataFoundException as e:
+                result = str(e)
+            logger.info(f'function: {function_name} result: {result}')
+            self.message_history.append({"role": "function", "name": function_name, "content": result})
+            self.send_message(result)
 
     def get_openai_functions(self):
         return [
@@ -124,11 +136,11 @@ class ChatModel():
                 'description': "Breakdown the given sentence into words",
                 'parameters': cloudlanguagetools.chatapi.BreakdownQuery.model_json_schema(),
             },            
-            # {
-            #     'name': "pronounce",
-            #     'description': "Pronounce input text in the given language",
-            #     'parameters': PronounceQuery.model_json_schema(),
-            # },
+            {
+                'name': self.FUNCTION_NAME_PRONOUNCE,
+                'description': "Pronounce input text in the given language (generate text to speech audio)",
+                'parameters': cloudlanguagetools.chatapi.AudioQuery.model_json_schema(),
+            },
             {
                 'name': self.FUNCTION_NAME_FINISH,
                 'description': "Finish the conversation",

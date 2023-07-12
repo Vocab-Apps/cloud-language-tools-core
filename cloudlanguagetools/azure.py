@@ -392,9 +392,11 @@ class AzureService(cloudlanguagetools.service.Service):
         # Creates a recognizer with the given settings
         if language != None:
             # we know which language
+            logger.info(f'configuration speech recognition for language {language}')
             speech_recognizer = azure.cognitiveservices.speech.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input, language=language)
         else:
             # language unknown
+            logger.info(f'configuration speech recognition for any language')
             speech_recognizer = azure.cognitiveservices.speech.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input)
 
         # Starts speech recognition, and returns after a single utterance is recognized. The end of a

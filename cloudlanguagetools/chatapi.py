@@ -163,7 +163,7 @@ class ChatAPI():
     def audio(self, query: AudioQuery, format: cloudlanguagetools.options.AudioFormat):
         # get full voice list, filter down to correct language
         # ====================================================
-        voice_list = self.manager.get_voice_list()
+        voice_list = self.manager.get_tts_voice_list()
         candidates = [x for x in voice_list if x.audio_language.lang == query.language]
 
         # select service
@@ -224,7 +224,8 @@ class ChatAPI():
                     convert_mp3_to_ogg = False
 
         # generate audio
-        audio_temp_file = self.manager.get_audio(
+        logger.debug(f'generating audio with voice {pprint.pformat(voice.json_obj())} options {pprint.pformat(options)}')
+        audio_temp_file = self.manager.get_tts_audio(
             query.input_text,
             service,
             voice.get_voice_key(),

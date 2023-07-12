@@ -5,19 +5,16 @@ import unittest
 import pytest
 import json
 import pprint
+import audio_utils
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.chatapi
+import cloudlanguagetools.options
 from cloudlanguagetools.languages import Language
 
-
-def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
-    manager.configure_default()
-    return manager
 
 class TestChatAPI(unittest.TestCase):
     def setUp(self):
@@ -102,3 +99,20 @@ class TestChatAPI(unittest.TestCase):
         )
         result = self.chatapi.dictionary_lookup(query)
         self.assertEqual(result, 'rainbow')
+
+    def assert_audio_matches(self, audio_temp_file, expected_text, azure_language):
+        recognized_text = audio_utils.speech_to_text(self.chatapi.manager, audio_temp_file, azure_language)
+        self.assertEqual(audio_utils.sanitize_recognized_text(recognized_text), audio_utils.sanitize_recognized_text(expected_text))
+
+    def test_audio_french(self):
+        # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_audio_french
+        # french
+        query = cloudlanguagetools.chatapi.AudioQuery(
+            input_text='bonjour',
+            language=Language.fr
+        )
+        audio_temp_file = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
+        self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
+        self.assert_audio_matches(audio_temp_file, 'bonjour', 'fr-FR')
+
+        

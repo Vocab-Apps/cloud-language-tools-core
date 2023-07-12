@@ -5,6 +5,7 @@ import tempfile
 import pydub
 import pasimple
 import wave
+import readline
 logger = logging.getLogger(__name__)
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -20,10 +21,10 @@ class InteractiveChatbot():
         self.chat_model.set_send_message_callback(self.received_message, self.received_audio)
 
     def received_message(self, message: str):
-        print(message)
+        logger.info(f'received message: {message}')
 
     def received_audio(self, audio_tempfile: tempfile.NamedTemporaryFile):
-        print(f'received audio')
+        logger.info(f'playing audio')
         sound = pydub.AudioSegment.from_mp3(audio_tempfile.name)
         wav_tempfile = tempfile.NamedTemporaryFile(prefix='clt_interactivechatbot', suffix='.wav')
         sound.export(wav_tempfile.name, format="wav")
@@ -42,9 +43,9 @@ class InteractiveChatbot():
 
     def run(self):
         while True:
-            user_input = input("Enter a message:")
+            user_input = input("Enter a message: ")
             self.chat_model.process_message(user_input)
-            print(self.chat_model.status())
+            logger.info(self.chat_model.status())
 
 
 if __name__ == '__main__':

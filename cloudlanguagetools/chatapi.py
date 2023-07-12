@@ -298,3 +298,29 @@ class ChatAPI():
 
         # locate translation option
         # =========================
+        translation_option = self.select_translation_option(query.translation_service, query.language, query.translation_language)
+
+        # locate transliteration option
+        # =============================
+        transliteration_option = self.select_transliteration_option(query.transliteration_service, query.language)
+
+        breakdown_result = self.manager.get_breakdown(query.input_text, 
+            tokenization_option.json_obj(), 
+            translation_option, 
+            transliteration_option.json_obj())
+
+        # process breakdown result
+        # ========================
+
+        lines = []
+        for entry in breakdown_result:
+            line = entry['token'] + ': '
+            if 'lemma' in entry and entry['lemma'] != entry['token']:
+                line += '/' + entry['lemma'] + ' '
+            line += entry['transliteration'] + ', '
+            line += entry['translation']
+            if 'pos_description' in entry:
+                line += ' (' + entry['pos_description'] + ')'
+            lines.append(line)
+
+        return '\n'.join(lines)

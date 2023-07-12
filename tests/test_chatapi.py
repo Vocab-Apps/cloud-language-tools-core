@@ -155,3 +155,14 @@ class TestChatAPI(unittest.TestCase):
         self.assertTrue(audio_utils.is_ogg_opus_format(audio_temp_file.name))
         recognized_text = self.chatapi.recognize_audio(audio_temp_file, cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(audio_utils.sanitize_recognized_text(recognized_text), 'bonjour')
+
+    def test_breakdown_chinese(self):
+        query = cloudlanguagetools.chatapi.BreakdownQuery(
+            input_text='成本很低',
+            language=Language.zh_cn
+        )
+        result = self.chatapi.breakdown(query)
+        expected_output = """成本: chéngběn, (manufacturing, production etc) costs
+很: hěn, very much
+低: dī, lower (one's head)"""
+        self.assertEqual(result, expected_output)

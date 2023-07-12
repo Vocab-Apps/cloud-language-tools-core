@@ -68,8 +68,8 @@ class SpacyService(cloudlanguagetools.service.Service):
         for language in chinese_language_list:
             # chinese variants
             result.extend([
-                SpacyTokenization(language, 'zh_char', 'Characters'),
                 SpacyTokenization(language, 'zh_jieba', 'Jieba (words)'),
+                SpacyTokenization(language, 'zh_char', 'Characters'),
                 SpacyTokenization(language, 'zh_pkuseg', 'PKUSeg (words)')
             ])
         return result

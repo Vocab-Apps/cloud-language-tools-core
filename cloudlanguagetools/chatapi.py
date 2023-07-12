@@ -6,6 +6,7 @@ import tempfile
 from pydantic import Field
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.options
+import cloudlanguagetools.languages
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +165,8 @@ class ChatAPI():
         # get full voice list, filter down to correct language
         # ====================================================
         voice_list = self.manager.get_tts_voice_list()
-        candidates = [x for x in voice_list if x.audio_language.lang == query.language]
+        default_audio_language = cloudlanguagetools.languages.AudioLanguageDefaults[query.language]
+        candidates = [x for x in voice_list if x.audio_language == default_audio_language]
 
         # select service
         # ==============

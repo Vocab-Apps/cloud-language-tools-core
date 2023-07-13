@@ -31,6 +31,9 @@ class ChatModel():
     def set_instruction(self, instruction):
         self.instruction = instruction
 
+    def get_instruction(self):
+        return self.instruction
+
     def set_send_message_callback(self, send_message_fn, send_audio_fn, send_error_fn):
         self.send_message_fn = send_message_fn
         self.send_audio_fn = send_audio_fn
@@ -52,7 +55,9 @@ class ChatModel():
             instruction_message_list = [{"role": "system", "content": self.instruction}]
 
         messages = [
-            {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning."}
+            {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning. " +
+             "You will receive instructions in English telling you what to do. " +
+             "If you receive a message in another language, it means the user is asking you to execute some commands."}
         ] + instruction_message_list
 
 
@@ -71,12 +76,14 @@ class ChatModel():
         )
 
         self.latest_token_usage = response['usage']['total_tokens']
+        self.latest_prompt_usage = response['usage']['prompt_tokens']
+        self.latest_completion_usage = response['usage']['completion_tokens']
         self.total_tokens += self.latest_token_usage
 
         return response
 
     def status(self):
-        return f'total_tokens: {self.total_tokens}, latest_token_usage: {self.latest_token_usage}'
+        return f'total_tokens: {self.total_tokens}, latest_token_usage: {self.latest_token_usage} (prompt: {self.latest_prompt_usage} completion: {self.latest_completion_usage})'
 
     def process_message(self, message):
     
@@ -100,7 +107,10 @@ class ChatModel():
                 if 'function_call' in message:
                     function_name = message['function_call']['name']
                     logger.info(f'function_call: function_name: {function_name}')
-                    arguments = json.loads(message["function_call"]["arguments"])
+                    try:
+                        arguments = json.loads(message["function_call"]["arguments"])
+                    except json.decoder.JSONDecodeError as e:
+                        logger.exception(f'error decoding json: {message}')
                     arguments_str = json.dumps(arguments, indent=4)
                     # check whether we've called that function with exact same arguments before
                     if arguments_str not in function_call_cache.get(function_name, {}):

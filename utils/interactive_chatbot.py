@@ -47,8 +47,13 @@ class InteractiveChatbot():
     def run(self):
         while True:
             user_input = input("Enter a message: ")
-            self.chat_model.process_message(user_input)
-            logger.info(self.chat_model.status())
+            if user_input.startswith('instructions:'):
+                instruction = user_input[len('instructions:'):].strip()
+                self.chat_model.set_instruction(instruction)
+                logger.info(f'instructions set to: [{self.chat_model.get_instruction()}]')
+            else:
+                self.chat_model.process_message(user_input)
+                logger.info(self.chat_model.status())
 
 
 if __name__ == '__main__':

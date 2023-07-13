@@ -13,7 +13,7 @@ import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.chatapi
 import cloudlanguagetools.options
-from cloudlanguagetools.languages import Language
+from cloudlanguagetools.languages import CommonLanguage
 
 
 def get_manager():
@@ -45,8 +45,8 @@ class TestChatAPI(unittest.TestCase):
 
         query = cloudlanguagetools.chatapi.TranslateQuery(
             input_text='Je ne suis pas intéressé.',
-            source_language=Language.fr,
-            target_language=Language.en
+            source_language=CommonLanguage.fr,
+            target_language=CommonLanguage.en
         )
 
         result = self.chatapi.translate(query)
@@ -57,7 +57,7 @@ class TestChatAPI(unittest.TestCase):
         # chinese
         query = cloudlanguagetools.chatapi.TransliterateQuery(
             input_text='你好',
-            language=Language.zh_cn
+            language=CommonLanguage.zh_cn
         )
         result = self.chatapi.transliterate(query)
         self.assertEqual(result, 'nǐhǎo')
@@ -66,7 +66,7 @@ class TestChatAPI(unittest.TestCase):
         # chinese
         query = cloudlanguagetools.chatapi.TransliterateQuery(
             input_text='成本很低',
-            language=Language.zh_cn
+            language=CommonLanguage.zh_cn
         )
         result = self.chatapi.transliterate(query)
         self.assertEqual(result, 'chéngběn hěn dī')
@@ -75,7 +75,7 @@ class TestChatAPI(unittest.TestCase):
         # japanese
         query = cloudlanguagetools.chatapi.TransliterateQuery(
             input_text='おはようございます',
-            language=Language.ja
+            language=CommonLanguage.ja
         )
         self.assertEqual(self.chatapi.transliterate(query), 'ohayo– gozaimasu')
 
@@ -83,7 +83,7 @@ class TestChatAPI(unittest.TestCase):
         # french
         query = cloudlanguagetools.chatapi.TransliterateQuery(
             input_text='l’herbe est plus verte ailleurs',
-            language=Language.fr
+            language=CommonLanguage.fr
         )
         self.assertEqual(self.chatapi.transliterate(query), 'lɛʁb‿ ɛ ply vɛʁt‿ ajœʁ')
 
@@ -92,7 +92,7 @@ class TestChatAPI(unittest.TestCase):
         # thai
         query = cloudlanguagetools.chatapi.TransliterateQuery(
             input_text='สวัสดี',
-            language=Language.th
+            language=CommonLanguage.th
         )
         self.assertEqual(self.chatapi.transliterate(query), 'sawatdi')
 
@@ -100,7 +100,7 @@ class TestChatAPI(unittest.TestCase):
         # french
         query = cloudlanguagetools.chatapi.DictionaryLookup(
             input_text='bonjour',
-            language=Language.fr,
+            language=CommonLanguage.fr,
         )
         result = self.chatapi.dictionary_lookup(query)
         self.assertEqual(result, 'hello')
@@ -111,7 +111,7 @@ class TestChatAPI(unittest.TestCase):
         # chinese
         query = cloudlanguagetools.chatapi.DictionaryLookup(
             input_text='彩虹',
-            language=Language.zh_cn,
+            language=CommonLanguage.zh_cn,
             service=cloudlanguagetools.constants.Service.Wenlin
         )
         result = self.chatapi.dictionary_lookup(query)
@@ -126,7 +126,7 @@ class TestChatAPI(unittest.TestCase):
         # french
         query = cloudlanguagetools.chatapi.AudioQuery(
             input_text='bonjour',
-            language=Language.fr
+            language=CommonLanguage.fr
         )
         audio_temp_file = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
         self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
@@ -136,7 +136,7 @@ class TestChatAPI(unittest.TestCase):
         # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_audio_chinese
         query = cloudlanguagetools.chatapi.AudioQuery(
             input_text='老人家',
-            language=Language.zh_cn
+            language=CommonLanguage.zh_cn
         )
         audio_temp_file = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
         self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
@@ -147,7 +147,7 @@ class TestChatAPI(unittest.TestCase):
         # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_audio_recognition
         query = cloudlanguagetools.chatapi.AudioQuery(
             input_text='老人家',
-            language=Language.zh_cn
+            language=CommonLanguage.zh_cn
         )
         audio_temp_file = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
         recognized_text = self.chatapi.recognize_audio(audio_temp_file, cloudlanguagetools.options.AudioFormat.mp3)
@@ -157,7 +157,7 @@ class TestChatAPI(unittest.TestCase):
         # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_audio_recognition_french_ogg
         query = cloudlanguagetools.chatapi.AudioQuery(
             input_text='bonjour',
-            language=Language.fr
+            language=CommonLanguage.fr
         )
         audio_temp_file = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertTrue(audio_utils.is_ogg_opus_format(audio_temp_file.name))
@@ -167,7 +167,7 @@ class TestChatAPI(unittest.TestCase):
     def test_breakdown_chinese(self):
         query = cloudlanguagetools.chatapi.BreakdownQuery(
             input_text='成本很低',
-            language=Language.zh_cn
+            language=CommonLanguage.zh_cn
         )
         result = self.chatapi.breakdown(query)
         expected_output = """成本: chéngběn, (manufacturing, production etc) costs
@@ -178,8 +178,8 @@ class TestChatAPI(unittest.TestCase):
     def test_breakdown_english(self):
         query = cloudlanguagetools.chatapi.BreakdownQuery(
             input_text="I was reading today's paper.",
-            language=Language.en,
-            translation_language=Language.fr
+            language=CommonLanguage.en,
+            translation_language=CommonLanguage.fr
         )
         result = self.chatapi.breakdown(query)
         expected_output = """I: ˈaɪ, I (pronoun, personal)

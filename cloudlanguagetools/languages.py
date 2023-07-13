@@ -209,7 +209,6 @@ class CommonLanguage(enum.Enum):
     ne = ("Nepali")
     no = ("Norwegian")
     pl = ("Polish")
-    pt_br = ("Portuguese (Brazil)")
     ro = ("Romanian")
     ru = ("Russian")
     sk = ("Slovak")
@@ -223,16 +222,12 @@ class CommonLanguage(enum.Enum):
     cy = ("Welsh")
     he = ("Hebrew")
     fil = ("Filipino")
-    pt_pt = ("Portuguese (Portugal)")
-    yue = ("Chinese (Cantonese, Traditional)")
-    zh_cn = ("Chinese (Simplified)")
-    zh_tw = ("Chinese (Traditional)")
+    pt_pt = ("Portuguese")
+    yue = ("Cantonese")
+    zh_cn = ("Chinese")
 
     def __init__(self, lang_name):
         self.lang_name = lang_name        
-
-
-
 
 class AudioLanguage(enum.Enum):
     af_ZA = (Language.af, "Afrikaans (South Africa)")

@@ -25,30 +25,30 @@ class NoDataFoundException(Exception):
 
 class TranslateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to translate")
-    source_language: cloudlanguagetools.languages.Language = Field(description="language to translate from")
-    target_language: cloudlanguagetools.languages.Language = Field(description="language to translate to")
+    source_language: cloudlanguagetools.languages.CommonLanguage = Field(description="language to translate from")
+    target_language: cloudlanguagetools.languages.CommonLanguage = Field(description="language to translate to")
     service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for translation')
 
 class TransliterateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to transliterate")
-    language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
+    language: cloudlanguagetools.languages.CommonLanguage = Field(description="language the text is in")
     service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for transliteration')
 
 class DictionaryLookup(pydantic.BaseModel):
     input_text: str = Field(description="text lookup in the dictionary")
-    language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
+    language: cloudlanguagetools.languages.CommonLanguage = Field(description="language the text is in")
     service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for dictionary lookup')
 
 class AudioQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to pronounce")
-    language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
+    language: cloudlanguagetools.languages.CommonLanguage = Field(description="language the text is in")
     service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use audio pronunciation')
     gender: Optional[cloudlanguagetools.constants.Gender] = Field(default=None, description='gender of the voice to pronounce the text in')
 
 class BreakdownQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to breakdown")
-    language: cloudlanguagetools.languages.Language = Field(description="language the text is in")
-    translation_language: cloudlanguagetools.languages.Language = Field(default=cloudlanguagetools.languages.Language.en, description="language to translate into")
+    language: cloudlanguagetools.languages.CommonLanguage = Field(description="language the text is in")
+    translation_language: cloudlanguagetools.languages.CommonLanguage = Field(default=cloudlanguagetools.languages.CommonLanguage.en, description="language to translate into")
     translation_service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for translation')
     transliteration_service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for transliteration')
 
@@ -136,7 +136,9 @@ class ChatAPI():
     def translate(self, query: TranslateQuery):
         logger.info(f'translating {query.input_text} from {query.source_language} to {query.target_language}')
 
-        translation_option = self.select_translation_option(query.service, query.source_language, query.target_language)
+        source_language = cloudlanguagetools.languages.Language[query.source_language.name]
+        target_language = cloudlanguagetools.languages.Language[query.target_language.name]
+        translation_option = self.select_translation_option(query.service, source_language, target_language)
 
         # get the translation
         translated_text = self.manager.get_translation(
@@ -149,7 +151,8 @@ class ChatAPI():
 
 
     def transliterate(self, query: TranslateQuery):
-        transliteration_option = self.select_transliteration_option(query.service, query.language)
+        language = cloudlanguagetools.languages.Language[query.language.name]
+        transliteration_option = self.select_transliteration_option(query.service, language)
         transliterated_text = self.manager.get_transliteration(
             query.input_text,
             transliteration_option.service,
@@ -158,10 +161,11 @@ class ChatAPI():
         return transliterated_text
 
     def dictionary_lookup(self, query: DictionaryLookup):
+        language = cloudlanguagetools.languages.Language[query.language.name]
         dictionary_option_list = self.manager.get_dictionary_lookup_options()
-        candidates = [x for x in dictionary_option_list if x.language == query.language]
+        candidates = [x for x in dictionary_option_list if x.language == language]
         if len(candidates) == 0:
-            raise NoDataFoundException(f'No dictionary service found for language {query.language.lang_name}')
+            raise NoDataFoundException(f'No dictionary service found for language {language.lang_name}')
 
         service_list = set([x.service for x in candidates])
 
@@ -173,7 +177,7 @@ class ChatAPI():
         while service_preference[0] not in service_list:
             service_preference.pop(0)
             if len(service_preference) == 0:
-                raise NoDataFoundException(f'No service found for dictionary lookup of {query.language.lang_name}')
+                raise NoDataFoundException(f'No service found for dictionary lookup of {language.lang_name}')
             
         service = service_preference[0]
         final_candidates = [x for x in candidates if x.service == service]
@@ -192,10 +196,11 @@ class ChatAPI():
 
     def audio(self, query: AudioQuery, format: cloudlanguagetools.options.AudioFormat) -> tempfile.NamedTemporaryFile:
         logger.info(f'processing audio query: {query}')
+        language = cloudlanguagetools.languages.Language[query.language.name]
         # get full voice list, filter down to correct language
         # ====================================================
         voice_list = self.manager.get_tts_voice_list()
-        default_audio_language = cloudlanguagetools.languages.AudioLanguageDefaults[query.language]
+        default_audio_language = cloudlanguagetools.languages.AudioLanguageDefaults[language]
         candidates = [x for x in voice_list if x.audio_language == default_audio_language]
 
         # select service
@@ -216,7 +221,7 @@ class ChatAPI():
         while service_preference[0] not in service_list:
             service_preference.pop(0)
             if len(service_preference) == 0:
-                raise NoDataFoundException(f'No service found for audio pronouncation of {query.language.lang_name}')
+                raise NoDataFoundException(f'No service found for audio pronouncation of {language.lang_name}')
 
         # restrict to candidates for that service
         service = service_preference[0]
@@ -289,21 +294,24 @@ class ChatAPI():
     def breakdown(self, query: BreakdownQuery):
         logger.debug(f'processing breakdown query: {query}')
 
+        language = cloudlanguagetools.languages.Language[query.language.name]
+        translation_language = cloudlanguagetools.languages.Language[query.translation_language.name]
+
         # locate tokenization option
         # ==========================
         tokenization_options = self.manager.get_tokenization_options()
-        tokenization_candidates = [x for x in tokenization_options if x.language == query.language]
+        tokenization_candidates = [x for x in tokenization_options if x.language == language]
         if len(tokenization_candidates) == 0:
-            raise NoDataFoundException(f'No tokenization options found for language {query.language.lang_name}')
+            raise NoDataFoundException(f'No tokenization options found for language {language.lang_name}')
         tokenization_option = tokenization_candidates[0]
 
         # locate translation option
         # =========================
-        translation_option = self.select_translation_option(query.translation_service, query.language, query.translation_language)
+        translation_option = self.select_translation_option(query.translation_service, language, translation_language)
 
         # locate transliteration option
         # =============================
-        transliteration_option = self.select_transliteration_option(query.transliteration_service, query.language)
+        transliteration_option = self.select_transliteration_option(query.transliteration_service, language)
 
         breakdown_result = self.manager.get_breakdown(query.input_text, 
             tokenization_option.json_obj(), 

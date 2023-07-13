@@ -157,30 +157,26 @@ class ChatModel():
             {
                 'name': self.FUNCTION_NAME_TRANSLATE,
                 'description': "Translate input text from source language to target language",
-                'parameters': self.process_model_json_schema(cloudlanguagetools.chatapi.TranslateQuery.model_json_schema()),
+                'parameters': cloudlanguagetools.chatapi.TranslateQuery.model_json_schema(),
             },
             {
                 'name': self.FUNCTION_NAME_TRANSLITERATE,
                 'description': "Transliterate the input text in the given language",
-                'parameters': self.process_model_json_schema(cloudlanguagetools.chatapi.TransliterateQuery.model_json_schema()),
+                'parameters': cloudlanguagetools.chatapi.TransliterateQuery.model_json_schema(),
             },
             {
                 'name': self.FUNCTION_NAME_DICTIONARY_LOOKUP,
                 'description': "Lookup the input word in the given language",
-                'parameters': self.process_model_json_schema(cloudlanguagetools.chatapi.DictionaryLookup.model_json_schema()),
+                'parameters': cloudlanguagetools.chatapi.DictionaryLookup.model_json_schema(),
             },
             {
                 'name': self.FUNCTION_NAME_BREAKDOWN,
                 'description': "Breakdown the given sentence into words",
-                'parameters': self.process_model_json_schema(cloudlanguagetools.chatapi.BreakdownQuery.model_json_schema()),
+                'parameters': cloudlanguagetools.chatapi.BreakdownQuery.model_json_schema(),
             },            
             {
                 'name': self.FUNCTION_NAME_PRONOUNCE,
                 'description': "Pronounce input text in the given language (generate text to speech audio)",
-                'parameters': self.process_model_json_schema(cloudlanguagetools.chatapi.AudioQuery.model_json_schema()),
+                'parameters': cloudlanguagetools.chatapi.AudioQuery.model_json_schema(),
             },
         ]
-
-    def process_model_json_schema(self, model_json_schema):
-        model_json_schema['$defs']['Language']['enum'] = [language.lang_name for language in cloudlanguagetools.languages.CommonLanguage]    
-        return model_json_schema

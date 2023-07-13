@@ -30,8 +30,13 @@ class TestChatModel(unittest.TestCase):
     def setUp(self):
         self.message_list = []
         self.audio_list = [] # list of tempfile.NamedTemporaryFile
+        self.error_list = []
+        logger.info('creating chat model')
         self.chat_model = cloudlanguagetools.chatmodel.ChatModel(self.manager)
-        self.chat_model.set_send_message_callback(self.send_message_fn, self.send_audio_fn)
+        self.chat_model.set_send_message_callback(self.send_message_fn, self.send_audio_fn, self.send_error_fn)
+
+    def send_error_fn(self, message):
+        self.error_list.append(message)
 
     def send_message_fn(self, message):
         self.message_list.append(message)
@@ -62,7 +67,7 @@ class TestChatModel(unittest.TestCase):
     def test_chinese_translation_breakdown(self):
         # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_chinese_translation_breakdown
 
-        instruction = "When given a sentence in Chinese, translate it to English, then break it down"
+        instruction = "When given a sentence in Chinese, translate it to English, then breakdown the chinese sentence"
         self.chat_model.set_instruction(instruction)
 
         self.chat_model.process_message("成本很低")
@@ -74,7 +79,7 @@ class TestChatModel(unittest.TestCase):
     def test_chinese_translation_audio(self):
         # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_chinese_translation_audio
 
-        instruction = "When given a sentence in Chinese, translate it to English, pronounce the chinese"
+        instruction = "When given a sentence in Chinese, translate it to English, and pronounce the chinese sentence."
         self.chat_model.set_instruction(instruction)
 
         self.chat_model.process_message("成本很低")

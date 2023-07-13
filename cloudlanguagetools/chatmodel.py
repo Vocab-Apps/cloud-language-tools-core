@@ -9,10 +9,6 @@ import cloudlanguagetools.options
 
 logger = logging.getLogger(__name__)
 
-class FinishQuery(pydantic.BaseModel):
-    pass
-class NewSentenceQuery(pydantic.BaseModel):
-    pass
 
 """
 holds an instance of a conversation
@@ -93,6 +89,8 @@ class ChatModel():
         # if the processing loop resulted in no functions getting called, see what the bot has to say
         had_function_calls = False
 
+        function_call_cache = {}
+
         try:
             while continue_processing and max_calls > 0:
                 max_calls -= 1
@@ -103,8 +101,21 @@ class ChatModel():
                     function_name = message['function_call']['name']
                     logger.info(f'function_call: function_name: {function_name}')
                     arguments = json.loads(message["function_call"]["arguments"])
-                    self.process_function_call(function_name, arguments)
-                    had_function_calls = True
+                    arguments_str = json.dumps(arguments, indent=4)
+                    # check whether we've called that function with exact same arguments before
+                    if arguments_str not in function_call_cache.get(function_name, {}):
+                        # haven't called it with these arguments before
+                        function_call_result = self.process_function_call(function_name, arguments)
+                        self.message_history.append({"role": "function", "name": function_name, "content": function_call_result})
+                        # cache function call results
+                        if function_name not in function_call_cache:
+                            function_call_cache[function_name] = {}
+                        function_call_cache[function_name][arguments_str] = function_call_result
+                        had_function_calls = True
+                    else:
+                        # we've called that function already with same arguments, we won't call again, but
+                        # add to history again, so that chatgpt doesn't call the function again
+                        self.message_history.append({"role": "function", "name": function_name, "content": function_call_result})
                 else:
                     continue_processing = False
                     if had_function_calls == False:
@@ -118,7 +129,7 @@ class ChatModel():
         if function_name == self.FUNCTION_NAME_PRONOUNCE:
             query = cloudlanguagetools.chatapi.AudioQuery(**arguments)
             audio_tempfile = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
-            self.message_history.append({"role": "function", "name": function_name, "content": query.input_text})
+            result = query.input_text
             self.send_audio(audio_tempfile)
         else:
             try:
@@ -137,8 +148,9 @@ class ChatModel():
             except cloudlanguagetools.chatapi.NoDataFoundException as e:
                 result = str(e)
             logger.info(f'function: {function_name} result: {result}')
-            self.message_history.append({"role": "function", "name": function_name, "content": result})
             self.send_message(result)
+        # need to echo the result back to chatgpt
+        return result        
 
     def get_openai_functions(self):
         return [

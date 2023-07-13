@@ -134,6 +134,7 @@ class ChatAPI():
         return transliteration_option
 
     def translate(self, query: TranslateQuery):
+        logger.info(f'translating {query.input_text} from {query.source_language} to {query.target_language}')
 
         translation_option = self.select_translation_option(query.service, query.source_language, query.target_language)
 
@@ -190,7 +191,7 @@ class ChatAPI():
         
 
     def audio(self, query: AudioQuery, format: cloudlanguagetools.options.AudioFormat) -> tempfile.NamedTemporaryFile:
-        logger.debug(f'processing audio query: {query}')
+        logger.info(f'processing audio query: {query}')
         # get full voice list, filter down to correct language
         # ====================================================
         voice_list = self.manager.get_tts_voice_list()

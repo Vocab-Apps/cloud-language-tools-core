@@ -25,6 +25,7 @@ class ChatModel():
         self.chatapi = cloudlanguagetools.chatapi.ChatAPI(self.manager)
         self.instruction = None
         self.message_history = []
+        self.last_call_messages = None
         self.total_tokens = 0
         self.latest_token_usage = 0
     
@@ -33,6 +34,9 @@ class ChatModel():
 
     def get_instruction(self):
         return self.instruction
+
+    def get_last_call_messages(self):
+        return self.last_call_messages
 
     def set_send_message_callback(self, send_message_fn, send_audio_fn, send_error_fn):
         self.send_message_fn = send_message_fn
@@ -55,13 +59,12 @@ class ChatModel():
             instruction_message_list = [{"role": "system", "content": self.instruction}]
 
         messages = [
-            {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning. " +
-             "You will receive instructions in English telling you what to do. " +
-             "If you receive a message in another language, it means the user is asking you to execute some commands."}
+            {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning."}
         ] + instruction_message_list
 
 
         messages.extend(self.message_history)
+        self.last_call_messages = messages
 
         logger.debug(f"sending messages to openai: {pprint.pformat(messages)}")
 
@@ -104,6 +107,7 @@ class ChatModel():
                 response = self.call_openai()
                 logger.debug(pprint.pformat(response))
                 message = response['choices'][0]['message']
+                message_content = message.get('content', None)
                 if 'function_call' in message:
                     function_name = message['function_call']['name']
                     logger.info(f'function_call: function_name: {function_name}')
@@ -131,6 +135,10 @@ class ChatModel():
                     if had_function_calls == False:
                         # no functions were called. maybe chatgpt is trying to explain something
                         self.send_message(message['content'])
+                
+                # if there was a message, append it to the history
+                if message_content != None:
+                    self.message_history.append({"role": "assistant", "content": message_content})
         except Exception as e:
             logger.exception(f'error processing function call')
             self.send_error(str(e))                
@@ -155,6 +163,9 @@ class ChatModel():
                 elif function_name == self.FUNCTION_NAME_BREAKDOWN:
                     query = cloudlanguagetools.chatapi.BreakdownQuery(**arguments)
                     result = self.chatapi.breakdown(query)
+                else:
+                    # report unknown function
+                    result = f'unknown function: {function_name}'
             except cloudlanguagetools.chatapi.NoDataFoundException as e:
                 result = str(e)
             logger.info(f'function: {function_name} result: {result}')

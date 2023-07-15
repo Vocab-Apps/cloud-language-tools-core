@@ -6,6 +6,7 @@ import pydub
 import pasimple
 import wave
 import readline
+import pprint
 logger = logging.getLogger(__name__)
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -51,6 +52,8 @@ class InteractiveChatbot():
                 instruction = user_input[len('instructions:'):].strip()
                 self.chat_model.set_instruction(instruction)
                 logger.info(f'instructions set to: [{self.chat_model.get_instruction()}]')
+            elif user_input.startswith('history:'):
+                logger.info(f'history:\n {pprint.pformat(self.chat_model.get_last_call_messages())}')
             else:
                 self.chat_model.process_message(user_input)
                 logger.info(self.chat_model.status())

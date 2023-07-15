@@ -185,12 +185,15 @@ class ChatAPI():
         dictionary_option = final_candidates[0]
         logger.debug(f'Using dictionary option {pprint.pformat(dictionary_option.json_obj())}')
 
-        dictionary_result = self.manager.get_dictionary_lookup(
-            query.input_text,
-            service,
-            dictionary_option.get_lookup_key()
-        )
-        result = ' / '.join(dictionary_result)
+        try:
+            dictionary_result = self.manager.get_dictionary_lookup(
+                query.input_text,
+                service,
+                dictionary_option.get_lookup_key()
+            )
+            result = ' / '.join(dictionary_result)
+        except cloudlanguagetools.errors.NotFoundError as e:
+            result = f'No dictionary lookup results found for {query.input_text}'
         return result
         
 

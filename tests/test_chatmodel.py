@@ -139,5 +139,5 @@ class TestChatModel(unittest.TestCase):
         # third input sentence
         self.chat_model.process_message('黑社會')
         self.verify_single_audio_message('黑社會', 'zh-HK')
-        self.verify_messages(["I can't stand that kind of stuff the most",
+        self.verify_messages(["underworld",
             """黑社會: hāksěwúi, underworld"""])        

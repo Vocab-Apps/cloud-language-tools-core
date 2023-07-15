@@ -143,6 +143,8 @@ class TestChatModel(unittest.TestCase):
             """黑社會: hāksěwúi, underworld"""])        
 
     def test_cantonese_additional_questions(self):
+        # pytest --log-cli-level=INFO tests/test_chatmodel.py -k test_cantonese_additional_questions
+
         """follow instructions, but then ask an additional question regarding a sentence"""
         instructions = 'when I give you a sentence in cantonese, pronounce it using Azure service, then translate it into english, and break down the cantonese sentence into words'
         self.chat_model.set_instruction(instructions)

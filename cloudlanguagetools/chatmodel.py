@@ -9,6 +9,10 @@ import cloudlanguagetools.options
 
 logger = logging.getLogger(__name__)
 
+class IsNewSentenceQuery(pydantic.BaseModel):
+    is_new_sentence: bool = pydantic.Field(description="true if the input sentence is a new input sentence," 
+                                           "false if it is a question regarding the previous sentence")
+
 
 """
 holds an instance of a conversation
@@ -52,7 +56,7 @@ class ChatModel():
     def send_error(self, error: str):
         self.send_error_fn(error)        
 
-    def call_openai(self):
+    def get_system_messages(self):
         # do we have any instructions ?
         instruction_message_list = []
         if self.instruction != None:
@@ -62,8 +66,13 @@ class ChatModel():
             {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning."}
         ] + instruction_message_list
 
+        return messages
 
+    def call_openai(self):
+
+        messages = self.get_system_messages()
         messages.extend(self.message_history)
+
         self.last_call_messages = messages
 
         logger.debug(f"sending messages to openai: {pprint.pformat(messages)}")
@@ -88,8 +97,45 @@ class ChatModel():
     def status(self):
         return f'total_tokens: {self.total_tokens}, latest_token_usage: {self.latest_token_usage} (prompt: {self.latest_prompt_usage} completion: {self.latest_completion_usage})'
 
+    def is_new_sentence(self, input_sentence) -> bool:
+        """return true if input is a new sentence. we'll use this to clear history"""
+
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning."},
+            {"role": "user", "content": f"is this a new sentence that the user wants us to explain, or is it a question regarding the previous sentence: {input_sentence}"}
+        ]
+
+        new_sentence_function_name = 'is_new_sentence'
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-0613",
+            messages=messages,
+            functions=[{
+                'name': new_sentence_function_name,
+                'description': "Determine whether the input sentence is a new sentence or a question regarding the previous sentence",
+                'parameters': IsNewSentenceQuery.model_json_schema(),
+            }],
+            function_call={'name': new_sentence_function_name},
+            temperature=0.0
+        )
+
+        message = response['choices'][0]['message']
+        function_name = message['function_call']['name']
+        assert function_name == new_sentence_function_name
+        arguments = json.loads(message["function_call"]["arguments"])
+        is_new_sentence_arg = IsNewSentenceQuery(**arguments)
+        
+        logger.info(f'input sentence: [{input_sentence}] is new sentence: {is_new_sentence_arg.is_new_sentence}')
+        return is_new_sentence_arg.is_new_sentence
+
+
+
     def process_message(self, message):
     
+        # do we need to clear history ?
+        if len(self.message_history) > 0 and self.is_new_sentence(message):
+            self.message_history = []
+
         max_calls = 10
         continue_processing = True
 

@@ -108,9 +108,11 @@ class TestChatModel(unittest.TestCase):
 
 
     def test_cantonese_instructions(self):
+        """test whether the model can follow steps repeatedly when given new input sentences"""
         instructions = 'when I give you a sentence in cantonese, pronounce it using Azure service, then translate it into english, and break down the cantonese sentence into words'
         self.chat_model.set_instruction(instructions)
 
+        # first input sentence
         self.chat_model.process_message('呢條路係行返屋企嘅路')
         self.verify_single_audio_message('呢條路係行返屋企嘅路', 'zh-HK')
         self.verify_messages(['This road is the way home',
@@ -121,3 +123,21 @@ class TestChatModel(unittest.TestCase):
 屋企: ūkkéi, home
 嘅: gê, target
 路: lou, road"""])
+
+        # second input sentence
+        self.chat_model.process_message('我最頂唔順嗰樣嘢')
+        self.verify_single_audio_message('我最頂唔順果樣嘢', 'zh-HK')
+        self.verify_messages(["I can't stand that kind of stuff the most",
+"""我: ngǒ, I
+最頂: zêoidíng, Top
+唔: m, No
+順: seon, shun
+嗰: gó, that
+樣: joeng, shape
+嘢: jě, stuff"""])
+
+        # third input sentence
+        self.chat_model.process_message('黑社會')
+        self.verify_single_audio_message('黑社會', 'zh-HK')
+        self.verify_messages(["I can't stand that kind of stuff the most",
+            """黑社會: hāksěwúi, underworld"""])        

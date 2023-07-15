@@ -44,6 +44,16 @@ class TestChatModel(unittest.TestCase):
     def send_audio_fn(self, audio_tempfile):
         self.audio_list.append(audio_tempfile)
     
+    def verify_single_audio_message(self, expected_audio_message, recognition_language):
+        self.assertEquals(len(self.audio_list), 1)  
+        recognized_text = audio_utils.speech_to_text(self.manager, self.audio_list[0], recognition_language)
+        self.assertEquals(audio_utils.sanitize_recognized_text(recognized_text), expected_audio_message)
+        self.audio_list = []
+
+    def verify_messages(self, expected_message_list):
+        self.assertEquals(self.message_list, expected_message_list)
+        self.message_list = []
+
     def test_french_translation(self):
         # pytest --log-cli-level=DEBUG tests/test_chatmodel.py -k test_french_translation
 
@@ -94,7 +104,20 @@ class TestChatModel(unittest.TestCase):
         # pytest --log-cli-level=INFO tests/test_chatmodel.py -k test_cantonese_audio
 
         self.chat_model.process_message('pronounce "天氣預報" in cantonese')
+        self.verify_single_audio_message('天氣預報', 'zh-HK')
 
-        self.assertEquals(len(self.audio_list), 1)  
-        recognized_text = audio_utils.speech_to_text(self.manager, self.audio_list[0], 'zh-HK')
-        self.assertEquals(audio_utils.sanitize_recognized_text(recognized_text), '天氣預報')
+
+    def test_cantonese_instructions(self):
+        instructions = 'when I give you a sentence in cantonese, pronounce it using Azure service, then translate it into english, and break down the cantonese sentence into words'
+        self.chat_model.set_instruction(instructions)
+
+        self.chat_model.process_message('呢條路係行返屋企嘅路')
+        self.verify_single_audio_message('呢條路係行返屋企嘅路', 'zh-HK')
+        self.verify_messages(['This road is the way home',
+"""呢: nèi, this
+條路: tìulou, road
+係: hai, Oh, yes
+行返: hàngfáan, Walk back
+屋企: ūkkéi, home
+嘅: gê, target
+路: lou, road"""])

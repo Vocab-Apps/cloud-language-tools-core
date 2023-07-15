@@ -144,7 +144,7 @@ class ChatModel():
             self.send_error(str(e))                
 
         # clear history after processing one input sentence
-        self.message_history = []
+        # self.message_history = []
 
     def process_function_call(self, function_name, arguments):
         if function_name == self.FUNCTION_NAME_PRONOUNCE:

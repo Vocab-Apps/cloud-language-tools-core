@@ -141,3 +141,19 @@ class TestChatModel(unittest.TestCase):
         self.verify_single_audio_message('黑社會', 'zh-HK')
         self.verify_messages(["underworld",
             """黑社會: hāksěwúi, underworld"""])        
+
+    def test_cantonese_additional_questions(self):
+        """follow instructions, but then ask an additional question regarding a sentence"""
+        instructions = 'when I give you a sentence in cantonese, pronounce it using Azure service, then translate it into english, and break down the cantonese sentence into words'
+        self.chat_model.set_instruction(instructions)
+
+        # send input sentence
+        self.chat_model.process_message('黑社會')
+        self.verify_single_audio_message('黑社會', 'zh-HK')
+        self.verify_messages(["underworld",
+            """黑社會: hāksěwúi, underworld"""])        
+
+        self.chat_model.process_message('when do we use this ?')
+        # we should have an explanation from chatgpt
+        self.assertEquals(len(self.message_list), 1)
+        self.assertIn('crime', self.message_list[0])

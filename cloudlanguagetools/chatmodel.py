@@ -202,6 +202,7 @@ class ChatModel():
             result = query.input_text
             self.send_audio(audio_tempfile)
         else:
+            send_message_to_user = True
             try:
                 if function_name == self.FUNCTION_NAME_TRANSLATE:
                     translate_query = cloudlanguagetools.chatapi.TranslateQuery(**arguments)
@@ -218,10 +219,13 @@ class ChatModel():
                 else:
                     # report unknown function
                     result = f'unknown function: {function_name}'
+                    send_message_to_user = False
             except cloudlanguagetools.chatapi.NoDataFoundException as e:
                 result = str(e)
+                send_message_to_user = False
             logger.info(f'function: {function_name} result: {result}')
-            self.send_message(result)
+            if send_message_to_user:
+                self.send_message(result)
         # need to echo the result back to chatgpt
         return result        
 

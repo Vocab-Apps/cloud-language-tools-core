@@ -162,7 +162,7 @@ class ChatAPI():
         return transliterated_text
 
     def dictionary_lookup(self, query: DictionaryLookup):
-        logger.info(f'dictionary lookup [{query.input_text}] in {query.source_language}, target language: {query.target_language}')
+        logger.info(f'dictionary lookup {query}')
         source_language = cloudlanguagetools.languages.Language[query.source_language.name]
         target_language = cloudlanguagetools.languages.Language[query.target_language.name]
         dictionary_option_list = self.manager.get_dictionary_lookup_options()
@@ -172,15 +172,25 @@ class ChatAPI():
 
         service_list = set([x.service for x in candidates])
 
+        preferred_service = query.service
+        # for Chinese, always enforce Wenlin
+        if source_language in [
+            cloudlanguagetools.languages.Language.yue,
+            cloudlanguagetools.languages.Language.zh_cn,
+            cloudlanguagetools.languages.Language.zh_tw,
+            cloudlanguagetools.languages.Language.zh_lit
+        ]:
+            preferred_service = cloudlanguagetools.constants.Service.Wenlin
+
         service_preference = self.get_service_preference([
             cloudlanguagetools.constants.Service.Wenlin,
             cloudlanguagetools.constants.Service.Azure,
-        ], query.service)
+        ], preferred_service)
 
         while service_preference[0] not in service_list:
             service_preference.pop(0)
             if len(service_preference) == 0:
-                raise NoDataFoundException(f'No service found for dictionary lookup of {language.lang_name}')
+                raise NoDataFoundException(f'No service found for dictionary lookup of {query.source_language.lang_name}')
             
         service = service_preference[0]
         final_candidates = [x for x in candidates if x.service == service]

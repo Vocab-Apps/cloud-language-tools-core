@@ -144,8 +144,6 @@ class ChatModel():
         # message_history contains the most recent request
         self.message_history.append({"role": "user", "content": input_message})
 
-        # if the processing loop resulted in no functions getting called, see what the bot has to say
-        had_function_calls = False
 
         function_call_cache = {}
         at_least_one_message_to_user = False
@@ -175,16 +173,14 @@ class ChatModel():
                         if function_name not in function_call_cache:
                             function_call_cache[function_name] = {}
                         function_call_cache[function_name][arguments_str] = function_call_result
-                        had_function_calls = True
                     else:
                         # we've called that function already with same arguments, we won't call again, but
                         # add to history again, so that chatgpt doesn't call the function again
                         self.message_history.append({"role": "function", "name": function_name, "content": function_call_result})
                 else:
                     continue_processing = False
-                    if had_function_calls == False or at_least_one_message_to_user == False:
-                        # no functions were called. maybe chatgpt is trying to explain something
-                        # or nothing has been shown to the user yet, so we should show the final message
+                    if at_least_one_message_to_user == False:
+                        # or nothing has been shown to the user yet, so we should show the final message. maybe chatgpt is trying to explain something
                         self.send_message(message['content'])
                 
                 # if there was a message, append it to the history
@@ -208,6 +204,7 @@ class ChatModel():
             self.send_audio(audio_tempfile)
             send_message_to_user = True
         else:
+            # text-based functions
             try:
                 if function_name == self.FUNCTION_NAME_TRANSLATE:
                     translate_query = cloudlanguagetools.chatapi.TranslateQuery(**arguments)

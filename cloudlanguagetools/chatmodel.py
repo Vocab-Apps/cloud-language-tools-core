@@ -148,6 +148,7 @@ class ChatModel():
         had_function_calls = False
 
         function_call_cache = {}
+        at_least_one_message_to_user = False
 
         try:
             while continue_processing and max_calls > 0:
@@ -167,7 +168,8 @@ class ChatModel():
                     # check whether we've called that function with exact same arguments before
                     if arguments_str not in function_call_cache.get(function_name, {}):
                         # haven't called it with these arguments before
-                        function_call_result = self.process_function_call(function_name, arguments)
+                        function_call_result, sent_message_to_user = self.process_function_call(function_name, arguments)
+                        at_least_one_message_to_user = at_least_one_message_to_user or sent_message_to_user
                         self.message_history.append({"role": "function", "name": function_name, "content": function_call_result})
                         # cache function call results
                         if function_name not in function_call_cache:
@@ -180,8 +182,9 @@ class ChatModel():
                         self.message_history.append({"role": "function", "name": function_name, "content": function_call_result})
                 else:
                     continue_processing = False
-                    if had_function_calls == False:
+                    if had_function_calls == False or at_least_one_message_to_user == False:
                         # no functions were called. maybe chatgpt is trying to explain something
+                        # or nothing has been shown to the user yet, so we should show the final message
                         self.send_message(message['content'])
                 
                 # if there was a message, append it to the history
@@ -196,38 +199,42 @@ class ChatModel():
         self.last_input_sentence = input_message
 
     def process_function_call(self, function_name, arguments):
+        # by default, don't send output to user
+        send_message_to_user = False
         if function_name == self.FUNCTION_NAME_PRONOUNCE:
             query = cloudlanguagetools.chatapi.AudioQuery(**arguments)
             audio_tempfile = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
             result = query.input_text
             self.send_audio(audio_tempfile)
-        else:
             send_message_to_user = True
+        else:
             try:
                 if function_name == self.FUNCTION_NAME_TRANSLATE:
                     translate_query = cloudlanguagetools.chatapi.TranslateQuery(**arguments)
                     result = self.chatapi.translate(translate_query)
+                    send_message_to_user = True
                 elif function_name == self.FUNCTION_NAME_TRANSLITERATE:
                     query = cloudlanguagetools.chatapi.TransliterateQuery(**arguments)
                     result = self.chatapi.transliterate(query)
+                    send_message_to_user = True
                 elif function_name == self.FUNCTION_NAME_DICTIONARY_LOOKUP:
                     query = cloudlanguagetools.chatapi.DictionaryLookup(**arguments)
                     result = self.chatapi.dictionary_lookup(query)
+                    send_message_to_user = True
                 elif function_name == self.FUNCTION_NAME_BREAKDOWN:
                     query = cloudlanguagetools.chatapi.BreakdownQuery(**arguments)
                     result = self.chatapi.breakdown(query)
+                    send_message_to_user = True
                 else:
                     # report unknown function
                     result = f'unknown function: {function_name}'
-                    send_message_to_user = False
             except cloudlanguagetools.chatapi.NoDataFoundException as e:
                 result = str(e)
-                send_message_to_user = False
             logger.info(f'function: {function_name} result: {result}')
             if send_message_to_user:
                 self.send_message(result)
         # need to echo the result back to chatgpt
-        return result        
+        return result, send_message_to_user    
 
     def get_openai_functions(self):
         return [

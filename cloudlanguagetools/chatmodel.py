@@ -10,8 +10,8 @@ import cloudlanguagetools.options
 logger = logging.getLogger(__name__)
 
 class IsNewSentenceQuery(pydantic.BaseModel):
-    is_new_sentence: bool = pydantic.Field(description="true if the input sentence is a new input sentence," 
-                                           "false if it is a question regarding the previous sentence")
+    is_new_sentence: bool = pydantic.Field(description="true if the last user message is a new input sentence for translation, transliteration, pronuncation or dictionary lookup," 
+                                           "false if it is a question regarding the meaning, grammar, or vocabulary of the previous sentence")
 
 
 """
@@ -32,6 +32,7 @@ class ChatModel():
         self.last_call_messages = None
         self.total_tokens = 0
         self.latest_token_usage = 0
+        self.last_input_sentence = None
     
     def set_instruction(self, instruction):
         self.instruction = instruction
@@ -102,7 +103,8 @@ class ChatModel():
 
         messages = [
             {"role": "system", "content": "You are a helpful assistant specialized in translation and language learning."},
-            {"role": "user", "content": f"is this a new sentence that the user wants us to explain, or is it a question regarding the previous sentence: {input_sentence}"}
+            {"role": "user", "content": self.last_input_sentence},
+            {"role": "user", "content": input_sentence}
         ]
 
         new_sentence_function_name = 'is_new_sentence'
@@ -112,7 +114,7 @@ class ChatModel():
             messages=messages,
             functions=[{
                 'name': new_sentence_function_name,
-                'description': "Determine whether the input sentence is a new sentence or a question regarding the previous sentence",
+                'description': "Determine whether the last user message is a new sentence or a question regarding the meaning, grammar, or vocabulary of the previous sentence",
                 'parameters': IsNewSentenceQuery.model_json_schema(),
             }],
             function_call={'name': new_sentence_function_name},
@@ -130,17 +132,17 @@ class ChatModel():
 
 
 
-    def process_message(self, message):
+    def process_message(self, input_message):
     
         # do we need to clear history ?
-        if len(self.message_history) > 0 and self.is_new_sentence(message):
+        if len(self.message_history) > 0 and self.is_new_sentence(input_message):
             self.message_history = []
 
         max_calls = 10
         continue_processing = True
 
         # message_history contains the most recent request
-        self.message_history.append({"role": "user", "content": message})
+        self.message_history.append({"role": "user", "content": input_message})
 
         # if the processing loop resulted in no functions getting called, see what the bot has to say
         had_function_calls = False
@@ -191,6 +193,7 @@ class ChatModel():
 
         # clear history after processing one input sentence
         # self.message_history = []
+        self.last_input_sentence = input_message
 
     def process_function_call(self, function_name, arguments):
         if function_name == self.FUNCTION_NAME_PRONOUNCE:

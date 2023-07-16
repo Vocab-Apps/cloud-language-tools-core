@@ -35,18 +35,19 @@ class TransliterateQuery(pydantic.BaseModel):
     service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for transliteration')
 
 class DictionaryLookup(pydantic.BaseModel):
-    input_text: str = Field(description="text lookup in the dictionary")
-    language: cloudlanguagetools.languages.CommonLanguage = Field(description="language the text is in")
+    input_text: str = Field(description="text to lookup in the dictionary")
+    source_language: cloudlanguagetools.languages.CommonLanguage = Field(description="language of the text to look up")
+    target_language: cloudlanguagetools.languages.CommonLanguage = Field(description="language for the dictionary definition")
     service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for dictionary lookup')
 
 class AudioQuery(pydantic.BaseModel):
-    input_text: str = Field(description="text to pronounce")
+    input_text: str = Field(description="text to pronounce / generate audio")
     language: cloudlanguagetools.languages.CommonLanguage = Field(description="language the text is in")
     service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use audio pronunciation')
     gender: Optional[cloudlanguagetools.constants.Gender] = Field(default=None, description='gender of the voice to pronounce the text in')
 
 class BreakdownQuery(pydantic.BaseModel):
-    input_text: str = Field(description="text to breakdown")
+    input_text: str = Field(description="text to breakdown into words")
     language: cloudlanguagetools.languages.CommonLanguage = Field(description="language the text is in")
     translation_language: cloudlanguagetools.languages.CommonLanguage = Field(default=cloudlanguagetools.languages.CommonLanguage.en, description="language to translate into")
     translation_service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for translation')
@@ -161,11 +162,13 @@ class ChatAPI():
         return transliterated_text
 
     def dictionary_lookup(self, query: DictionaryLookup):
-        language = cloudlanguagetools.languages.Language[query.language.name]
+        logger.info(f'dictionary lookup [{query.input_text}] in {query.source_language}, target language: {query.target_language}')
+        source_language = cloudlanguagetools.languages.Language[query.source_language.name]
+        target_language = cloudlanguagetools.languages.Language[query.target_language.name]
         dictionary_option_list = self.manager.get_dictionary_lookup_options()
-        candidates = [x for x in dictionary_option_list if x.language == language]
+        candidates = [x for x in dictionary_option_list if x.language == source_language and x.target_language == target_language]
         if len(candidates) == 0:
-            raise NoDataFoundException(f'No dictionary service found for language {language.lang_name}')
+            raise NoDataFoundException(f'No dictionary service found for source language {query.source_language.lang_name} / target language: {query.target_language.lang_name}')
 
         service_list = set([x.service for x in candidates])
 

@@ -142,7 +142,7 @@ class TestChatModel(unittest.TestCase):
         self.verify_messages(["underworld",
             """黑社會: hāksěwúi, underworld"""])        
 
-    def test_cantonese_additional_questions(self):
+    def test_cantonese_additional_questions_1(self):
         # pytest --log-cli-level=INFO tests/test_chatmodel.py -k test_cantonese_additional_questions
 
         """follow instructions, but then ask an additional question regarding a sentence"""
@@ -159,3 +159,27 @@ class TestChatModel(unittest.TestCase):
         # we should have an explanation from chatgpt
         self.assertEquals(len(self.message_list), 1)
         self.assertIn('crime', self.message_list[0])
+
+    def test_cantonese_additional_questions_2(self):
+        # pytest --log-cli-level=INFO tests/test_chatmodel.py -k test_cantonese_additional_questions_2
+
+        """follow instructions, but then ask an additional question regarding a sentence"""
+        instructions = 'when I give you a sentence in cantonese, pronounce it using Azure service, then translate it into english, and break down the cantonese sentence into words'
+        self.chat_model.set_instruction(instructions)
+
+        # first input sentence
+        self.chat_model.process_message('呢條路係行返屋企嘅路')
+        self.verify_single_audio_message('呢條路係行返屋企嘅路', 'zh-HK')
+        self.verify_messages(['This road is the way home',
+"""呢: nèi, this
+條路: tìulou, road
+係: hai, Oh, yes
+行返: hàngfáan, Walk back
+屋企: ūkkéi, home
+嘅: gê, target
+路: lou, road"""])
+
+        self.chat_model.process_message('Is there another chinese character which means road?')
+        # we should have an explanation from chatgpt
+        self.assertEquals(len(self.message_list), 1)
+        self.assertIn('路', self.message_list[0])

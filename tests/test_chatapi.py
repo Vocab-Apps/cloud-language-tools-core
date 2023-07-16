@@ -100,7 +100,8 @@ class TestChatAPI(unittest.TestCase):
         # french
         query = cloudlanguagetools.chatapi.DictionaryLookup(
             input_text='bonjour',
-            language=CommonLanguage.fr,
+            source_language=CommonLanguage.fr,
+            target_language=CommonLanguage.en
         )
         result = self.chatapi.dictionary_lookup(query)
         self.assertEqual(result, 'hello')
@@ -111,7 +112,8 @@ class TestChatAPI(unittest.TestCase):
         # chinese
         query = cloudlanguagetools.chatapi.DictionaryLookup(
             input_text='彩虹',
-            language=CommonLanguage.zh_cn,
+            source_language=CommonLanguage.zh_cn,
+            target_language=CommonLanguage.en,
             service=cloudlanguagetools.constants.Service.Wenlin
         )
         result = self.chatapi.dictionary_lookup(query)

@@ -24,7 +24,7 @@ class ChatModel():
     FUNCTION_NAME_BREAKDOWN = 'breakdown'
     FUNCTION_NAME_PRONOUNCE = 'pronounce'
 
-    def __init__(self, manager):
+    def __init__(self, manager, audio_format=cloudlanguagetools.options.AudioFormat.mp3):
         self.manager = manager
         self.chatapi = cloudlanguagetools.chatapi.ChatAPI(self.manager)
         self.instruction = None
@@ -33,6 +33,7 @@ class ChatModel():
         self.total_tokens = 0
         self.latest_token_usage = 0
         self.last_input_sentence = None
+        self.audio_format = audio_format
     
     def set_instruction(self, instruction):
         self.instruction = instruction
@@ -199,7 +200,7 @@ class ChatModel():
         send_message_to_user = False
         if function_name == self.FUNCTION_NAME_PRONOUNCE:
             query = cloudlanguagetools.chatapi.AudioQuery(**arguments)
-            audio_tempfile = self.chatapi.audio(query, cloudlanguagetools.options.AudioFormat.mp3)
+            audio_tempfile = self.chatapi.audio(query, self.audio_format)
             result = query.input_text
             self.send_audio(audio_tempfile)
             send_message_to_user = True

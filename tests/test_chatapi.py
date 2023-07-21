@@ -119,6 +119,26 @@ class TestChatAPI(unittest.TestCase):
         result = self.chatapi.dictionary_lookup(query)
         self.assertEqual(result, 'rainbow')
 
+    def test_translate_or_lookup_chinese(self):
+        # pytest --log-cli-level=INFO tests/test_chatapi.py -k test_translate_or_lookup_chinese
+
+        # chinese
+        query = cloudlanguagetools.chatapi.TranslateLookupQuery(
+            input_text='彩虹',
+            source_language=CommonLanguage.zh_cn,
+            target_language=CommonLanguage.en
+        )
+        result = self.chatapi.translate_or_lookup(query)
+        self.assertEqual(result, 'rainbow')
+
+        query = cloudlanguagetools.chatapi.TranslateLookupQuery(
+            input_text='成本很低',
+            source_language=CommonLanguage.zh_cn,
+            target_language=CommonLanguage.en
+        )
+        result = self.chatapi.translate_or_lookup(query)
+        self.assertEqual(result, 'The cost is low.')
+
     def assert_audio_matches(self, audio_temp_file, expected_text, azure_language):
         recognized_text = audio_utils.speech_to_text(self.chatapi.manager, audio_temp_file, azure_language)
         self.assertEqual(audio_utils.sanitize_recognized_text(recognized_text), audio_utils.sanitize_recognized_text(expected_text))

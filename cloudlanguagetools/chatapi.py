@@ -22,6 +22,11 @@ but sometimes parameters will be overriden to ensure an output is produced.
 class NoDataFoundException(Exception):
     pass
 
+class TranslateLookupQuery(pydantic.BaseModel):
+    input_text: str = Field(description="text to translate or lookup in the dictionary")
+    source_language: cloudlanguagetools.languages.CommonLanguage = Field(description="language of the text to translate or lookup in dictionary")
+    target_language: cloudlanguagetools.languages.CommonLanguage = Field(description="language to translate to, or language of dictionary definition")
+    service: Optional[cloudlanguagetools.constants.Service] = Field(default=None, description='service to use for translation')
 
 class TranslateQuery(pydantic.BaseModel):
     input_text: str = Field(description="text to translate")
@@ -161,6 +166,18 @@ class ChatAPI():
         )
         return transliterated_text
 
+    def translate_or_lookup(self, query: TranslateLookupQuery):
+        logger.info(f'translation or dictionary lookup: {query}')
+
+        try:
+            # try dictionary lookup as a first attempt
+            result = self.dictionary_lookup(query)
+            return result
+        except cloudlanguagetools.errors.NotFoundError as e:
+            # if dictionary lookup fails, try translation
+            result = self.translate(query)
+            return result
+
     def dictionary_lookup(self, query: DictionaryLookup):
         logger.info(f'dictionary lookup {query}')
         source_language = cloudlanguagetools.languages.Language[query.source_language.name]
@@ -198,15 +215,12 @@ class ChatAPI():
         dictionary_option = final_candidates[0]
         logger.debug(f'Using dictionary option {pprint.pformat(dictionary_option.json_obj())}')
 
-        try:
-            dictionary_result = self.manager.get_dictionary_lookup(
-                query.input_text,
-                service,
-                dictionary_option.get_lookup_key()
-            )
-            result = ' / '.join(dictionary_result)
-        except cloudlanguagetools.errors.NotFoundError as e:
-            result = f'No dictionary lookup results found for {query.input_text}'
+        dictionary_result = self.manager.get_dictionary_lookup(
+            query.input_text,
+            service,
+            dictionary_option.get_lookup_key()
+        )
+        result = ' / '.join(dictionary_result)
         return result
         
 

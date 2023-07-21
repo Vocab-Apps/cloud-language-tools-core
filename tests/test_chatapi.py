@@ -43,7 +43,7 @@ class TestChatAPI(unittest.TestCase):
             "i'm not interested"
         ]
 
-        query = cloudlanguagetools.chatapi.TranslateQuery(
+        query = cloudlanguagetools.chatapi.TranslateLookupQuery(
             input_text='Je ne suis pas intéressé.',
             source_language=CommonLanguage.fr,
             target_language=CommonLanguage.en
@@ -98,7 +98,7 @@ class TestChatAPI(unittest.TestCase):
 
     def test_dictionary_lookup_french(self):
         # french
-        query = cloudlanguagetools.chatapi.DictionaryLookup(
+        query = cloudlanguagetools.chatapi.TranslateLookupQuery(
             input_text='bonjour',
             source_language=CommonLanguage.fr,
             target_language=CommonLanguage.en
@@ -110,7 +110,7 @@ class TestChatAPI(unittest.TestCase):
         # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_dictionary_lookup_chinese
 
         # chinese
-        query = cloudlanguagetools.chatapi.DictionaryLookup(
+        query = cloudlanguagetools.chatapi.TranslateLookupQuery(
             input_text='彩虹',
             source_language=CommonLanguage.zh_cn,
             target_language=CommonLanguage.en,

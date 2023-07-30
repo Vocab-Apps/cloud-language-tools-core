@@ -19,19 +19,10 @@ import cloudlanguagetools.errors
 DEFAULT_STABILITY = 0.75
 DEFAULT_SIMILARITY_BOOST = 0.75
 
-
 GENDER_MAP = {
-    'Rachel': cloudlanguagetools.constants.Gender.Female,
-    'Domi': cloudlanguagetools.constants.Gender.Female,
-    'Bella': cloudlanguagetools.constants.Gender.Female,
-    'Antoni': cloudlanguagetools.constants.Gender.Male,
-    'Elli': cloudlanguagetools.constants.Gender.Female,
-    'Josh': cloudlanguagetools.constants.Gender.Male,
-    'Arnold': cloudlanguagetools.constants.Gender.Male,
-    'Adam': cloudlanguagetools.constants.Gender.Male,
-    'Sam': cloudlanguagetools.constants.Gender.Male
+    'male': cloudlanguagetools.constants.Gender.Male,
+    'female': cloudlanguagetools.constants.Gender.Female,
 }
-
 
 class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data, language, model_id, model_short_name):
@@ -42,7 +33,7 @@ class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.model_id = model_id
         self.model_short_name = model_short_name
         self.name = voice_data['name']
-        self.gender = GENDER_MAP.get(self.name, cloudlanguagetools.constants.Gender.Male)
+        self.gender = GENDER_MAP.get(voice_data['labels']['gender'], cloudlanguagetools.constants.Gender.Male)
         self.audio_language = language
 
     def get_voice_key(self):

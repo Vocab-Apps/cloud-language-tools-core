@@ -213,7 +213,7 @@ def get_elevenlabs_voice_list():
     # pprint.pprint(voice_list)
     # print names of voices in voice_list
     for voice in voice_list:
-        print(voice.name)
+        print(voice)
 
 
 def elevenlabs_api_test():
@@ -1117,7 +1117,7 @@ if __name__ == '__main__':
     # play_azure_audio()
     # get_voice_list()
     # get_voice_list_awesometts()
-    # get_elevenlabs_voice_list()
+    get_elevenlabs_voice_list()
     # elevenlabs_api_test()
     # get_watson_voice_list()
     # get_amazon_voice_list()
@@ -1147,7 +1147,7 @@ if __name__ == '__main__':
     # test_debounce()
     # load_vocalware_voices()
     # thai_tokenization()
-    test_get_language_data()
+    # test_get_language_data()
     # test_get_language_data_redis()
     # test_wenlin_lookup()
     # openai_test()

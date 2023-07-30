@@ -94,7 +94,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             }
         }
 
-        response = requests.post(url, json=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
         response.raise_for_status()
         
         output_temp_file = tempfile.NamedTemporaryFile()
@@ -159,7 +159,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         # call elevenlabs API to list TTS voices
         url = "https://api.elevenlabs.io/v1/voices"
 
-        response = requests.get(url, headers=self.get_headers())
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         response.raise_for_status()
 
         data = response.json()

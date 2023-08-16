@@ -30,7 +30,9 @@ class LibreTranslateLanguage(cloudlanguagetools.translationlanguage.TranslationL
     def get_language_id(self):
         return self.language_id
 
-
+"""
+note: libre translate service offers poor quality translations, disable this service.
+"""
 class LibreTranslateService(cloudlanguagetools.service.Service):
     BASE_URL = 'http://libretranslate.vocab.ai'
 

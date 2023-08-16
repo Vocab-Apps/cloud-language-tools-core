@@ -63,7 +63,6 @@ class ServiceManager():
             self.services[cloudlanguagetools.constants.Service.Spacy] = cloudlanguagetools.spacy.SpacyService()
             self.services[cloudlanguagetools.constants.Service.MandarinCantonese] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
             self.services[cloudlanguagetools.constants.Service.Wenlin] = cloudlanguagetools.wenlin.WenlinService()
-            self.services[cloudlanguagetools.constants.Service.LibreTranslate] = cloudlanguagetools.libretranslate.LibreTranslateService()
             self.services[cloudlanguagetools.constants.Service.OpenAI] = cloudlanguagetools.openai.OpenAIService()
 
     def configure_default(self):

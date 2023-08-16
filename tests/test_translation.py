@@ -160,9 +160,11 @@ class TestTranslation(unittest.TestCase):
     # def test_translate_french_argos(self):
     #     self.translate_text(Service.ArgosTranslate, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement.')
 
+    @pytest.mark.skip('2023/08 libretranslate disabled')
     def test_translate_french_libretranslate(self):
         self.translate_text(Service.LibreTranslate, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement.')        
 
+    @pytest.mark.skip('2023/08 libretranslate disabled')
     def test_translate_chinese_libretranslate(self):
         self.translate_text(Service.LibreTranslate, '中国有很多外国人', Language.zh_cn, Language.en, 'there are many foreigners in china')
 

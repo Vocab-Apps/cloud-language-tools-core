@@ -4,6 +4,7 @@ import requests
 import tempfile
 import os
 import contextlib
+import logging
 from typing import List
 
 import cloudlanguagetools.service
@@ -14,6 +15,8 @@ import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
+
+logger = logging.getLogger(__name__)
 
 
 DEFAULT_STABILITY = 0.75
@@ -108,15 +111,27 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         return output_temp_file
 
 
+
     def get_audio_language(self, language_id):
+        logger.debug(f'processing language_id: {language_id}')
         override_map = {
             'pt': cloudlanguagetools.languages.AudioLanguage.pt_PT,
+            'en-uk': cloudlanguagetools.languages.AudioLanguage.en_GB,
         }
         if language_id in override_map:
             return override_map[language_id]
-        language_enum = cloudlanguagetools.languages.Language[language_id]
-        audio_language_enum = cloudlanguagetools.languages.AudioLanguageDefaults[language_enum]
-        return audio_language_enum
+        # try to reconstruct AudioLanguage
+        language_id_components = language_id.split('-')
+        if len(language_id_components) != 2:
+            language_enum = cloudlanguagetools.languages.Language[language_id]
+            audio_language_enum = cloudlanguagetools.languages.AudioLanguageDefaults[language_enum]
+            return audio_language_enum
+        else:
+            # language is in format en-us
+            modified_language_id = language_id_components[0] + '_' + language_id_components[1].upper()
+            logger.debug(f'modified_language_id: {modified_language_id}')
+            audio_language_enum = cloudlanguagetools.languages.AudioLanguage[modified_language_id]
+            return audio_language_enum
 
     def get_tts_voice_list(self) -> List[ElevenLabsVoice]:
         result = []

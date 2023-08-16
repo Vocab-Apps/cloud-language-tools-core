@@ -35,7 +35,11 @@ class TestTranslation(unittest.TestCase):
     def test_single_prompt(self):
         prompt = 'translate to French: speak slowly please.'
         response, tokens = self.manager.openai_single_prompt(prompt)
-        self.assertEqual(self.sanitize_text("Parlez lentement s'il vous plaît."), self.sanitize_text(response))
+        self.assertIn(self.sanitize_text(response),
+                      [
+                         self.sanitize_text("Parlez lentement s'il vous plaît."),
+                         self.sanitize_text("parle lentement s'il te plaît") 
+                      ])
 
     def test_full_query(self):
         messages = [

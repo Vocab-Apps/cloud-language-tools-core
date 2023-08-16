@@ -26,7 +26,6 @@ class TestTranslation(unittest.TestCase):
 
     def test_service_cost(self):
         self.assertEqual(self.manager.service_cost('abcd', 'Azure', cloudlanguagetools.constants.RequestType.translation), 4)
-        self.assertEqual(self.manager.service_cost('abcd', 'LibreTranslate', cloudlanguagetools.constants.RequestType.translation), 0)
         self.assertEqual(self.manager.service_cost('abcd', 'Epitran', cloudlanguagetools.constants.RequestType.transliteration), 0)
         self.assertEqual(self.manager.service_cost('abcd', 'Naver', cloudlanguagetools.constants.RequestType.translation), 4)
         self.assertEqual(self.manager.service_cost('abcd', 'Naver', cloudlanguagetools.constants.RequestType.audio), 24)
@@ -40,7 +39,7 @@ class TestTranslation(unittest.TestCase):
         free_translation_options = language_data['free']['translation_options']
         # check that libretranslate is there
         free_translation_services = list(set([option['service'] for option in free_translation_options]))
-        self.assertEqual(free_translation_services, ['LibreTranslate'])
+        self.assertEqual(free_translation_services, []) # libretranslate removed
 
         # check free transliteration services
         free_transliteration_options = language_data['free']['transliteration_options']

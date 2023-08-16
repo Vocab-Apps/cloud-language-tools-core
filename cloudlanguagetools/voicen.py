@@ -34,6 +34,9 @@ class VoicenVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def get_options(self):
         return {}
 
+"""
+note: Voicen Text To Speech service has been decomissioned
+"""
 class VoicenService(cloudlanguagetools.service.Service):
     def __init__(self):
         pass

@@ -54,7 +54,6 @@ class ServiceManager():
             self.services[cloudlanguagetools.constants.Service.CereProc] = cloudlanguagetools.cereproc.CereProcService()
             self.services[cloudlanguagetools.constants.Service.VocalWare] = cloudlanguagetools.vocalware.VocalWareService()
             self.services[cloudlanguagetools.constants.Service.FptAi] = cloudlanguagetools.fptai.FptAiService()
-            self.services[cloudlanguagetools.constants.Service.Voicen] = cloudlanguagetools.voicen.VoicenService()
             self.services[cloudlanguagetools.constants.Service.ElevenLabs] = cloudlanguagetools.elevenlabs.ElevenLabsService()
             self.services[cloudlanguagetools.constants.Service.EasyPronunciation] = cloudlanguagetools.easypronunciation.EasyPronunciationService()
             self.services[cloudlanguagetools.constants.Service.Epitran] = cloudlanguagetools.epitran.EpitranService()

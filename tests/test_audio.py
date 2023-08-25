@@ -112,15 +112,15 @@ class TestAudio(unittest.TestCase):
         for voice in voices:
             self.verify_voice(voice, text, recognition_language)
 
-    def test_service_japanese(self, service: Service):
+    def verify_service_japanese(self, service: Service):
         source_text = self.JAPANESE_INPUT_TEXT
         self.verify_service_audio_language(source_text, service, AudioLanguage.ja_JP, 'ja-JP')
 
-    def test_service_chinese(self, service: Service):
+    def verify_service_chinese(self, service: Service):
         source_text = self.CHINESE_INPUT_TEXT
         self.verify_service_audio_language(source_text, service, AudioLanguage.zh_CN, 'zh-CN')
 
-    def test_service_korean(self, service: Service):
+    def verify_service_korean(self, service: Service):
         source_text = self.KOREAN_INPUT_TEXT
         self.verify_service_audio_language(source_text, service, AudioLanguage.ko_KR, 'ko-KR')
 
@@ -425,10 +425,10 @@ class TestAudio(unittest.TestCase):
         self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.de_DE, 'de-DE')        
 
     def test_elevenlabs_japanese(self):
-        self.test_service_japanese(Service.ElevenLabs)
+        self.verify_service_japanese(Service.ElevenLabs)
 
     def test_elevenlabs_chinese(self):
-        self.test_service_chinese(Service.ElevenLabs)
+        self.verify_service_chinese(Service.ElevenLabs)
 
     def test_elevenlabs_korean(self):
-        self.test_service_korean(Service.ElevenLabs)
+        self.verify_service_korean(Service.ElevenLabs)

@@ -34,6 +34,7 @@ class TestAudio(unittest.TestCase):
 
     FRENCH_INPUT_TEXT = "On m'a volé mes affaires."
     JAPANESE_INPUT_TEXT = 'おはようございます'
+    CHINESE_INPUT_TEXT = '老人家'
 
     @classmethod
     def setUpClass(cls):
@@ -113,6 +114,10 @@ class TestAudio(unittest.TestCase):
     def test_service_japanese(self, service: Service):
         source_text = self.JAPANESE_INPUT_TEXT
         self.verify_service_audio_language(source_text, service, AudioLanguage.ja_JP, 'ja-JP')
+
+    def test_service_chinese(self, service: Service):
+        source_text = self.CHINESE_INPUT_TEXT
+        self.verify_service_audio_language(source_text, service, AudioLanguage.zh_CN, 'zh-CN')
 
     def test_french_google(self):
         source_text = self.FRENCH_INPUT_TEXT
@@ -416,3 +421,6 @@ class TestAudio(unittest.TestCase):
 
     def test_elevenlabs_japanese(self):
         self.test_service_japanese(Service.ElevenLabs)
+
+    def test_elevenlabs_chinese(self):
+        self.test_service_chinese(Service.ElevenLabs)        

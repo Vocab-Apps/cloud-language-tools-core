@@ -117,6 +117,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         override_map = {
             'pt': cloudlanguagetools.languages.AudioLanguage.pt_PT,
             'en-uk': cloudlanguagetools.languages.AudioLanguage.en_GB,
+            'zh': cloudlanguagetools.languages.AudioLanguage.zh_CN,
         }
         if language_id in override_map:
             return override_map[language_id]
@@ -184,10 +185,13 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             model_name = model['name']
             model_short_name = model_name.replace('Eleven ', '').replace('v1', '').strip()
             for language_record in model['languages']:
-                language_id = language_record['language_id']
-                audio_language_enum = self.get_audio_language(language_id)
-                for voice_data in data['voices']:
-                    result.append(ElevenLabsVoice(voice_data, audio_language_enum, model_id, model_short_name))
+                try:
+                    language_id = language_record['language_id']
+                    audio_language_enum = self.get_audio_language(language_id)
+                    for voice_data in data['voices']:
+                        result.append(ElevenLabsVoice(voice_data, audio_language_enum, model_id, model_short_name))
+                except Exception as e:
+                    logger.exception(f'ElevenLabs: error processing voice_data: {voice_data}')
 
         return result
 

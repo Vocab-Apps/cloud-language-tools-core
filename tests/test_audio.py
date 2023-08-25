@@ -33,6 +33,7 @@ def get_manager():
 class TestAudio(unittest.TestCase):
 
     FRENCH_INPUT_TEXT = "On m'a volé mes affaires."
+    JAPANESE_INPUT_TEXT = 'おはようございます'
 
     @classmethod
     def setUpClass(cls):
@@ -109,6 +110,10 @@ class TestAudio(unittest.TestCase):
         for voice in voices:
             self.verify_voice(voice, text, recognition_language)
 
+    def test_service_japanese(self, service: Service):
+        source_text = self.JAPANESE_INPUT_TEXT
+        self.verify_service_audio_language(source_text, service, AudioLanguage.ja_JP, 'ja-JP')
+
     def test_french_google(self):
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.fr_FR, 'fr-FR')
@@ -180,7 +185,7 @@ class TestAudio(unittest.TestCase):
 
     def test_japanese_naver(self):
         # pytest test_audio.py -k test_japanese_naver
-        source_text = 'おはようございます'
+        source_text = self.JAPANESE_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ja_JP, 'ja-JP')
 
     def test_japanese_naver_error(self):
@@ -404,3 +409,10 @@ class TestAudio(unittest.TestCase):
     def test_elevenlabs_german(self):
         source_text = 'Ich mag das Essen nicht.'
         self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.de_DE, 'de-DE')
+
+    def test_elevenlabs_german(self):
+        source_text = 'Ich mag das Essen nicht.'
+        self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.de_DE, 'de-DE')        
+
+    def test_elevenlabs_japanese(self):
+        self.test_service_japanese(Service.ElevenLabs)

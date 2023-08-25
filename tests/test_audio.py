@@ -190,7 +190,7 @@ class TestAudio(unittest.TestCase):
 
     def test_korean_naver(self):
         # pytest test_audio.py -k test_korean_naver
-        source_text = '여보세요'
+        source_text = self.KOREAN_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.Naver, AudioLanguage.ko_KR, 'ko-KR')
 
     def test_japanese_naver(self):

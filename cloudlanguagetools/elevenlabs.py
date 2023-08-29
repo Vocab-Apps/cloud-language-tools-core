@@ -28,7 +28,7 @@ GENDER_MAP = {
 }
 
 class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
-    def __init__(self, voice_data, language, model_id, model_short_name):
+    def __init__(self, voice_data, language: cloudlanguagetools.languages.AudioLanguage, model_id, model_short_name):
         # pprint.pprint(voice_data)
         self.service = cloudlanguagetools.constants.Service.ElevenLabs
         self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
@@ -42,7 +42,8 @@ class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def get_voice_key(self):
         return {
             'voice_id': self.voice_id,
-            'model_id': self.model_id
+            'model_id': self.model_id,
+            'language': self.audio_language.name
         }
 
     def get_voice_shortname(self):
@@ -112,7 +113,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
 
 
-    def get_audio_language(self, language_id):
+    def get_audio_language(self, language_id) -> cloudlanguagetools.languages.AudioLanguage:
         logger.debug(f'processing language_id: {language_id}')
         override_map = {
             'pt': cloudlanguagetools.languages.AudioLanguage.pt_PT,

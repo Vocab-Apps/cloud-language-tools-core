@@ -395,6 +395,7 @@ class AudioLanguage(enum.Enum):
     zh_CN_shaanxi = (Language.zh_cn, 'Chinese (Zhongyuan Mandarin Shaanxi, Simplified)')
     zh_CN_shandong = (Language.zh_cn, 'Chinese (Jilu Mandarin, Simplified)')
     zh_CN_sichuan = (Language.zh_cn, 'Chinese (Southwestern Mandarin, Simplified)')
+    zh_CN_guangxi = (Language.zh_cn, 'Chinese (Guangxi Accent Mandarin, Simplified)')
 
     fa_IR = (Language.fa, "Persian (Iran)")
     zu_ZA = (Language.zu, "Zulu (South Africa)")

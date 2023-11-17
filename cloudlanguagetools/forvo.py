@@ -221,6 +221,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.zh_CN_shaanxi: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_shandong: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_sichuan: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.zh_CN_guangxi: 'CHN',
 
         }
         if audio_language not in country_code_map:

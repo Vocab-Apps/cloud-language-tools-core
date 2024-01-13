@@ -256,6 +256,7 @@ class AudioLanguage(enum.Enum):
     az_AZ = (Language.az, "Azerbaijani (Azerbaijan)")
     ba_RU = (Language.ba, "Bashkir (Russia)")
 
+    be_BY = (Language.be, "Belarusian (Belarus)")
     bg_BG = (Language.bg, "Bulgarian")
     bn_BD = (Language.bn, "Bangla (Bangladesh)")
     bn_IN = (Language.bn, "Bengali (India)")

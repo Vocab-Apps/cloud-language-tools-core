@@ -114,6 +114,13 @@ class OpenAIService(cloudlanguagetools.service.Service):
         result = []
 
         supported_languages = [
+            AudioLanguage.af_ZA,
+            AudioLanguage.ar_XA,
+            AudioLanguage.hy_AM,
+            AudioLanguage.az_AZ,
+            AudioLanguage.be_BY,
+
+
             AudioLanguage.en_US,
             AudioLanguage.fr_FR,
         ]

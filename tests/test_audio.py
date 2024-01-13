@@ -432,3 +432,7 @@ class TestAudio(unittest.TestCase):
 
     def test_elevenlabs_korean(self):
         self.verify_service_korean(Service.ElevenLabs)
+
+    def test_openai_english(self):
+        source_text = 'This is the best restaurant in town.'
+        self.verify_service_audio_language(source_text, Service.OpenAI, AudioLanguage.en_US, 'en-US')

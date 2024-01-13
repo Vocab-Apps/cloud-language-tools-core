@@ -1,16 +1,62 @@
 import openai
-import pprint
 import logging
 import tempfile
-import pydub
+from typing import List
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import cloudlanguagetools.options
-import cloudlanguagetools.transliterationlanguage
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_TTS_MODEL = 'tts-1-hd'
+DEFAULT_TTS_SPEED = 1.0
+
+class OpenAIVoice(cloudlanguagetools.ttsvoice.TtsVoice):
+    def __init__(self, name: str, 
+                audio_language: cloudlanguagetools.languages.AudioLanguage,
+                gender: cloudlanguagetools.constants.Gender):
+        self.name = name
+        self.gender = gender
+        self.audio_language = audio_language
+        self.service = cloudlanguagetools.constants.Service.OpenAI
+        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
+
+    def get_voice_key(self):
+        return {
+            'name': self.name,
+            'language': self.audio_language.name            
+        }
+
+    def get_voice_shortname(self):
+        return self.name
+
+    def get_options(self):
+        return {
+            'speed' : {
+                'type': cloudlanguagetools.options.ParameterType.number.name,
+                'min': 0.25,
+                'max': 4.0,
+                'default': DEFAULT_TTS_SPEED
+            },
+            'model': {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [
+                    'tts-1-hd',
+                    'tts-1',
+                ],
+                'default': DEFAULT_TTS_MODEL
+            },
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [
+                    cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.ogg_opus.name,
+                ],
+                'default': cloudlanguagetools.options.AudioFormat.mp3.name
+            }
+        }
 
 class OpenAIService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -69,4 +115,44 @@ class OpenAIService(cloudlanguagetools.service.Service):
         audio_file= open(filepath, "rb")
         transcript = openai.Audio.transcribe("whisper-1", audio_file)
         return transcript['text']
+    
+    
+    def get_tts_voice_list(self) -> List[OpenAIVoice]:
+        result = []
+        voice_names = [
+            'alloy',
+            'echo', 
+            'fable', 
+            'onyx', 
+            'nova', 
+            'shimmer'
+        ]
+        for audio_language in [cloudlanguagetools.languages.AudioLanguage.en_US]:
+            result.extend([
+                OpenAIVoice('alloy', audio_language, cloudlanguagetools.constants.Gender.Female)
+            ])
+        return result
 
+    def get_tts_audio(self, text, voice_key, options):
+        # https://platform.openai.com/docs/guides/text-to-speech
+        # https://platform.openai.com/docs/api-reference/audio/createSpeech?lang=python
+        
+        output_temp_file = tempfile.NamedTemporaryFile()
+
+        model = options.get('model', 'tts-1-hd')
+        speed = options.get('speed', DEFAULT_TTS_SPEED)
+        response_format = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, 
+            cloudlanguagetools.options.AudioFormat.mp3.name)
+        if response_format == cloudlanguagetools.options.AudioFormat.ogg_opus.name:
+            response_format = 'opus'
+
+        response = openai.audio.speech.create(
+            model=model,
+            voice=voice_key['name'],
+            input=text,
+            response_format=response_format,
+            speed=speed
+        )
+        response.stream_to_file(output_temp_file.name)
+
+        return output_temp_file

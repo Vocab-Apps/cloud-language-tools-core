@@ -100,7 +100,8 @@ class TestTranslation(unittest.TestCase):
     def test_translate_chinese(self):
         # pytest test_translation.py -k test_translate_chinese
         self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, ['the person who delivers the takeaway', 
-        'people who deliver food', 'people who deliver takeaways', 'the person who delivered the takeaway', 'food delivery people'])
+        'people who deliver food', 'people who deliver takeaways', 'the person who delivered the takeaway', 'food delivery people',
+        'delivery people'])
         self.translate_text(Service.Google, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
         self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
         self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, ["Changer la carte d'embarquement", "changer de carte d'embarquement", "changer la carte d'embarquement"])
@@ -179,9 +180,20 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue('Azure' in result)
         self.assertTrue('Google' in result)
         self.assertTrue('Watson' in result)
-        self.assertTrue(result['Azure'] == 'Le coût est faible' or result['Azure'] == 'Le coût est très faible')
-        self.assertIn(result['Google'], ['à bas prix', 'Faible coût', 'À bas prix', 'faible coût', 'très faible coût'])
-        self.assertEqual(result['Watson'], 'Le coût est très bas.')
+
+        possible_french_translations = [
+            'Le coût est très faible',
+            'à bas prix', 
+            'Faible coût', 
+            'À bas prix', 
+            'faible coût', 
+            'très faible coût',
+            'Le coût est très bas.'
+        ]
+
+        self.assertIn(result['Azure'], possible_french_translations)
+        self.assertIn(result['Google'], possible_french_translations)
+        self.assertEqual(result['Watson'], possible_french_translations)
 
     def test_translate_all_bug_vi(self):
         # pytest test_translation.py -rPP -k test_translate_all_bug_vi

@@ -1,6 +1,7 @@
 import openai
 import logging
 import tempfile
+import pydub
 from typing import List
 
 import cloudlanguagetools.service

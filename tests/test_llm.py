@@ -42,12 +42,13 @@ class TestTranslation(unittest.TestCase):
                       ])
 
     def test_full_query(self):
+        # pytest --log-cli-level=DEBUG tests/test_llm.py -k test_full_query
         messages = [
                 {"role": "system", "content": "You are a friendly assistant who will translate languages"},
                 {"role": "user", "content": "translate into english: 成本很低"},
         ]
         response = self.manager.openai_full_query(messages)
-        new_message = response['choices'][0]['message']
+        new_message = response.choices[0].message
         # pprint.pprint(new_message)
         messages.append(new_message)
         messages.append({
@@ -57,9 +58,9 @@ class TestTranslation(unittest.TestCase):
         pprint.pprint(messages)
         response = self.manager.openai_full_query(messages)
         pprint.pprint(response)
-        new_message = response['choices'][0]['message']
+        new_message = response.choices[0].message
         pprint.pprint(new_message)
-        sanitized_output = self.sanitize_text(new_message['content'])
+        sanitized_output = self.sanitize_text(new_message.content)
         self.assertTrue(self.sanitize_text('coût') in sanitized_output, f'output: [{sanitized_output}]')
         self.assertTrue(self.sanitize_text('faible') in sanitized_output or self.sanitize_text('bas') in sanitized_output, 
             f'output: [{sanitized_output}]')

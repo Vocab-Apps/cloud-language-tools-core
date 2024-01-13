@@ -183,7 +183,8 @@ class TestDictionaryLookup(unittest.TestCase):
         lookup_option = definitions_lookup_options[0]
 
         result = self.manager.get_dictionary_lookup('boulangerie', service.name, lookup_option.get_lookup_key())
-        self.assertEqual(result, ['bakery'])
+        expected_result = ['bakery', 'baked goods', 'baked', 'baking']
+        self.assertEqual(result, expected_result)
 
 
     def test_azure_notfound(self):

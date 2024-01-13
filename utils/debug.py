@@ -456,7 +456,7 @@ def cereproc_authentication():
 
     print(response.json())
 
-    access_token = response.json()['access_token']
+    access_token = response.json().access_token
 
     voices_url = 'https://api.cerevoice.com/v2/voices'
 
@@ -778,15 +778,24 @@ def test_wenlin_lookup():
     print(lookup_result)    
 
 def openai_test():
-    import openai
+    from openai import AzureOpenAI
+    
+    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    azure_endpoint=azure_openai_config['azure_endpoint'],
+    api_version="2023-05-15",
+    api_key=azure_openai_config['azure_api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'])
 
     # Load your API key from an environment variable or secret management service
-    openai.api_key = os.getenv("OPENAI_API_KEY")
 
     list_models = False
     if list_models:
-        models = openai.Model.list()
-        model_id_list = [model['id'] for model in models['data']]
+        models = client.models.list()
+        model_id_list = [model['id'] for model in models.data]
         print(f'models: {model_id_list}')
 
 
@@ -848,153 +857,169 @@ Please put Cantonese text in Yue table.
 
         # https://platform.openai.com/docs/guides/chat
         # https://platform.openai.com/docs/guides/chat/introduction
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=messages
-        )    
+        response = client.chat.completions.create(model="gpt-3.5-turbo",
+        messages=messages)    
         print(response)
-        print(response['choices'][0]['message']['content'])
+        print(response.choices[0].message.content)
 
 def microsoft_openai_test():
     #Note: The openai-python library support for Azure OpenAI is in preview.
     import os
-    import openai
+    from openai import AzureOpenAI
+    
+    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    azure_endpoint=azure_openai_config['azure_endpoint'],
+    api_version="2023-05-15",
+    api_key=azure_openai_config['azure_api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'])
 
     azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
 
-    openai.api_type = "azure"
-    openai.api_base = azure_openai_config['azure_endpoint']
-    openai.api_version = "2023-05-15"
-    openai.api_key = azure_openai_config['azure_api_key']
 
     deployment_name=azure_openai_config['azure_deployment_name'] #This will correspond to the custom name you chose for your deployment when you deployed a model. 
 
-    response = openai.ChatCompletion.create(
-        engine=deployment_name, # engine = "deployment_name".
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Does Azure OpenAI support customer managed keys?"},
-            {"role": "assistant", "content": "Yes, customer managed keys are supported by Azure OpenAI."},
-            {"role": "user", "content": "Do other Azure Cognitive Services support this too?"}
-        ]
-    )
+    response = client.chat.completions.create(model=deployment_name, # engine = "deployment_name".
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Does Azure OpenAI support customer managed keys?"},
+        {"role": "assistant", "content": "Yes, customer managed keys are supported by Azure OpenAI."},
+        {"role": "user", "content": "Do other Azure Cognitive Services support this too?"}
+    ])
 
     print(response)
-    print(response['choices'][0]['message']['content'])    
+    print(response.choices[0].message.content)    
 
 def openai_functioncalls_simple_example():
-    import openai
+    from openai import AzureOpenAI
+    
+    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    azure_endpoint=azure_openai_config['azure_endpoint'],
+    api_version="2023-05-15",
+    api_key=azure_openai_config['azure_api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'])
 
     azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
 
-    openai.api_key = azure_openai_config['api_key']
 
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "What's the weather in Miami?"},
-        ],
-        functions= [
-            {
-                'name': "getCityWeather",
-                'description': "Get the weather in a given city",
-                'parameters': {
-                    'type': "object",
-                    'properties': {
-                    'city': { 'type': "string", 'description': "The city" },
-                    'unit': { 'type': "string", 'enum': ["C", "F"] },
-                    },
-                    'required': ["city"],
+    response = client.chat.completions.create(model="gpt-3.5-turbo-0613",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What's the weather in Miami?"},
+    ],
+    functions= [
+        {
+            'name': "getCityWeather",
+            'description': "Get the weather in a given city",
+            'parameters': {
+                'type': "object",
+                'properties': {
+                'city': { 'type': "string", 'description': "The city" },
+                'unit': { 'type': "string", 'enum': ["C", "F"] },
                 },
+                'required': ["city"],
             },
-        ],
-        function_call= "auto"
-    )
+        },
+    ],
+    function_call= "auto")
 
     # print(response)
     # print(response['choices'][0]['message']['content'])        
     pprint.pprint(response)
 
 def openai_function_calls_telegram_bot():
-    import openai
+    from openai import AzureOpenAI
+    
+    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    azure_endpoint=azure_openai_config['azure_endpoint'],
+    api_version="2023-05-15",
+    api_key=azure_openai_config['azure_api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'])
 
     azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
 
-    openai.api_key = azure_openai_config['api_key']
 
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
-            # {"role": "system", "content": "When I give you a French sentence, I want you to translate it to English, and also pronounce the audio."},
-            # {"role": "system", "content": "When I give you an English sentence, I want you to translate it to French, and also pronounce the audio."},
-            # {"role": "system", "content": "When I give you a French sentence, I want you to translate it to English"},
-            # {"role": "system", "content": "When I give you an English sentence, I want you to translate it to French"},            
-            {"role": "system", "content": "When I give you a French sentence, I want you to pronounce it"},
-            {"role": "system", "content": "When I give you an English sentence, I want you to pronounce it"},
-            {"role": "user", "content": "Bonjour mes amis"},
-            # {"role": "user", "content": "Please also translate this sentence to English"},
-        ],
-        functions= [
-            # {
-            #     'name': "translate",
-            #     'description': "Translate given text from one language to another",
-            #     'parameters': {
-            #         'type': "object",
-            #         'properties': {
-            #         'text': { 'type': "string", 'description': "The input text the user wishes to translate" },
-            #         'source_language': { 'type': "string", 'description': 'the language to translate from', 'enum': ['fr', 'en'] },
-            #         'target_language': { 'type': "string", 'description': 'the language to translate to', 'enum': ['fr', 'en'] },
-            #         },
-            #         'required': ['text', 'source_language', 'target_language'],
-            #     },
-            # },
-            # {
-            #     'name': "audio",
-            #     'description': "Generate audio to pronounce given text, using text to speech",
-            #     'parameters': {
-            #         'type': "object",
-            #         'properties': {
-            #         'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
-            #         'language': { 'type': "string", 'description': 'the language of the input text to be pronounced', 'enum': ['fr', 'en'] },
-            #         },
-            #         'required': ['text', 'language'],
-            #     },
-            # },            
-            # {
-            #     'name': "translate_and_audio",
-            #     'description': "Translate a sentence, and then pronounce it",
-            #     'parameters': {
-            #         'type': "object",
-            #         'properties': {
-            #         'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
-            #         'source_language': { 'type': "string", 'description': 'the language of the input text to be translated', 'enum': ['fr', 'en'] },
-            #         'target_language': { 'type': "string", 'description': 'the target language to pronounce in', 'enum': ['fr', 'en'] },
-            #         },
-            #         'required': ['text', 'source_language', 'target_language'],
-            #     },
-            # },
-            {
-                'name': "process_sentence",
-                'description': "Process a sentence, by translating it and generating audio, depending on parameters",
-                'parameters': {
-                    'type': "object",
-                    'properties': {
-                        'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
-                        'source_language': { 'type': "string", 'description': 'the language of the input text to be translated', 'enum': ['fr', 'en'] },
-                        'target_language': { 'type': "string", 'description': 'the target language to pronounce in', 'enum': ['fr', 'en'] },
-                        'translate': { 'type': "boolean", 'description': 'whether to translate the input text' },
-                        'audio': { 'type': "boolean", 'description': 'whether to generate audio for the input text' },
-                    },
-                    'required': ['text', 'source_language', 'target_language', 'translate', 'audio'],
+    response = client.chat.completions.create(model="gpt-3.5-turbo-0613",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
+        # {"role": "system", "content": "When I give you a French sentence, I want you to translate it to English, and also pronounce the audio."},
+        # {"role": "system", "content": "When I give you an English sentence, I want you to translate it to French, and also pronounce the audio."},
+        # {"role": "system", "content": "When I give you a French sentence, I want you to translate it to English"},
+        # {"role": "system", "content": "When I give you an English sentence, I want you to translate it to French"},            
+        {"role": "system", "content": "When I give you a French sentence, I want you to pronounce it"},
+        {"role": "system", "content": "When I give you an English sentence, I want you to pronounce it"},
+        {"role": "user", "content": "Bonjour mes amis"},
+        # {"role": "user", "content": "Please also translate this sentence to English"},
+    ],
+    functions= [
+        # {
+        #     'name': "translate",
+        #     'description': "Translate given text from one language to another",
+        #     'parameters': {
+        #         'type': "object",
+        #         'properties': {
+        #         'text': { 'type': "string", 'description': "The input text the user wishes to translate" },
+        #         'source_language': { 'type': "string", 'description': 'the language to translate from', 'enum': ['fr', 'en'] },
+        #         'target_language': { 'type': "string", 'description': 'the language to translate to', 'enum': ['fr', 'en'] },
+        #         },
+        #         'required': ['text', 'source_language', 'target_language'],
+        #     },
+        # },
+        # {
+        #     'name': "audio",
+        #     'description': "Generate audio to pronounce given text, using text to speech",
+        #     'parameters': {
+        #         'type': "object",
+        #         'properties': {
+        #         'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
+        #         'language': { 'type': "string", 'description': 'the language of the input text to be pronounced', 'enum': ['fr', 'en'] },
+        #         },
+        #         'required': ['text', 'language'],
+        #     },
+        # },            
+        # {
+        #     'name': "translate_and_audio",
+        #     'description': "Translate a sentence, and then pronounce it",
+        #     'parameters': {
+        #         'type': "object",
+        #         'properties': {
+        #         'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
+        #         'source_language': { 'type': "string", 'description': 'the language of the input text to be translated', 'enum': ['fr', 'en'] },
+        #         'target_language': { 'type': "string", 'description': 'the target language to pronounce in', 'enum': ['fr', 'en'] },
+        #         },
+        #         'required': ['text', 'source_language', 'target_language'],
+        #     },
+        # },
+        {
+            'name': "process_sentence",
+            'description': "Process a sentence, by translating it and generating audio, depending on parameters",
+            'parameters': {
+                'type': "object",
+                'properties': {
+                    'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
+                    'source_language': { 'type': "string", 'description': 'the language of the input text to be translated', 'enum': ['fr', 'en'] },
+                    'target_language': { 'type': "string", 'description': 'the target language to pronounce in', 'enum': ['fr', 'en'] },
+                    'translate': { 'type': "boolean", 'description': 'whether to translate the input text' },
+                    'audio': { 'type': "boolean", 'description': 'whether to generate audio for the input text' },
                 },
-            },            
-        ],
-        function_call= "auto"
-    )
+                'required': ['text', 'source_language', 'target_language', 'translate', 'audio'],
+            },
+        },            
+    ],
+    function_call= "auto")
 
     # print(response)
     # print(response['choices'][0]['message']['content'])        
@@ -1002,43 +1027,50 @@ def openai_function_calls_telegram_bot():
 
 
 def openai_detect_language():
-    import openai
+    from openai import AzureOpenAI
+    
+    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    azure_endpoint=azure_openai_config['azure_endpoint'],
+    api_version="2023-05-15",
+    api_key=azure_openai_config['azure_api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'])
 
     manager = get_manager()
 
     openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
-    openai.api_key = openai_config['api_key']
 
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
-            {"role": "system", "content": "Detect the language of the sentence provided"},
-            {"role": "user", "content": "Bonjour mes amis"},
-        ],
-        functions= [
-            {
-                'name': "detect_language",
-                'description': "Detect the language of input text",
-                'parameters': {
-                    'type': "object",
-                    'properties': {
-                        'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
-                    },
-                    'required': ['text'],
+    response = client.chat.completions.create(model="gpt-3.5-turbo-0613",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
+        {"role": "system", "content": "Detect the language of the sentence provided"},
+        {"role": "user", "content": "Bonjour mes amis"},
+    ],
+    functions= [
+        {
+            'name': "detect_language",
+            'description': "Detect the language of input text",
+            'parameters': {
+                'type': "object",
+                'properties': {
+                    'text': { 'type': "string", 'description': "The input text the user wishes to generate audio for" },
                 },
-            },            
-        ],
-        function_call= "auto"
-    )
+                'required': ['text'],
+            },
+        },            
+    ],
+    function_call= "auto")
 
     def detect_language(text):
         return manager.detect_language([text])
 
     pprint.pprint(response)    
 
-    message = response['choices'][0]['message']
+    message = response.choices[0].message
     if message['function_call'] != None:
         function_name = message['function_call']['name']
         arguments = json.loads(message["function_call"]["arguments"])
@@ -1051,13 +1083,22 @@ def openai_detect_language():
     # print(response['choices'][0]['message']['content'])        
 
 def openai_guess_from_to_language():
-    import openai
+    from openai import AzureOpenAI
+    
+    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    azure_endpoint=azure_openai_config['azure_endpoint'],
+    api_version="2023-05-15",
+    api_key=azure_openai_config['azure_api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'])
     import pydantic
 
     manager = get_manager()
 
     openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
-    openai.api_key = openai_config['api_key']
 
 
     from typing import List
@@ -1072,27 +1113,25 @@ def openai_guess_from_to_language():
 
     pprint.pprint(TranslateQuery.model_json_schema())
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
-            {"role": "system", "content": "Translate from cantonese to french, using watson"},
-            # {"role": "user", "content": "Bonjour mes amis"},
-            {"role": "user", "content": "挨向後"},
-        ],
-        functions= [
-            {
-                'name': "translate",
-                'description': "Translate input text from source language to target language",
-                'parameters': TranslateQuery.model_json_schema(),
-            },            
-        ],
-        function_call= "auto"
-    )
+    response = client.chat.completions.create(model="gpt-3.5-turbo-0613",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
+        {"role": "system", "content": "Translate from cantonese to french, using watson"},
+        # {"role": "user", "content": "Bonjour mes amis"},
+        {"role": "user", "content": "挨向後"},
+    ],
+    functions= [
+        {
+            'name': "translate",
+            'description': "Translate input text from source language to target language",
+            'parameters': TranslateQuery.model_json_schema(),
+        },            
+    ],
+    function_call= "auto")
 
     pprint.pprint(response)    
 
-    message = response['choices'][0]['message']
+    message = response.choices[0].message
     if message['function_call'] != None:
         function_name = message['function_call']['name']
         arguments = json.loads(message["function_call"]["arguments"])
@@ -1100,12 +1139,21 @@ def openai_guess_from_to_language():
         print(f'translate query: {translate_query}')    
 
 def openai_audio():
-    import openai
+    from openai import AzureOpenAI
+    
+    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    azure_endpoint=azure_openai_config['azure_endpoint'],
+    api_version="2023-05-15",
+    api_key=azure_openai_config['azure_api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=azure_openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'],
+    api_key=openai_config['api_key'])
 
     manager = get_manager()
 
     openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
-    openai.api_key = openai_config['api_key']
 
     speech_file_path = 'output.mp3'
     response = openai.audio.speech.create(

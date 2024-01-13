@@ -1,4 +1,5 @@
-import openai
+from openai import OpenAI
+
 import logging
 import tempfile
 import pydub
@@ -58,7 +59,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
 
     def configure(self, config):
         self.api_key = config['api_key']
-        openai.api_key = self.api_key
+        self.client = OpenAI(api_key=self.api_key)
 
     def single_prompt(self, prompt, max_tokens):
         messages = [
@@ -66,33 +67,25 @@ class OpenAIService(cloudlanguagetools.service.Service):
         ]        
 
         if max_tokens != None:
-            response = openai.ChatCompletion.create(
-                model=self.chatbot_model,
-                messages=messages,
-                max_tokens=max_tokens
-            )    
+            response = self.client.chat.completions.create(model=self.chatbot_model,
+            messages=messages,
+            max_tokens=max_tokens)    
         else:
-            response = openai.ChatCompletion.create(
-                model=self.chatbot_model,
-                messages=messages
-            )    
+            response = self.client.chat.completions.create(model=self.chatbot_model,
+            messages=messages)    
         logger.debug(pprint.pformat(response))
-        tokens_used = response['usage']['total_tokens']
-        response_text = response['choices'][0]['message']['content']
+        tokens_used = response.usage.total_tokens
+        response_text = response.choices[0].message.content
         return response_text, tokens_used
 
     def full_query(self, messages, max_tokens):
         if max_tokens != None:
-            response = openai.ChatCompletion.create(
-                model=self.chatbot_model,
-                messages=messages,
-                max_tokens=max_tokens
-            )    
+            response = self.client.chat.completions.create(model=self.chatbot_model,
+            messages=messages,
+            max_tokens=max_tokens)    
         else:
-            response = openai.ChatCompletion.create(
-                model=self.chatbot_model,
-                messages=messages
-            )    
+            response = self.client.chat.completions.create(model=self.chatbot_model,
+            messages=messages)    
         logger.debug(pprint.pformat(response))
         return response
 
@@ -107,8 +100,8 @@ class OpenAIService(cloudlanguagetools.service.Service):
 
         logger.debug(f'opening file {filepath}')
         audio_file= open(filepath, "rb")
-        transcript = openai.Audio.transcribe("whisper-1", audio_file)
-        return transcript['text']
+        transcript = self.client.audio.transcribe("whisper-1", audio_file)
+        return transcript.text
     
     
     def get_tts_voice_list(self) -> List[OpenAIVoice]:

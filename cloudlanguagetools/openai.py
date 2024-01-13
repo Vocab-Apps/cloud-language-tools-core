@@ -119,17 +119,15 @@ class OpenAIService(cloudlanguagetools.service.Service):
     
     def get_tts_voice_list(self) -> List[OpenAIVoice]:
         result = []
-        voice_names = [
-            'alloy',
-            'echo', 
-            'fable', 
-            'onyx', 
-            'nova', 
-            'shimmer'
-        ]
+
         for audio_language in [cloudlanguagetools.languages.AudioLanguage.en_US]:
             result.extend([
-                OpenAIVoice('alloy', audio_language, cloudlanguagetools.constants.Gender.Female)
+                OpenAIVoice('alloy', audio_language, cloudlanguagetools.constants.Gender.Female),
+                OpenAIVoice('echo', audio_language, cloudlanguagetools.constants.Gender.Male),
+                OpenAIVoice('fable', audio_language, cloudlanguagetools.constants.Gender.Female),
+                OpenAIVoice('onyx', audio_language, cloudlanguagetools.constants.Gender.Male),
+                OpenAIVoice('nova', audio_language, cloudlanguagetools.constants.Gender.Female),
+                OpenAIVoice('shimmer', audio_language, cloudlanguagetools.constants.Gender.Female),
             ])
         return result
 

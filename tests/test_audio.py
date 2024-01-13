@@ -436,3 +436,7 @@ class TestAudio(unittest.TestCase):
     def test_openai_english(self):
         source_text = 'This is the best restaurant in town.'
         self.verify_service_audio_language(source_text, Service.OpenAI, AudioLanguage.en_US, 'en-US')
+
+    def test_openai_french(self):
+        source_text = self.FRENCH_INPUT_TEXT
+        self.verify_service_audio_language(source_text, Service.OpenAI, AudioLanguage.fr_FR, 'fr-FR')

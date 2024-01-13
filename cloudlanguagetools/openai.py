@@ -113,7 +113,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
 
         supported_languages = [
             cloudlanguagetools.languages.AudioLanguage.en_US,
-            cloudlanguagetools.languages.AudioLanguage.en_US,
+            cloudlanguagetools.languages.AudioLanguage.fr_FR,
         ]
 
         for audio_language in supported_languages:

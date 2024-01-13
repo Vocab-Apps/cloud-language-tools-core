@@ -8,6 +8,8 @@ import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import cloudlanguagetools.options
 
+from cloudlanguagetools.languages import AudioLanguage
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_TTS_SPEED = 1.0
@@ -112,8 +114,8 @@ class OpenAIService(cloudlanguagetools.service.Service):
         result = []
 
         supported_languages = [
-            cloudlanguagetools.languages.AudioLanguage.en_US,
-            cloudlanguagetools.languages.AudioLanguage.fr_FR,
+            AudioLanguage.en_US,
+            AudioLanguage.fr_FR,
         ]
 
         for audio_language in supported_languages:

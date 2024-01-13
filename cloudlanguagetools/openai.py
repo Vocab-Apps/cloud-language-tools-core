@@ -194,7 +194,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
         if response_format == cloudlanguagetools.options.AudioFormat.ogg_opus.name:
             response_format = 'opus'
 
-        response = openai.audio.speech.create(
+        response = self.client.audio.speech.create(
             model='tts-1-hd',
             voice=voice_key['name'],
             input=text,

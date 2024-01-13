@@ -350,7 +350,7 @@ class AudioLanguage(enum.Enum):
     ms_MY = (Language.ms, "Malay")
     mt_MT = (Language.mt, "Maltese (Malta)")
     my_MM = (Language.my, "Burmese (Myanmar [Burma])")
-    nb_NO = (Language.nb, "Norwegian")
+    nb_NO = (Language.nb, "Norwegian (Norway)")
     ne_NP = (Language.ne, "Nepali (Nepal)")
     nl_BE = (Language.nl, "Dutch (Belgium)")
     nl_NL = (Language.nl, "Dutch (Netherlands)")

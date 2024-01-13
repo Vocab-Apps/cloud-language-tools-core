@@ -119,6 +119,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
             AudioLanguage.hy_AM,
             AudioLanguage.az_AZ,
             AudioLanguage.be_BY,
+            AudioLanguage.bs_BA,
 
 
             AudioLanguage.en_US,

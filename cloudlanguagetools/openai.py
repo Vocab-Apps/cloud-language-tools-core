@@ -100,7 +100,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
 
         logger.debug(f'opening file {filepath}')
         audio_file= open(filepath, "rb")
-        transcript = self.client.audio.transcribe("whisper-1", audio_file)
+        transcript = self.client.audio.transcriptions.create(model="whisper-1", file=audio_file)
         return transcript.text
     
     

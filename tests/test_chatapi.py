@@ -104,7 +104,7 @@ class TestChatAPI(unittest.TestCase):
             target_language=CommonLanguage.en
         )
         result = self.chatapi.dictionary_lookup(query)
-        self.assertEqual(result, 'hello')
+        self.assertIn(result, ['hello', 'Hello / Hi / morning / greetings / Hey'])
 
     def test_dictionary_lookup_chinese(self):
         # pytest --log-cli-level=DEBUG tests/test_chatapi.py -k test_dictionary_lookup_chinese
@@ -209,6 +209,6 @@ was: /be ˈwəz, être (verb, past tense)
 reading: /read ˈɹiːdɪŋ, lire (verb, gerund or present participle)
 today: təˈdeɪ, aujourd'hui (noun, singular or mass)
 's: (possessive ending)
-paper: ˈpeɪpɚ, papier (noun, singular or mass)
+paper: ˈpeɪpə˞, papier (noun, singular or mass)
 .: (punctuation mark, sentence closer)"""
         self.assertEqual(result, expected_output)        

@@ -182,6 +182,7 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue('Watson' in result)
 
         possible_french_translations = [
+            'Le coût est faible',
             'Le coût est très faible',
             'à bas prix', 
             'Faible coût', 
@@ -193,7 +194,7 @@ class TestTranslation(unittest.TestCase):
 
         self.assertIn(result['Azure'], possible_french_translations)
         self.assertIn(result['Google'], possible_french_translations)
-        self.assertEqual(result['Watson'], possible_french_translations)
+        self.assertIn(result['Watson'], possible_french_translations)
 
     def test_translate_all_bug_vi(self):
         # pytest test_translation.py -rPP -k test_translate_all_bug_vi

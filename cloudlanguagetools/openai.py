@@ -10,7 +10,6 @@ import cloudlanguagetools.options
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TTS_MODEL = 'tts-1-hd'
 DEFAULT_TTS_SPEED = 1.0
 
 class OpenAIVoice(cloudlanguagetools.ttsvoice.TtsVoice):
@@ -39,14 +38,6 @@ class OpenAIVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'min': 0.25,
                 'max': 4.0,
                 'default': DEFAULT_TTS_SPEED
-            },
-            'model': {
-                'type': cloudlanguagetools.options.ParameterType.list.name,
-                'values': [
-                    'tts-1-hd',
-                    'tts-1',
-                ],
-                'default': DEFAULT_TTS_MODEL
             },
             cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
                 'type': cloudlanguagetools.options.ParameterType.list.name,
@@ -120,7 +111,12 @@ class OpenAIService(cloudlanguagetools.service.Service):
     def get_tts_voice_list(self) -> List[OpenAIVoice]:
         result = []
 
-        for audio_language in [cloudlanguagetools.languages.AudioLanguage.en_US]:
+        supported_languages = [
+            cloudlanguagetools.languages.AudioLanguage.en_US,
+            cloudlanguagetools.languages.AudioLanguage.en_US,
+        ]
+
+        for audio_language in supported_languages:
             result.extend([
                 OpenAIVoice('alloy', audio_language, cloudlanguagetools.constants.Gender.Female),
                 OpenAIVoice('echo', audio_language, cloudlanguagetools.constants.Gender.Male),
@@ -137,7 +133,6 @@ class OpenAIService(cloudlanguagetools.service.Service):
         
         output_temp_file = tempfile.NamedTemporaryFile()
 
-        model = options.get('model', 'tts-1-hd')
         speed = options.get('speed', DEFAULT_TTS_SPEED)
         response_format = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, 
             cloudlanguagetools.options.AudioFormat.mp3.name)
@@ -145,7 +140,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
             response_format = 'opus'
 
         response = openai.audio.speech.create(
-            model=model,
+            model='tts-1-hd',
             voice=voice_key['name'],
             input=text,
             response_format=response_format,

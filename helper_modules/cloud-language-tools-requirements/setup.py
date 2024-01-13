@@ -5,7 +5,7 @@ from setuptools import setup
 # twine upload dist/*
 
 setup(name='clt_requirements',
-      version='1.0',
+      version='1.1',
       description='Helper module for Cloud Language Tools, additional dependencies',
       url='https://github.com/Language-Tools/cloud-language-tools-core',
       author='Luc',
@@ -28,7 +28,7 @@ setup(name='clt_requirements',
           'jieba',
           'cryptography',
           'pydub',
-          'openai',
+          'openai>=1.7.2',
           'pydantic',
           'StrEnum',
           'cachetools'

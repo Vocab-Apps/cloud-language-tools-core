@@ -1099,6 +1099,23 @@ def openai_guess_from_to_language():
         translate_query = TranslateQuery(**arguments)
         print(f'translate query: {translate_query}')    
 
+def openai_audio():
+    import openai
+
+    manager = get_manager()
+
+    openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+    openai.api_key = openai_config['api_key']
+
+    speech_file_path = 'output.mp3'
+    response = openai.audio.speech.create(
+        model="tts-1",
+        voice="alloy",
+        input="The quick brown fox jumped over the lazy dog."
+    )
+    response.stream_to_file(speech_file_path)
+
+
 
 if __name__ == '__main__':
     logger = logging.getLogger()
@@ -1147,7 +1164,7 @@ if __name__ == '__main__':
     # test_debounce()
     # load_vocalware_voices()
     # thai_tokenization()
-    test_get_language_data()
+    # test_get_language_data()
     # test_get_language_data_redis()
     # test_wenlin_lookup()
     # openai_test()
@@ -1155,3 +1172,4 @@ if __name__ == '__main__':
     # openai_functioncalls_simple_example()
     # openai_detect_language()
     # openai_guess_from_to_language()
+    openai_audio()

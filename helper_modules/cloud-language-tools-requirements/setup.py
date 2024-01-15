@@ -5,7 +5,7 @@ from setuptools import setup
 # twine upload dist/*
 
 setup(name='clt_requirements',
-      version='1.1',
+      version='1.2',
       description='Helper module for Cloud Language Tools, additional dependencies',
       url='https://github.com/Language-Tools/cloud-language-tools-core',
       author='Luc',
@@ -18,7 +18,7 @@ setup(name='clt_requirements',
       license='GPL',
       packages=['clt_requirements'],
       install_requires=[
-          'azure-cognitiveservices-speech==1.23.0',
+          'azure-cognitiveservices-speech',
           'requests',
           'google-cloud-texttospeech',
           'google-cloud-translate',

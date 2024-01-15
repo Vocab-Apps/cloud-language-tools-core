@@ -1,5 +1,5 @@
 clt_wenlin
-clt_requirements>=0.8
+clt_requirements>=1.2
 pinyin_jyutping>=0.9
 StrEnum
 cachetools

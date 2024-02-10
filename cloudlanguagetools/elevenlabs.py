@@ -99,6 +99,12 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         }
 
         response = requests.post(url, json=data, headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
+        if response.status_code != 200:
+            error_message = f'ElevenLabs: error processing TTS request: {response.status_code} {response.text}'
+            logger.error(error_message)
+            raise cloudlanguagetools.errors.RequestError(error_message)
+
+
         response.raise_for_status()
         
         output_temp_file = tempfile.NamedTemporaryFile()

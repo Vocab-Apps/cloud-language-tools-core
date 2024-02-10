@@ -409,8 +409,10 @@ class TestAudio(unittest.TestCase):
         source_text = 'This is the best restaurant in town.'
         voice_list = self.get_voice_list_service_audio_language(Service.ElevenLabs, AudioLanguage.en_US)
         pprint.pprint(voice_list)
-        selected_voice_candidates = [x for x in voice_list if x['voice_key']['voice_id'] == 'XB0fDUnXU5powFXDhCwa' \
-                                     and x['voice_key']['model_id'] == 'eleven_english_sts_v2']
+        # selected_voice_candidates = [x for x in voice_list if x['voice_key']['voice_id'] == 'XB0fDUnXU5powFXDhCwa' \
+        #                              and x['voice_key']['model_id'] == 'eleven_english_sts_v2']
+        # selected_voice_candidates = [x for x in voice_list if x['voice_name'] == 'Charlotte (Multilingual v2)']
+        selected_voice_candidates = [x for x in voice_list if x['voice_name'] == 'Charlotte (English v2)']
         voice = selected_voice_candidates[0]
         pprint.pprint(voice)
         self.verify_voice(voice, source_text, 'en-US')

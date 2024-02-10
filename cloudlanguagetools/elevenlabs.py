@@ -150,6 +150,11 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         response.raise_for_status()
         model_data = response.json()
+
+        # restrict to models that can do text to speech (elevenlabs introduced voice conversion)
+        model_data = [model for model in model_data if model['can_do_text_to_speech']]
+
+        #pprint.pprint(model_data)
         # model_data: 
         # [{'can_be_finetuned': True,
         # 'can_do_text_to_speech': True,
@@ -191,7 +196,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         for model in model_data:
             model_id = model['model_id']
             model_name = model['name']
-            model_short_name = model_name.replace('Eleven ', '').replace('v1', '').strip()
+            model_short_name = model_name.replace('Eleven ', '').strip()
             for language_record in model['languages']:
                 try:
                     language_id = language_record['language_id']

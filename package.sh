@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eoux pipefail
 
 # exit if parameter is not passed in
 if [ -z "$1" ]; then
@@ -20,6 +21,9 @@ git push origin ${GIT_TAG}
 source ~/secrets/python/twine.sh
 python setup.py sdist
 twine upload dist/*
+
+# wait for package to be updated on pypi
+python utils/wait_pypi_version_update.py --package cloudlanguagetools --version ${VERSION_NUMBER}
 
 # get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"

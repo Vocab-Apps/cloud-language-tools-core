@@ -1,0 +1,12 @@
+# this is the base image which contains all the requirements to run clt-core
+FROM python:3.11-slim-bookworm
+
+ARG CLT_REQUIREMENTS_VERSION
+# update packages
+RUN apt-get update -y && apt-get install -y libasound2 python3-pip git gnupg build-essential wget
+# required by Epitran module
+RUN wget https://github.com/festvox/flite/archive/refs/tags/v2.2.tar.gz && tar xvzf v2.2.tar.gz && cd flite-2.2 && ./configure && make && make install && cd testsuite && make lex_lookup && cp lex_lookup /usr/local/bin
+# update pip
+RUN pip3 install --upgrade pip
+# install clt_requirements
+RUN pip3 install clt-requirements==$CLT_REQUIREMENTS_VERSION

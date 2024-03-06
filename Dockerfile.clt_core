@@ -1,0 +1,4 @@
+# this image has all the pre-requisites
+FROM lucwastiaux/clt-requirements:1.5
+ARG CLT_CORE_VERSION
+RUN pip3 install cloudlanguagetools==$CLT_CORE_VERSION

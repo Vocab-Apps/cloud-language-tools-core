@@ -1,5 +1,4 @@
 import enum
-from strenum import StrEnum
 
 class Language(enum.Enum):
     af = ("Afrikaans")

@@ -6,7 +6,7 @@ from setuptools import setup
 
 
 setup(name='clt_requirements',
-      version='1.5',
+      version='1.6',
       description='Helper module for Cloud Language Tools, additional dependencies',
       url='https://github.com/Language-Tools/cloud-language-tools-core',
       author='Luc',
@@ -24,7 +24,7 @@ setup(name='clt_requirements',
         'google-cloud-translate',
         'boto3',
         'epitran==1.22',
-        'pythainlp[thai2romipa]',
+        'pythainlp[thai2rom,ipa]',
         'jieba',
         'cryptography',
         'pydub',

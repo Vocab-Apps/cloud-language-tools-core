@@ -21,7 +21,6 @@ source ~/secrets/python/twine.sh
 python setup.py sdist
 twine upload dist/*
 
-# build docker image
-export DOCKER_BUILDKIT=1
-docker build -t lucwastiaux/cloud-language-tools-core:${VERSION_NUMBER} --build-arg CLT_CORE_VERSION=${VERSION_NUMBER} -f Dockerfile.clt_core .
-docker push lucwastiaux/cloud-language-tools-core:${VERSION_NUMBER}
+# get script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+${SCRIPT_DIR}/build_clt_core_docker.sh ${VERSION_NUMBER}

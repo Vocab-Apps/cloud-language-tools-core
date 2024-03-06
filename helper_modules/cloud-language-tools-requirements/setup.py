@@ -4,11 +4,9 @@ from setuptools import setup
 # python setup.py sdist
 # twine upload dist/*
 
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
 
 setup(name='clt_requirements',
-      version='1.4',
+      version='1.5',
       description='Helper module for Cloud Language Tools, additional dependencies',
       url='https://github.com/Language-Tools/cloud-language-tools-core',
       author='Luc',
@@ -19,5 +17,21 @@ setup(name='clt_requirements',
       ],      
       license='GPL',
       packages=['clt_requirements'],
-      install_requires=requirements,
+      install_requires=[
+        'azure-cognitiveservices-speech',
+        'requests',
+        'google-cloud-texttospeech',
+        'google-cloud-translate',
+        'boto3',
+        'epitran==1.22',
+        'pythainlp[thai2romipa]',
+        'jieba',
+        'cryptography',
+        'pydub',
+        'openai>=1.7.2',
+        'pydantic',
+        'cachetools',
+        'clt_wenlin',
+        'pinyin_jyutping',
+      ],
       )

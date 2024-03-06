@@ -1,6 +1,4 @@
 pytest
-pytest-parallel
 pydub
 python-magic
 twine
-pytest-xdist

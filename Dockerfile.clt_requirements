@@ -9,4 +9,4 @@ RUN wget https://github.com/festvox/flite/archive/refs/tags/v2.2.tar.gz && tar x
 # update pip
 RUN pip3 install --upgrade pip
 # install clt_requirements
-RUN pip3 install clt-requirements==$CLT_REQUIREMENTS_VERSION
+RUN pip3 install --no-cache-dir clt-requirements==$CLT_REQUIREMENTS_VERSION && pip3 cache purge

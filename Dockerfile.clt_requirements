@@ -5,9 +5,9 @@ ARG CLT_REQUIREMENTS_VERSION
 # update packages
 RUN apt-get update -y && apt-get install -y libasound2 python3-pip git gnupg build-essential wget libssl-dev ca-certificates
 # azure speech sdk requires openssl 1.1.1
-RUN wget -O - https://www.openssl.org/source/openssl-1.1.1u.tar.gz | tar zxf - && \
+RUN wget -O - https://www.openssl.org/source/openssl-1.1.1w.tar.gz | tar zxf - && \
     cd openssl-1.1.1u && \
-    ./config --prefix=/usr/local && \
+    ./config \
     make -j $(nproc) && \
     make install_sw install_ssldirs && \
     ldconfig -v && \
@@ -20,3 +20,6 @@ RUN wget https://github.com/festvox/flite/archive/refs/tags/v2.2.tar.gz && tar x
 RUN pip3 install --upgrade pip
 # install clt_requirements
 RUN pip3 install --no-cache-dir clt-requirements==$CLT_REQUIREMENTS_VERSION && pip3 cache purge
+
+# inspecting this image
+# docker run --rm -it lucwastiaux/clt-requirements:1.6 /bin/bash

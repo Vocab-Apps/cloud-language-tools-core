@@ -28,3 +28,4 @@ ${SCRIPT_DIR}/build_clt_core_docker.sh ${VERSION_NUMBER}
 
 # run test using docker
 ${SCRIPT_DIR}/run_clt_docker.test.sh ${VERSION_NUMBER}
+

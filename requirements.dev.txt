@@ -3,3 +3,4 @@ pytest-xdist
 pydub
 python-magic
 twine
+bump

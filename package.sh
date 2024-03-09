@@ -1,11 +1,10 @@
 #!/bin/bash
 set -eoux pipefail
 
-VERSION_NUMBER=`bump`
+VERSION_NUMBER=`bump --major`
 echo "new version number is ${VERSION_NUMBER}"
 GIT_TAG=v${VERSION_NUMBER}
 
-sed -i "s/version='.*',/version='${VERSION_NUMBER}',/g" setup.py
 git commit -a -m "upgraded version to ${VERSION_NUMBER}"
 git push
 git tag -a ${GIT_TAG} -m "version ${GIT_TAG}"

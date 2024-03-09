@@ -30,4 +30,4 @@ ${SCRIPT_DIR}/run_clt_docker.test.sh ${VERSION_NUMBER}
 # print output
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-echo "cloud-language-tools-core version ${GREEN}${VERSION_NUMBER}${NC} passed tests."
+echo -e "cloud-language-tools-core version ${GREEN}${VERSION_NUMBER}${NC} passed tests."

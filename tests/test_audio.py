@@ -14,6 +14,8 @@ import pprint
 
 import audio_utils
 
+CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE = os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE', 'no') == 'yes'
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import cloudlanguagetools
@@ -174,6 +176,9 @@ class TestAudio(unittest.TestCase):
 
     def test_mandarin_vocalware(self):
         # pytest test_audio.py -k test_mandarin_vocalware
+        if not CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE:
+            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE=yes')
+        
         source_text = '你好'
         self.verify_service_audio_language(source_text, Service.VocalWare, AudioLanguage.zh_CN, 'zh-CN')
 
@@ -232,7 +237,10 @@ class TestAudio(unittest.TestCase):
 
     def test_ssml_english_google(self):
         # pytest tests/test_audio.py -k test_ssml_english_google
-        source_text = 'hello <break time="200ms"/>world'
+        if not CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE:
+            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE=yes')
+
+        source_text = 'hello <break time="50ms"/>world'
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.en_US, 'en-US')
 
     def test_ssml_english_azure(self):

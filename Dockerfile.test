@@ -1,6 +1,5 @@
 ARG CLT_CORE_VERSION
 FROM lucwastiaux/cloud-language-tools-core:${CLT_CORE_VERSION}
-RUN apt-get update -y && apt-get install -y libmagic1 ffmpeg
 COPY requirements.dev.txt ./
 RUN pip3 install --no-cache-dir -r requirements.dev.txt && pip3 cache purge
 COPY tests tests

@@ -260,6 +260,9 @@ class TestAudio(unittest.TestCase):
 
     def test_ssml_english_cereproc(self):
         # pytest test_audio.py -k test_ssml_english_cereproc
+        if not CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE:
+            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE=yes')
+
         source_text = 'hello <break time="200ms"/>my friends'
         self.verify_service_audio_language(source_text, Service.CereProc, AudioLanguage.en_GB, 'en-GB')
 

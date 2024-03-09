@@ -1,6 +1,6 @@
 # this image has all the pre-requisites
 FROM lucwastiaux/clt-requirements:1.6
 ARG CLT_CORE_VERSION
-COPY utils/wait_pypi_version_update.py .
-RUN python wait_pypi_version_update.py --package cloudlanguagetools --version $CLT_CORE_VERSION
-RUN pip3 install cloudlanguagetools==$CLT_CORE_VERSION
+# COPY utils/wait_pypi_version_update.py .
+# RUN python wait_pypi_version_update.py --package cloudlanguagetools --version $CLT_CORE_VERSION
+RUN pip3 install --no-cache-dir cloudlanguagetools==$CLT_CORE_VERSION

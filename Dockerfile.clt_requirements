@@ -5,15 +5,17 @@ ARG CLT_REQUIREMENTS_VERSION
 # update packages
 RUN apt-get update -y && apt-get install -y libasound2 python3-pip git gnupg build-essential wget libssl-dev ca-certificates
 # azure speech sdk requires openssl 1.1.1
+# https://learn.microsoft.com/en-us/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux%2Cubuntu%2Cdotnetcli%2Cdotnet%2Cjre%2Cmaven%2Cnodejs%2Cmac%2Cpypi&pivots=programming-language-cpp#platform-requirements
 RUN wget -O - https://www.openssl.org/source/openssl-1.1.1w.tar.gz | tar zxf - && \
     cd openssl-1.1.1w && \
-    ./config && \
+    ./config --prefix=/usr/local && \
     make -j $(nproc) && \
     make install_sw install_ssldirs && \
     ldconfig -v && \
-    export SSL_CERT_DIR=/etc/ssl/certs && \
     cd ../ && \
-    rm -rf openssl-1.1.1u
+    rm -rf openssl-1.1.1u && \
+    rmdir /usr/local/ssl/certs && \
+    ln -s /etc/ssl/certs /usr/local/ssl/certs
 # required by Epitran module
 RUN wget https://github.com/festvox/flite/archive/refs/tags/v2.2.tar.gz && tar xvzf v2.2.tar.gz && cd flite-2.2 && ./configure && make && make install && cd testsuite && make lex_lookup && cp lex_lookup /usr/local/bin
 # update pip

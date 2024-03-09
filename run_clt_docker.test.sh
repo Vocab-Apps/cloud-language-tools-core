@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eoux pipefail
+
 # exit if parameter is not passed in
 # exit if parameter is not passed in
 if [ -z "$1" ]; then

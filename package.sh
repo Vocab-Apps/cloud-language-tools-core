@@ -1,13 +1,8 @@
 #!/bin/bash
 set -eoux pipefail
 
-# exit if parameter is not passed in
-if [ -z "$1" ]; then
-    echo "Please provide a version number"
-    exit 1
-fi
-
-VERSION_NUMBER=$1 # for example 0.1
+VERSION_NUMBER=`bump`
+echo "new version number is ${VERSION_NUMBER}"
 GIT_TAG=v${VERSION_NUMBER}
 
 sed -i "s/version='.*',/version='${VERSION_NUMBER}',/g" setup.py

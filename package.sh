@@ -5,7 +5,7 @@ set -eoux pipefail
 # default should be patch, but could be major or minor
 BUMP_TYPE=${1:-patch}
 
-VERSION_NUMBER=`bump --${BUMP_TYPE}`
+VERSION_NUMBER=`bump --${BUMP_TYPE} --reset`
 echo "new version number is ${VERSION_NUMBER}"
 GIT_TAG=v${VERSION_NUMBER}
 

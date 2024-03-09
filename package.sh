@@ -20,10 +20,10 @@ git push origin ${GIT_TAG}
 # get twice user/password
 source ~/secrets/python/twine.sh
 python setup.py sdist
-twine upload dist/*
+twine upload dist/cloudlanguagetools-${VERSION_NUMBER}.tar.gz
 
 # wait for package to be updated on pypi
-python utils/wait_pypi_version_update.py --package cloudlanguagetools --version ${VERSION_NUMBER}
+# python utils/wait_pypi_version_update.py --package cloudlanguagetools --version ${VERSION_NUMBER}
 
 # get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"

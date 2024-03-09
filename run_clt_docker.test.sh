@@ -14,4 +14,4 @@ VERSION_NUMBER=$1 # for example 0.1
 export DOCKER_BUILDKIT=1
 DOCKER_IMAGE=lucwastiaux/cloud-language-tools-core-test
 docker build -t ${DOCKER_IMAGE}:${VERSION_NUMBER} --build-arg CLT_CORE_VERSION=${VERSION_NUMBER} -f Dockerfile.test .
-docker run --env CLOUDLANGUAGETOOLS_CORE_KEY=${CLOUDLANGUAGETOOLS_CORE_KEY} --rm -it ${DOCKER_IMAGE}:${VERSION_NUMBER} pytest tests
+docker run --env CLOUDLANGUAGETOOLS_CORE_KEY=${CLOUDLANGUAGETOOLS_CORE_KEY} --rm -it ${DOCKER_IMAGE}:${VERSION_NUMBER} pytest -n10 --dist=loadfile tests

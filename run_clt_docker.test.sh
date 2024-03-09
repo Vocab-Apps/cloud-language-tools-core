@@ -16,4 +16,4 @@ DOCKER_IMAGE=lucwastiaux/cloud-language-tools-core-test
 docker build -t ${DOCKER_IMAGE}:${VERSION_NUMBER} --build-arg CLT_CORE_VERSION=${VERSION_NUMBER} -f Dockerfile.test .
 # https://pypi.org/project/pytest-xdist/2.5.0/#features
 # --dist load (default): Sends pending tests to any worker that is available, without any guaranteed order.
-docker run --env CLOUDLANGUAGETOOLS_CORE_KEY=${CLOUDLANGUAGETOOLS_CORE_KEY} --rm -it ${DOCKER_IMAGE}:${VERSION_NUMBER} pytest -n4 --dist=load tests
+docker run --env CLOUDLANGUAGETOOLS_CORE_KEY=${CLOUDLANGUAGETOOLS_CORE_KEY} --rm -it ${DOCKER_IMAGE}:${VERSION_NUMBER} pytest -n8 --dist=load tests

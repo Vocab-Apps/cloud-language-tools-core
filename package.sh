@@ -1,7 +1,11 @@
 #!/bin/bash
 set -eoux pipefail
 
-VERSION_NUMBER=`bump --major`
+# bump version argument
+# default should be patch
+BUMP_TYPE = ${1:-patch}
+
+VERSION_NUMBER=`bump --${BUMP_TYPE}`
 echo "new version number is ${VERSION_NUMBER}"
 GIT_TAG=v${VERSION_NUMBER}
 

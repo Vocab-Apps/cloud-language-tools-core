@@ -3,7 +3,7 @@ set -eoux pipefail
 
 # bump version argument
 # default should be patch, but could be major or minor
-BUMP_TYPE = ${1:-patch}
+BUMP_TYPE=${1:-patch}
 
 VERSION_NUMBER=`bump --${BUMP_TYPE}`
 echo "new version number is ${VERSION_NUMBER}"

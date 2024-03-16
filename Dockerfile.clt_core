@@ -1,5 +1,5 @@
 # this image has all the pre-requisites
-FROM lucwastiaux/clt-requirements:1.6
+FROM lucwastiaux/clt-requirements:1.7
 ARG CLT_CORE_VERSION
 COPY dist/cloudlanguagetools-${CLT_CORE_VERSION}.tar.gz .
 RUN pip3 install --no-cache-dir cloudlanguagetools-${CLT_CORE_VERSION}.tar.gz

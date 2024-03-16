@@ -19,6 +19,6 @@ setup(name='cloudlanguagetools',
       license='GPL',
       packages=['cloudlanguagetools'],
       install_requires=[
-          'clt_requirements>=1.6',
+          'clt_requirements>=1.7',
       ],
       )

@@ -6,7 +6,7 @@ from setuptools import setup
 
 
 setup(name='clt_requirements',
-      version='1.6',
+      version='1.7',
       description='Helper module for Cloud Language Tools, additional dependencies',
       url='https://github.com/Language-Tools/cloud-language-tools-core',
       author='Luc',
@@ -33,5 +33,6 @@ setup(name='clt_requirements',
         'cachetools',
         'clt_wenlin',
         'pinyin_jyutping',
+        'StrEnum'
       ],
       )

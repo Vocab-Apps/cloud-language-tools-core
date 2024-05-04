@@ -98,27 +98,13 @@ class CereProcService(cloudlanguagetools.service.Service):
         return result
 
     def get_tts_audio(self, text, voice_key, options):
-        output_temp_file = tempfile.NamedTemporaryFile()
-        output_temp_filename = output_temp_file.name
-
         voice_name = voice_key['name']
         url = f'https://api.cerevoice.com/v2/speak?voice={voice_name}&audio_format=mp3'
-
 
         ssml_text = f"""<?xml version="1.0" encoding="UTF-8"?>
 <speak xmlns="http://www.w3.org/2001/10/synthesis">{text}</speak>""".encode(encoding='utf-8')
 
-        # logging.debug(f'querying url: {url}')
-        response = requests.post(url, data=ssml_text, headers=self.get_auth_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
-
-        if response.status_code == 200:
-            with open(output_temp_filename, 'wb') as audio:
-                audio.write(response.content)
-            return output_temp_file
-
-        # otherwise, an error occured
-        error_message = f"Status code: {response.status_code} reason: {response.reason} voice: [{voice_name}]]"
-        raise cloudlanguagetools.errors.RequestError(error_message)
+        return self.get_tts_audio_base_post_request(url, data=ssml_text, headers=self.get_auth_headers())
 
 
     def get_transliteration_language_list(self):

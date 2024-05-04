@@ -1,6 +1,8 @@
 import os
 import requests
 import urllib.parse
+import json
+import logging
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -9,6 +11,8 @@ import cloudlanguagetools.transliterationlanguage
 
 VARIANT_JAPANESE_ROMAJI = 'Romaji'
 VARIANT_JAPANESE_KANA = 'Kana'
+
+logger = logging.getLogger(__name__)
 
 class EasyPronunciationTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
     def __init__(self, url_path, language, api_params, api_key, variant = None):
@@ -209,27 +213,41 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
         full_url = f'{api_url}?{encoded_parameters}'
 
         # print(full_url)
-        request = requests.get(full_url)
-        result = request.json()
+        try:
+            response = requests.get(full_url)
+            response.raise_for_status()
+            result = response.json()
 
-        # print(request)
-        # print(result)
+            # print(request)
+            # print(result)
 
-        if 'phonetic_transcription' in result:
-            phonetic_transcription = result['phonetic_transcription']
-            result_components = []
-            for entry in phonetic_transcription:
-                result_components.append(entry['transcriptions'][0])
+            if 'phonetic_transcription' in result:
+                phonetic_transcription = result['phonetic_transcription']
+                result_components = []
+                for entry in phonetic_transcription:
+                    result_components.append(entry['transcriptions'][0])
 
-            if 'variant' in transliteration_key:
-                if transliteration_key['variant'] == VARIANT_JAPANESE_ROMAJI:
-                    result_components = [x['romaji'] for x in result_components]
-                if transliteration_key['variant'] == VARIANT_JAPANESE_KANA:
-                    result_components = [x['kana'] for x in result_components]
+                if 'variant' in transliteration_key:
+                    if transliteration_key['variant'] == VARIANT_JAPANESE_ROMAJI:
+                        result_components = [x['romaji'] for x in result_components]
+                    if transliteration_key['variant'] == VARIANT_JAPANESE_KANA:
+                        result_components = [x['kana'] for x in result_components]
 
-            # print(result_components)
-            return ' '.join(result_components)
+                # print(result_components)
+                return ' '.join(result_components)
 
-        # an error occured
-        error_message = f'EasyPronunciation: could not perform conversion: {str(result)}'
-        raise cloudlanguagetools.errors.RequestError(error_message)
+            # an error occured
+            error_message = f'EasyPronunciation: could not perform conversion: {str(result)}'
+            raise cloudlanguagetools.errors.RequestError(error_message)
+
+        except requests.exceptions.ReadTimeout as exception:
+            raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving EasyPronouncation transliteration')
+        # handle json decode error
+        except json.decoder.JSONDecodeError as exception:
+            logger.error(f'could not decode json response from EasyPronounciation: {response.content}')
+            raise cloudlanguagetools.errors.RequestError('Unable to retrieve transliteration from EasyPronounciation')
+        except Exception as exception:
+            # make sure not to leak url and key
+            msg = 'could not retrieve EasyPronouncation transliteration'
+            logger.exception(msg)
+            raise cloudlanguagetools.errors.RequestError(msg)

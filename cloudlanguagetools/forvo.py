@@ -105,6 +105,10 @@ class ForvoService(cloudlanguagetools.service.Service):
             raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving forvo audio')
         except cloudlanguagetools.errors.NotFoundError as exception:
             raise exception
+        # handle json decode error
+        except json.decoder.JSONDecodeError as exception:
+            logger.error(f'could not decode json response from forvo: {response.content}')
+            raise cloudlanguagetools.errors.RequestError('Unable to retrieve audio from Forvo')
         except Exception as exception:
             # make sure not to leak url and key
             logger.exception('could not retrieve forvo audio')

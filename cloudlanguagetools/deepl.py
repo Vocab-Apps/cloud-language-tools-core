@@ -65,6 +65,9 @@ class DeepLService(cloudlanguagetools.service.Service):
                 deepl_language_code = language_entry['language']
                 language_enum = self.get_language_enum(deepl_language_code)
                 results.append(DeepLTranslationLanguage(language_enum, deepl_language_code))
+                # if it's portuguese, replicate the entry for PT-PT and PT-BR
+                if language_enum == language.pt_pt:
+                    results.append(DeepLTranslationLanguage(language.pt_br, deepl_language_code))
             except Exception as e:
                 logger.exception(f'could not process Deepl language entry: {language_entry}')
         return results

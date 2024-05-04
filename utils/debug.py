@@ -780,15 +780,15 @@ def test_wenlin_lookup():
 def openai_test():
     from openai import AzureOpenAI
     
-    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
-    azure_endpoint=azure_openai_config['azure_endpoint'],
-    api_version="2023-05-15",
-    api_key=azure_openai_config['azure_api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'])
+    # client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    # azure_endpoint=azure_openai_config['azure_endpoint'],
+    # api_version="2023-05-15",
+    # api_key=azure_openai_config['azure_api_key'],
+    # api_key=azure_openai_config['api_key'],
+    # api_key=azure_openai_config['api_key'],
+    # api_key=openai_config['api_key'],
+    # api_key=openai_config['api_key'],
+    # api_key=openai_config['api_key'])
 
     # Load your API key from an environment variable or secret management service
 
@@ -867,15 +867,15 @@ def microsoft_openai_test():
     import os
     from openai import AzureOpenAI
     
-    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
-    azure_endpoint=azure_openai_config['azure_endpoint'],
-    api_version="2023-05-15",
-    api_key=azure_openai_config['azure_api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'])
+    # client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    # azure_endpoint=azure_openai_config['azure_endpoint'],
+    # api_version="2023-05-15",
+    # api_key=azure_openai_config['azure_api_key'],
+    # api_key=azure_openai_config['api_key'],
+    # api_key=azure_openai_config['api_key'],
+    # api_key=openai_config['api_key'],
+    # api_key=openai_config['api_key'],
+    # api_key=openai_config['api_key'])
 
     azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
 
@@ -896,15 +896,15 @@ def microsoft_openai_test():
 def openai_functioncalls_simple_example():
     from openai import AzureOpenAI
     
-    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
-    azure_endpoint=azure_openai_config['azure_endpoint'],
-    api_version="2023-05-15",
-    api_key=azure_openai_config['azure_api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'])
+    # client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    # azure_endpoint=azure_openai_config['azure_endpoint'],
+    # api_version="2023-05-15",
+    # api_key=azure_openai_config['azure_api_key'],
+    # api_key=azure_openai_config['api_key'],
+    # api_key=azure_openai_config['api_key'],
+    # api_key=openai_config['api_key'],
+    # api_key=openai_config['api_key'],
+    # api_key=openai_config['api_key'])
 
     azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
 
@@ -940,13 +940,7 @@ def openai_function_calls_telegram_bot():
     
     client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
     azure_endpoint=azure_openai_config['azure_endpoint'],
-    api_version="2023-05-15",
-    api_key=azure_openai_config['azure_api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'])
+    api_version="2023-05-15")
 
     azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
 
@@ -1029,15 +1023,15 @@ def openai_function_calls_telegram_bot():
 def openai_detect_language():
     from openai import AzureOpenAI
     
-    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
-    azure_endpoint=azure_openai_config['azure_endpoint'],
-    api_version="2023-05-15",
-    api_key=azure_openai_config['azure_api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'])
+    # client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+    # azure_endpoint=azure_openai_config['azure_endpoint'],
+    # api_version="2023-05-15",
+    # api_key=azure_openai_config['azure_api_key'],
+    # api_key=azure_openai_config['api_key'],
+    # api_key=azure_openai_config['api_key'],
+    # api_key=openai_config['api_key'],
+    # api_key=openai_config['api_key'],
+    # api_key=openai_config['api_key'])
 
     manager = get_manager()
 
@@ -1082,88 +1076,6 @@ def openai_detect_language():
     # print(response)
     # print(response['choices'][0]['message']['content'])        
 
-def openai_guess_from_to_language():
-    from openai import AzureOpenAI
-    
-    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
-    azure_endpoint=azure_openai_config['azure_endpoint'],
-    api_version="2023-05-15",
-    api_key=azure_openai_config['azure_api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'])
-    import pydantic
-
-    manager = get_manager()
-
-    openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
-
-
-    from typing import List
-    from pydantic import BaseModel
-
-    class TranslateQuery(BaseModel):
-        input_text: str
-        source_language: cloudlanguagetools.languages.Language
-        target_language: cloudlanguagetools.languages.Language
-        service: cloudlanguagetools.constants.Service = cloudlanguagetools.constants.Service.Azure
-
-
-    pprint.pprint(TranslateQuery.model_json_schema())
-
-    response = client.chat.completions.create(model="gpt-3.5-turbo-0613",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant specialized in translation. "},
-        {"role": "system", "content": "Translate from cantonese to french, using watson"},
-        # {"role": "user", "content": "Bonjour mes amis"},
-        {"role": "user", "content": "挨向後"},
-    ],
-    functions= [
-        {
-            'name': "translate",
-            'description': "Translate input text from source language to target language",
-            'parameters': TranslateQuery.model_json_schema(),
-        },            
-    ],
-    function_call= "auto")
-
-    pprint.pprint(response)    
-
-    message = response.choices[0].message
-    if message['function_call'] != None:
-        function_name = message['function_call']['name']
-        arguments = json.loads(message["function_call"]["arguments"])
-        translate_query = TranslateQuery(**arguments)
-        print(f'translate query: {translate_query}')    
-
-def openai_audio():
-    from openai import AzureOpenAI
-    
-    client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
-    azure_endpoint=azure_openai_config['azure_endpoint'],
-    api_version="2023-05-15",
-    api_key=azure_openai_config['azure_api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=azure_openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'],
-    api_key=openai_config['api_key'])
-
-    manager = get_manager()
-
-    openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
-
-    speech_file_path = 'output.mp3'
-    response = openai.audio.speech.create(
-        model="tts-1",
-        voice="alloy",
-        input="The quick brown fox jumped over the lazy dog."
-    )
-    response.stream_to_file(speech_file_path)
-
-
 
 if __name__ == '__main__':
     logger = logging.getLogger()
@@ -1192,7 +1104,7 @@ if __name__ == '__main__':
     # get_google_translation_languages()
     # get_watson_translation_languages()
     #output_languages_enum()
-    # get_translation_language_list()
+    get_translation_language_list()
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()
@@ -1220,4 +1132,4 @@ if __name__ == '__main__':
     # openai_functioncalls_simple_example()
     # openai_detect_language()
     # openai_guess_from_to_language()
-    openai_audio()
+    # openai_audio()

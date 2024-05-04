@@ -79,15 +79,11 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         }
 
     def get_tts_audio(self, text, voice_key, options):
-        import requests
-
-        CHUNK_SIZE = 1024
         voice_id = voice_key['voice_id']
         url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'
 
         headers = self.get_headers()
         headers['Accept'] = "audio/mpeg"
-
 
         data = {
             "text": text,
@@ -98,24 +94,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             }
         }
 
-        response = requests.post(url, json=data, headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
-        if response.status_code != 200:
-            error_message = f'ElevenLabs: error processing TTS request: {response.status_code} {response.text}'
-            logger.error(error_message)
-            raise cloudlanguagetools.errors.RequestError(error_message)
-
-
-        response.raise_for_status()
-        
-        output_temp_file = tempfile.NamedTemporaryFile()
-        output_temp_filename = output_temp_file.name
-
-        with open(output_temp_filename, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                if chunk:
-                    f.write(chunk)
-
-        return output_temp_file
+        return self.get_tts_audio_base_post_request(url, json=data, headers=headers)
 
 
 

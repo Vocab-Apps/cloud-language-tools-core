@@ -65,6 +65,7 @@ class Language(enum.Enum):
     id_ = ("Indonesian")
     ilo = ("Iloko")
     ga = ("Irish")
+    hne = ("Chhattisgarhi")
     it = ("Italian")
     ja = ("Japanese")
     jw = ("Javanese")

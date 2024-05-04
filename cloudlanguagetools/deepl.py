@@ -3,15 +3,16 @@ import requests
 import tempfile
 import logging
 import os
+import pprint
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
-import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
 
+logger = logging.getLogger(__name__)
 
 class DeepLTranslationLanguage(cloudlanguagetools.translationlanguage.TranslationLanguage):
     def __init__(self, language, language_id):
@@ -34,41 +35,39 @@ class DeepLService(cloudlanguagetools.service.Service):
     def get_tts_voice_list(self):
         return []
 
+    def get_headers(self):
+        return {
+            'Authorization': f'DeepL-Auth-Key {self.api_key}'
+        }
+
+    def get_language_enum(self, deepl_language_code):
+        lowercase_str = deepl_language_code.lower()
+        override_map = {
+            'id': 'id_',
+            'zh': 'zh_cn',
+            'pt': 'pt_pt'
+        }
+        lowercase_str = override_map.get(lowercase_str, lowercase_str)
+        language = cloudlanguagetools.languages.Language
+        return language[lowercase_str]
+
 
     def get_translation_language_list(self):
         language = cloudlanguagetools.languages.Language
-        result = [
-            DeepLTranslationLanguage(language.bg, 'BG'),
-            DeepLTranslationLanguage(language.cs, 'CS'),
-            DeepLTranslationLanguage(language.da, 'DA'),
-            DeepLTranslationLanguage(language.de, 'DE'),
-            DeepLTranslationLanguage(language.el, 'EL'),
-            DeepLTranslationLanguage(language.en, 'EN'),
-            DeepLTranslationLanguage(language.es, 'ES'),
-            DeepLTranslationLanguage(language.et, 'ET'),
-            DeepLTranslationLanguage(language.fi, 'FI'),
-            DeepLTranslationLanguage(language.fr, 'FR'),
-            DeepLTranslationLanguage(language.hu, 'HU'),
-            DeepLTranslationLanguage(language.id_, 'ID'),
-            DeepLTranslationLanguage(language.it, 'IT'),
-            DeepLTranslationLanguage(language.ja, 'JA'),
-            DeepLTranslationLanguage(language.lt, 'LT'),
-            DeepLTranslationLanguage(language.lv, 'LV'),
-            DeepLTranslationLanguage(language.nl, 'NL'),
-            DeepLTranslationLanguage(language.pl, 'PL'),
-            DeepLTranslationLanguage(language.pt_pt, 'PT-PT'),
-            DeepLTranslationLanguage(language.pt_br, 'PT-BR'),
-            DeepLTranslationLanguage(language.ro, 'RO'),
-            DeepLTranslationLanguage(language.ru, 'RU'),
-            DeepLTranslationLanguage(language.sk, 'SK'),
-            DeepLTranslationLanguage(language.sl, 'SL'),
-            DeepLTranslationLanguage(language.sv, 'SV'),
-            DeepLTranslationLanguage(language.tr, 'TR'),
-            DeepLTranslationLanguage(language.uk, 'UK'),
-            DeepLTranslationLanguage(language.zh_cn, 'ZH'),
-        ]
-        return result        
-
+        url = 'https://api.deepl.com/v2/languages'
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
+        # pprint.pprint(response.json())
+        results = []
+        for language_entry in response.json():
+            try:
+                # pprint.pprint(language_entry)
+                deepl_language_code = language_entry['language']
+                language_enum = self.get_language_enum(deepl_language_code)
+                results.append(DeepLTranslationLanguage(language_enum, deepl_language_code))
+            except Exception as e:
+                logger.exception(f'could not process Deepl language entry: {language_entry}')
+        return results
 
     def get_tts_voice_list(self):
         result = []

@@ -67,7 +67,7 @@ class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
 class ElevenLabsService(cloudlanguagetools.service.Service):
     def __init__(self):
-        pass
+        self.service = cloudlanguagetools.constants.Service.ElevenLabs
 
     def configure(self, config):
         self.api_key = config['api_key']

@@ -50,7 +50,7 @@ class CereProcVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
 class CereProcService(cloudlanguagetools.service.Service):
     def __init__(self):
-        pass
+        self.service = cloudlanguagetools.constants.Service.CereProc
 
     def configure(self, config):
         self.username = config['username']

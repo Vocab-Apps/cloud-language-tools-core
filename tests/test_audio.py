@@ -130,7 +130,18 @@ class TestAudio(unittest.TestCase):
     def test_voice_list_v3(self):
         # pytest tests/test_audio.py -k test_voice_list_v3
         voice_list_v3 = self.manager.get_tts_voice_list_v3()
-        self.assertTrue(len(voice_list_v3) > 0)
+        # there should be more than 1000 voices in total
+        self.assertTrue(len(voice_list_v3) > 1000)
+
+        # search for some particular voices
+        azure_voices = [x for x in voice_list_v3 if x.service == Service.Azure]
+        mandarin_azure_voices = [x for x in azure_voices if AudioLanguage.zh_CN in x.audio_languages]
+        self.assertTrue(len(mandarin_azure_voices) > 10)
+
+        pprint.pprint(mandarin_azure_voices)
+
+        xiaochen = [x for x in mandarin_azure_voices if 'Xiaochen' in x.name]
+        self.assertTrue(len(xiaochen) > 1) # there is a regular and a multilingual
 
     def test_french_google(self):
         source_text = self.FRENCH_INPUT_TEXT

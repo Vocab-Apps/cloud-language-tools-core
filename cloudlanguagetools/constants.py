@@ -46,6 +46,11 @@ class RequestMode(enum.Enum):
     dynamic = enum.auto()
     edit = enum.auto()
 
+class APIVersion(enum.Enum):
+    v1 = enum.auto()
+    v2 = enum.auto()
+    v3 = enum.auto()
+
 # service and language related constants
 # ======================================
 

@@ -153,6 +153,14 @@ class ServiceManager():
         return [voice.json_obj() for voice in tts_voice_list]
 
     @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
+    def get_tts_voice_list_v3(self):
+        result = []
+        for key, service in self.services.items():
+            logging.info(f'retrieving voice list from {key}')
+            result.extend(service.get_tts_voice_list_v3())
+        return result
+
+    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
     def get_translation_language_list(self) -> List[cloudlanguagetools.translationlanguage.TranslationLanguage]:
         result = []
         for key, service in self.services.items():

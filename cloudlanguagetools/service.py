@@ -1,8 +1,10 @@
 import requests
 import tempfile
 import logging
+from typing import List
 
 import cloudlanguagetools.constants
+import cloudlanguagetools.ttsvoice
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +41,20 @@ class Service():
 
     def get_tts_voice_list(self):
         return []
+
+    def get_tts_voice_list_v3(self) -> cloudlanguagetools.ttsvoice.TtsVoice_v3:
+        # the default implementation will convert list of voices to list of TtsVoice_v3
+        voices = self.get_tts_voice_list()
+        voices_v3 = [cloudlanguagetools.ttsvoice.TtsVoice_v3(
+            name=voice.get_voice_shortname(),
+            voice_key=voice.get_voice_key(),
+            options=voice.get_options(),
+            service=voice.service,
+            gender=voice.get_gender(),
+            audio_languages=[voice.audio_language],
+            service_fee=voice.service_fee
+        ) for voice in voices]
+        return voices_v3
 
     def get_translation_language_list(self):
         return []

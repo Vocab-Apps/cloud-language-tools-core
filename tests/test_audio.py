@@ -127,6 +127,11 @@ class TestAudio(unittest.TestCase):
         source_text = self.KOREAN_INPUT_TEXT
         self.verify_service_audio_language(source_text, service, AudioLanguage.ko_KR, 'ko-KR')
 
+    def test_voice_list_v3(self):
+        # pytest tests/test_audio.py -k test_voice_list_v3
+        voice_list_v3 = self.manager.get_tts_voice_list_v3()
+        self.assertTrue(len(voice_list_v3) > 0)
+
     def test_french_google(self):
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.fr_FR, 'fr-FR')

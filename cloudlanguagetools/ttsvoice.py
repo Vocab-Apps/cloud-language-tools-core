@@ -1,4 +1,8 @@
 import json
+import dataclasses
+from typing import List
+import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 
 class TtsVoice():
     def __init__(self):
@@ -35,3 +39,15 @@ class TtsVoice():
    
     def __repr__(self):
         return json.dumps(self.json_obj(), indent=4, sort_keys=True, ensure_ascii=False)
+
+# this class is used with API version 3
+# support for multilingual voices
+@dataclasses.dataclass
+class TtsVoice_v3:
+    name: str
+    voice_key: dict
+    options: dict
+    service: cloudlanguagetools.constants.Service
+    gender: cloudlanguagetools.constants.Gender
+    audio_languages: List[cloudlanguagetools.languages.AudioLanguage]
+    service_fee: cloudlanguagetools.constants.ServiceFee

@@ -255,6 +255,29 @@ def get_voice_list():
         f.close()
     print(f'wrote {output_filename}')
 
+def get_azure_voice_list():
+    manager = get_manager()
+    azure_service = manager.services[cloudlanguagetools.constants.Service.Azure.name]
+    token = azure_service.get_token()
+
+    base_url = f'https://{azure_service.region}.tts.speech.microsoft.com/'
+    path = 'cognitiveservices/voices/list'
+    constructed_url = base_url + path
+    headers = {
+        'Authorization': 'Bearer ' + token,
+    }        
+    response = requests.get(constructed_url, headers=headers)
+    response.raise_for_status()
+
+    data = response.json()
+
+    # print(data)
+    output_filename = 'azure_voice_list.json'
+    with open(output_filename, 'w') as f:
+        f.write(json.dumps(data, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
+        f.close()
+    print(f'wrote output to {output_filename}')
+
 def get_voice_list_awesometts():
     # for awesometts
     manager = get_manager()
@@ -1093,6 +1116,7 @@ if __name__ == '__main__':
     # play_google_audio()
     # play_azure_audio()
     # get_voice_list()
+    get_azure_voice_list()
     # get_voice_list_awesometts()
     # get_elevenlabs_voice_list()
     # elevenlabs_api_test()
@@ -1104,7 +1128,7 @@ if __name__ == '__main__':
     # get_google_translation_languages()
     # get_watson_translation_languages()
     #output_languages_enum()
-    get_translation_language_list()
+    # get_translation_language_list()
     # output_language_audio_mapping()
     # detect_language()
     # translate_google()

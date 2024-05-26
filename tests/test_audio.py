@@ -141,6 +141,9 @@ class TestAudio(unittest.TestCase):
         # there should be more than 1000 voices in total
         self.assertTrue(len(voice_list_v3) > 1000)
 
+        # check Azure voices
+        # ==================
+
         # search for some particular voices
         azure_voices = [x for x in voice_list_v3 if x.service == Service.Azure]
         mandarin_azure_voices = [x for x in azure_voices if AudioLanguage.zh_CN in x.audio_languages]
@@ -158,6 +161,14 @@ class TestAudio(unittest.TestCase):
         self.assertTrue(len(xiaochen_multilingual.audio_languages) > 1)
         self.assertTrue(AudioLanguage.zh_CN in xiaochen_multilingual.audio_languages)
         self.assertTrue(AudioLanguage.fr_FR in xiaochen_multilingual.audio_languages)
+
+        # check OpenAI voices
+        # ===================
+        openai_voices = [x for x in voice_list_v3 if x.service == Service.OpenAI]
+        self.assertTrue(len(openai_voices) >= 6)
+        # choose random voice
+        openai_voice = random.choice(openai_voices)
+        self.assertTrue(len(openai_voice.audio_languages) >= 57) # at least 57 locales supportedn
 
     def test_french_google(self):
         source_text = self.FRENCH_INPUT_TEXT
@@ -222,6 +233,19 @@ class TestAudio(unittest.TestCase):
         # check that multilingual voice can generate chinese and french
         self.verify_voice_v3(xiaochen_multilingual, self.CHINESE_INPUT_TEXT, 'zh-CN')
         self.verify_voice_v3(xiaochen_multilingual, self.FRENCH_INPUT_TEXT, 'fr-FR')
+
+    def test_openai_multilingual_v3(self):
+        pass
+        # get random voice
+        openai_voices = [x for x in self.voice_list_v3 if x.service == Service.OpenAI]
+        selected_voice = random.choice(openai_voices)
+
+        source_text = 'This is the best restaurant in town.'
+        self.verify_voice_v3(selected_voice, source_text, 'en-US')
+
+        source_text = self.CHINESE_INPUT_TEXT
+        self.verify_voice_v3(selected_voice, source_text, 'zh-CN')
+
 
     @pytest.mark.skip('watson does not support chinese anymore')
     def test_mandarin_watson(self):

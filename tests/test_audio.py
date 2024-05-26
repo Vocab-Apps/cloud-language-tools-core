@@ -72,7 +72,14 @@ class TestAudio(unittest.TestCase):
         return subset        
 
     def verify_voice(self, voice, text, recognition_language):
-        voice_key = voice['voice_key']
+        return self.verify_voice_internal(voice['voice_key'], voice['service'], text, recognition_language)
+
+    def verify_voice_v3(self, voice, text, recognition_language):
+        voice_key = voice.voice_key
+        voice_service = voice.service.name
+        return self.verify_voice_internal(voice_key, voice_service, text, recognition_language)
+
+    def verify_voice_internal(self, voice_key, voice_service, text, recognition_language):
 
         max_tries = 3
         num_tries = max_tries
@@ -81,14 +88,14 @@ class TestAudio(unittest.TestCase):
         while get_tts_audio_success != True and num_tries >= 0:
             num_tries -= 1
             try:
-                logging.info(f"attempting to retrieve audio from {voice['service']}, attempts: {num_tries}")
-                audio_temp_file = self.manager.get_tts_audio(text, voice['service'], voice_key, {})
+                logging.info(f"attempting to retrieve audio from {voice_service}, attempts: {num_tries}")
+                audio_temp_file = self.manager.get_tts_audio(text, voice_service, voice_key, {})
                 get_tts_audio_success = True
             except cloudlanguagetools.errors.TimeoutError as exception:
                 time.sleep(1) # allow retry
 
         if num_tries < 0:
-            raise Exception(f"could not retrieve audio from {voice['service']} after {max_tries} tries")
+            raise Exception(f"could not retrieve audio from {voice_service} after {max_tries} tries")
 
         # check file format
         is_mp3 = audio_utils.is_mp3_format(audio_temp_file.name)
@@ -101,7 +108,7 @@ class TestAudio(unittest.TestCase):
 
         self.assertTrue(is_mp3)
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, recognition_language)
-        assert_text = f"service {voice['service']} voice_key: {voice['voice_key']}"
+        assert_text = f"service {voice_service} voice_key: {voice_key}"
         self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text), msg=assert_text)
 
     def verify_service_audio_language(self, text, service, audio_language, recognition_language):
@@ -138,7 +145,7 @@ class TestAudio(unittest.TestCase):
         mandarin_azure_voices = [x for x in azure_voices if AudioLanguage.zh_CN in x.audio_languages]
         self.assertTrue(len(mandarin_azure_voices) > 10)
 
-        pprint.pprint(mandarin_azure_voices)
+        # pprint.pprint(mandarin_azure_voices)
 
         xiaochen = [x for x in mandarin_azure_voices if 'Xiaochen' in x.name]
         self.assertTrue(len(xiaochen) == 2) # there is a regular and a multilingual
@@ -150,6 +157,13 @@ class TestAudio(unittest.TestCase):
         self.assertTrue(len(xiaochen_multilingual.audio_languages) > 1)
         self.assertTrue(AudioLanguage.zh_CN in xiaochen_multilingual.audio_languages)
         self.assertTrue(AudioLanguage.fr_FR in xiaochen_multilingual.audio_languages)
+
+        # check that single language voice can generate chinese
+        self.verify_voice_v3(xiaochen_single_language, self.CHINESE_INPUT_TEXT, 'zh-CN')
+
+        # check that multilingual voice can generate chinese and french
+        self.verify_voice_v3(xiaochen_multilingual, self.CHINESE_INPUT_TEXT, 'zh-CN')
+        self.verify_voice_v3(xiaochen_multilingual, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
 
     def test_french_google(self):

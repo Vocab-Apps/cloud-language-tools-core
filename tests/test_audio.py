@@ -50,6 +50,7 @@ class TestAudio(unittest.TestCase):
             num_tries -= 1
             try:
                 cls.voice_list = cls.manager.get_tts_voice_list_json()
+                cls.voice_list_v3 = cls.manager.get_tts_voice_list_v3()
                 success = True
             except requests.exceptions.ReadTimeout as e:
                 logging.exception(f'could not get voice list, timeout')
@@ -136,7 +137,7 @@ class TestAudio(unittest.TestCase):
 
     def test_voice_list_v3(self):
         # pytest tests/test_audio.py -k test_voice_list_v3
-        voice_list_v3 = self.manager.get_tts_voice_list_v3()
+        voice_list_v3 = self.voice_list_v3
         # there should be more than 1000 voices in total
         self.assertTrue(len(voice_list_v3) > 1000)
 
@@ -157,14 +158,6 @@ class TestAudio(unittest.TestCase):
         self.assertTrue(len(xiaochen_multilingual.audio_languages) > 1)
         self.assertTrue(AudioLanguage.zh_CN in xiaochen_multilingual.audio_languages)
         self.assertTrue(AudioLanguage.fr_FR in xiaochen_multilingual.audio_languages)
-
-        # check that single language voice can generate chinese
-        self.verify_voice_v3(xiaochen_single_language, self.CHINESE_INPUT_TEXT, 'zh-CN')
-
-        # check that multilingual voice can generate chinese and french
-        self.verify_voice_v3(xiaochen_multilingual, self.CHINESE_INPUT_TEXT, 'zh-CN')
-        self.verify_voice_v3(xiaochen_multilingual, self.FRENCH_INPUT_TEXT, 'fr-FR')
-
 
     def test_french_google(self):
         source_text = self.FRENCH_INPUT_TEXT
@@ -205,13 +198,30 @@ class TestAudio(unittest.TestCase):
         voice_key= {
             "name": "Microsoft Server Speech Text to Speech Voice (ja-JP, HarukaRUS)"
         }
-        options = {}
+        options = {} 
 
         with self.assertRaises(cloudlanguagetools.errors.RequestError) as cm:
             self.manager.get_tts_audio(source_text, service, voice_key, options)
 
         self.assertEquals(str(cm.exception), 'Azure Standard voices are not supported anymore, please switch to Neural voices.')
 
+    def test_mandarin_azure_xiaochen_multilingual(self):
+        # search for some particular voices
+        azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
+        mandarin_azure_voices = [x for x in azure_voices if AudioLanguage.zh_CN in x.audio_languages]
+
+        xiaochen = [x for x in mandarin_azure_voices if 'Xiaochen' in x.name]
+        self.assertTrue(len(xiaochen) == 2) # there is a regular and a multilingual
+
+        xiaochen_single_language = [x for x in xiaochen if len(x.audio_languages) == 1][0]
+        xiaochen_multilingual = [x for x in xiaochen if len(x.audio_languages) > 1][0]
+
+        # check that single language voice can generate chinese
+        self.verify_voice_v3(xiaochen_single_language, self.CHINESE_INPUT_TEXT, 'zh-CN')
+
+        # check that multilingual voice can generate chinese and french
+        self.verify_voice_v3(xiaochen_multilingual, self.CHINESE_INPUT_TEXT, 'zh-CN')
+        self.verify_voice_v3(xiaochen_multilingual, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
     @pytest.mark.skip('watson does not support chinese anymore')
     def test_mandarin_watson(self):

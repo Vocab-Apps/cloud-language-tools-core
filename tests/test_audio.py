@@ -141,7 +141,16 @@ class TestAudio(unittest.TestCase):
         pprint.pprint(mandarin_azure_voices)
 
         xiaochen = [x for x in mandarin_azure_voices if 'Xiaochen' in x.name]
-        self.assertTrue(len(xiaochen) > 1) # there is a regular and a multilingual
+        self.assertTrue(len(xiaochen) == 2) # there is a regular and a multilingual
+
+        xiaochen_single_language = [x for x in xiaochen if len(x.audio_languages) == 1][0]
+        self.assertEquals(xiaochen_single_language.audio_languages, [AudioLanguage.zh_CN])
+
+        xiaochen_multilingual = [x for x in xiaochen if len(x.audio_languages) > 1][0]
+        self.assertTrue(len(xiaochen_multilingual.audio_languages) > 1)
+        self.assertTrue(AudioLanguage.zh_CN in xiaochen_multilingual.audio_languages)
+        self.assertTrue(AudioLanguage.fr_FR in xiaochen_multilingual.audio_languages)
+
 
     def test_french_google(self):
         source_text = self.FRENCH_INPUT_TEXT

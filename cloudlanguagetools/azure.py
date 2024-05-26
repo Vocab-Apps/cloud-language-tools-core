@@ -6,6 +6,7 @@ import operator
 import pydub
 import logging
 import pprint
+from typing import List
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -31,6 +32,29 @@ GENDER_MAP = {
     'Female': cloudlanguagetools.constants.Gender.Female,
     'Male': cloudlanguagetools.constants.Gender.Male,
     'Neutral': cloudlanguagetools.constants.Gender.Any,
+}
+
+VOICE_OPTIONS = {
+            'rate' : {
+                'type': cloudlanguagetools.options.ParameterType.number.name,
+                'min': 0.5,
+                'max': 3.0,
+                'default': 1.0
+            },
+            'pitch': {
+                'type': cloudlanguagetools.options.ParameterType.number.name,
+                'min': -100,
+                'max': 100,
+                'default': 0
+            },
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [
+                    cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.ogg_opus.name,
+                ],
+                'default': cloudlanguagetools.options.AudioFormat.mp3.name
+            }
 }
 
 class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
@@ -64,28 +88,52 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
             return f'{self.display_name} ({self.voice_type})'
 
     def get_options(self):
-        return {
-            'rate' : {
-                'type': cloudlanguagetools.options.ParameterType.number.name,
-                'min': 0.5,
-                'max': 3.0,
-                'default': 1.0
-            },
-            'pitch': {
-                'type': cloudlanguagetools.options.ParameterType.number.name,
-                'min': -100,
-                'max': 100,
-                'default': 0
-            },
-            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
-                'type': cloudlanguagetools.options.ParameterType.list.name,
-                'values': [
-                    cloudlanguagetools.options.AudioFormat.mp3.name,
-                    cloudlanguagetools.options.AudioFormat.ogg_opus.name,
-                ],
-                'default': cloudlanguagetools.options.AudioFormat.mp3.name
-            }
-        }
+        return VOICE_OPTIONS
+
+def locale_to_audio_language(locale: str) -> cloudlanguagetools.languages.AudioLanguage:
+    locale = AUDIO_LOCALE_OVERRIDE_MAP.get(locale, locale)
+    language_enum_name = locale.replace('-', '_')
+    audio_language = cloudlanguagetools.languages.AudioLanguage[language_enum_name]    
+    return audio_language
+
+def build_tts_voice_v3(voice_data) -> cloudlanguagetools.ttsvoice.TtsVoice_v3:
+    local_name = voice_data['LocalName']
+    display_name = voice_data['DisplayName']
+    voice_type = voice_data['VoiceType']
+
+    # build all attributes required for TtsVoice_v3
+    # name
+    if local_name != display_name:
+        voice_name = f"{display_name} {local_name} ({voice_type})"
+    else:
+        voice_name = f'{display_name} ({voice_type})'    
+    voice_key = {
+        'name': voice_data['Name']
+    }
+    options = VOICE_OPTIONS
+    service = cloudlanguagetools.constants.Service.Azure
+    gender = GENDER_MAP[voice_data['Gender']]
+    service_fee = cloudlanguagetools.constants.ServiceFee.paid
+
+    azure_locale_list = [voice_data['Locale']]
+    if 'SecondaryLocaleList' in voice_data:
+        azure_locale_list = voice_data['SecondaryLocaleList']
+        # ensure the main locale is present
+        azure_locale_list.append(voice_data['Locale'])
+        # unique array
+        azure_locale_list = list(set(azure_locale_list))
+
+    audio_languages = [locale_to_audio_language(locale) for locale in azure_locale_list]
+
+    return cloudlanguagetools.ttsvoice.TtsVoice_v3(
+        name=voice_name,
+        voice_key=voice_key,
+        options=options,
+        service=service,
+        gender=gender,
+        audio_languages=audio_languages,
+        service_fee=service_fee)
+
 
 def get_translation_language_enum(language_id):
     # print(f'language_id: {language_id}')
@@ -284,6 +332,29 @@ class AzureService(cloudlanguagetools.service.Service):
                 except KeyError:
                     logging.error(f'could not process voice for {voice_data}', exc_info=True)
             return result
+
+    def get_tts_voice_list_v3(self) -> List[cloudlanguagetools.ttsvoice.TtsVoice_v3]:
+        # returns list of TtsVoice_v3
+
+        token = self.get_token()
+
+        base_url = f'https://{self.region}.tts.speech.microsoft.com/'
+        path = 'cognitiveservices/voices/list'
+        constructed_url = base_url + path
+        headers = {
+            'Authorization': 'Bearer ' + token,
+        }        
+        response = requests.get(constructed_url, headers=headers)
+        if response.status_code == 200:
+            voice_list = json.loads(response.content)
+            result = []
+            for voice_data in voice_list:
+                # print(voice_data['Status'])
+                try:
+                    result.append(build_tts_voice_v3(voice_data))
+                except:
+                    logger.exception(f'could not process voice for {voice_data}')
+            return result            
 
     def get_translation(self, text, from_language_key, to_language_key):
         base_url = f'{self.url_translator_base}/translate?api-version=3.0'

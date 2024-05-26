@@ -42,7 +42,7 @@ class Service():
     def get_tts_voice_list(self):
         return []
 
-    def get_tts_voice_list_v3(self) -> cloudlanguagetools.ttsvoice.TtsVoice_v3:
+    def get_tts_voice_list_v3(self) -> List[cloudlanguagetools.ttsvoice.TtsVoice_v3]:
         # the default implementation will convert list of voices to list of TtsVoice_v3
         voices = self.get_tts_voice_list()
         voices_v3 = [cloudlanguagetools.ttsvoice.TtsVoice_v3(

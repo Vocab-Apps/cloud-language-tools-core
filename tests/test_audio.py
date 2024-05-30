@@ -170,6 +170,14 @@ class TestAudio(unittest.TestCase):
         openai_voice = random.choice(openai_voices)
         self.assertTrue(len(openai_voice.audio_languages) >= 57) # at least 57 locales supportedn
 
+        # check ElevenLabs voices
+        # =======================
+        elevenlabs_voices = [x for x in voice_list_v3 if x.service == Service.ElevenLabs]
+        self.assertTrue(len(elevenlabs_voices) >= 15)
+        mandarin_elevenlabs_voices = [x for x in elevenlabs_voices if AudioLanguage.zh_CN in x.audio_languages]
+        self.assertTrue(len(mandarin_elevenlabs_voices) > 10)
+
+
     def test_french_google(self):
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.fr_FR, 'fr-FR')

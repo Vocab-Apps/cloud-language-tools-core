@@ -27,6 +27,21 @@ GENDER_MAP = {
     'female': cloudlanguagetools.constants.Gender.Female,
 }
 
+VOICE_OPTIONS = {
+            'stability' : {
+                'type': cloudlanguagetools.options.ParameterType.number.name,
+                'min': 0.0,
+                'max': 1.0,
+                'default': DEFAULT_STABILITY
+            },
+            'similarity_boost' : {
+                'type': cloudlanguagetools.options.ParameterType.number.name,
+                'min': 0.0,
+                'max': 1.0,
+                'default': DEFAULT_SIMILARITY_BOOST
+            },                        
+}
+
 class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data, language: cloudlanguagetools.languages.AudioLanguage, model_id, model_short_name):
         # pprint.pprint(voice_data)
@@ -50,20 +65,7 @@ class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         return f'{self.name} ({self.model_short_name})'
 
     def get_options(self):
-        return {
-            'stability' : {
-                'type': cloudlanguagetools.options.ParameterType.number.name,
-                'min': 0.0,
-                'max': 1.0,
-                'default': DEFAULT_STABILITY
-            },
-            'similarity_boost' : {
-                'type': cloudlanguagetools.options.ParameterType.number.name,
-                'min': 0.0,
-                'max': 1.0,
-                'default': DEFAULT_SIMILARITY_BOOST
-            },                        
-        }
+        return VOICE_OPTIONS
 
 class ElevenLabsService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -182,6 +184,86 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
                     audio_language_enum = self.get_audio_language(language_id)
                     for voice_data in data['voices']:
                         result.append(ElevenLabsVoice(voice_data, audio_language_enum, model_id, model_short_name))
+                except Exception as e:
+                    logger.exception(f'ElevenLabs: error processing voice_data: {voice_data}')
+
+        return result
+
+
+    def get_tts_voice_list_v3(self) -> List[cloudlanguagetools.ttsvoice.TtsVoice_v3]:
+        result = []
+
+        # first, get all models to get list of languages
+        url = "https://api.elevenlabs.io/v1/models"
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
+        model_data = response.json()
+
+        # restrict to models that can do text to speech (elevenlabs introduced voice conversion)
+        model_data = [model for model in model_data if model['can_do_text_to_speech']]
+
+        #pprint.pprint(model_data)
+        # model_data: 
+        # [{'can_be_finetuned': True,
+        # 'can_do_text_to_speech': True,
+        # 'can_do_voice_conversion': False,
+        # 'description': 'Use our standard English language model to generate speech '
+        #                 'in a variety of voices, styles and moods.',
+        # 'languages': [{'language_id': 'en', 'name': 'English'}],
+        # 'model_id': 'eleven_monolingual_v1',
+        # 'name': 'Eleven Monolingual v1',
+        # 'token_cost_factor': 1.0},
+        # {'can_be_finetuned': True,
+        # 'can_do_text_to_speech': True,
+        # 'can_do_voice_conversion': True,
+        # 'description': 'Generate lifelike speech in multiple languages and create '
+        #                 'content that resonates with a broader audience. ',
+        # 'languages': [{'language_id': 'en', 'name': 'English'},
+        #                 {'language_id': 'de', 'name': 'German'},
+        #                 {'language_id': 'pl', 'name': 'Polish'},
+        #                 {'language_id': 'es', 'name': 'Spanish'},
+        #                 {'language_id': 'it', 'name': 'Italian'},
+        #                 {'language_id': 'fr', 'name': 'French'},
+        #                 {'language_id': 'pt', 'name': 'Portuguese'},
+        #                 {'language_id': 'hi', 'name': 'Hindi'}],
+        # 'model_id': 'eleven_multilingual_v1',
+        # 'name': 'Eleven Multilingual v1',
+        # 'token_cost_factor': 1.0}]
+        #         
+
+
+        # now, retrieve voice list
+        # call elevenlabs API to list TTS voices
+        url = "https://api.elevenlabs.io/v1/voices"
+
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
+
+        data = response.json()
+
+        for model in model_data:
+            model_id = model['model_id']
+            model_name = model['name']
+            model_short_name = model_name.replace('Eleven ', '').strip()
+            # for language_record in model['languages']:
+            for voice_data in data['voices']:
+                try:
+                    languages = model['languages']
+                    language_id_list = [language_record['language_id'] for language_record in languages]
+                    audio_language_enum_list = [self.get_audio_language(language_id) for language_id in language_id_list]
+                    voice = cloudlanguagetools.ttsvoice.TtsVoice_v3(
+                        name=voice_data['name'],
+                        voice_key={
+                            'voice_id': voice_data['voice_id'],
+                            'model_id': model_id,
+                        },
+                        options=VOICE_OPTIONS,
+                        service=cloudlanguagetools.constants.Service.ElevenLabs,
+                        gender=GENDER_MAP.get(voice_data['labels']['gender'], cloudlanguagetools.constants.Gender.Male),
+                        audio_languages=audio_language_enum_list,
+                        service_fee=cloudlanguagetools.constants.ServiceFee.paid
+                    )
+                    result.append(voice)
                 except Exception as e:
                     logger.exception(f'ElevenLabs: error processing voice_data: {voice_data}')
 

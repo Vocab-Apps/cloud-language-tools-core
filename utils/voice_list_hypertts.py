@@ -1,9 +1,16 @@
 import sys
 import os
-import inspect
+import logging
 from typing import List
 import pprint
 import databind.json
+
+logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                    datefmt='%Y%m%d-%H:%M:%S',
+                    stream=sys.stdout,
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -16,7 +23,8 @@ def get_manager():
     manager.configure_default()
     return manager
 
-def process_voice(voice):
+def process_voice(voice: cloudlanguagetools.ttsvoice.TtsVoice_v3):
+    logger.info(f'processing voice {voice}')
     return databind.json.dump(voice, cloudlanguagetools.ttsvoice.TtsVoice_v3)
 
 def get_voice_list_hypertts():
@@ -36,4 +44,6 @@ def get_voice_list_hypertts():
 
 
 if __name__ == '__main__':
+    # setup basic logging at info level
+    logger.info('starting to generate hypertts voice list')
     get_voice_list_hypertts()

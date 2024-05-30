@@ -1,6 +1,6 @@
 import json
 import dataclasses
-from typing import List
+from typing import List, Dict, Any
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 
@@ -45,8 +45,8 @@ class TtsVoice():
 @dataclasses.dataclass
 class TtsVoice_v3:
     name: str
-    voice_key: dict
-    options: dict
+    voice_key: Dict[str, str]
+    options: Dict[str, Dict[str, Any]]
     service: cloudlanguagetools.constants.Service
     gender: cloudlanguagetools.constants.Gender
     audio_languages: List[cloudlanguagetools.languages.AudioLanguage]

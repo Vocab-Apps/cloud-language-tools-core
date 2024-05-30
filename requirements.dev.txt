@@ -4,3 +4,4 @@ pydub
 python-magic
 twine
 bump
+databind

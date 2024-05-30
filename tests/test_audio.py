@@ -243,7 +243,6 @@ class TestAudio(unittest.TestCase):
         self.verify_voice_v3(xiaochen_multilingual, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
     def test_openai_multilingual_v3(self):
-        pass
         # get random voice
         openai_voices = [x for x in self.voice_list_v3 if x.service == Service.OpenAI]
         selected_voice = random.choice(openai_voices)
@@ -253,6 +252,17 @@ class TestAudio(unittest.TestCase):
 
         source_text = self.CHINESE_INPUT_TEXT
         self.verify_voice_v3(selected_voice, source_text, 'zh-CN')
+
+    def test_elevenlabs_multilingual_v3(self):
+        # get random voice
+        elevenlabs_voices = [x for x in self.voice_list_v3 if x.service == Service.ElevenLabs]
+        selected_voice = random.choice(elevenlabs_voices)
+
+        source_text = 'This is the best restaurant in town.'
+        self.verify_voice_v3(selected_voice, source_text, 'en-US')
+
+        source_text = self.CHINESE_INPUT_TEXT
+        self.verify_voice_v3(selected_voice, source_text, 'zh-CN')        
 
 
     @pytest.mark.skip('watson does not support chinese anymore')

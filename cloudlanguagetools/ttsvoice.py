@@ -45,7 +45,7 @@ class TtsVoice():
 @dataclasses.dataclass
 class TtsVoice_v3:
     name: str
-    voice_key: Dict[str, str]
+    voice_key: Dict[str, Any]
     options: Dict[str, Dict[str, Any]]
     service: cloudlanguagetools.constants.Service
     gender: cloudlanguagetools.constants.Gender

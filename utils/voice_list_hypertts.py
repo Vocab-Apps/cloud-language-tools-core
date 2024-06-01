@@ -3,6 +3,7 @@ import os
 import logging
 from typing import List
 import pprint
+import json
 import databind.json
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
@@ -34,12 +35,11 @@ def get_voice_list_hypertts():
     # sort by voice_description
     tts_voice_list.sort(key=lambda voice: (voice.service, voice.name))
     tts_voice_list = [process_voice(voice) for voice in tts_voice_list]
-    output_filename = 'temp_data_files/hypertts_voicelist.py'
+    output_filename = 'temp_data_files/hypertts_voicelist.json'
+    
     with open(output_filename, 'w', encoding='utf8') as f:
-        list_formatted = pprint.pformat(tts_voice_list, width=250)
-        f.write('VOICE_LIST = ')
-        f.write(list_formatted)
-        f.close()
+        json.dump(tts_voice_list, f, ensure_ascii=False, indent=4)
+
     print(f'wrote {output_filename}')    
 
 

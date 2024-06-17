@@ -159,6 +159,21 @@ class TestAudio(unittest.TestCase):
         source_text = '你好'
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_CN, 'zh-CN') 
 
+    def test_azure_standard_voice_deprecated(self):
+        # standard voices should raise an error
+        service = "Azure"
+        source_text = "流暢"
+        voice_key= {
+            "name": "Microsoft Server Speech Text to Speech Voice (ja-JP, HarukaRUS)"
+        }
+        options = {}
+
+        with self.assertRaises(cloudlanguagetools.errors.RequestError) as cm:
+            self.manager.get_tts_audio(source_text, service, voice_key, options)
+
+        self.assertEquals(str(cm.exception), 'Azure Standard voices are not supported anymore, please switch to Neural voices.')
+
+
     @pytest.mark.skip('watson does not support chinese anymore')
     def test_mandarin_watson(self):
         # pytest tests/test_audio.py -s --log-cli-level=DEBUG -k test_mandarin_watson

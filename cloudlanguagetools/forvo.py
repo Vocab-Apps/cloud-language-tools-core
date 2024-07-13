@@ -57,6 +57,10 @@ class ForvoService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.url_base = 'https://apicommercial.forvo.com'
         self.build_audio_language_map()
+        
+        # on 2024/07, forvo started throwing some errors with SSL verification, suspect an incorrect
+        # setup on their side but they are taking too long to fix it.
+        self.verify_ssl = False
 
     def configure(self, config):
         self.key = config['key']
@@ -87,7 +91,8 @@ class ForvoService(cloudlanguagetools.service.Service):
         url = f'{self.url_base}/key/{self.key}/format/json/action/word-pronunciations/word/{encoded_text}/language/{language}{sex_param}{username_param}/order/rate-desc/limit/1{country_code}'
 
         try:
-            response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+            response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout,
+                                    verify=self.verify_ssl)
             response.raise_for_status()
 
             data = response.json()
@@ -98,7 +103,8 @@ class ForvoService(cloudlanguagetools.service.Service):
             audio_url = items[0]['pathmp3']
             output_temp_file = tempfile.NamedTemporaryFile()
             output_temp_filename = output_temp_file.name
-            audio_request = requests.get(audio_url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+            audio_request = requests.get(audio_url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout,
+                                         verify=self.verify_ssl)
             open(output_temp_filename, 'wb').write(audio_request.content)
             return output_temp_file
         except requests.exceptions.ReadTimeout as exception:
@@ -275,7 +281,8 @@ class ForvoService(cloudlanguagetools.service.Service):
 
         # https://api.forvo.com/documentation/word-pronunciations/
         url = f'{self.url_base}/key/{self.key}/format/json/action/language-list/min-pronunciations/5000'
-        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout,
+                                    verify=self.verify_ssl)
         if response.status_code == 200:
             data = response.json()
             languages = data['items']

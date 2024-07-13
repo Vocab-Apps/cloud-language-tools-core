@@ -332,6 +332,8 @@ class AudioLanguage(enum.Enum):
     id_ID = (Language.id_, "Indonesian")
     is_IS = (Language.is_, "Icelandic")
     it_IT = (Language.it, "Italian")
+    iu_Latn_CA = (Language.iu_latn, "Inuktitut (Latin, Canada)")
+    iu_Cans_CA = (Language.iu, "Inuktitut (Syllabics, Canada)")
     ja_JP = (Language.ja, "Japanese")
     jv_ID = (Language.jw, "Javanese (Indonesia)")
     ka_GE = (Language.ka, "Georgian (Georgia)")

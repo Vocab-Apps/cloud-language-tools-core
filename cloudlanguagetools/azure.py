@@ -91,6 +91,12 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         return VOICE_OPTIONS
 
 def locale_to_audio_language(locale: str) -> cloudlanguagetools.languages.AudioLanguage:
+
+    locale_override_map = {
+        'zh-CN-shanxi': 'zh-CN-shaanxi'
+    }
+    locale = locale_override_map.get(locale, locale)
+
     locale = AUDIO_LOCALE_OVERRIDE_MAP.get(locale, locale)
     language_enum_name = locale.replace('-', '_')
     audio_language = cloudlanguagetools.languages.AudioLanguage[language_enum_name]    
@@ -159,7 +165,7 @@ def get_translation_language_enum(language_id):
         'iu-Latn': 'iu_latn',
         'lug': 'lg',
         'nya': 'ny',
-        'run': 'rn'
+        'run': 'rn',
     }
     if language_id in azure_language_id_map:
         language_id = azure_language_id_map[language_id]

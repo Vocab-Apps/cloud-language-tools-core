@@ -406,6 +406,11 @@ class TestAudio(unittest.TestCase):
         source_text = 'absolument'
         self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.fr_FR, 'fr-FR')
 
+    def test_mandarin_forvo(self):
+        # pytest tests/test_audio.py -k test_mandarin_forvo
+        source_text = '你好'
+        self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.zh_CN, 'zh-CN')
+
     def test_french_cereproc(self):
         # pytest test_audio.py -k test_french_cereproc
         source_text = 'absolument'

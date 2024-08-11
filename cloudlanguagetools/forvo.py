@@ -127,8 +127,8 @@ class ForvoService(cloudlanguagetools.service.Service):
             'ind': 'id_',
             'pt': 'pt_pt'
         }
-        if language_id in forvo_language_id_map:
-            language_id = forvo_language_id_map[language_id]
+        language_id = forvo_language_id_map.get(language_id, language_id)
+        logger.debug(f'looking for {language_id}')
         return cloudlanguagetools.languages.Language[language_id]
 
     def get_audio_language_enum(self, language_id):
@@ -226,12 +226,17 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.zh_HK: 'HKG',
             cloudlanguagetools.languages.AudioLanguage.yue_CN: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.wuu_CN: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.nan_CN: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_henan: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_liaoning: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_shaanxi: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_shandong: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_sichuan: 'CHN',
             cloudlanguagetools.languages.AudioLanguage.zh_CN_guangxi: 'CHN',
+
+            cloudlanguagetools.languages.AudioLanguage.zh_CN_gansu: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.zh_CN_anhui: 'CHN',
+            cloudlanguagetools.languages.AudioLanguage.zh_CN_hunan: 'CHN'
 
         }
         if audio_language not in country_code_map:
@@ -244,6 +249,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             language_enum = self.get_language_enum(language_code)
             # create as many voices as there are audio languages available
 
+            logger.debug(f'processing language_enum {language_enum}')
             audio_language_list = self.audio_language_map[language_enum]
             
             voices = []
@@ -287,7 +293,8 @@ class ForvoService(cloudlanguagetools.service.Service):
             data = response.json()
             languages = data['items']
             for language in languages:
-                voice_list.extend(self.get_voices_for_language_entry(language))
+                language_voice_list = self.get_voices_for_language_entry(language)
+                voice_list.extend(language_voice_list)
 
             # pprint.pprint(data)
         else:

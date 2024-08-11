@@ -195,7 +195,8 @@ def get_forvo_voice_list():
     manager = get_manager()
     #tts_voice_list_json = manager.get_tts_voice_list_json()
     # print(tts_voice_list_json)    
-    manager.services[cloudlanguagetools.constants.Service.Forvo.name].get_tts_voice_list()
+    voice_list = manager.services[cloudlanguagetools.constants.Service.Forvo.name].get_tts_voice_list_v3()
+    pprint.pprint(voice_list)
 
 def get_amazon_voice_list_awesometts():
     manager = get_manager()
@@ -1107,7 +1108,7 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                         datefmt='%Y%m%d-%H:%M:%S',
                         stream=sys.stdout,
-                        level=logging.INFO)
+                        level=logging.DEBUG)
 
     # generate_video_audio()
     # test_azure_audio()
@@ -1115,14 +1116,14 @@ if __name__ == '__main__':
     # test_forvo_audio_tokipona()
     # play_google_audio()
     # play_azure_audio()
-    get_voice_list()
+    # get_voice_list()
     # get_azure_voice_list()
     # get_voice_list_awesometts()
     # get_elevenlabs_voice_list()
     # elevenlabs_api_test()
     # get_watson_voice_list()
     # get_amazon_voice_list()
-    # get_forvo_voice_list()
+    get_forvo_voice_list()
     # get_amazon_voice_list_awesometts()
     # get_azure_translation_languages()
     # get_google_translation_languages()

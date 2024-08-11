@@ -247,12 +247,13 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             model_short_name = model_name.replace('Eleven ', '').strip()
             # for language_record in model['languages']:
             for voice_data in data['voices']:
+                voice_name = voice_data['name']
                 try:
                     languages = model['languages']
                     language_id_list = [language_record['language_id'] for language_record in languages]
                     audio_language_enum_list = [self.get_audio_language(language_id) for language_id in language_id_list]
                     voice = cloudlanguagetools.ttsvoice.TtsVoice_v3(
-                        name=voice_data['name'],
+                        name=f'{voice_name} ({model_short_name})',
                         voice_key={
                             'voice_id': voice_data['voice_id'],
                             'model_id': model_id,

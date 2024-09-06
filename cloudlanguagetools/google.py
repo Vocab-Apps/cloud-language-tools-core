@@ -86,6 +86,7 @@ def get_translation_language_enum(language_id):
         'or': 'or_',
         'pt': 'pt_br',
         'pt-pt': 'pt_pt',
+        'pt-PT': 'pt_pt',
         'sr': 'sr_cyrl',
         'sr-Cyrl': 'sr_cyrl',
         'sr-Latn': 'sr_latn',

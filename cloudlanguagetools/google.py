@@ -202,7 +202,7 @@ class GoogleService(cloudlanguagetools.service.Service):
                 translation_language = GoogleTranslationLanguage(entry['language'])
                 result_dict[translation_language.get_language_code()] = translation_language
             except KeyError:
-                logging.error(f'could not process translation language for {entry}', exc_info=True)                
+                logging.warn(f'could not process translation language for {entry}', exc_info=True)
         return result_dict.values()
 
     def get_transliteration_language_list(self):

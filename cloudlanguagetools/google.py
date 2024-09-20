@@ -146,36 +146,41 @@ class GoogleService(cloudlanguagetools.service.Service):
             cloudlanguagetools.options.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS
         }
 
-        client = self.get_client()
+        try:
+            client = self.get_client()
 
-        ssml_text = '<speak>' + text + '</speak>'
-        input_text = google.cloud.texttospeech.SynthesisInput(ssml=ssml_text)
+            ssml_text = '<speak>' + text + '</speak>'
+            input_text = google.cloud.texttospeech.SynthesisInput(ssml=ssml_text)
 
-        # Note: the voice can also be specified by name.
-        # Names of voices can be retrieved with client.list_voices().
-        voice = google.cloud.texttospeech.VoiceSelectionParams(
-            name=voice_key['name'],
-            language_code=voice_key['language_code'],
-            ssml_gender=google.cloud.texttospeech.SsmlVoiceGender[voice_key['ssml_gender']]
-        )
+            # Note: the voice can also be specified by name.
+            # Names of voices can be retrieved with client.list_voices().
+            voice = google.cloud.texttospeech.VoiceSelectionParams(
+                name=voice_key['name'],
+                language_code=voice_key['language_code'],
+                ssml_gender=google.cloud.texttospeech.SsmlVoiceGender[voice_key['ssml_gender']]
+            )
 
-        audio_config = google.cloud.texttospeech.AudioConfig(
-            audio_encoding=audio_format_map[audio_format],
-            speaking_rate=options.get('speaking_rate', 1.0),
-            pitch=options.get('pitch', 0.0)
-        )
+            audio_config = google.cloud.texttospeech.AudioConfig(
+                audio_encoding=audio_format_map[audio_format],
+                speaking_rate=options.get('speaking_rate', 1.0),
+                pitch=options.get('pitch', 0.0)
+            )
 
-        response = client.synthesize_speech(
-            request={"input": input_text, "voice": voice, "audio_config": audio_config}
-        )
+            response = client.synthesize_speech(
+                request={"input": input_text, "voice": voice, "audio_config": audio_config}
+            )
 
-        # The response's audio_content is binary.
-        output_temp_file = tempfile.NamedTemporaryFile()
-        output_temp_filename = output_temp_file.name        
-        with open(output_temp_filename, "wb") as out:
-            out.write(response.audio_content)
+            # The response's audio_content is binary.
+            output_temp_file = tempfile.NamedTemporaryFile()
+            output_temp_filename = output_temp_file.name        
+            with open(output_temp_filename, "wb") as out:
+                out.write(response.audio_content)
 
-        return output_temp_file
+            return output_temp_file
+        except google.api_core.exceptions.BadRequest as bad_request_exception:
+            logger.exception(bad_request_exception)
+            error_message = f'Could not generate audio: {str(bad_request_exception)}'
+            raise cloudlanguagetools.errors.RequestError(error_message)
 
 
     def get_tts_voice_list(self):

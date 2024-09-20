@@ -35,6 +35,7 @@ def get_manager():
 
 class TestAudio(unittest.TestCase):
 
+    ENGLISH_INPUT_TEXT = 'This is the best restaurant in town.'
     FRENCH_INPUT_TEXT = "On a volé mes affaires."
     JAPANESE_INPUT_TEXT = 'おはようございます'
     CHINESE_INPUT_TEXT = '老人家'
@@ -463,6 +464,20 @@ class TestAudio(unittest.TestCase):
         
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
+
+    def test_google_voice_journey(self):
+        service = 'Google'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {
+            'name': 'en-US-Journey-F', 
+            'language_code': 'en-US', 
+            'ssml_gender': 'FEMALE'}
+
+        # seems to return:
+        # google.api_core.exceptions.InvalidArgument: 400 This voice currently only supports LINEAR16 and MULAW output.
+        # ensure that exception is properly wrapped
+        self.assertRaises(cloudlanguagetools.errors.RequestError, self.manager.get_tts_audio, source_text, service, voice_key, {})
 
     def test_google_format_ogg(self):
         service = 'Google'

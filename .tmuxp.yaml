@@ -1,0 +1,17 @@
+session_name: clt-core
+start_directory: ./ # load session relative to config location (project root).
+shell_command_before:
+  - cmd: source ${HOME}/python-env/cloud-language-tools-core/bin/activate
+    sleep_before: 1
+    sleep_after: 1
+  - cmd: source .bash_aliases
+  - cmd: source ~/secrets/cloudlanguagetools/cloudlanguagetools_core_secret.sh
+  - cmd: source ~/secrets/python/twine.sh
+windows:
+- window_name: clt-core
+  focus: true
+- window_name: git
+- window_name: htop
+  panes:
+    - shell_command: 
+      - htop

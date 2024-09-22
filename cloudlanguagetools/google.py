@@ -13,6 +13,9 @@ import cloudlanguagetools.languages
 
 logger = logging.getLogger(__name__)
 
+# updates on google text to speech:
+# https://cloud.google.com/text-to-speech/docs/release-notes
+
 def language_code_to_enum(language_code):
     override_map = {
         'cmn-TW': cloudlanguagetools.languages.AudioLanguage.zh_TW,

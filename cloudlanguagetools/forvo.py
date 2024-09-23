@@ -170,8 +170,9 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.ta_SG: 'SGP',
             cloudlanguagetools.languages.AudioLanguage.ta_MY: 'MYS',
 
-
-
+            # portuguese
+            cloudlanguagetools.languages.AudioLanguage.pt_PT: 'PRT',
+            cloudlanguagetools.languages.AudioLanguage.pt_BR: 'BRA',
 
             # arabic
             cloudlanguagetools.languages.AudioLanguage.ar_AE: 'ARE',
@@ -251,7 +252,14 @@ class ForvoService(cloudlanguagetools.service.Service):
 
             logger.debug(f'processing language_enum {language_enum}')
             audio_language_list = self.audio_language_map[language_enum]
-            
+
+            # special handling for portugese. we need to add both countries manually.
+            if language_enum == cloudlanguagetools.languages.Language.pt_pt:
+                audio_language_list = [
+                    cloudlanguagetools.languages.AudioLanguage.pt_PT,
+                    cloudlanguagetools.languages.AudioLanguage.pt_BR
+                ]
+
             voices = []
 
             for gender in cloudlanguagetools.constants.Gender:
@@ -296,7 +304,7 @@ class ForvoService(cloudlanguagetools.service.Service):
                 language_voice_list = self.get_voices_for_language_entry(language)
                 voice_list.extend(language_voice_list)
 
-            # pprint.pprint(data)
+            pprint.pprint(data)
         else:
             print(response.content)
 

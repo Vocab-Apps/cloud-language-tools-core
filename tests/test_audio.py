@@ -407,6 +407,11 @@ class TestAudio(unittest.TestCase):
         source_text = 'absolument'
         self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.fr_FR, 'fr-FR')
 
+    def test_portugal_portuguese_forvo(self):
+        # pytest test_audio.py -k test_brazilian_portuguese_forvo
+        source_text = 'obrigado'
+        self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.pt_PT, 'pt-PT')
+
     def test_brazilian_portuguese_forvo(self):
         # pytest test_audio.py -k test_brazilian_portuguese_forvo
         source_text = 'obrigado'

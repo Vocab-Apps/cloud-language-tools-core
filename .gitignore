@@ -7,3 +7,4 @@ dist/
 __pycache__/
 services_configuration.json
 temp_data_files/
+.aider.*

@@ -295,7 +295,7 @@ class TestAudio(unittest.TestCase):
         self.verify_service_audio_language(source_text, Service.VocalWare, AudioLanguage.zh_CN, 'zh-CN')
 
     def test_cantonese_google(self):
-        source_text = '天氣預報'
+        source_text = self.CHINESE_INPUT_TEXT_SIMPLE
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.zh_HK, 'zh-HK')
 
     def test_cantonese_azure(self):

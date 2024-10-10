@@ -36,7 +36,7 @@ def get_manager():
 class TestAudio(unittest.TestCase):
 
     ENGLISH_INPUT_TEXT = 'This is the best restaurant in town.'
-    FRENCH_INPUT_TEXT = "On a volé mes affaires."
+    FRENCH_INPUT_TEXT = 'Bonjour'
     JAPANESE_INPUT_TEXT = 'おはようございます'
     CHINESE_INPUT_TEXT = '你好'
     KOREAN_INPUT_TEXT = '여보세요'

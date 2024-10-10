@@ -39,6 +39,7 @@ class TestAudio(unittest.TestCase):
     FRENCH_INPUT_TEXT = "On a volé mes affaires."
     JAPANESE_INPUT_TEXT = 'おはようございます'
     CHINESE_INPUT_TEXT = '老人家'
+    CHINESE_INPUT_TEXT_SIMPLE = '你好'
     KOREAN_INPUT_TEXT = '여보세요'
 
     @classmethod
@@ -204,11 +205,11 @@ class TestAudio(unittest.TestCase):
         self.verify_service_audio_language(source_text, Service.Amazon, AudioLanguage.fr_FR, 'fr-FR')        
 
     def test_mandarin_google(self):
-        source_text = '老人家'
+        source_text = self.CHINESE_INPUT_TEXT_SIMPLE
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.zh_CN, 'zh-CN')
 
     def test_mandarin_azure(self):
-        source_text = '你好'
+        source_text = self.CHINESE_INPUT_TEXT_SIMPLE
         self.verify_service_audio_language(source_text, Service.Azure, AudioLanguage.zh_CN, 'zh-CN') 
 
     def test_azure_standard_voice_deprecated(self):

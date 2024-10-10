@@ -6,6 +6,7 @@ import base64
 import json
 import tempfile
 import shutil 
+import subprocess
 import unittest
 import pydub
 import pydub.playback
@@ -33,7 +34,7 @@ def test_azure_audio():
     manager = get_manager()
 
     service = 'Azure'
-    text = """<mstts:silence type="Sentenceboundary" value="200ms"/>My mother is ill. She's in bed."""
+    text = "this is a test sentence"
     voice_key = {
         'name': 'Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)' 
     }
@@ -42,6 +43,8 @@ def test_azure_audio():
     permanent_file_name = 'azure_output.mp3'
     shutil.copyfile(result.name, permanent_file_name)
     print(f'tts result: {permanent_file_name}')
+    # result = subprocess.run(['ffprobe', '-i', permanent_file_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # print(result.stderr)
 
 def generate_video_audio():
     manager = get_manager()
@@ -1111,7 +1114,7 @@ if __name__ == '__main__':
                         level=logging.DEBUG)
 
     # generate_video_audio()
-    # test_azure_audio()
+    test_azure_audio()
     # test_google_audio()
     # test_forvo_audio_tokipona()
     # play_google_audio()
@@ -1149,7 +1152,7 @@ if __name__ == '__main__':
     # test_debounce()
     # load_vocalware_voices()
     # thai_tokenization()
-    test_get_language_data()
+    # test_get_language_data()
     # test_get_language_data_redis()
     # test_wenlin_lookup()
     # openai_test()

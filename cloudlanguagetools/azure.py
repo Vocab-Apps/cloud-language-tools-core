@@ -262,9 +262,12 @@ class AzureService(cloudlanguagetools.service.Service):
         audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
         audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
 
+        # https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech?tabs=streaming#audio-outputs
+        # https://learn.microsoft.com/en-us/python/api/azure-cognitiveservices-speech/azure.cognitiveservices.speech.speechsynthesisoutputformat?view=azure-python
         audio_format_map = {
             cloudlanguagetools.options.AudioFormat.mp3: 'Audio24Khz96KBitRateMonoMp3',
-            cloudlanguagetools.options.AudioFormat.ogg_opus: 'Ogg48Khz16BitMonoOpus'
+            cloudlanguagetools.options.AudioFormat.ogg_opus: 'Ogg48Khz16BitMonoOpus',
+            cloudlanguagetools.options.AudioFormat.wav: 'Riff48Khz16BitMonoPcm',
         }
 
         output_temp_file = tempfile.NamedTemporaryFile(prefix=f'cloudlanguage_tools_{self.__class__.__name__}_audio', suffix=f'.{audio_format.name}')

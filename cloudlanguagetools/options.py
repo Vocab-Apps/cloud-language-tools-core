@@ -11,3 +11,4 @@ class AudioFormat(enum.Enum):
     mp3 = enum.auto()
     ogg_opus = enum.auto()
     ogg_vorbis = enum.auto()
+    wav = enum.auto()

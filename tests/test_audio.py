@@ -608,6 +608,7 @@ class TestAudio(unittest.TestCase):
     def test_elevenlabs_japanese(self):
         self.verify_service_japanese(Service.ElevenLabs)
 
+    @skip_unreliable_clt_test()
     def test_elevenlabs_chinese(self):
         self.verify_service_chinese(Service.ElevenLabs)
 

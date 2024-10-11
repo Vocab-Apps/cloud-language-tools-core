@@ -367,6 +367,7 @@ class TestAudio(unittest.TestCase):
         source_text = 'hello <break time="50ms"/>world'
         self.verify_service_audio_language(source_text, Service.Google, AudioLanguage.en_US, 'en-US')
 
+    @skip_unreliable_clt_test()
     def test_ssml_english_azure(self):
         # pytest tests/test_audio.py -k test_ssml_english_azure
         source_text = 'hello <break time="200ms"/>world'

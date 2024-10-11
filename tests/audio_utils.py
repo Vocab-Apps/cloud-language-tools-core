@@ -33,3 +33,8 @@ def is_ogg_opus_format(filename):
     mime_type = magic.from_file(filename)
     expected_mime_type_str = 'Ogg data, Opus audio,'
     return expected_mime_type_str in mime_type
+
+def is_wav_format(filename):
+    mime_type = magic.from_file(filename)
+    expected_mime_type_str = 'PCM'
+    return expected_mime_type_str in mime_type    

@@ -54,6 +54,7 @@ VOICE_OPTIONS = {
                 'values': [
                     cloudlanguagetools.options.AudioFormat.mp3.name,
                     cloudlanguagetools.options.AudioFormat.ogg_opus.name,
+                    cloudlanguagetools.options.AudioFormat.wav.name,
                 ],
                 'default': cloudlanguagetools.options.AudioFormat.mp3.name
             }

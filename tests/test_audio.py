@@ -489,6 +489,22 @@ class TestAudio(unittest.TestCase):
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
 
+    def test_azure_format_wav(self):
+        service = 'Azure'
+        source_text = self.FRENCH_INPUT_TEXT
+
+        voice_key = {
+            "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
+        }
+        options = {'format': 'wav'}
+
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+
+        self.assertTrue(audio_utils.is_wav_format(audio_temp_file.name))
+        
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
+        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))                
+
     def test_google_voice_journey(self):
         service = 'Google'
         source_text = self.ENGLISH_INPUT_TEXT

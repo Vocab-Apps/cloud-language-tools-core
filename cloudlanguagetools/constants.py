@@ -55,6 +55,8 @@ class APIVersion(enum.Enum):
 # ======================================
 
 RequestTimeout = 10 # 10 seconds max
+# need to change timeout for long requests, such as retrieving list of services
+RequestTimeoutLong = 20 # 10 seconds max
 ReadTimeout = 3 # 3 seconds read timeout
 
 TTLCacheTimeout = 86400 # 24 hours

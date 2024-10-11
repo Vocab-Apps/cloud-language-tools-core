@@ -330,17 +330,18 @@ class AzureService(cloudlanguagetools.service.Service):
         headers = {
             'Authorization': 'Bearer ' + token,
         }        
-        response = requests.get(constructed_url, headers=headers)
-        if response.status_code == 200:
-            voice_list = json.loads(response.content)
-            result = []
-            for voice_data in voice_list:
-                # print(voice_data['Status'])
-                try:
-                    result.append(AzureVoice(voice_data))
-                except KeyError:
-                    logging.error(f'could not process voice for {voice_data}', exc_info=True)
-            return result
+        response = requests.get(constructed_url, headers=headers, 
+            timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
+        voice_list = json.loads(response.content)
+        result = []
+        for voice_data in voice_list:
+            # print(voice_data['Status'])
+            try:
+                result.append(AzureVoice(voice_data))
+            except KeyError:
+                logging.error(f'could not process voice for {voice_data}', exc_info=True)
+        return result
 
     def get_tts_voice_list_v3(self) -> List[cloudlanguagetools.ttsvoice.TtsVoice_v3]:
         # returns list of TtsVoice_v3
@@ -353,17 +354,18 @@ class AzureService(cloudlanguagetools.service.Service):
         headers = {
             'Authorization': 'Bearer ' + token,
         }        
-        response = requests.get(constructed_url, headers=headers)
-        if response.status_code == 200:
-            voice_list = json.loads(response.content)
-            result = []
-            for voice_data in voice_list:
-                # print(voice_data['Status'])
-                try:
-                    result.append(build_tts_voice_v3(voice_data))
-                except:
-                    logger.exception(f'could not process voice for {voice_data}')
-            return result            
+        response = requests.get(constructed_url, headers=headers, 
+            timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
+        voice_list = json.loads(response.content)
+        result = []
+        for voice_data in voice_list:
+            # print(voice_data['Status'])
+            try:
+                result.append(build_tts_voice_v3(voice_data))
+            except:
+                logger.exception(f'could not process voice for {voice_data}')
+        return result            
 
     def get_translation(self, text, from_language_key, to_language_key):
         base_url = f'{self.url_translator_base}/translate?api-version=3.0'
@@ -427,7 +429,9 @@ class AzureService(cloudlanguagetools.service.Service):
             'X-ClientTraceId': str(uuid.uuid4())
         }
 
-        request = requests.get(url, headers=headers)
+        request = requests.get(url, headers=headers, 
+            timeout=cloudlanguagetools.constants.RequestTimeoutLong)
+        request.raise_for_status()
         response = request.json()
 
         return response

@@ -51,9 +51,9 @@ class TestAudio(unittest.TestCase):
 
     ENGLISH_INPUT_TEXT = 'This is the best restaurant in town.'
     FRENCH_INPUT_TEXT = 'Bonjour'
-    JAPANESE_INPUT_TEXT = 'おはようございます'
+    JAPANESE_INPUT_TEXT = 'こんにちは'
     CHINESE_INPUT_TEXT = '你好'
-    KOREAN_INPUT_TEXT = '여보세요'
+    KOREAN_INPUT_TEXT = '안녕하세요'
 
     @classmethod
     def setUpClass(cls):

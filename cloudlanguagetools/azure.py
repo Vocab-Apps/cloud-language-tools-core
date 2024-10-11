@@ -6,6 +6,7 @@ import operator
 import pydub
 import logging
 import pprint
+import time
 from typing import List
 
 import cloudlanguagetools.service
@@ -418,6 +419,8 @@ class AzureService(cloudlanguagetools.service.Service):
 
 
     def get_supported_languages(self):
+        max_retries = 3
+        retry_delay = 5  # seconds
         url = 'https://api.cognitive.microsofttranslator.com/languages?api-version=3.0'
 
         # If you encounter any issues with the base_url or path, make sure
@@ -429,12 +432,20 @@ class AzureService(cloudlanguagetools.service.Service):
             'X-ClientTraceId': str(uuid.uuid4())
         }
 
-        request = requests.get(url, headers=headers, 
-            timeout=cloudlanguagetools.constants.RequestTimeoutLong)
-        request.raise_for_status()
-        response = request.json()
-
-        return response
+        for attempt in range(max_retries):
+            try:
+                request = requests.get(url, headers=headers, 
+                    timeout=cloudlanguagetools.constants.RequestTimeoutLong)
+                request.raise_for_status()
+                response = request.json()
+                return response
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:  # If not the last attempt
+                    logging.warning(f"Request failed. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    time.sleep(retry_delay)
+                else:
+                    logging.error(f"Max retries reached. Unable to get supported languages.")
+                    raise  # Re-raise the last exception if all retries failed
 
         # print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))        
 

@@ -7,6 +7,7 @@ import pydub
 import logging
 import pprint
 import time
+import cachetools
 from typing import List
 
 import cloudlanguagetools.service
@@ -418,6 +419,7 @@ class AzureService(cloudlanguagetools.service.Service):
         return result
 
 
+    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
     def get_supported_languages(self):
         max_retries = 3
         retry_delay = 5  # seconds
@@ -441,10 +443,10 @@ class AzureService(cloudlanguagetools.service.Service):
                 return response
             except requests.exceptions.RequestException as e:
                 if attempt < max_retries - 1:  # If not the last attempt
-                    logging.warning(f"Request failed. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    logger.warning(f"Request failed. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
                     time.sleep(retry_delay)
                 else:
-                    logging.error(f"Max retries reached. Unable to get supported languages.")
+                    logger.error(f"Max retries reached. Unable to get supported languages.")
                     raise  # Re-raise the last exception if all retries failed
 
         # print(json.dumps(response, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))        

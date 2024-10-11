@@ -11,6 +11,7 @@ import pytest
 import json
 import time
 import pprint
+import functools
 
 import audio_utils
 
@@ -32,6 +33,19 @@ def get_manager():
     manager.configure_default()
 
     return manager
+
+
+
+def skip_unreliable_clt_test():
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if not CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE:
+                pytest.skip(f'you must set CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE=yes')
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
 
 class TestAudio(unittest.TestCase):
 
@@ -285,10 +299,9 @@ class TestAudio(unittest.TestCase):
         source_text = '老人家'
         self.verify_service_audio_language(source_text, Service.CereProc, AudioLanguage.zh_CN, 'zh-CN')
 
+    @skip_unreliable_clt_test()
     def test_mandarin_vocalware(self):
         # pytest test_audio.py -k test_mandarin_vocalware
-        if not CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE:
-            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE=yes')
         
         source_text = '你好'
         self.verify_service_audio_language(source_text, Service.VocalWare, AudioLanguage.zh_CN, 'zh-CN')

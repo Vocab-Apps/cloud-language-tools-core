@@ -5,6 +5,8 @@ import unittest
 import pytest
 import json
 import pprint
+import time
+import requests
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -21,11 +23,24 @@ def get_manager():
 
 class TestTranslation(unittest.TestCase):
     def setUp(self):
-        self.manager = get_manager()
-        self.language_list = self.manager.get_language_list()
-        self.translation_language_list = self.manager.get_translation_language_list_json()
-        self.transliteration_language_list = self.manager.get_transliteration_language_list_json()
-        self.tokenization_options = self.manager.get_tokenization_options_json()
+        max_retries = 3
+        retry_delay = 5  # seconds
+
+        for attempt in range(max_retries):
+            try:
+                self.manager = get_manager()
+                self.language_list = self.manager.get_language_list()
+                self.translation_language_list = self.manager.get_translation_language_list_json()
+                self.transliteration_language_list = self.manager.get_transliteration_language_list_json()
+                self.tokenization_options = self.manager.get_tokenization_options_json()
+                break  # If successful, break out of the retry loop
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:  # If not the last attempt
+                    logging.warning(f"Request failed. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    time.sleep(retry_delay)
+                else:
+                    logging.error(f"Max retries reached. Unable to set up the test environment.")
+                    raise  # Re-raise the last exception if all retries failed
 
     def test_language_list(self):
         self.assertTrue(len(self.language_list) > 0)

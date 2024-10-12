@@ -502,7 +502,7 @@ class TestAudio(unittest.TestCase):
 
         self.assertTrue(audio_utils.is_wav_format(audio_temp_file.name))
         
-        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.wav)
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))                
 
     def test_google_voice_journey(self):

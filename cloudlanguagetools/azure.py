@@ -493,6 +493,8 @@ class AzureService(cloudlanguagetools.service.Service):
             sound = pydub.AudioSegment.from_mp3(mp3_filepath)
         elif audio_format in [cloudlanguagetools.options.AudioFormat.ogg_opus, cloudlanguagetools.options.AudioFormat.ogg_vorbis]:
             sound = pydub.AudioSegment.from_ogg(mp3_filepath)
+        elif audio_format == cloudlanguagetools.options.AudioFormat.wav:
+            sound = pydub.AudioSegment.from_wav(mp3_filepath)
         wav_filepath = tempfile.NamedTemporaryFile(suffix='.wav').name
         sound.export(wav_filepath, format="wav")
 

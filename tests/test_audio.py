@@ -495,10 +495,13 @@ class TestAudio(unittest.TestCase):
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
 
     def verify_wav_voice(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, recognition_language: str):
-        options = {'format': 'wav'}
+        # assert that the wav format is in the list of supported formats
+        self.assertTrue(cloudlanguagetools.options.AudioFormat.wav.name in 
+                        voice.options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER]['values'])
+        options = {cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.options.AudioFormat.wav.name}
         audio_temp_file = self.manager.get_tts_audio(text, voice.service, voice.voice_key, options)
         self.assertTrue(audio_utils.is_wav_format(audio_temp_file.name))
-        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.wav)
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, recognition_language, audio_format=cloudlanguagetools.options.AudioFormat.wav)
         self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text))
 
     def test_azure_format_wav(self):

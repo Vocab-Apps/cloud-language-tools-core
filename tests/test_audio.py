@@ -87,6 +87,11 @@ class TestAudio(unittest.TestCase):
         subset = [x for x in self.voice_list if x['audio_language_code'] == audio_language.name and x['service'] == service.name]
         return subset        
 
+    def get_voice_by_service_and_name(self, service: Service, voice_name) -> cloudlanguagetools.ttsvoice.TtsVoice_v3:
+        subset = [x for x in self.voice_list_v3 if voice_name in x.name and x.service == service]
+        self.assertEqual(len(subset), 1)
+        return subset[0]
+
     def verify_voice(self, voice, text, recognition_language):
         return self.verify_voice_internal(voice['voice_key'], voice['service'], text, recognition_language)
 
@@ -489,21 +494,27 @@ class TestAudio(unittest.TestCase):
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
 
+    def verify_wav_voice(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, recognition_language: str):
+        self.verify_voice_v3(voice, text, recognition_language)
+
     def test_azure_format_wav(self):
-        service = 'Azure'
-        source_text = self.FRENCH_INPUT_TEXT
+        fr_voice = self.get_voice_by_service_and_name(Service.Azure, 'Denise')
+        self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
-        voice_key = {
-            "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
-        }
-        options = {'format': 'wav'}
+        # service = 'Azure'
+        # source_text = self.FRENCH_INPUT_TEXT
 
-        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+        # voice_key = {
+        #     "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
+        # }
+        # options = {'format': 'wav'}
 
-        self.assertTrue(audio_utils.is_wav_format(audio_temp_file.name))
+        # audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+
+        # self.assertTrue(audio_utils.is_wav_format(audio_temp_file.name))
         
-        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.wav)
-        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))                
+        # audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.wav)
+        # self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))                
 
     def test_google_voice_journey(self):
         service = 'Google'

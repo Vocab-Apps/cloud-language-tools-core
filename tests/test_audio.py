@@ -495,7 +495,12 @@ class TestAudio(unittest.TestCase):
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
 
     def verify_wav_voice(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, recognition_language: str):
-        self.verify_voice_v3(voice, text, recognition_language)
+        # self.verify_voice_v3(voice, text, recognition_language)
+        options = {'format': 'wav'}
+        audio_temp_file = self.manager.get_tts_audio(text, voice.service, voice.voice_key, options)
+        self.assertTrue(audio_utils.is_wav_format(audio_temp_file.name))
+        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.wav)
+        self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text))
 
     def test_azure_format_wav(self):
         fr_voice = self.get_voice_by_service_and_name(Service.Azure, 'Denise')

@@ -5,6 +5,7 @@ import os
 import boto3
 import botocore.exceptions
 import contextlib
+import wave
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -73,6 +74,7 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'values': [
                     cloudlanguagetools.options.AudioFormat.mp3.name,
                     cloudlanguagetools.options.AudioFormat.ogg_vorbis.name,
+                    cloudlanguagetools.options.AudioFormat.wav.name
                 ],
                 'default': cloudlanguagetools.options.AudioFormat.mp3.name
             }            
@@ -119,8 +121,11 @@ class AmazonService(cloudlanguagetools.service.Service):
 
         audio_format_map = {
             cloudlanguagetools.options.AudioFormat.mp3: 'mp3',
-            cloudlanguagetools.options.AudioFormat.ogg_vorbis: 'ogg_vorbis'
+            cloudlanguagetools.options.AudioFormat.ogg_vorbis: 'ogg_vorbis',
+            cloudlanguagetools.options.AudioFormat.wav: 'pcm'
         }
+        # wav, we need to convert as described here:
+        # https://aws.amazon.com/blogs/machine-learning/integrating-amazon-polly-with-legacy-ivr-systems-by-converting-output-to-wav-format/
 
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
@@ -143,7 +148,15 @@ class AmazonService(cloudlanguagetools.service.Service):
 </speak>"""
 
         try:
-            response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=audio_format_map[audio_format], VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
+            if audio_format == cloudlanguagetools.options.AudioFormat.wav:
+                response = self.polly_client.synthesize_speech(Text=ssml_str, 
+                    TextType="ssml", 
+                    OutputFormat=audio_format_map[audio_format], 
+                    VoiceId=voice_key['voice_id'], 
+                    Engine=voice_key['engine'],
+                    SampleRate="16000")
+            else:
+                response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=audio_format_map[audio_format], VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
             raise cloudlanguagetools.errors.RequestError(str(error))
 
@@ -153,8 +166,19 @@ class AmazonService(cloudlanguagetools.service.Service):
             # ensure the close method of the stream object will be called automatically
             # at the end of the with statement's scope.
             with contextlib.closing(response["AudioStream"]) as stream:
-                with open(output_temp_filename, 'wb') as audio:
-                    audio.write(stream.read())
+                if audio_format == cloudlanguagetools.options.AudioFormat.wav:
+                    wav_frames = []
+                    wav_frames.append(stream.read())
+
+                    WAVEFORMAT = wave.open(output_temp_filename,'wb')
+                    WAVEFORMAT.setnchannels(1) # one channel, mono
+                    WAVEFORMAT.setsampwidth(2) # Polly's output is a stream of 16-bits (2 bytes) samples
+                    WAVEFORMAT.setframerate(16000)
+                    WAVEFORMAT.writeframes(b''.join(wav_frames))
+                    WAVEFORMAT.close()
+                else:
+                    with open(output_temp_filename, 'wb') as audio:
+                        audio.write(stream.read())
                 return output_temp_file
 
         else:

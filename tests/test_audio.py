@@ -500,13 +500,17 @@ class TestAudio(unittest.TestCase):
                         voice.options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER]['values'])
         options = {cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.options.AudioFormat.wav.name}
         audio_temp_file = self.manager.get_tts_audio(text, voice.service, voice.voice_key, options)
-        self.assertTrue(audio_utils.is_wav_format(audio_temp_file.name))
+        audio_utils.assert_is_wav_format(self, audio_temp_file.name)
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, recognition_language, audio_format=cloudlanguagetools.options.AudioFormat.wav)
         self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text))
 
     def test_azure_format_wav(self):
         fr_voice = self.get_voice_by_service_and_name(Service.Azure, 'Denise')
         self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')
+
+    def test_amazon_format_wav(self):
+        fr_voice = self.get_voice_by_service_and_name(Service.Amazon, 'Mathieu')
+        self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')        
 
     def test_google_voice_journey(self):
         service = 'Google'

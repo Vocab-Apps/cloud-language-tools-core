@@ -34,7 +34,7 @@ def is_ogg_opus_format(filename):
     expected_mime_type_str = 'Ogg data, Opus audio,'
     return expected_mime_type_str in mime_type
 
-def is_wav_format(filename):
+def assert_is_wav_format(self, filename):
     mime_type = magic.from_file(filename)
     expected_mime_type_str = 'PCM'
-    return expected_mime_type_str in mime_type    
+    self.assertTrue(expected_mime_type_str in mime_type, f'checking for WAV format: expected [{expected_mime_type_str}] in mime type: [{mime_type}]')

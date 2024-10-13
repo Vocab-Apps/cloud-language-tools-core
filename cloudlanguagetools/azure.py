@@ -19,6 +19,7 @@ import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.dictionarylookup
 import cloudlanguagetools.errors
+from cloudlanguagetools.options import AudioFormat
 
 
 import azure.cognitiveservices.speech
@@ -261,22 +262,18 @@ class AzureService(cloudlanguagetools.service.Service):
         return headers        
 
     def get_tts_audio(self, text, voice_key, options):
-
-        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
-        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
-
         # https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech?tabs=streaming#audio-outputs
         # https://learn.microsoft.com/en-us/python/api/azure-cognitiveservices-speech/azure.cognitiveservices.speech.speechsynthesisoutputformat?view=azure-python
-        audio_format_map = {
-            cloudlanguagetools.options.AudioFormat.mp3: 'Audio24Khz96KBitRateMonoMp3',
-            cloudlanguagetools.options.AudioFormat.ogg_opus: 'Ogg48Khz16BitMonoOpus',
-            cloudlanguagetools.options.AudioFormat.wav: 'Riff48Khz16BitMonoPcm',
-        }
+        response_format_parameter, audio_format = self.get_request_audio_format({
+            AudioFormat.mp3: 'Audio24Khz96KBitRateMonoMp3',
+            AudioFormat.ogg_opus: 'Ogg48Khz16BitMonoOpus',
+            AudioFormat.wav: 'Riff48Khz16BitMonoPcm'
+        }, options, AudioFormat.mp3)
 
         output_temp_file = tempfile.NamedTemporaryFile(prefix=f'cloudlanguage_tools_{self.__class__.__name__}_audio', suffix=f'.{audio_format.name}')
         output_temp_filename = output_temp_file.name
         speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
-        speech_config.set_speech_synthesis_output_format(azure.cognitiveservices.speech.SpeechSynthesisOutputFormat[audio_format_map[audio_format]])
+        speech_config.set_speech_synthesis_output_format(azure.cognitiveservices.speech.SpeechSynthesisOutputFormat[response_format_parameter])
         synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
         default_pitch = 0

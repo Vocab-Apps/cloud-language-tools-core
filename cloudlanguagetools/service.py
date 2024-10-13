@@ -42,7 +42,7 @@ class Service():
             default_format.name)
         response_format = cloudlanguagetools.options.AudioFormat[response_format_str]
         response_format_parameter = format_map[response_format]
-        return response_format_parameter
+        return response_format_parameter, response_format
 
     # used for pre-loading models
     def load_data(self):

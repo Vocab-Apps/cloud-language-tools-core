@@ -534,6 +534,11 @@ class TestAudio(unittest.TestCase):
             lambda x: AudioLanguage.ko_KR in x.audio_languages, assert_unique=False)
         self.verify_wav_voice(ko_voice, self.KOREAN_INPUT_TEXT, 'ko-KR')
 
+    def test_openai_format_wav(self):
+        ko_voice = self.get_voice_by_lambda(Service.OpenAI,
+            lambda x: AudioLanguage.en_US in x.audio_languages, assert_unique=False)
+        self.verify_wav_voice(ko_voice, self.ENGLISH_INPUT_TEXT, 'en-US')
+
 
     def test_google_voice_journey(self):
         service = 'Google'

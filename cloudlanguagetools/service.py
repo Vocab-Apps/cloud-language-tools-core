@@ -21,9 +21,10 @@ class Service():
 
     def get_tts_audio_base_post_request(self, url, **kwargs):
         try:
+            kwargs['timeout'] = cloudlanguagetools.constants.RequestTimeout
             response = self.post_request(url, **kwargs)
             response.raise_for_status()
-            output_temp_file = tempfile.NamedTemporaryFile()
+            output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_audio_')
             output_temp_filename = output_temp_file.name            
             with open(output_temp_filename, 'wb') as audio:
                 audio.write(response.content)

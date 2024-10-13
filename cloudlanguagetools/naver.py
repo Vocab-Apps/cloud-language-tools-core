@@ -48,6 +48,14 @@ class NaverVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'min': -5,
                 'max': 5,
                 'default': NAVER_VOICE_PITCH_DEFAULT
+            },
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [
+                    cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.wav.name
+                ],
+                'default': cloudlanguagetools.options.AudioFormat.mp3.name
             }
         }
 
@@ -63,7 +71,7 @@ class NaverTranslationLanguage(cloudlanguagetools.translationlanguage.Translatio
 
 class NaverService(cloudlanguagetools.service.Service):
     def __init__(self):
-        pass
+        self.service = cloudlanguagetools.constants.Service.Naver
 
     def configure(self, config):
         self.client_id = config['client_id']
@@ -93,8 +101,14 @@ class NaverService(cloudlanguagetools.service.Service):
 
 
     def get_tts_audio(self, text, voice_key, options):
-        output_temp_file = tempfile.NamedTemporaryFile()
-        output_temp_filename = output_temp_file.name
+        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
+        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
+
+        audio_format_map = {
+            cloudlanguagetools.options.AudioFormat.mp3: 'mp3',
+            cloudlanguagetools.options.AudioFormat.wav: 'wav'
+        }
+        format_str = audio_format_map[audio_format]
 
         url = 'https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts'
         headers = {
@@ -107,19 +121,13 @@ class NaverService(cloudlanguagetools.service.Service):
             'text': text,
             'speaker': voice_key['name'],
             'speed': options.get('speed', NAVER_VOICE_SPEED_DEFAULT),
-            'pitch': options.get('pitch', NAVER_VOICE_PITCH_DEFAULT)
+            'pitch': options.get('pitch', NAVER_VOICE_PITCH_DEFAULT),
+            'format': format_str
         }
+        if audio_format == cloudlanguagetools.options.AudioFormat.wav:
+            data['sampling-rate'] = 48000
 
-        # alternate_data = 'speaker=clara&text=vehicle&volume=0&speed=0&pitch=0&format=mp3'
-        response = requests.post(url, data=data, headers=headers, timeout=cloudlanguagetools.constants.RequestTimeout)
-        if response.status_code == 200:
-            with open(output_temp_filename, 'wb') as audio:
-                audio.write(response.content)
-            return output_temp_file
-
-        response_data = response.json()
-        error_message = f'Status code: {response.status_code}: {response_data}'
-        raise cloudlanguagetools.errors.RequestError(error_message)
+        return self.get_tts_audio_base_post_request(url, data=data, headers=headers)
 
     def get_tts_voice_list(self):
         # returns list of TtSVoice

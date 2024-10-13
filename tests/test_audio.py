@@ -529,6 +529,11 @@ class TestAudio(unittest.TestCase):
             lambda x: AudioLanguage.fr_FR in x.audio_languages, assert_unique=False)
         self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
+    def test_naver_format_wav(self):
+        ko_voice = self.get_voice_by_lambda(Service.Naver,
+            lambda x: AudioLanguage.ko_KR in x.audio_languages, assert_unique=False)
+        self.verify_wav_voice(ko_voice, self.KOREAN_INPUT_TEXT, 'ko-KR')
+
 
     def test_google_voice_journey(self):
         service = 'Google'

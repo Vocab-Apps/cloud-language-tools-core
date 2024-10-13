@@ -102,14 +102,10 @@ class NaverService(cloudlanguagetools.service.Service):
 
 
     def get_tts_audio(self, text, voice_key, options):
-        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
-        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
-
-        audio_format_map = {
-            cloudlanguagetools.options.AudioFormat.mp3: 'mp3',
-            cloudlanguagetools.options.AudioFormat.wav: 'wav'
-        }
-        format_str = audio_format_map[audio_format]
+        response_format_parameter, audio_format = self.get_request_audio_format({
+            AudioFormat.mp3: 'mp3',
+            AudioFormat.wav: 'wav'
+        }, options, AudioFormat.mp3)
 
         url = 'https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts'
         headers = {
@@ -123,7 +119,7 @@ class NaverService(cloudlanguagetools.service.Service):
             'speaker': voice_key['name'],
             'speed': options.get('speed', NAVER_VOICE_SPEED_DEFAULT),
             'pitch': options.get('pitch', NAVER_VOICE_PITCH_DEFAULT),
-            'format': format_str
+            'format': response_format_parameter
         }
         if audio_format == cloudlanguagetools.options.AudioFormat.wav:
             data['sampling-rate'] = 48000

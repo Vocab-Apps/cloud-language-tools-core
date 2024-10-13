@@ -219,7 +219,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
         output_temp_file = tempfile.NamedTemporaryFile()
 
         speed = options.get('speed', DEFAULT_TTS_SPEED)
-        response_format_parameter = self.get_request_audio_format({
+        response_format_parameter, audio_format = self.get_request_audio_format({
             AudioFormat.mp3: 'mp3',
             AudioFormat.ogg_opus: 'opus',
             AudioFormat.wav: 'wav'

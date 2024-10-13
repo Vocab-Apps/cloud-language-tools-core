@@ -16,6 +16,7 @@ import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
+from cloudlanguagetools.options import AudioFormat
 
 logger = logging.getLogger(__name__)
 
@@ -93,15 +94,10 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         voice_id = voice_key['voice_id']
         url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'
 
-
-        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
-        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
-
-        audio_format_map = {
-            cloudlanguagetools.options.AudioFormat.mp3: 'mp3_44100_128',
-            cloudlanguagetools.options.AudioFormat.wav: 'pcm_44100'
-        }
-        output_format = audio_format_map[audio_format]
+        response_format_parameter, audio_format = self.get_request_audio_format({
+            AudioFormat.mp3: 'mp3_44100_128',
+            AudioFormat.wav: 'pcm_44100'
+        }, options, AudioFormat.mp3)
 
         headers = self.get_headers()
         headers['Accept'] = "audio/mpeg"
@@ -116,7 +112,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         }
 
         query_params = {
-            'output_format': output_format
+            'output_format': response_format_parameter
         }
         full_url = f'{url}?{urllib.parse.urlencode(query_params)}'
 

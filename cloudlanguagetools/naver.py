@@ -13,6 +13,7 @@ import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
+from cloudlanguagetools.options import AudioFormat
 
 NAVER_VOICE_SPEED_DEFAULT = 0
 NAVER_VOICE_PITCH_DEFAULT = 0

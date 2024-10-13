@@ -12,6 +12,7 @@ import cloudlanguagetools.languages
 import cloudlanguagetools.options
 
 from cloudlanguagetools.languages import AudioLanguage
+from cloudlanguagetools.options import AudioFormat
 
 logger = logging.getLogger(__name__)
 
@@ -218,15 +219,20 @@ class OpenAIService(cloudlanguagetools.service.Service):
         output_temp_file = tempfile.NamedTemporaryFile()
 
         speed = options.get('speed', DEFAULT_TTS_SPEED)
-        response_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, 
-            cloudlanguagetools.options.AudioFormat.mp3.name)
-        response_format = cloudlanguagetools.options.AudioFormat[response_format_str]
-        response_format_map = {
-            cloudlanguagetools.options.AudioFormat.mp3: 'mp3',
-            cloudlanguagetools.options.AudioFormat.ogg_opus: 'opus',
-            cloudlanguagetools.options.AudioFormat.wav: 'wav'
-        }
-        response_format_parameter = response_format_map[response_format]
+        response_format_parameter = self.get_request_audio_format({
+            AudioFormat.mp3: 'mp3',
+            AudioFormat.ogg_opus: 'opus',
+            AudioFormat.wav: 'wav'
+        }, options, AudioFormat.mp3)
+        # response_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, 
+        #     cloudlanguagetools.options.AudioFormat.mp3.name)
+        # response_format = cloudlanguagetools.options.AudioFormat[response_format_str]
+        # response_format_map = {
+        #     cloudlanguagetools.options.AudioFormat.mp3: 'mp3',
+        #     cloudlanguagetools.options.AudioFormat.ogg_opus: 'opus',
+        #     cloudlanguagetools.options.AudioFormat.wav: 'wav'
+        # }
+        # response_format_parameter = response_format_map[response_format]
 
         response = self.client.audio.speech.create(
             model='tts-1-hd',

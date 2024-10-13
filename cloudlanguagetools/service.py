@@ -1,10 +1,11 @@
 import requests
 import tempfile
 import logging
-from typing import List
+from typing import List, Dict
 
 import cloudlanguagetools.constants
 import cloudlanguagetools.ttsvoice
+import cloudlanguagetools.options
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,13 @@ class Service():
             error_message = f'could not retrieve audio from {self.get_service_name()}'
             logger.exception(error_message)
             raise cloudlanguagetools.errors.RequestError(error_message)
+
+    def get_request_audio_format(self, format_map: Dict, options: Dict, default_format: cloudlanguagetools.options.AudioFormat):
+        response_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, 
+            default_format.name)
+        response_format = cloudlanguagetools.options.AudioFormat[response_format_str]
+        response_format_parameter = format_map[response_format]
+        return response_format_parameter
 
     # used for pre-loading models
     def load_data(self):

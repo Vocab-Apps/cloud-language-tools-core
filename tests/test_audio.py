@@ -539,6 +539,11 @@ class TestAudio(unittest.TestCase):
             lambda x: AudioLanguage.en_US in x.audio_languages, assert_unique=False)
         self.verify_wav_voice(ko_voice, self.ENGLISH_INPUT_TEXT, 'en-US')
 
+    def test_watson_format_wav(self):
+        en_voice = self.get_voice_by_lambda(Service.Watson,
+            lambda x: AudioLanguage.en_US in x.audio_languages, assert_unique=False)
+        self.verify_wav_voice(en_voice, self.ENGLISH_INPUT_TEXT, 'en-US')
+
 
     def test_google_voice_journey(self):
         service = 'Google'

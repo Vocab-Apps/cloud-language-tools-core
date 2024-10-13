@@ -11,6 +11,7 @@ import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
+from cloudlanguagetools.options import AudioFormat
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +72,18 @@ class WatsonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         return self.description.split(':')[0] + is_dnn
 
     def get_options(self):
-        return {}
+        return {
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [
+                    cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.ogg_opus.name,
+                    cloudlanguagetools.options.AudioFormat.ogg_vorbis.name,
+                    cloudlanguagetools.options.AudioFormat.wav.name
+                ],
+                'default': cloudlanguagetools.options.AudioFormat.mp3.name
+            }
+        }
 
 class WatsonService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -124,6 +136,13 @@ class WatsonService(cloudlanguagetools.service.Service):
         return result
 
     def get_tts_audio(self, text, voice_key, options):
+        response_format_parameter, audio_format = self.get_request_audio_format({
+            AudioFormat.mp3: 'audio/mp3',
+            AudioFormat.ogg_opus: 'audio/ogg;codecs=opus',
+            AudioFormat.ogg_vorbis: 'audio/ogg;codecs=vorbis',
+            AudioFormat.wav: 'audio/wav;rate=48000'
+        }, options, AudioFormat.mp3)
+
         output_temp_file = tempfile.NamedTemporaryFile()
         output_temp_filename = output_temp_file.name
 
@@ -133,7 +152,7 @@ class WatsonService(cloudlanguagetools.service.Service):
         constructed_url = base_url + url_path + f'?voice={voice_name}'
         headers = {
             'Content-Type': 'application/json',
-            'Accept': 'audio/mp3'
+            'Accept': response_format_parameter
         }
 
         data = {

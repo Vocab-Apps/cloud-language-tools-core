@@ -74,6 +74,7 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'values': [
                     cloudlanguagetools.options.AudioFormat.mp3.name,
                     cloudlanguagetools.options.AudioFormat.ogg_opus.name,
+                    cloudlanguagetools.options.AudioFormat.wav.name
                 ],
                 'default': cloudlanguagetools.options.AudioFormat.mp3.name
             }            
@@ -146,7 +147,8 @@ class GoogleService(cloudlanguagetools.service.Service):
 
         audio_format_map = {
             cloudlanguagetools.options.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.MP3,
-            cloudlanguagetools.options.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS
+            cloudlanguagetools.options.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS,
+            cloudlanguagetools.options.AudioFormat.wav: google.cloud.texttospeech.AudioEncoding.LINEAR16
         }
 
         try:

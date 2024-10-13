@@ -92,6 +92,12 @@ class TestAudio(unittest.TestCase):
         self.assertEqual(len(subset), 1)
         return subset[0]
 
+    def get_voice_by_lambda(self, service: Service, filter_func):
+        service_voices = [x for x in self.voice_list_v3 if x.service == service]
+        subset = [x for x in service_voices if filter_func(x)]
+        self.assertEqual(len(subset), 1, pprint.pformat(subset))
+        return subset[0]
+
     def verify_voice(self, voice, text, recognition_language):
         return self.verify_voice_internal(voice['voice_key'], voice['service'], text, recognition_language)
 
@@ -510,6 +516,11 @@ class TestAudio(unittest.TestCase):
 
     def test_amazon_format_wav(self):
         fr_voice = self.get_voice_by_service_and_name(Service.Amazon, 'Mathieu')
+        self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')
+
+    def test_elevenlabs_format_wav(self):
+        fr_voice = self.get_voice_by_lambda(Service.ElevenLabs, 
+            lambda x: 'Charlotte' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
         self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')        
 
     def test_google_voice_journey(self):

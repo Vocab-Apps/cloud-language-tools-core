@@ -5,7 +5,7 @@ import os
 import boto3
 import botocore.exceptions
 import contextlib
-import wave
+
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -15,6 +15,7 @@ import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
+import cloudlanguagetools.audio_processing
 
 DEFAULT_VOICE_PITCH = 0
 DEFAULT_VOICE_RATE = 100
@@ -166,19 +167,14 @@ class AmazonService(cloudlanguagetools.service.Service):
             # ensure the close method of the stream object will be called automatically
             # at the end of the with statement's scope.
             with contextlib.closing(response["AudioStream"]) as stream:
-                if audio_format == cloudlanguagetools.options.AudioFormat.wav:
-                    wav_frames = []
-                    wav_frames.append(stream.read())
+                with open(output_temp_filename, 'wb') as audio:
+                    audio.write(stream.read())
 
-                    WAVEFORMAT = wave.open(output_temp_filename,'wb')
-                    WAVEFORMAT.setnchannels(1) # one channel, mono
-                    WAVEFORMAT.setsampwidth(2) # Polly's output is a stream of 16-bits (2 bytes) samples
-                    WAVEFORMAT.setframerate(16000)
-                    WAVEFORMAT.writeframes(b''.join(wav_frames))
-                    WAVEFORMAT.close()
-                else:
-                    with open(output_temp_filename, 'wb') as audio:
-                        audio.write(stream.read())
+                if audio_format == cloudlanguagetools.options.AudioFormat.wav:
+                    return cloudlanguagetools.audio_processing.wrap_pcm_data_wave(output_temp_file, 
+                        num_channels=1, 
+                        sample_width=2, 
+                        framerate=16000)
                 return output_temp_file
 
         else:

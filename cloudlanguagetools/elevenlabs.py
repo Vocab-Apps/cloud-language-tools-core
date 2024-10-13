@@ -5,6 +5,7 @@ import tempfile
 import os
 import contextlib
 import logging
+import urllib.parse
 from typing import List
 
 import cloudlanguagetools.service
@@ -39,7 +40,15 @@ VOICE_OPTIONS = {
                 'min': 0.0,
                 'max': 1.0,
                 'default': DEFAULT_SIMILARITY_BOOST
-            },                        
+            },
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [
+                    cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.wav.name
+                ],
+                'default': cloudlanguagetools.options.AudioFormat.mp3.name
+            }
 }
 
 class ElevenLabsVoice(cloudlanguagetools.ttsvoice.TtsVoice):
@@ -84,6 +93,16 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         voice_id = voice_key['voice_id']
         url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'
 
+
+        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
+        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
+
+        audio_format_map = {
+            cloudlanguagetools.options.AudioFormat.mp3: 'mp3_44100_128',
+            cloudlanguagetools.options.AudioFormat.wav: 'pcm_44100'
+        }
+        output_format = audio_format_map[audio_format]
+
         headers = self.get_headers()
         headers['Accept'] = "audio/mpeg"
 
@@ -96,7 +115,17 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             }
         }
 
-        return self.get_tts_audio_base_post_request(url, json=data, headers=headers)
+        query_params = {
+            'output_format': output_format
+        }
+        full_url = f'{url}?{urllib.parse.urlencode(query_params)}'
+
+        if audio_format == cloudlanguagetools.options.AudioFormat.wav:
+            return cloudlanguagetools.audio_processing.wrap_pcm_data_wave(self.get_tts_audio_base_post_request(full_url, json=data, headers=headers), 
+                num_channels=1,
+                sample_width=2, 
+                framerate=44100) # pcm_44100 - PCM format (S16LE) with 44.1kHz sample rate. 
+        return self.get_tts_audio_base_post_request(full_url, json=data, headers=headers)
 
 
 

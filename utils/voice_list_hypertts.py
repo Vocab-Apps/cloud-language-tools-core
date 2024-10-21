@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.ttsvoice
+import cloudlanguagetools.options
 
 def get_manager():
     manager = cloudlanguagetools.servicemanager.ServiceManager()
@@ -26,11 +27,17 @@ def get_manager():
 
 def process_voice(voice: cloudlanguagetools.ttsvoice.TtsVoice_v3):
     logger.info(f'processing voice {voice}')
+    voice_options = voice.options
+    if cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER in voice_options:
+        if cloudlanguagetools.options.AudioFormat.wav.name in voice_options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER]['values']:
+            # remove it, don't offer wav format in HyperTTS, it doesn't really make sense
+            voice_options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER]['values'].remove(cloudlanguagetools.options.AudioFormat.wav.name)
+
     return f"""
         voice.TtsVoice_v3(
             name='{voice.name}',
             voice_key={voice.voice_key},
-            options={voice.options},
+            options={voice_options},
             service='{voice.service.name}',
             gender=constants.Gender.{voice.gender.name},
             audio_languages=[

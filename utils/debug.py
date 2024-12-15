@@ -331,6 +331,13 @@ def get_azure_transliteration_languages():
     data = manager.services[cloudlanguagetools.constants.Service.Azure.name].get_supported_languages()
     with open('temp_data_files/azure_transliteration_languages.json', 'w') as json_file:
         json.dump(data['transliteration'], json_file, indent=4)
+
+    # [option.json_obj() for option in transliteration_language_list]
+
+    data = manager.services[cloudlanguagetools.constants.Service.Azure.name].get_transliteration_language_list()
+    json_data = [option.json_obj() for option in data]
+    with open('temp_data_files/azure_transliteration_services.json', 'w') as json_file:
+        json.dump(json_data, json_file, indent=4)    
     # azure_data = self.get_supported_languages()
     # # print(data)
     # output_filename = 'azure_transliteration_languages.json'

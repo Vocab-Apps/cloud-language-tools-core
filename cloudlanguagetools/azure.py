@@ -186,7 +186,7 @@ class AzureTranslationLanguage(cloudlanguagetools.translationlanguage.Translatio
         return self.language_id
 
 class AzureTransliterationLanguage(cloudlanguagetools.transliterationlanguage.TransliterationLanguage):
-    def __init__(self, language_id, from_script, to_script, from_script_name, to_script_name):
+    def __init__(self, language_id, from_script, to_script, from_script_name, to_script_name, from_native_name, to_native_name):
         self.service = cloudlanguagetools.constants.Service.Azure
         self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.language_id = language_id
@@ -195,13 +195,15 @@ class AzureTransliterationLanguage(cloudlanguagetools.transliterationlanguage.Tr
         self.to_script = to_script
         self.from_script_name = from_script_name
         self.to_script_name = to_script_name
+        self.from_native_name = from_native_name
+        self.to_native_name = to_native_name
 
     def get_transliteration_name(self):
-        result = f'{self.language.lang_name} ({self.from_script_name} to {self.to_script_name}), {self.service.name}'
+        result = f'{self.language.lang_name} ({self.from_script_name}/{self.from_native_name} to {self.to_script_name}/{self.to_native_name}), {self.service.name}'
         return result
 
     def get_transliteration_shortname(self):
-        result = f'{self.from_script_name} to {self.to_script_name}, {self.service.name}'
+        result = f'{self.from_script_name}/{self.from_native_name} to {self.to_script_name}/{self.to_native_name}, {self.service.name}'
         return result        
 
     def get_transliteration_key(self):
@@ -402,16 +404,26 @@ class AzureService(cloudlanguagetools.service.Service):
         result = []
         azure_data = self.get_supported_languages()
         for language_id, data in azure_data['transliteration'].items():
-            # get the first script
-            first_script = data['scripts'][0]
-            from_script =  first_script['code']
-            to_script = first_script['toScripts'][0]['code']
-            from_script_name = first_script['name']
-            to_script_name = first_script['toScripts'][0]['name']
-            # print(language_id, from_script, to_script)
-            # assert(to_script == 'Latn')
             try:
-                result.append(AzureTransliterationLanguage(language_id, from_script, to_script, from_script_name, to_script_name))
+                # get the first script
+                for from_script_data in data['scripts']:
+                    from_script =  from_script_data['code']
+                    from_native_name = from_script_data['nativeName']
+                    for to_script_data in from_script_data['toScripts']:
+                        to_script = to_script_data['code']
+                        from_script_name = from_script_data['name']
+                        to_script_name = to_script_data['name']
+                        to_native_name = to_script_data['nativeName']
+                        # print(language_id, from_script, to_script)
+                        # assert(to_script == 'Latn')
+                    result.append(AzureTransliterationLanguage(
+                        language_id, 
+                        from_script, 
+                        to_script, 
+                        from_script_name, 
+                        to_script_name,
+                        from_native_name,
+                        to_native_name))
             except KeyError:
                 logging.error(f'could not process transliteration language for {language_id}, {data}', exc_info=True)
         return result

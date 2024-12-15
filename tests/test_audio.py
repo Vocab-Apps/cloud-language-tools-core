@@ -527,7 +527,7 @@ class TestAudio(unittest.TestCase):
 
     def test_google_format_wav(self):
         fr_voice = self.get_voice_by_lambda(Service.Google, 
-            lambda x: AudioLanguage.fr_FR in x.audio_languages, assert_unique=False)
+            lambda x: AudioLanguage.fr_FR in x.audio_languages and 'Journey' not in x.name, assert_unique=False)
         self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
     def test_naver_format_wav(self):

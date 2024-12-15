@@ -241,6 +241,14 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
         self.assertIn(result, ['chéng běn hěn dī', 'chéngběn hěndī'])
 
+        transliteration_key = {
+            'language_id': 'zh-Hant', 
+            'from_script': 'Hans', 
+            'to_script': 'Hant',
+        }
+        result = self.manager.get_transliteration('讲话', service, transliteration_key)
+        self.assertEqual(result, '講話')
+
     def test_transliteration_azure(self):
         # pytest tests/test_translation.py -k test_transliteration_azure
         

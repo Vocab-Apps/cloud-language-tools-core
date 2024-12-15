@@ -326,6 +326,20 @@ def get_azure_translation_languages():
     print(f'wrote output to {output_filename}')
 
 
+def get_azure_transliteration_languages():
+    manager = get_manager()
+    data = manager.services[cloudlanguagetools.constants.Service.Azure.name].get_supported_languages()
+    with open('temp_data_files/azure_transliteration_languages.json', 'w') as json_file:
+        json.dump(data['transliteration'], json_file, indent=4)
+    # azure_data = self.get_supported_languages()
+    # # print(data)
+    # output_filename = 'azure_transliteration_languages.json'
+    # with open(output_filename, 'w') as f:
+    #     f.write(json.dumps(data, sort_keys=True, indent=4, ensure_ascii=False, separators=(',', ': ')))
+    #     f.close()
+    # print(f'wrote output to {output_filename}')    
+
+
 def get_google_translation_languages():
     manager = get_manager()
     data = manager.services[cloudlanguagetools.constants.Service.Google.name].get_translation_languages()
@@ -1114,7 +1128,7 @@ if __name__ == '__main__':
                         level=logging.DEBUG)
 
     # generate_video_audio()
-    test_azure_audio()
+    # test_azure_audio()
     # test_google_audio()
     # test_forvo_audio_tokipona()
     # play_google_audio()
@@ -1161,3 +1175,4 @@ if __name__ == '__main__':
     # openai_detect_language()
     # openai_guess_from_to_language()
     # openai_audio()
+    get_azure_transliteration_languages()

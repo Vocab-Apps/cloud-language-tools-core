@@ -226,6 +226,21 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue
         self.assertEqual(result['Watson'], "<b><span style=\"font-weight: 400;\">What's wrong with you?</span></b>")
 
+    def test_transliteration_azure_custom(self):
+        # pytest tests/test_translation.py -k test_transliteration_azure_custom
+        
+        # chinese
+        source_text = '成本很低'
+        service = 'Azure'
+        # transliteration_key = transliteration_option['transliteration_key']
+        transliteration_key = {
+            'language_id': 'zh-Hans', 
+            'from_script': 'Hans', 
+            'to_script': 'Latn',
+        }
+        result = self.manager.get_transliteration(source_text, service, transliteration_key)
+        self.assertIn(result, ['chéng běn hěn dī', 'chéngběn hěndī'])
+
     def test_transliteration_azure(self):
         # pytest tests/test_translation.py -k test_transliteration_azure
         

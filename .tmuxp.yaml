@@ -5,8 +5,8 @@ shell_command_before:
     sleep_before: 1
     sleep_after: 1
   - cmd: source .bash_aliases
-  - cmd: source ~/secrets/cloudlanguagetools/cloudlanguagetools_core_secret.sh
-  - cmd: source ~/secrets/python/twine.sh
+  - cmd: source ${SECRETS_DIR}/cloudlanguagetools/cloudlanguagetools_core_secret.sh
+  - cmd: source ${SECRETS_DIR}/python/twine.sh
 windows:
 - window_name: clt-core
   focus: true

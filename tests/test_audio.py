@@ -143,6 +143,11 @@ class TestAudio(unittest.TestCase):
         # logging.info(f'verify_service_audio: service: {service} audio_language: {audio_language}')
         voices = self.get_voice_list_service_audio_language(service, audio_language)
         self.assertGreaterEqual(len(voices), 1, f'at least one voice for service {service}, language {audio_language}')
+
+        if service == Service.Google:
+            # exclude Journey voices, they don't use the standard interface
+            voices = [x for x in voices if 'Journey' not in x['voice_name']]
+
         # pick 3 random voices
         max_voices = 3
         if len(voices) > max_voices:

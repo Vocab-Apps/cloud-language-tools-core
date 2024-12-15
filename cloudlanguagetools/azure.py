@@ -414,8 +414,6 @@ class AzureService(cloudlanguagetools.service.Service):
                         from_script_name = from_script_data['name']
                         to_script_name = to_script_data['name']
                         to_native_name = to_script_data['nativeName']
-                        # print(language_id, from_script, to_script)
-                        # assert(to_script == 'Latn')
                     result.append(AzureTransliterationLanguage(
                         language_id, 
                         from_script, 

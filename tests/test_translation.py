@@ -226,8 +226,8 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue
         self.assertEqual(result['Watson'], "<b><span style=\"font-weight: 400;\">What's wrong with you?</span></b>")
 
-    def test_transliteration(self):
-        # pytest test_translation.py -k test_transliteration
+    def test_transliteration_azure(self):
+        # pytest tests/test_translation.py -k test_transliteration_azure
         
         # chinese
         source_text = '成本很低'

@@ -16,7 +16,7 @@ git push origin ${GIT_TAG}
 
 # build python module , upload to pypi
 # get twine user/password
-source ~/secrets/python/twine.sh
+source ${SECRETS_DIR}/python/twine.sh
 python setup.py sdist
 twine upload dist/cloudlanguagetools-${VERSION_NUMBER}.tar.gz
 

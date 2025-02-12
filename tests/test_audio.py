@@ -323,6 +323,11 @@ class TestAudio(unittest.TestCase):
         source_text = '老人家'
         self.verify_service_audio_language_v3(source_text, Service.Alibaba, AudioLanguage.zh_CN, 'zh-CN')
 
+    def test_english_alibaba(self):
+        # pytest test_audio.py -k test_english_alibaba
+        source_text = 'I am not interested.'
+        self.verify_service_audio_language_v3(source_text, Service.Alibaba, AudioLanguage.en_GB, 'en-GB')
+
     @skip_unreliable_clt_test()
     def test_mandarin_vocalware(self):
         # pytest test_audio.py -k test_mandarin_vocalware

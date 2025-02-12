@@ -33,7 +33,7 @@ VOICE_OPTIONS = {
     cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
         'type': cloudlanguagetools.options.ParameterType.list.name,
         'values': ['pcm', 'wav', 'mp3'],
-        'default': 'pcm'
+        'default': 'mp3'
     }
 }
 

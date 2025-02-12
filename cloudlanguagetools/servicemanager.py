@@ -28,6 +28,7 @@ import cloudlanguagetools.spacy
 import cloudlanguagetools.wenlin
 import cloudlanguagetools.libretranslate
 import cloudlanguagetools.openai
+import cloudlanguagetools.alibaba
 import cloudlanguagetools.encryption
 import cloudlanguagetools.translationlanguage
 
@@ -63,6 +64,7 @@ class ServiceManager():
             self.services[cloudlanguagetools.constants.Service.MandarinCantonese] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
             self.services[cloudlanguagetools.constants.Service.Wenlin] = cloudlanguagetools.wenlin.WenlinService()
             self.services[cloudlanguagetools.constants.Service.OpenAI] = cloudlanguagetools.openai.OpenAIService()
+            self.services[cloudlanguagetools.constants.Service.Alibaba] = cloudlanguagetools.alibaba.AlibabaService()
 
     def configure_default(self):
         # use the stored keys to configure services

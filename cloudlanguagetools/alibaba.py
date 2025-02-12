@@ -153,26 +153,107 @@ class AlibabaService(cloudlanguagetools.service.Service):
 
         # Standard voices for all scenarios
         result.extend([
-            self.build_tts_voice_v3(
-                'Xiaoyun', 'xiaoyun',
-                cloudlanguagetools.constants.Gender.Female,
-                [cloudlanguagetools.languages.AudioLanguage.zh_CN]
-            ),
-            self.build_tts_voice_v3(
-                'Xiaogang', 'xiaogang',
-                cloudlanguagetools.constants.Gender.Male,
-                [cloudlanguagetools.languages.AudioLanguage.zh_CN]
-            ),
-            self.build_tts_voice_v3(
-                'Harry (British)', 'harry',
-                cloudlanguagetools.constants.Gender.Male,
-                [cloudlanguagetools.languages.AudioLanguage.en_GB]
-            ),
-            self.build_tts_voice_v3(
-                'Shanshan (Cantonese)', 'shanshan',
-                cloudlanguagetools.constants.Gender.Female,
-                [cloudlanguagetools.languages.AudioLanguage.zh_HK]
-            )
+            # Standard Chinese voices
+            self.build_tts_voice_v3('Xiaoyun', 'Xiaoyun', 
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Xiaogang', 'Xiaogang',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Ruoxi', 'Ruoxi',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Siqi', 'Siqi',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Sijia', 'Sijia',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Sicheng', 'Sicheng',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aiqi', 'Aiqi',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aijia', 'Aijia',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aicheng', 'Aicheng',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aida', 'Aida',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3("Ning'er", 'Ninger',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Ruilin', 'Ruilin',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+
+            # Customer service voices
+            self.build_tts_voice_v3('Siyue', 'Siyue',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aiya', 'Aiya',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aixia', 'Aixia',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aimei', 'Aimei',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aiyu', 'Aiyu',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aiyue', 'Aiyue',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aijing', 'Aijing',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Xiaomei', 'Xiaomei',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+
+            # Regional accent voices
+            self.build_tts_voice_v3('Aina', 'Aina',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Yina', 'Yina',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Sijing', 'Sijing',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+
+            # Child voices
+            self.build_tts_voice_v3('Sitong', 'Sitong',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Xiaobei', 'Xiaobei',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aitong', 'Aitong',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aiwei', 'Aiwei',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Aibao', 'Aibao',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+
+            # English voices
+            self.build_tts_voice_v3('Harry', 'Harry',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.en_GB]),
+            self.build_tts_voice_v3('Abby', 'Abby',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.en_US]),
+            self.build_tts_voice_v3('Andy', 'Andy',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.en_US]),
+            self.build_tts_voice_v3('Eric', 'Eric',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.en_GB]),
+            self.build_tts_voice_v3('Emily', 'Emily',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.en_GB]),
+            self.build_tts_voice_v3('Luna', 'Luna',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.en_GB]),
+            self.build_tts_voice_v3('Luca', 'Luca',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.en_GB]),
+            self.build_tts_voice_v3('Wendy', 'Wendy',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.en_GB]),
+            self.build_tts_voice_v3('William', 'William',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.en_GB]),
+            self.build_tts_voice_v3('Olivia', 'Olivia',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.en_GB]),
+
+            # Special dialect voices
+            self.build_tts_voice_v3('Shanshan', 'Shanshan',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_HK]),
+            self.build_tts_voice_v3('Xiaoyue', 'Xiaoyue',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Lydia', 'Lydia',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.en_US]),
+            self.build_tts_voice_v3('Aishuo', 'Aishuo',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Qingqing', 'Qingqing',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Cuijie', 'Cuijie',
+                cloudlanguagetools.constants.Gender.Female, [cloudlanguagetools.languages.AudioLanguage.zh_CN]),
+            self.build_tts_voice_v3('Xiaoze', 'Xiaoze',
+                cloudlanguagetools.constants.Gender.Male, [cloudlanguagetools.languages.AudioLanguage.zh_CN])
         ])
         
         return result

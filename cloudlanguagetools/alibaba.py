@@ -152,12 +152,7 @@ class AlibabaService(cloudlanguagetools.service.Service):
             cloudlanguagetools.ttsvoice.TtsVoice_v3(
                 name='Xiaogang',
                 voice_key={'name': 'xiaogang'},
-                options={
-                    'speed': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
-                    'pitch': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
-                    'volume': {'type': 'number_int', 'min': 0, 'max': 100, 'default': 50},
-                    'audio_format': {'type': 'list', 'values': ['pcm', 'wav', 'mp3'], 'default': 'pcm'}
-                },
+                options=VOICE_OPTIONS,
                 service=cloudlanguagetools.constants.Service.Alibaba,
                 gender=cloudlanguagetools.constants.Gender.Male,
                 audio_languages=[cloudlanguagetools.languages.AudioLanguage.zh_CN],
@@ -167,12 +162,7 @@ class AlibabaService(cloudlanguagetools.service.Service):
             cloudlanguagetools.ttsvoice.TtsVoice_v3(
                 name='Harry (British)',
                 voice_key={'name': 'harry'},
-                options={
-                    'speed': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
-                    'pitch': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
-                    'volume': {'type': 'number_int', 'min': 0, 'max': 100, 'default': 50},
-                    'audio_format': {'type': 'list', 'values': ['pcm', 'wav', 'mp3'], 'default': 'pcm'}
-                },
+                options=VOICE_OPTIONS,
                 service=cloudlanguagetools.constants.Service.Alibaba,
                 gender=cloudlanguagetools.constants.Gender.Male,
                 audio_languages=[cloudlanguagetools.languages.AudioLanguage.en_GB],
@@ -182,12 +172,7 @@ class AlibabaService(cloudlanguagetools.service.Service):
             cloudlanguagetools.ttsvoice.TtsVoice_v3(
                 name='Shanshan (Cantonese)',
                 voice_key={'name': 'shanshan'},
-                options={
-                    'speed': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
-                    'pitch': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
-                    'volume': {'type': 'number_int', 'min': 0, 'max': 100, 'default': 50},
-                    'audio_format': {'type': 'list', 'values': ['pcm', 'wav', 'mp3'], 'default': 'pcm'}
-                },
+                options=VOICE_OPTIONS,
                 service=cloudlanguagetools.constants.Service.Alibaba,
                 gender=cloudlanguagetools.constants.Gender.Female,
                 audio_languages=[cloudlanguagetools.languages.AudioLanguage.zh_HK],

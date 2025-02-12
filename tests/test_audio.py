@@ -185,8 +185,9 @@ class TestAudio(unittest.TestCase):
         # pprint.pprint(mandarin_azure_voices)
 
         xiaochen = [x for x in mandarin_azure_voices if 'Xiaochen' in x.name]
-        self.assertEqual(len(xiaochen), 3, str(xiaochen)) # there is a regular and a multilingual
-        # and also a DragonHD
+        logger.debug(f'xiaochen voices: {pprint.pformat(xiaochen)}')
+        self.assertEqual(len(xiaochen), 4, str(xiaochen)) # there is a regular and a multilingual
+        # and also a DragonHD, and DragonHD V1
 
         xiaochen_single_language = [x for x in xiaochen if len(x.audio_languages) == 1][0]
         self.assertEquals(xiaochen_single_language.audio_languages, [AudioLanguage.zh_CN])

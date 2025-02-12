@@ -82,6 +82,7 @@ class Service(StrEnum):
     Wenlin =    'Wenlin'
     LibreTranslate = 'LibreTranslate'
     ElevenLabs = 'ElevenLabs'
+    Alibaba = 'Alibaba'
     TestServiceA = 'TestServiceA'
     TestServiceB = 'TestServiceB'
 

@@ -160,10 +160,72 @@ class AlibabaService(cloudlanguagetools.service.Service):
 
     def get_tts_voice_list(self):
         # returns list of TtsVoice
-        return [
-            AlibabaVoice(cloudlanguagetools.languages.AudioLanguage.en_US, 'clara', cloudlanguagetools.constants.Gender.Female, 'Clara', 'General'),
-            AlibabaVoice(cloudlanguagetools.languages.AudioLanguage.en_US, 'danna', cloudlanguagetools.constants.Gender.Female, 'Anna', 'Premium'),
-            AlibabaVoice(cloudlanguagetools.languages.AudioLanguage.en_US, 'djoey', cloudlanguagetools.constants.Gender.Female, 'Joey', 'General'),
-            AlibabaVoice(cloudlanguagetools.languages.AudioLanguage.en_US, 'matt', cloudlanguagetools.constants.Gender.Male, 'Matt', 'General'),
-            # Add more voices as needed
-        ]
+        return []
+
+    def get_tts_voice_list_v3(self) -> List[cloudlanguagetools.ttsvoice.TtsVoice_v3]:
+        result = []
+
+        # Standard voices for all scenarios
+        result.extend([
+            cloudlanguagetools.ttsvoice.TtsVoice_v3(
+                name='Xiaoyun',
+                voice_key={'name': 'xiaoyun'},
+                options={
+                    'speed': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
+                    'pitch': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
+                    'volume': {'type': 'number_int', 'min': 0, 'max': 100, 'default': 50},
+                    'audio_format': {'type': 'list', 'values': ['pcm', 'wav', 'mp3'], 'default': 'pcm'}
+                },
+                service=cloudlanguagetools.constants.Service.Alibaba,
+                gender=cloudlanguagetools.constants.Gender.Female,
+                audio_languages=[cloudlanguagetools.languages.AudioLanguage.zh_CN],
+                service_fee=cloudlanguagetools.constants.ServiceFee.paid
+            ),
+            # Add more standard voices
+            cloudlanguagetools.ttsvoice.TtsVoice_v3(
+                name='Xiaogang',
+                voice_key={'name': 'xiaogang'},
+                options={
+                    'speed': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
+                    'pitch': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
+                    'volume': {'type': 'number_int', 'min': 0, 'max': 100, 'default': 50},
+                    'audio_format': {'type': 'list', 'values': ['pcm', 'wav', 'mp3'], 'default': 'pcm'}
+                },
+                service=cloudlanguagetools.constants.Service.Alibaba,
+                gender=cloudlanguagetools.constants.Gender.Male,
+                audio_languages=[cloudlanguagetools.languages.AudioLanguage.zh_CN],
+                service_fee=cloudlanguagetools.constants.ServiceFee.paid
+            ),
+            # English voices
+            cloudlanguagetools.ttsvoice.TtsVoice_v3(
+                name='Harry (British)',
+                voice_key={'name': 'harry'},
+                options={
+                    'speed': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
+                    'pitch': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
+                    'volume': {'type': 'number_int', 'min': 0, 'max': 100, 'default': 50},
+                    'audio_format': {'type': 'list', 'values': ['pcm', 'wav', 'mp3'], 'default': 'pcm'}
+                },
+                service=cloudlanguagetools.constants.Service.Alibaba,
+                gender=cloudlanguagetools.constants.Gender.Male,
+                audio_languages=[cloudlanguagetools.languages.AudioLanguage.en_GB],
+                service_fee=cloudlanguagetools.constants.ServiceFee.paid
+            ),
+            # Dialect voices
+            cloudlanguagetools.ttsvoice.TtsVoice_v3(
+                name='Shanshan (Cantonese)',
+                voice_key={'name': 'shanshan'},
+                options={
+                    'speed': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
+                    'pitch': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
+                    'volume': {'type': 'number_int', 'min': 0, 'max': 100, 'default': 50},
+                    'audio_format': {'type': 'list', 'values': ['pcm', 'wav', 'mp3'], 'default': 'pcm'}
+                },
+                service=cloudlanguagetools.constants.Service.Alibaba,
+                gender=cloudlanguagetools.constants.Gender.Female,
+                audio_languages=[cloudlanguagetools.languages.AudioLanguage.zh_HK],
+                service_fee=cloudlanguagetools.constants.ServiceFee.paid
+            )
+        ])
+        
+        return result

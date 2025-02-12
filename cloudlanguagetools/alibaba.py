@@ -21,47 +21,6 @@ logger = logging.getLogger(__name__)
 ALIBABA_VOICE_SPEED_DEFAULT = 0
 ALIBABA_VOICE_PITCH_DEFAULT = 0
 
-class AlibabaVoice(cloudlanguagetools.ttsvoice.TtsVoice):
-    def __init__(self, audio_language, name, gender, description, voice_type):
-        self.service = cloudlanguagetools.constants.Service.Alibaba
-        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
-        self.audio_language = audio_language
-        self.name = name
-        self.gender = gender
-        self.description = description
-        self.voice_type = voice_type
-
-    def get_voice_key(self):
-        return {
-            'name': self.name
-        }
-
-    def get_voice_shortname(self):
-        return f'{self.description} ({self.voice_type})'
-
-    def get_options(self):
-        return {
-            'speed': {
-                'type': 'number_int',
-                'min': -5,
-                'max': 5,
-                'default': ALIBABA_VOICE_SPEED_DEFAULT
-            },
-            'pitch': {
-                'type': 'number_int',
-                'min': -5,
-                'max': 5,
-                'default': ALIBABA_VOICE_PITCH_DEFAULT
-            },
-            'audio_format': {
-                'type': 'list',
-                'values': [
-                    AudioFormat.mp3.name,
-                    AudioFormat.wav.name
-                ],
-                'default': AudioFormat.mp3.name
-            }
-        }
 
 class AlibabaService(cloudlanguagetools.service.Service):
     def __init__(self):

@@ -14,6 +14,9 @@ import cloudlanguagetools.options
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
+import cloudlanguagetools.constants
+import cloudlanguagetools.languages
+import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.errors
 from cloudlanguagetools.options import AudioFormat
 
@@ -134,49 +137,41 @@ class AlibabaService(cloudlanguagetools.service.Service):
         # returns list of TtsVoice
         return []
 
+    def build_tts_voice_v3(self, name: str, voice_id: str, gender: cloudlanguagetools.constants.Gender, audio_languages: List[cloudlanguagetools.languages.AudioLanguage]):
+        return cloudlanguagetools.ttsvoice.TtsVoice_v3(
+            name=name,
+            voice_key={'name': voice_id},
+            options=VOICE_OPTIONS,
+            service=cloudlanguagetools.constants.Service.Alibaba,
+            gender=gender,
+            audio_languages=audio_languages,
+            service_fee=cloudlanguagetools.constants.ServiceFee.paid
+        )
+
     def get_tts_voice_list_v3(self) -> List[cloudlanguagetools.ttsvoice.TtsVoice_v3]:
         result = []
 
         # Standard voices for all scenarios
         result.extend([
-            cloudlanguagetools.ttsvoice.TtsVoice_v3(
-                name='Xiaoyun',
-                voice_key={'name': 'xiaoyun'},
-                options=VOICE_OPTIONS,
-                service=cloudlanguagetools.constants.Service.Alibaba,
-                gender=cloudlanguagetools.constants.Gender.Female,
-                audio_languages=[cloudlanguagetools.languages.AudioLanguage.zh_CN],
-                service_fee=cloudlanguagetools.constants.ServiceFee.paid
+            self.build_tts_voice_v3(
+                'Xiaoyun', 'xiaoyun',
+                cloudlanguagetools.constants.Gender.Female,
+                [cloudlanguagetools.languages.AudioLanguage.zh_CN]
             ),
-            # Add more standard voices
-            cloudlanguagetools.ttsvoice.TtsVoice_v3(
-                name='Xiaogang',
-                voice_key={'name': 'xiaogang'},
-                options=VOICE_OPTIONS,
-                service=cloudlanguagetools.constants.Service.Alibaba,
-                gender=cloudlanguagetools.constants.Gender.Male,
-                audio_languages=[cloudlanguagetools.languages.AudioLanguage.zh_CN],
-                service_fee=cloudlanguagetools.constants.ServiceFee.paid
+            self.build_tts_voice_v3(
+                'Xiaogang', 'xiaogang',
+                cloudlanguagetools.constants.Gender.Male,
+                [cloudlanguagetools.languages.AudioLanguage.zh_CN]
             ),
-            # English voices
-            cloudlanguagetools.ttsvoice.TtsVoice_v3(
-                name='Harry (British)',
-                voice_key={'name': 'harry'},
-                options=VOICE_OPTIONS,
-                service=cloudlanguagetools.constants.Service.Alibaba,
-                gender=cloudlanguagetools.constants.Gender.Male,
-                audio_languages=[cloudlanguagetools.languages.AudioLanguage.en_GB],
-                service_fee=cloudlanguagetools.constants.ServiceFee.paid
+            self.build_tts_voice_v3(
+                'Harry (British)', 'harry',
+                cloudlanguagetools.constants.Gender.Male,
+                [cloudlanguagetools.languages.AudioLanguage.en_GB]
             ),
-            # Dialect voices
-            cloudlanguagetools.ttsvoice.TtsVoice_v3(
-                name='Shanshan (Cantonese)',
-                voice_key={'name': 'shanshan'},
-                options=VOICE_OPTIONS,
-                service=cloudlanguagetools.constants.Service.Alibaba,
-                gender=cloudlanguagetools.constants.Gender.Female,
-                audio_languages=[cloudlanguagetools.languages.AudioLanguage.zh_HK],
-                service_fee=cloudlanguagetools.constants.ServiceFee.paid
+            self.build_tts_voice_v3(
+                'Shanshan (Cantonese)', 'shanshan',
+                cloudlanguagetools.constants.Gender.Female,
+                [cloudlanguagetools.languages.AudioLanguage.zh_HK]
             )
         ])
         

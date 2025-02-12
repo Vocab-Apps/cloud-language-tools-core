@@ -7,6 +7,7 @@ import urllib
 import hmac
 import base64
 import logging
+import tempfile
 from typing import List
 
 import cloudlanguagetools.service
@@ -131,7 +132,11 @@ class AlibabaService(cloudlanguagetools.service.Service):
                 f'Got bad content type in response: {response.headers["Content-Type"]}'
             )
 
-        return response.content
+        # Create a temporary file and write the audio content to it
+        output_temp_file = tempfile.NamedTemporaryFile(prefix=f'cloudlanguage_tools_{self.__class__.__name__}_audio', suffix='.mp3')
+        output_temp_file.write(response.content)
+        output_temp_file.flush()
+        return output_temp_file
 
     def get_tts_voice_list(self):
         # returns list of TtsVoice

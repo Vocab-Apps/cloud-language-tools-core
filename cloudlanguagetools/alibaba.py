@@ -10,6 +10,7 @@ import logging
 from typing import List
 
 import cloudlanguagetools.service
+import cloudlanguagetools.options
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
@@ -20,6 +21,17 @@ logger = logging.getLogger(__name__)
 
 ALIBABA_VOICE_SPEED_DEFAULT = 0
 ALIBABA_VOICE_PITCH_DEFAULT = 0
+
+VOICE_OPTIONS = {
+    'speed': {'type': 'number_int', 'min': -500, 'max': 500, 'default': ALIBABA_VOICE_SPEED_DEFAULT},
+    'pitch': {'type': 'number_int', 'min': -500, 'max': 500, 'default': ALIBABA_VOICE_PITCH_DEFAULT},
+    'volume': {'type': 'number_int', 'min': 0, 'max': 100, 'default': 50},
+    cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+        'type': cloudlanguagetools.options.ParameterType.list.name,
+        'values': ['pcm', 'wav', 'mp3'],
+        'default': 'pcm'
+    }
+}
 
 
 class AlibabaService(cloudlanguagetools.service.Service):
@@ -130,12 +142,7 @@ class AlibabaService(cloudlanguagetools.service.Service):
             cloudlanguagetools.ttsvoice.TtsVoice_v3(
                 name='Xiaoyun',
                 voice_key={'name': 'xiaoyun'},
-                options={
-                    'speed': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
-                    'pitch': {'type': 'number_int', 'min': -500, 'max': 500, 'default': 0},
-                    'volume': {'type': 'number_int', 'min': 0, 'max': 100, 'default': 50},
-                    'audio_format': {'type': 'list', 'values': ['pcm', 'wav', 'mp3'], 'default': 'pcm'}
-                },
+                options=VOICE_OPTIONS,
                 service=cloudlanguagetools.constants.Service.Alibaba,
                 gender=cloudlanguagetools.constants.Gender.Female,
                 audio_languages=[cloudlanguagetools.languages.AudioLanguage.zh_CN],

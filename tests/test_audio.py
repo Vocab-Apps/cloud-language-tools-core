@@ -140,6 +140,7 @@ class TestAudio(unittest.TestCase):
         self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text), msg=assert_text)
 
     def verify_service_audio_language(self, text, service, audio_language, recognition_language):
+        """Legacy version using voice_list"""
         # logging.info(f'verify_service_audio: service: {service} audio_language: {audio_language}')
         voices = self.get_voice_list_service_audio_language(service, audio_language)
         self.assertGreaterEqual(len(voices), 1, f'at least one voice for service {service}, language {audio_language}')
@@ -320,7 +321,7 @@ class TestAudio(unittest.TestCase):
     def test_mandarin_alibaba(self):
         # pytest test_audio.py -k test_mandarin_alibaba
         source_text = '老人家'
-        self.verify_service_audio_language(source_text, Service.Alibaba, AudioLanguage.zh_CN, 'zh-CN')
+        self.verify_service_audio_language_v3(source_text, Service.Alibaba, AudioLanguage.zh_CN, 'zh-CN')
 
     @skip_unreliable_clt_test()
     def test_mandarin_vocalware(self):
@@ -511,6 +512,18 @@ class TestAudio(unittest.TestCase):
         
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
+
+    def verify_service_audio_language_v3(self, text, service, audio_language, recognition_language):
+        """Version using voice_list_v3"""
+        voices = [x for x in self.voice_list_v3 if x.service == service and audio_language in x.audio_languages]
+        self.assertGreaterEqual(len(voices), 1, f'at least one voice for service {service}, language {audio_language}')
+
+        # pick 3 random voices
+        max_voices = 3
+        if len(voices) > max_voices:
+            voices = random.sample(voices, max_voices)
+        for voice in voices:
+            self.verify_voice_v3(voice, text, recognition_language)
 
     def verify_wav_voice(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, recognition_language: str):
         # assert that the wav format is in the list of supported formats

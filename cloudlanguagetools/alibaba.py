@@ -7,6 +7,7 @@ import urllib
 import hmac
 import base64
 import logging
+from typing import List
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants

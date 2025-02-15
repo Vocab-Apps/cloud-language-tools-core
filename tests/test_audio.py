@@ -90,7 +90,8 @@ class TestAudio(unittest.TestCase):
 
     def get_voice_by_service_and_name(self, service: Service, voice_name) -> cloudlanguagetools.ttsvoice.TtsVoice_v3:
         subset = [x for x in self.voice_list_v3 if voice_name in x.name and x.service == service]
-        self.assertEqual(len(subset), 1)
+        num_voices = len(subset)
+        self.assertEqual(num_voices, 1, msg=f'found {num_voices} voices for {service} and {voice_name}, expected 1')
         return subset[0]
 
     def get_voice_by_lambda(self, service: Service, filter_func, assert_unique=True):
@@ -566,8 +567,12 @@ class TestAudio(unittest.TestCase):
         options = {cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.options.AudioFormat.wav.name}
         audio_temp_file = self.manager.get_tts_audio(text, voice.service, voice.voice_key, options)
         audio_utils.assert_is_wav_format(self, audio_temp_file.name)
-        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, recognition_language, audio_format=cloudlanguagetools.options.AudioFormat.wav)
-        self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text))
+
+        self.recognize_and_verify_text(
+            audio_temp_file, 
+            text, 
+            recognition_language, 
+            cloudlanguagetools.options.AudioFormat.wav)
 
     def test_azure_format_wav(self):
         fr_voice = self.get_voice_by_service_and_name(Service.Azure, 'Denise')
@@ -603,7 +608,8 @@ class TestAudio(unittest.TestCase):
         self.verify_wav_voice(en_voice, self.ENGLISH_INPUT_TEXT, 'en-US')
 
 
-    def test_google_voice_journey(self):
+    @pytest.mark.skip(reason="journey voice seems to be gone")
+    def test_google_voice_journey_old(self):
         service = 'Google'
         source_text = self.ENGLISH_INPUT_TEXT
 

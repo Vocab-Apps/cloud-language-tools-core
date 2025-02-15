@@ -22,6 +22,8 @@ def convert_to_wav(audio_temp_file, audio_format) -> tempfile.NamedTemporaryFile
         sound = pydub.AudioSegment.from_ogg(audio_temp_file.name)
     elif audio_format == cloudlanguagetools.options.AudioFormat.ogg_vorbis:
         sound = pydub.AudioSegment.from_ogg(audio_temp_file.name)
+    elif audio_format == cloudlanguagetools.options.AudioFormat.wav:
+        sound = pydub.AudioSegment.from_wav(audio_temp_file.name)
 
     # convert to wav
     wav_tempfile = tempfile.NamedTemporaryFile(prefix='clt_speech_recognition_', suffix='.wav')

@@ -12,6 +12,7 @@ import json
 import time
 import pprint
 import functools
+import tempfile
 
 import audio_utils
 
@@ -138,9 +139,17 @@ class TestAudio(unittest.TestCase):
 
         audio_format = cloudlanguagetools.options.AudioFormat.mp3
 
+        self.recognize_and_verify_text(audio_temp_file, text, recognition_language, audio_format)
+
+
+    def recognize_and_verify_text(self, 
+                audio_temp_file: tempfile.NamedTemporaryFile, 
+                expected_text: str,
+                recognition_language: str,
+                audio_format: cloudlanguagetools.options.AudioFormat):
         # recognize text
         # ==============
-        sanitized_expected_text = audio_utils.sanitize_recognized_text(text)
+        sanitized_expected_text = audio_utils.sanitize_recognized_text(expected_text)
         # first, try openwhisper
         logger.info(f'attempting to recognize text using OpenAI. expected text: {sanitized_expected_text}')
         audio_text_openai = audio_utils.speech_to_text_openai(self.manager, audio_temp_file, audio_format)
@@ -153,8 +162,8 @@ class TestAudio(unittest.TestCase):
         # second, try azure
         logger.info(f'attempting to recognize text using Azure. expected text: {sanitized_expected_text}')
         audio_text = audio_utils.speech_to_text_azure_wav(self.manager, audio_temp_file, recognition_language, audio_format)
-        assert_text = f"service {voice_service} voice_key: {voice_key}"
-        self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text), msg=assert_text)
+        sanitized_azure_text = audio_utils.sanitize_recognized_text(audio_text)
+        self.assertEqual(sanitized_expected_text, sanitized_azure_text)
 
     def verify_service_audio_language(self, text, service, audio_language, recognition_language):
         """Legacy version using voice_list"""

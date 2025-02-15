@@ -188,6 +188,10 @@ def get_watson_voice_list():
         f.close()
     print(f'wrote {output_filename}')
 
+def get_google_voice_list():
+    manager = get_manager()
+    manager.services[cloudlanguagetools.constants.Service.Google.name].get_tts_voice_list()
+
 def get_amazon_voice_list():
     manager = get_manager()
     #tts_voice_list_json = manager.get_tts_voice_list_json()
@@ -1182,4 +1186,5 @@ if __name__ == '__main__':
     # openai_detect_language()
     # openai_guess_from_to_language()
     # openai_audio()
-    get_azure_transliteration_languages()
+    # get_azure_transliteration_languages()
+    get_google_voice_list()

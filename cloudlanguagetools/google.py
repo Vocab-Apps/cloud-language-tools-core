@@ -3,6 +3,7 @@ import tempfile
 import html
 import base64
 import logging
+import pprint
 import google.cloud.texttospeech
 import google.cloud.translate_v2
 import google.api_core.exceptions
@@ -37,6 +38,7 @@ GENDER_MAP = {
 class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         logger.debug(f'processing voice {voice_data}')
+        logger.debug(pprint.pformat(voice_data))
         self.service = cloudlanguagetools.constants.Service.Google
         self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
         self.name = voice_data.name
@@ -154,8 +156,6 @@ class GoogleService(cloudlanguagetools.service.Service):
         try:
             client = self.get_client()
 
-            ssml_text = '<speak>' + text + '</speak>'
-            input_text = google.cloud.texttospeech.SynthesisInput(ssml=ssml_text)
 
             # Note: the voice can also be specified by name.
             # Names of voices can be retrieved with client.list_voices().
@@ -171,8 +171,21 @@ class GoogleService(cloudlanguagetools.service.Service):
                 pitch=options.get('pitch', 0.0)
             )
 
+
+            # prepare speech request
+            ssml_text = '<speak>' + text + '</speak>'
+            input_text = google.cloud.texttospeech.SynthesisInput(ssml=ssml_text)
+
+            # some voices don't support SSML and it's weirdly not documented
+            non_ssml_voices = ['Chirp', 'Journey']
+            non_ssml_voice_found = any(s in text for s in voice_key['name'])
+            if non_ssml_voice_found:
+                logger.info(f'with voice {voice_key}, use non-ssml input')
+                input_text = google.cloud.texttospeech.SynthesisInput(text=text)
+
+            speech_request = {"input": input_text, "voice": voice, "audio_config": audio_config}
             response = client.synthesize_speech(
-                request={"input": input_text, "voice": voice, "audio_config": audio_config}
+                request=speech_request
             )
 
             # The response's audio_content is binary.

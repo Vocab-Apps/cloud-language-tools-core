@@ -526,8 +526,9 @@ class TestAudio(unittest.TestCase):
         options = {'rate': 0.8, 'pitch': -10}
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
-        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR')
-        self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'fr-FR', cloudlanguagetools.options.AudioFormat.mp3)
 
     def test_azure_format_ogg(self):
         service = 'Azure'

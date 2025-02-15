@@ -201,6 +201,7 @@ class TestTranslation(unittest.TestCase):
         self.assertTrue('Watson' in result)
 
         possible_french_translations = [
+            'Très faible coût',
             'Le coût est faible',
             'Le coût est très faible',
             'à bas prix', 

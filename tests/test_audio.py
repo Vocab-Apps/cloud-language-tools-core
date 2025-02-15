@@ -265,7 +265,8 @@ class TestAudio(unittest.TestCase):
         mandarin_azure_voices = [x for x in azure_voices if AudioLanguage.zh_CN in x.audio_languages]
 
         xiaochen = [x for x in mandarin_azure_voices if 'Xiaochen' in x.name]
-        self.assertEqual(len(xiaochen), 3) # there is a regular and a multilingual, and dragonhd
+        self.assertEqual(len(xiaochen), 4) # there is a regular and a multilingual, and dragonhd, 
+        # and dragonhd latest
 
         xiaochen_single_language = [x for x in xiaochen if len(x.audio_languages) == 1][0]
         xiaochen_multilingual = [x for x in xiaochen if len(x.audio_languages) > 1][0]

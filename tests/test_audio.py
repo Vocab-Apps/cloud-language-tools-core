@@ -135,7 +135,24 @@ class TestAudio(unittest.TestCase):
             print(f.read())
 
         self.assertTrue(is_mp3)
-        audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, recognition_language)
+
+        audio_format = cloudlanguagetools.options.AudioFormat.mp3
+
+        # recognize text
+        # ==============
+        sanitized_expected_text = audio_utils.sanitize_recognized_text(text)
+        # first, try openwhisper
+        logger.info(f'attempting to recognize text using OpenAI. expected text: {sanitized_expected_text}')
+        audio_text_openai = audio_utils.speech_to_text_openai(self.manager, audio_temp_file, audio_format)
+        sanitized_openai_text = audio_utils.sanitize_recognized_text(audio_text_openai)
+        if sanitized_expected_text == sanitized_openai_text:
+            # openai text matches
+            logger.info(f'found a match on OpenAI with {sanitized_openai_text}=={sanitized_expected_text}')
+            return
+
+        # second, try azure
+        logger.info(f'attempting to recognize text using Azure. expected text: {sanitized_expected_text}')
+        audio_text = audio_utils.speech_to_text_azure_wav(self.manager, audio_temp_file, recognition_language, audio_format)
         assert_text = f"service {voice_service} voice_key: {voice_key}"
         self.assertEqual(audio_utils.sanitize_recognized_text(text), audio_utils.sanitize_recognized_text(audio_text), msg=assert_text)
 

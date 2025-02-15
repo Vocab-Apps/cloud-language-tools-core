@@ -119,7 +119,11 @@ class TestTranslation(unittest.TestCase):
         'delivery people'])
         self.translate_text(Service.Google, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
         self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
-        self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, ["Changer la carte d'embarquement", "changer de carte d'embarquement", "changer la carte d'embarquement"])
+        self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, 
+            ["Changer la carte d'embarquement", 
+             "changer de carte d'embarquement", 
+             "changer la carte d'embarquement",
+             "échanger la carte d'embarquement"])
         self.translate_text(Service.Amazon, '换登机牌', Language.zh_cn, Language.fr, 
             ["utilisez votre carte d'embarquement", # seems wrong, but amazon returns this occasionally
              "modifier la carte d'embar", # seems wrong, but amazon returns this occasionally

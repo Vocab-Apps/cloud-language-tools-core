@@ -39,7 +39,7 @@ def get_audio_language_enum(language_code):
     return cloudlanguagetools.languages.AudioLanguage[language_enum_name]
 
 class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
-    def __init__(self, voice_data):
+    def __init__(self, voice_data, engine: str):
         # print(voice_data)
         # {'Gender': 'Female', 'Id': 'Lotte', 'LanguageCode': 'nl-NL', 'LanguageName': 'Dutch', 'Name': 'Lotte', 'SupportedEngines': ['standard']}
         self.service = cloudlanguagetools.constants.Service.Amazon
@@ -48,9 +48,7 @@ class AmazonVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.voice_id = voice_data['Id']
         self.name = voice_data['Name']
         self.audio_language = get_audio_language_enum(voice_data['LanguageCode'])
-        self.engine = 'standard'
-        if 'neural' in voice_data['SupportedEngines']:
-            self.engine = 'neural'
+        self.engine = engine
 
     def get_voice_key(self):
         return {
@@ -194,7 +192,8 @@ class AmazonService(cloudlanguagetools.service.Service):
         # print(response['Voices'])
         for voice in response['Voices']:
             logger.debug(f'voice: {pprint.pformat(voice)}')
-            result.append(AmazonVoice(voice))
+            for engine in voice['SupportedEngines']:
+                result.append(AmazonVoice(voice, engine))
         return result
 
 

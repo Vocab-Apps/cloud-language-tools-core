@@ -39,10 +39,6 @@ class TestTranslation(unittest.TestCase):
         cls.manager = get_manager()
         cls.get_all_language_data()
 
-    # def setUp(self):
-    #     self.manager = get_manager()
-    #     self.get_all_language_data()
-
     def test_language_list(self):
         self.assertTrue(len(self.language_list) > 0)
         # check for the presence of a few languages

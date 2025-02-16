@@ -13,6 +13,7 @@ import time
 import pprint
 import functools
 import tempfile
+import backoff
 
 import audio_utils
 
@@ -48,6 +49,16 @@ def skip_unreliable_clt_test():
     return decorator
 
 
+@backoff.on_exception(backoff.expo,
+                      requests.exceptions.RequestException)
+def get_tts_voice_list_json_with_retry(manager):
+    return manager.get_tts_voice_list_json()
+
+@backoff.on_exception(backoff.expo,
+                      requests.exceptions.RequestException)
+def get_tts_voice_list_v3_with_retry(manager):
+    return manager.get_tts_voice_list_v3()
+
 class TestAudio(unittest.TestCase):
 
     ENGLISH_INPUT_TEXT = 'This is the best restaurant in town.'
@@ -60,17 +71,8 @@ class TestAudio(unittest.TestCase):
     def setUpClass(cls):
         cls.manager = get_manager()
         cls.language_list = cls.manager.get_language_list()
-        num_tries = 3
-        success = False
-        while success == False and num_tries >= 0:
-            num_tries -= 1
-            try:
-                cls.voice_list = cls.manager.get_tts_voice_list_json()
-                cls.voice_list_v3 = cls.manager.get_tts_voice_list_v3()
-                success = True
-            except requests.exceptions.ReadTimeout as e:
-                logging.exception(f'could not get voice list, timeout')
-                time.sleep(1)
+        cls.voice_list = get_tts_voice_list_json_with_retry(cls.manager)
+        cls.voice_list_v3 = get_tts_voice_list_v3_with_retry(cls.manager)
         
         import http.client as http_client                            
         http_client.HTTPConnection.debuglevel = 1

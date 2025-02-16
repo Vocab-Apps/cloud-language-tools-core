@@ -161,9 +161,10 @@ class AmazonService(cloudlanguagetools.service.Service):
                     SampleRate="16000")
             else:
                 if voice_key['engine'] in ['generative', 'long-form']:
-                    logger.info(f'with generative/long-form voice, use text mode')
+                    logger.info(f'voice: {voice_key}, generating text format: {text}')
                     response = self.polly_client.synthesize_speech(Text=text, TextType="text", OutputFormat=response_format_parameter, VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
                 else:
+                    logger.info(f'voice: {voice_key}, generating ssml format: {ssml_str}')
                     response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=response_format_parameter, VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
             logger.error(f'Amazon Polly exception: {type(error)}')

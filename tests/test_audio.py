@@ -431,8 +431,17 @@ class TestAudio(unittest.TestCase):
 
     def test_ssml_english_amazon(self):
         # pytest test_audio.py -k test_ssml_english_amazon
+
+        us_standard_neural_voices = [x for x in self.voice_list_v3 if 
+                  x.service == Service.Amazon and
+                  x.voice_key['engine'] in ['standard', 'neural'] and 
+            AudioLanguage.en_US in x.audio_languages]
+
+        # choose random voice from standard_neural_voices
+        standard_neural_voice = random.choice(us_standard_neural_voices)
         source_text = 'hello <break time="200ms"/>world'
-        self.verify_service_audio_language(source_text, Service.Amazon, AudioLanguage.en_US, 'en-US')
+        self.verify_voice_v3(standard_neural_voice, source_text, 'en-US')
+
 
     def test_ssml_english_watson(self):
         # pytest test_audio.py -k test_ssml_english_watson

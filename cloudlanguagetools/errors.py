@@ -7,6 +7,9 @@ class TransientError(Exception):
 class PermanentError(Exception):
     pass
 
+class InputError(PermanentError):
+    pass
+
 class ApiKeyNotFoundError(PermanentError):
     pass
 

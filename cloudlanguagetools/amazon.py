@@ -144,12 +144,12 @@ class AmazonService(cloudlanguagetools.service.Service):
             # pitch not supported on neural voices
             prosody_tags = f'rate="{rate_str}"'
 
-
         ssml_str = f"""<speak>
     <prosody {prosody_tags} >
         {text}
     </prosody>
 </speak>"""
+
 
         try:
             if audio_format == cloudlanguagetools.options.AudioFormat.wav:
@@ -160,7 +160,14 @@ class AmazonService(cloudlanguagetools.service.Service):
                     Engine=voice_key['engine'],
                     SampleRate="16000")
             else:
-                response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=response_format_parameter, VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
+                if voice_key['engine'] == 'generative':
+                    logger.info(f'with generative voice, use text mode')
+                    response = self.polly_client.synthesize_speech(Text=text, TextType="text", OutputFormat=response_format_parameter, VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
+                else:
+                    response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=response_format_parameter, VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
+        except botocore.errorfactory.InvalidSsmlException as error:
+            logger.error(f'Amazon Polly exception: {error}')
+            raise cloudlanguagetools.errors.InputError(str(error))
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
             logger.error(f'Amazon Polly exception: {type(error)}')
             raise cloudlanguagetools.errors.RequestError(str(error))

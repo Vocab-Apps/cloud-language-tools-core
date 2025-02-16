@@ -580,6 +580,11 @@ class TestAudio(unittest.TestCase):
         fr_voice = self.get_voice_by_service_and_name(Service.Amazon, 'Mathieu')
         self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
+    def test_amazon_generative(self):
+        amy_generative_voice = self.get_voice_by_lambda(Service.Amazon, 
+            lambda x: x.voice_key['engine'] == 'generative' and 'Amy' in x.name)
+        self.verify_voice_v3(amy_generative_voice, self.ENGLISH_INPUT_TEXT, 'en-GB')
+
     def test_elevenlabs_format_wav(self):
         fr_voice = self.get_voice_by_lambda(Service.ElevenLabs, 
             lambda x: 'Charlotte' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')

@@ -24,6 +24,8 @@ class Service():
         try:
             kwargs['timeout'] = cloudlanguagetools.constants.RequestTimeout
             response = self.post_request(url, **kwargs)
+            if response.status_code >= 400:
+                logger.error(f'{self.get_service_name()} audio request failed with status code {response.status_code}: {response.content}')
             response.raise_for_status()
             output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_audio_')
             output_temp_filename = output_temp_file.name            

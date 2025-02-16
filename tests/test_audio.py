@@ -157,6 +157,8 @@ class TestAudio(unittest.TestCase):
             # openai text matches
             logger.info(f'found a match on OpenAI with {sanitized_openai_text}=={sanitized_expected_text}')
             return
+        else:
+            logger.warning(f'failed to recognize text using OpenAI. expected text: {sanitized_expected_text} got: {sanitized_openai_text}')
 
         # second, try azure
         logger.info(f'attempting to recognize text using Azure. expected text: {sanitized_expected_text}')

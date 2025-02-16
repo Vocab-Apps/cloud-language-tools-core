@@ -23,18 +23,25 @@ def get_manager():
     return manager
 
 class TestTranslation(unittest.TestCase):
+    
+    @classmethod
     @backoff.on_exception(backoff.expo,
                         requests.exceptions.RequestException,
                         max_time=60)
-    def get_all_language_data(self):
-        self.language_list = self.manager.get_language_list()
-        self.translation_language_list = self.manager.get_translation_language_list_json()
-        self.transliteration_language_list = self.manager.get_transliteration_language_list_json()
-        self.tokenization_options = self.manager.get_tokenization_options_json()
+    def get_all_language_data(cls):
+        cls.language_list = cls.manager.get_language_list()
+        cls.translation_language_list = cls.manager.get_translation_language_list_json()
+        cls.transliteration_language_list = cls.manager.get_transliteration_language_list_json()
+        cls.tokenization_options = cls.manager.get_tokenization_options_json()
 
-    def setUp(self):
-        self.manager = get_manager()
-        self.get_all_language_data()
+    @classmethod
+    def setUpClass(cls):
+        cls.manager = get_manager()
+        cls.get_all_language_data()
+
+    # def setUp(self):
+    #     self.manager = get_manager()
+    #     self.get_all_language_data()
 
     def test_language_list(self):
         self.assertTrue(len(self.language_list) > 0)

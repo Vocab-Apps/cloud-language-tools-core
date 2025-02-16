@@ -5,7 +5,8 @@ import os
 import boto3
 import botocore.exceptions
 import contextlib
-
+import logging
+import pprint
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -18,6 +19,8 @@ import cloudlanguagetools.errors
 import cloudlanguagetools.audio_processing
 
 from cloudlanguagetools.options import AudioFormat
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_VOICE_PITCH = 0
 DEFAULT_VOICE_RATE = 100
@@ -125,6 +128,8 @@ class AmazonService(cloudlanguagetools.service.Service):
             AudioFormat.wav: 'pcm'
         }, options, AudioFormat.mp3)
 
+        logger.info(f'generating audio with voice {voice_key}')
+
         # wav, we need to convert as described here:
         # https://aws.amazon.com/blogs/machine-learning/integrating-amazon-polly-with-legacy-ivr-systems-by-converting-output-to-wav-format/
 
@@ -159,6 +164,7 @@ class AmazonService(cloudlanguagetools.service.Service):
             else:
                 response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=response_format_parameter, VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
+            logger.error(f'Amazon Polly exception: {type(error)}')
             raise cloudlanguagetools.errors.RequestError(str(error))
 
         if "AudioStream" in response:
@@ -187,6 +193,7 @@ class AmazonService(cloudlanguagetools.service.Service):
         response = self.polly_client.describe_voices()
         # print(response['Voices'])
         for voice in response['Voices']:
+            logger.debug(f'voice: {pprint.pformat(voice)}')
             result.append(AmazonVoice(voice))
         return result
 

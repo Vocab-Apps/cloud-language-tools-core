@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.options
+import cloudlanguagetools.errors
 from cloudlanguagetools.languages import Language
 from cloudlanguagetools.languages import AudioLanguage
 from cloudlanguagetools.constants import Service
@@ -113,23 +114,16 @@ class TestAudio(unittest.TestCase):
         voice_service = voice.service.name
         return self.verify_voice_internal(voice_key, voice_service, text, recognition_language)
 
+    @backoff.on_exception(backoff.expo,
+                        cloudlanguagetools.errors.TransientError,
+                        max_time=BACKOFF_MAX_TIME)
+    def get_tts_audio_with_retry(self, text, voice_service, voice_key):
+        audio_temp_file = self.manager.get_tts_audio(text, voice_service, voice_key, {})
+        return audio_temp_file
+
     def verify_voice_internal(self, voice_key, voice_service, text, recognition_language):
 
-        max_tries = 3
-        num_tries = max_tries
-        get_tts_audio_success = False
-
-        while get_tts_audio_success != True and num_tries >= 0:
-            num_tries -= 1
-            try:
-                logging.info(f"attempting to retrieve audio from {voice_service}, attempts: {num_tries}")
-                audio_temp_file = self.manager.get_tts_audio(text, voice_service, voice_key, {})
-                get_tts_audio_success = True
-            except cloudlanguagetools.errors.TimeoutError as exception:
-                time.sleep(1) # allow retry
-
-        if num_tries < 0:
-            raise Exception(f"could not retrieve audio from {voice_service} after {max_tries} tries")
+        audio_temp_file = self.get_tts_audio_with_retry(text, voice_service, voice_key)
 
         # check file format
         is_mp3 = audio_utils.is_mp3_format(audio_temp_file.name)

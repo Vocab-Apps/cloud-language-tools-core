@@ -1,15 +1,23 @@
 
-class ApiKeyNotFoundError(ValueError):
+# these exceptions can be retried
+class TransientError(Exception):
     pass
 
-class RequestError(ValueError):
+# no need to retry, something is wrong which won't be fixed on retry
+class PermanentError(Exception):
     pass
 
-class TimeoutError(ValueError):
+class ApiKeyNotFoundError(PermanentError):
     pass
 
-class NotFoundError(ValueError):
+class RequestError(TransientError):
     pass
 
-class OverQuotaError(Exception):
+class TimeoutError(TransientError):
+    pass
+
+class NotFoundError(PermanentError):
+    pass
+
+class OverQuotaError(PermanentError):
     pass

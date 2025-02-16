@@ -36,7 +36,7 @@ def get_manager():
 
     return manager
 
-
+BACKOFF_MAX_TIME=30
 
 def skip_unreliable_clt_test():
     def decorator(func):
@@ -50,12 +50,14 @@ def skip_unreliable_clt_test():
 
 
 @backoff.on_exception(backoff.expo,
-                      requests.exceptions.RequestException)
+                      requests.exceptions.RequestException,
+                      max_time=BACKOFF_MAX_TIME)
 def get_tts_voice_list_json_with_retry(manager):
     return manager.get_tts_voice_list_json()
 
 @backoff.on_exception(backoff.expo,
-                      requests.exceptions.RequestException)
+                      requests.exceptions.RequestException, 
+                      max_time=BACKOFF_MAX_TIME)
 def get_tts_voice_list_v3_with_retry(manager):
     return manager.get_tts_voice_list_v3()
 

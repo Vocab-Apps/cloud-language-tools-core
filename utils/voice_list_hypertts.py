@@ -33,9 +33,10 @@ def process_voice(voice: cloudlanguagetools.ttsvoice.TtsVoice_v3):
             # remove it, don't offer wav format in HyperTTS, it doesn't really make sense
             voice_options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER]['values'].remove(cloudlanguagetools.options.AudioFormat.wav.name)
 
+    escaped_name = voice.name.replace("'", "\\'")
     return f"""
         voice.TtsVoice_v3(
-            name='{voice.name}',
+            name='{escaped_name}',
             voice_key={voice.voice_key},
             options={voice_options},
             service='{voice.service.name}',

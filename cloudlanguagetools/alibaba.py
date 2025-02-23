@@ -8,6 +8,7 @@ import hmac
 import base64
 import logging
 import tempfile
+import pprint
 from typing import List
 
 import cloudlanguagetools.service
@@ -121,16 +122,24 @@ class AlibabaService(cloudlanguagetools.service.Service):
 
         if response.status_code != 200:
             data = response.json()
-            error_message = data.get('message', str(data))
-            logger.warning(error_message)
+            error_message = f'could not retrieve audio using Alibaba: {response.content}'
+            logger.error(error_message)
             raise cloudlanguagetools.errors.RequestError(text, voice, error_message)
 
         if response.headers['Content-Type'] != 'audio/mpeg':
-            logger.warning(f'Unexpected response type. Response as text: {response.text}')
+            logger.error(f'Unexpected response type. Response as text: {response.text}')
             raise cloudlanguagetools.errors.RequestError(
                 text, voice,
                 f'Got bad content type in response: {response.headers["Content-Type"]}'
             )
+        
+        # check the content length
+        if len(response.content) == 0:
+            # empty sound response
+            error_message = f'empty sound response. headers: {pprint.pformat(response.headers)}'
+            logger.error(error_message)
+            raise cloudlanguagetools.errors.RequestError(text, voice, f'empty sound result')
+
 
         # Create a temporary file and write the audio content to it
         output_temp_file = tempfile.NamedTemporaryFile(prefix=f'cloudlanguage_tools_{self.__class__.__name__}_audio', suffix='.mp3')

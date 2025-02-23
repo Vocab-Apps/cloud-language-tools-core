@@ -60,7 +60,7 @@ class ForvoService(cloudlanguagetools.service.Service):
         
         # on 2024/07, forvo started throwing some errors with SSL verification, suspect an incorrect
         # setup on their side but they are taking too long to fix it.
-        self.verify_ssl = False
+        self.verify_ssl = True
 
     def configure(self, config):
         self.key = config['key']

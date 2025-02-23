@@ -97,6 +97,7 @@ class AlibabaService(cloudlanguagetools.service.Service):
         logger.info(f"Got access token: {self.access_token}")
 
     def get_tts_audio(self, text, voice_key, options):
+        logger.debug(f'get_tts_audio, text: {text} voice_key: {voice_key}')
         if not self.access_token or self.access_token["ExpireTime"] <= int(time.time()):
             self.refresh_token()
 
@@ -120,6 +121,8 @@ class AlibabaService(cloudlanguagetools.service.Service):
             timeout=cloudlanguagetools.constants.RequestTimeout
         )
 
+        logger.debug(f'response status code: {response.status_code} headers: {pprint.pformat(response.headers)} length of response: {len(response.content)}')
+
         if response.status_code != 200:
             data = response.json()
             error_message = f'could not retrieve audio using Alibaba: {response.content}'
@@ -133,18 +136,12 @@ class AlibabaService(cloudlanguagetools.service.Service):
                 f'Got bad content type in response: {response.headers["Content-Type"]}'
             )
         
-        # check the content length
-        if len(response.content) == 0:
-            # empty sound response
-            error_message = f'empty sound response. headers: {pprint.pformat(response.headers)}'
-            logger.error(error_message)
-            raise cloudlanguagetools.errors.RequestError(text, voice, f'empty sound result')
-
-
         # Create a temporary file and write the audio content to it
         output_temp_file = tempfile.NamedTemporaryFile(prefix=f'cloudlanguage_tools_{self.__class__.__name__}_audio', suffix='.mp3')
-        output_temp_file.write(response.content)
-        output_temp_file.flush()
+        output_temp_filename = output_temp_file.name
+        with open(output_temp_filename, 'wb') as audio:
+            audio.write(response.content)        
+        logger.debug(f'result temporary file name: {output_temp_file.name}')
         return output_temp_file
 
     def get_tts_voice_list(self):

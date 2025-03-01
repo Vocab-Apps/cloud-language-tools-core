@@ -12,7 +12,7 @@ fi
 VERSION_NUMBER=$1 # for example 0.1
 
 export DOCKER_BUILDKIT=1
-DOCKER_IMAGE=lucwastiaux/cloud-language-tools-core-test
+DOCKER_IMAGE=vocabai/cloud-language-tools-core-test
 docker build -t ${DOCKER_IMAGE}:${VERSION_NUMBER} --build-arg CLT_CORE_VERSION=${VERSION_NUMBER} -f Dockerfile.test .
 # https://pypi.org/project/pytest-xdist/2.5.0/#features
 # --dist load (default): Sends pending tests to any worker that is available, without any guaranteed order.

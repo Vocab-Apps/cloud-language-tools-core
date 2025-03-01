@@ -1,5 +1,5 @@
 import os
-import epitran as epitran_module
+import requests
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -29,8 +29,20 @@ class EpitranTransliterationLanguage(cloudlanguagetools.transliterationlanguage.
         return key
 
 class EpitranService(cloudlanguagetools.service.Service):
+    BASE_URL = 'https://clt-nlp-api.vocab.ai'
+
     def __init__(self):
-        pass
+        self.base_url = os.environ.get('EPITRAN_URL_OVERRIDE', self.BASE_URL)
+
+    def post_request(self, text, language_code, endpoint):
+        query_url = self.base_url + endpoint
+        response = requests.post(query_url, 
+            json={'text': text, 'language_code': language_code}, 
+            timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
+
+        response_data = response.json()        
+        return response_data
 
     def get_tts_voice_list(self):
         return []
@@ -100,6 +112,6 @@ class EpitranService(cloudlanguagetools.service.Service):
         return result
 
     def get_transliteration(self, text, transliteration_key):
-        epi = epitran_module.Epitran(transliteration_key['language_code'])
-        result = epi.transliterate(text)
+        language_code = transliteration_key['language_code']
+        result = self.post_request(text, language_code, '/epitran/v1/transliterate')
         return result

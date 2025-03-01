@@ -615,7 +615,7 @@ class TestTranslation(unittest.TestCase):
             service, 
             ['kønnən siː mir das awf dər karte t͡sajeːɡən?',
             'kønən siː miʁ das auf deʁ kaɐte t͡saieɡən?',
-            'kœnən siː miːʀ dɑːs auf dəʀ kaʀteː t͡saiɡən?'])
+            'kœnɛːn ziː miːr daːs aʊ̯f dɛːr kaːrtɛː t͡saɪ̯ɡɛːn?'])
 
         # spanish
         self.verify_transliteration_single_option(Language.es, '¿A qué hora usted cierra?', service, '¿a ke oɾa usted siera?')

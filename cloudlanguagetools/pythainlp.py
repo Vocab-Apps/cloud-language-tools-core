@@ -1,4 +1,3 @@
-import pythainlp
 import enum
 import string
 import os

@@ -1,6 +1,8 @@
 import pythainlp
 import enum
 import string
+import os
+import requests
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -51,8 +53,18 @@ class PyThaiNLPTokenization(cloudlanguagetools.tokenization.Tokenization):
         }
 
 class PyThaiNLPService(cloudlanguagetools.service.Service):
+    BASE_URL = 'https://clt-nlp-api.vocab.ai'
+
     def __init__(self):
-        pass
+        self.base_url = os.environ.get('PYTHAINLP_URL_OVERRIDE', self.BASE_URL)
+
+    def post_request(self, text, endpoint):
+        query_url = self.base_url + endpoint
+        response = requests.post(query_url, json={'text': text}, timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
+
+        response_data = response.json()        
+        return response_data
 
     def get_transliteration_language_list(self):
         result = [
@@ -66,15 +78,15 @@ class PyThaiNLPService(cloudlanguagetools.service.Service):
         mode = PyThaiNLPTransliterationMode[transliteration_key['mode']]
 
         if mode ==  PyThaiNLPTransliterationMode.Romanization:
-            return pythainlp.romanize(text, engine='thai2rom')
+            return self.post_request(text, '/pythainlp/v1/romanize')
         elif mode == PyThaiNLPTransliterationMode.IPA:
-            return pythainlp.transliterate(text)
+            return self.post_request(text, '/pythainlp/v1/transliterate')
 
     def get_tokenization(self, text, tokenization_key):
         mode = PyThaiNLPTokenizationMode[tokenization_key['mode']]
         
         if mode == PyThaiNLPTokenizationMode.Default:
-            tokens = pythainlp.word_tokenize(text)
+            tokens = self.post_request(text, '/pythainlp/v1/word_tokenize')
             tokens = [token for token in tokens if not token.isspace()]
             tokens = [token for token in tokens if not token in string.punctuation]
             token_entries = [{'token': token, 'lemma': token, 'can_translate': True, 'can_transliterate': True} for token in tokens]

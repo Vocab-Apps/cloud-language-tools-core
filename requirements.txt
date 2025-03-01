@@ -1,1 +1,1 @@
-clt_requirements>=1.7
+clt_requirements>=1.8

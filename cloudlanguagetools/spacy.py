@@ -30,7 +30,7 @@ class SpacyTokenization(cloudlanguagetools.tokenization.Tokenization):
         }
 
 class SpacyService(cloudlanguagetools.service.Service):
-    BASE_URL = 'http://spacy-api.vocab.ai'
+    BASE_URL = 'https://clt-nlp-api.vocab.ai'
 
     def __init__(self):
         self.BASE_URL = os.environ.get('SPACY_URL_OVERRIDE', self.BASE_URL)

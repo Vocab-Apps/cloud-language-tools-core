@@ -3,7 +3,7 @@ FROM python:3.11-slim-bookworm
 
 ARG CLT_REQUIREMENTS_VERSION
 # update packages
-RUN apt-get update -y && apt-get install -y libasound2 python3-pip git gnupg build-essential wget libssl-dev ca-certificates libmagic1 ffmpeg
+RUN apt-get update -y && apt-get install -y libasound2 python3-pip git gnupg wget libssl-dev ca-certificates libmagic1 ffmpeg
 # azure speech sdk requires openssl 1.1.1
 # https://learn.microsoft.com/en-us/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux%2Cubuntu%2Cdotnetcli%2Cdotnet%2Cjre%2Cmaven%2Cnodejs%2Cmac%2Cpypi&pivots=programming-language-cpp#platform-requirements
 RUN wget -O - https://www.openssl.org/source/openssl-1.1.1w.tar.gz | tar zxf - && \
@@ -16,8 +16,6 @@ RUN wget -O - https://www.openssl.org/source/openssl-1.1.1w.tar.gz | tar zxf - &
     rm -rf openssl-1.1.1u && \
     rmdir /usr/local/ssl/certs && \
     ln -s /etc/ssl/certs /usr/local/ssl/certs
-# required by Epitran module
-RUN wget https://github.com/festvox/flite/archive/refs/tags/v2.2.tar.gz && tar xvzf v2.2.tar.gz && cd flite-2.2 && ./configure && make && make install && cd testsuite && make lex_lookup && cp lex_lookup /usr/local/bin
 # update pip
 RUN pip3 install --upgrade pip
 # install clt_requirements

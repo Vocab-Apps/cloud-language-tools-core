@@ -38,7 +38,8 @@ class SpacyService(cloudlanguagetools.service.Service):
     def get_tokenization(self, text, tokenization_key):
         model_name = tokenization_key['model_name']
 
-        response = requests.post(self.BASE_URL + '/v1/tokenize', json={'language': model_name, 'text': text}, timeout=cloudlanguagetools.constants.RequestTimeout)
+        query_url = self.BASE_URL + '/spacy/v1/tokenize'
+        response = requests.post(query_url, json={'language': model_name, 'text': text}, timeout=cloudlanguagetools.constants.RequestTimeout)
         response_data = response.json()        
 
         if response.status_code == 200:

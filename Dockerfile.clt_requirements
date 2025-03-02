@@ -1,5 +1,5 @@
 # this is the base image which contains all the requirements to run clt-core
-FROM python:3.11-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 ARG CLT_REQUIREMENTS_VERSION
 # update packages

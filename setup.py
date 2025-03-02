@@ -6,7 +6,7 @@ from setuptools.command.install import install
 # twine upload dist/*
 
 setup(name='cloudlanguagetools',
-      version='13.0.0',
+      version='13.0.1',
       description='Interface with various cloud APIs for language processing such as translation, text to speech',
       long_description=open('README.rst', encoding='utf-8').read(),
       url='https://github.com/Vocab-Apps/cloud-language-tools-core',

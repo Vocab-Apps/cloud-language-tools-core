@@ -6,13 +6,13 @@ from setuptools import setup
 
 
 setup(name='clt_requirements',
-      version='1.8',
+      version='2.0',
       description='Helper module for Cloud Language Tools, additional dependencies',
-      url='https://github.com/Language-Tools/cloud-language-tools-core',
+      url='https://github.com/Vocab-Apps/cloud-language-tools-core',
       author='Luc',
       author_email='languagetools@mailc.net',
       classifiers=[
-        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Topic :: Text Processing :: Linguistic',
       ],      
       license='GPL',
@@ -30,7 +30,6 @@ setup(name='clt_requirements',
         'pydantic',
         'cachetools',
         'clt_wenlin',
-        'pinyin_jyutping',
-        'StrEnum'
+        'pinyin_jyutping'
       ],
       )

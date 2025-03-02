@@ -217,7 +217,7 @@ class TestAudio(unittest.TestCase):
         # and also a DragonHD, and DragonHD V1
 
         xiaochen_single_language = [x for x in xiaochen if len(x.audio_languages) == 1][0]
-        self.assertEquals(xiaochen_single_language.audio_languages, [AudioLanguage.zh_CN])
+        self.assertEqual(xiaochen_single_language.audio_languages, [AudioLanguage.zh_CN])
 
         xiaochen_multilingual = [x for x in xiaochen if len(x.audio_languages) > 1][0]
         self.assertTrue(len(xiaochen_multilingual.audio_languages) > 1)
@@ -284,7 +284,7 @@ class TestAudio(unittest.TestCase):
         with self.assertRaises(cloudlanguagetools.errors.RequestError) as cm:
             self.manager.get_tts_audio(source_text, service, voice_key, options)
 
-        self.assertEquals(str(cm.exception), 'Azure Standard voices are not supported anymore, please switch to Neural voices.')
+        self.assertEqual(str(cm.exception), 'Azure Standard voices are not supported anymore, please switch to Neural voices.')
 
     def test_mandarin_azure_xiaochen_multilingual(self):
         # search for some particular voices

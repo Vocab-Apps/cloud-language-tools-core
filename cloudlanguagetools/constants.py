@@ -1,5 +1,4 @@
 import enum
-from strenum import StrEnum
 
 # usage/account related constants 
 # ===============================
@@ -61,7 +60,7 @@ ReadTimeout = 3 # 3 seconds read timeout
 
 TTLCacheTimeout = 86400 # 24 hours
 
-class Service(StrEnum):
+class Service(enum.StrEnum):
     Azure = 'Azure'
     Google = 'Google'
     MandarinCantonese = 'MandarinCantonese'
@@ -86,7 +85,7 @@ class Service(StrEnum):
     TestServiceA = 'TestServiceA'
     TestServiceB = 'TestServiceB'
 
-class Gender(StrEnum):
+class Gender(enum.StrEnum):
     Male = 'Male'
     Female = 'Female'
     Any = 'Any'

@@ -1,8 +1,13 @@
 import enum
 
 class Language(enum.Enum):
+    ab = ("Abkhaz")
+    ace = ("Acehnese")
+    ach = ("Acholi")
     af = ("Afrikaans")
     ak = ("Akan")
+    alz = ("Alur")
+    awa = ("Awadhi")
     ay = ("Aymara")
     bh = ("Bihari")
     sq = ("Albanian")

@@ -90,6 +90,8 @@ def get_translation_language_enum(language_id):
         'id': 'id_',
         'is': 'is_',
         'or': 'or_',
+        'ms-Arab': 'ms_arab',
+        'pa-Arab': 'pa_arab',
         'pt': 'pt_br',
         'pt-pt': 'pt_pt',
         'pt-PT': 'pt_pt',

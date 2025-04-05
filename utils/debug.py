@@ -10,7 +10,7 @@ import subprocess
 import unittest
 import pydub
 import pydub.playback
-import epitran
+# import epitran
 # import pandas
 import requests
 import re
@@ -187,6 +187,13 @@ def get_watson_voice_list():
         f.write(json.dumps(data, indent=4, sort_keys=True, ensure_ascii=False))
         f.close()
     print(f'wrote {output_filename}')
+
+def get_watson_translation_languages():
+    manager = get_manager()
+    #tts_voice_list_json = manager.get_tts_voice_list_json()
+    # print(tts_voice_list_json)    
+    data = manager.services[cloudlanguagetools.constants.Service.Watson.name].get_translation_language_list()
+    pprint.pprint(data)
 
 def get_google_voice_list():
     manager = get_manager()
@@ -1150,7 +1157,8 @@ if __name__ == '__main__':
     # get_elevenlabs_voice_list()
     # elevenlabs_api_test()
     # get_watson_voice_list()
-    get_amazon_voice_list()
+    get_watson_translation_languages()
+    # get_amazon_voice_list()
     # get_forvo_voice_list()
     # get_amazon_voice_list_awesometts()
     # get_azure_translation_languages()

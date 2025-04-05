@@ -103,18 +103,8 @@ class WatsonService(cloudlanguagetools.service.Service):
         return response.json()
 
     def get_translation_language_list(self):
-        language_list = self.get_translation_languages()['languages']
-        result = []
-        # print(language_list)
-        for entry in language_list:
-            if entry['supported_as_source'] == True and entry['supported_as_target'] == True:
-                # print(entry)
-                language_id = entry['language']
-                try:
-                    result.append(WatsonTranslationLanguage(language_id))
-                except KeyError:
-                    logging.error(f'could not process translation language for {language_id}, {entry}', exc_info=True)                    
-        return result        
+        # 2025/04: watson translation API has been decommisioned
+        return []
 
     def list_voices(self):
         response = requests.get(self.speech_url + '/v1/voices', auth=('apikey', self.speech_key), timeout=cloudlanguagetools.constants.RequestTimeout)

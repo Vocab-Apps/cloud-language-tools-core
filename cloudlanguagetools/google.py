@@ -178,7 +178,12 @@ class GoogleService(cloudlanguagetools.service.Service):
 
             # some voices don't support SSML and it's weirdly not documented
             non_ssml_voices = ['Chirp', 'Journey']
-            non_ssml_voice_found = any(s in text for s in voice_key['name'])
+            non_ssml_voice_found = False
+            for voice_name in non_ssml_voices:
+                if voice_name in voice_key['name']:
+                    logger.info(f'with voice {voice_key}, use non-ssml input')
+                    non_ssml_voice_found = True
+                    break
             if non_ssml_voice_found:
                 logger.info(f'with voice {voice_key}, use non-ssml input')
                 input_text = google.cloud.texttospeech.SynthesisInput(text=text)

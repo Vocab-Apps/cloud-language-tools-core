@@ -632,6 +632,11 @@ class TestAudio(unittest.TestCase):
             lambda x: x.name == 'en-US-Chirp-HD-O', assert_unique=True)
         self.verify_voice_v3(chirp_en_voice, self.ENGLISH_INPUT_TEXT, 'en-US')        
 
+    def test_google_chirp3_mandarin(self):
+        chirp_zh_voice = self.get_voice_by_lambda(Service.Google,
+            lambda x: x.name == 'cmn-CN-Chirp3-HD-Leda', assert_unique=True)
+        self.verify_voice_v3(chirp_zh_voice, self.CHINESE_INPUT_TEXT, 'zh-CN')
+
     @pytest.mark.skip(reason="journey voice seems to be gone")
     def test_google_voice_journey_old(self):
         service = 'Google'

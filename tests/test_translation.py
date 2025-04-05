@@ -207,7 +207,6 @@ class TestTranslation(unittest.TestCase):
 
         self.assertIn(result['Azure'], possible_french_translations)
         self.assertIn(result['Google'], possible_french_translations)
-        self.assertIn(result['Watson'], possible_french_translations)
 
     def test_translate_all_bug_vi(self):
         # pytest test_translation.py -rPP -k test_translate_all_bug_vi

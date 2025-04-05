@@ -500,6 +500,12 @@ class TestAudio(unittest.TestCase):
         source_text = 'obrigado'
         self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.pt_BR, 'pt-BR')
 
+    @pytest.mark.skip(reason="wait for clarification on github")
+    def test_egyptian_arabic_forvo(self):
+        # https://github.com/Vocab-Apps/anki-hyper-tts/issues/245
+        source_text = 'باب'
+        self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.ar_EG, 'ar-EG')
+
     def test_mandarin_forvo(self):
         # pytest tests/test_audio.py -k test_mandarin_forvo
         source_text = '你好'

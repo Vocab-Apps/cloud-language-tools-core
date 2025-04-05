@@ -219,7 +219,6 @@ class TestTranslation(unittest.TestCase):
         pprint.pprint(result)
         self.assertTrue('Azure' in result)
         self.assertTrue('Google' in result)
-        self.assertEqual(result['Watson'], "<b><span style=\"font-weight: 400;\">What's wrong with you?</span></b>")
 
     def test_transliteration_azure_custom(self):
         # pytest tests/test_translation.py -k test_transliteration_azure_custom

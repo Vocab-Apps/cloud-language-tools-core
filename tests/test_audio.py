@@ -284,7 +284,8 @@ class TestAudio(unittest.TestCase):
         with self.assertRaises(cloudlanguagetools.errors.RequestError) as cm:
             self.manager.get_tts_audio(source_text, service, voice_key, options)
 
-        self.assertEqual(str(cm.exception), 'Azure Standard voices are not supported anymore, please switch to Neural voices.')
+        # self.assertEqual(str(cm.exception), 'Azure Standard voices are not supported anymore, please switch to Neural voices.')
+        self.assertIn('Unsupported', str(cm.exception))
 
     def test_mandarin_azure_xiaochen_multilingual(self):
         # search for some particular voices

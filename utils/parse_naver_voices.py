@@ -139,25 +139,31 @@ VOICE_TYPE_MAP = {
 
 for line in naver_voice_list.splitlines():
     if len(line) > 1:
-        # print(f'[{line}]')
-        m = re.match('\s*([^:]+): ([^:]+): ([^,]+), (.+)', line)
-        if m == None:
-            raise Exception(f'could not parse {line}')
-        voice_id = m.group(1)
-        voice_id = voice_id.strip()
-        voice_name = m.group(2)
-        language = m.group(3)
-        voice_type = m.group(4)
-        gender = None
-        if 'female' in voice_type.lower():
-            gender = 'Female'        
-        elif 'male' in voice_type.lower():
-            gender = 'Male'
-        
-        actual_voice_type = VOICE_TYPE_MAP.get(voice_id, 'Premium')
-        if 'child' in voice_type.lower():
-            actual_voice_type += ' (Child)'
-        
+        # Split by tabs or multiple spaces
+        parts = re.split(r'\t+|\s{2,}', line.strip())
+        if len(parts) >= 4:
+            voice_id = parts[0].strip()
+            voice_name = parts[1].strip()
+            language = parts[2].strip()
+            voice_type = parts[3].strip()
+            
+            gender = None
+            if 'female' in voice_type.lower():
+                gender = 'Female'        
+            elif 'male' in voice_type.lower():
+                gender = 'Male'
+            elif 'child (female)' in voice_type.lower():
+                gender = 'Female'
+            elif 'child (male)' in voice_type.lower():
+                gender = 'Male'
+            
+            actual_voice_type = VOICE_TYPE_MAP.get(voice_id, 'Premium')
+            if 'child' in voice_type.lower():
+                actual_voice_type += ' (Child)'
+            
+            # Handle special case for Korean + English
+            if language.startswith('Korean + English'):
+                language = 'Korean + English (US)'
 
         #print(f'voice_id: {voice_id}, name: {voice_name} language: {language}, voice_type: {voice_type}')
         print(f"            NaverVoice(cloudlanguagetools.languages.AudioLanguage.{LANGUAGE_MAP[language]}, '{voice_id}', cloudlanguagetools.constants.Gender.{gender}, '{voice_name}', '{actual_voice_type}'),")

@@ -77,12 +77,14 @@ class NaverService(cloudlanguagetools.service.Service):
     def configure(self, config):
         self.client_id = config['client_id']
         self.client_secret = config['client_secret']
+        self.papago_translation_client_id = config['papago_translation_client_id']
+        self.papago_translation_client_secret = config['papago_translation_client_secret']
 
     def get_translation(self, text, from_language_key, to_language_key):
         url = 'https://naveropenapi.apigw.ntruss.com/nmt/v1/translation'
         headers = {
-            'X-NCP-APIGW-API-KEY-ID': self.client_id,
-            'X-NCP-APIGW-API-KEY': self.client_secret
+            'X-NCP-APIGW-API-KEY-ID': self.papago_translation_client_id,
+            'X-NCP-APIGW-API-KEY': self.papago_translation_client_secret
         }
 
         data = {

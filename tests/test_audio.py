@@ -68,6 +68,7 @@ class TestAudio(unittest.TestCase):
     FRENCH_INPUT_TEXT = 'Bonjour'
     JAPANESE_INPUT_TEXT = 'すみません'
     CHINESE_INPUT_TEXT = '你好'
+    CHINESE_INPUT_TEXT_2 = '信用卡'
     KOREAN_INPUT_TEXT = '안녕하세요'
 
     @classmethod
@@ -635,7 +636,7 @@ class TestAudio(unittest.TestCase):
     def test_google_chirp3_mandarin(self):
         chirp_zh_voice = self.get_voice_by_lambda(Service.Google,
             lambda x: x.name == 'cmn-CN-Chirp3-HD-Leda', assert_unique=True)
-        self.verify_voice_v3(chirp_zh_voice, self.CHINESE_INPUT_TEXT, 'zh-CN')
+        self.verify_voice_v3(chirp_zh_voice, self.CHINESE_INPUT_TEXT_2, 'zh-CN')
 
     @pytest.mark.skip(reason="journey voice seems to be gone")
     def test_google_voice_journey_old(self):

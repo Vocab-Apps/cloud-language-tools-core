@@ -163,6 +163,9 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.ta_IN: 'IND', 
             cloudlanguagetools.languages.AudioLanguage.ur_IN: 'IND',
             cloudlanguagetools.languages.AudioLanguage.bn_IN: 'IND',
+            # bengali, any country
+            # https://github.com/Vocab-Apps/anki-hyper-tts/issues/223
+            cloudlanguagetools.languages.AudioLanguage.bn_ANY: 'ANY', 
             cloudlanguagetools.languages.AudioLanguage.en_NG: 'NGA',
             cloudlanguagetools.languages.AudioLanguage.ta_LK: 'LKA',
             cloudlanguagetools.languages.AudioLanguage.ur_PK: 'PAK',

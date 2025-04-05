@@ -506,6 +506,12 @@ class TestAudio(unittest.TestCase):
         source_text = 'باب'
         self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.ar_EG, 'ar-EG')
 
+    @pytest.mark.skip(reason="recognition doesn't work for bengali, but bn-ANY voice should be OK")
+    def test_bengali_any_country_forvo(self):
+        # https://github.com/Vocab-Apps/anki-hyper-tts/issues/223
+        source_text = 'কলকাতা'
+        self.verify_service_audio_language(source_text, Service.Forvo, AudioLanguage.bn_ANY, 'bn-IN')
+
     def test_mandarin_forvo(self):
         # pytest tests/test_audio.py -k test_mandarin_forvo
         source_text = '你好'

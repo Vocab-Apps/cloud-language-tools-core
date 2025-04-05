@@ -66,7 +66,7 @@ class TestAudio(unittest.TestCase):
 
     ENGLISH_INPUT_TEXT = 'This is the best restaurant in town.'
     FRENCH_INPUT_TEXT = 'Bonjour'
-    JAPANESE_INPUT_TEXT = 'こんにちは'
+    JAPANESE_INPUT_TEXT = 'すみません'
     CHINESE_INPUT_TEXT = '你好'
     KOREAN_INPUT_TEXT = '안녕하세요'
 

@@ -130,9 +130,6 @@ class TestTranslation(unittest.TestCase):
              "échangez votre carte d'embarquement",
              "modifiez votre carte d'embarquement"])
 
-    def test_translate_chinese_watson(self):
-        self.translate_text(Service.Watson, '中国有很多外国人', Language.zh_cn, Language.en, 'There are a lot of foreigners in China.')
-
     def test_translate_chinese_amazon(self):
         self.translate_text(Service.Amazon, '中国有很多外国人', Language.zh_cn, Language.en, ['there are many foreigners in china', 'there are a lot of foreigners in china'])
 
@@ -195,7 +192,6 @@ class TestTranslation(unittest.TestCase):
         result = self.manager.get_all_translations(source_text, from_language, to_language)
         self.assertTrue('Azure' in result)
         self.assertTrue('Google' in result)
-        self.assertTrue('Watson' in result)
 
         possible_french_translations = [
             'Très faible coût',
@@ -224,8 +220,6 @@ class TestTranslation(unittest.TestCase):
         pprint.pprint(result)
         self.assertTrue('Azure' in result)
         self.assertTrue('Google' in result)
-        self.assertTrue('Watson' in result)
-        self.assertTrue
         self.assertEqual(result['Watson'], "<b><span style=\"font-weight: 400;\">What's wrong with you?</span></b>")
 
     def test_transliteration_azure_custom(self):

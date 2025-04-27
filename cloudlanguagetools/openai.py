@@ -87,7 +87,7 @@ TTS_SUPPORTED_LANGUAGES = [
             AudioLanguage.es_MX,
             AudioLanguage.sw_KE,
             AudioLanguage.sv_SE,
-            # AudioLanguage.tl_PH, # need to add tagalog language in AudioLanguages
+            AudioLanguage.fil_PH,
             AudioLanguage.ta_IN,
             AudioLanguage.ta_LK,
             AudioLanguage.th_TH,

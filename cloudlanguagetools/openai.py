@@ -17,6 +17,8 @@ from cloudlanguagetools.options import AudioFormat
 logger = logging.getLogger(__name__)
 
 DEFAULT_TTS_SPEED = 1.0
+DEFAULT_INSTRUCTIONS = ''
+DEFAULT_MODEL = 'tts-1-hd'
 
 VOICE_OPTIONS = {
             'speed' : {
@@ -24,6 +26,21 @@ VOICE_OPTIONS = {
                 'min': 0.25,
                 'max': 4.0,
                 'default': DEFAULT_TTS_SPEED
+            },
+            'instructions':
+            {
+                'type': cloudlanguagetools.options.ParameterType.text.name,
+                'default': DEFAULT_INSTRUCTIONS
+            },
+            'model':
+            {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [
+                    'gpt-4o-mini-tts',
+                    'tts-1-hd',
+                    'tts-1'
+                ],
+                'default': DEFAULT_MODEL
             },
             cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
                 'type': cloudlanguagetools.options.ParameterType.list.name,
@@ -210,6 +227,8 @@ class OpenAIService(cloudlanguagetools.service.Service):
         output_temp_file = tempfile.NamedTemporaryFile()
 
         speed = options.get('speed', DEFAULT_TTS_SPEED)
+        model = options.get('model', DEFAULT_MODEL)
+
         response_format_parameter, audio_format = self.get_request_audio_format({
             AudioFormat.mp3: 'mp3',
             AudioFormat.ogg_opus: 'opus',
@@ -217,9 +236,10 @@ class OpenAIService(cloudlanguagetools.service.Service):
         }, options, AudioFormat.mp3)
 
         response = self.client.audio.speech.create(
-            model='tts-1-hd',
+            model=model,
             voice=voice_key['name'],
             input=text,
+
             response_format=response_format_parameter,
             speed=speed
         )

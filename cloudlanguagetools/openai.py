@@ -172,20 +172,6 @@ class OpenAIService(cloudlanguagetools.service.Service):
         return transcript.text
     
     
-    def get_tts_voice_list(self) -> List[OpenAIVoice]:
-        result = []
-
-        for audio_language in TTS_SUPPORTED_LANGUAGES:
-            result.extend([
-                OpenAIVoice('alloy', audio_language, cloudlanguagetools.constants.Gender.Female),
-                OpenAIVoice('echo', audio_language, cloudlanguagetools.constants.Gender.Male),
-                OpenAIVoice('fable', audio_language, cloudlanguagetools.constants.Gender.Female),
-                OpenAIVoice('onyx', audio_language, cloudlanguagetools.constants.Gender.Male),
-                OpenAIVoice('nova', audio_language, cloudlanguagetools.constants.Gender.Female),
-                OpenAIVoice('shimmer', audio_language, cloudlanguagetools.constants.Gender.Female),
-            ])
-        return result
-
     def build_tts_voice_v3(self, voice_name, gender):
         return cloudlanguagetools.ttsvoice.TtsVoice_v3(
             name=voice_name,
@@ -204,11 +190,16 @@ class OpenAIService(cloudlanguagetools.service.Service):
 
         result = [
             self.build_tts_voice_v3('alloy', cloudlanguagetools.constants.Gender.Female),
+            self.build_tts_voice_v3('ash', cloudlanguagetools.constants.Gender.Male),
+            self.build_tts_voice_v3('ballad', cloudlanguagetools.constants.Gender.Male),
+            self.build_tts_voice_v3('coral', cloudlanguagetools.constants.Gender.Female),
             self.build_tts_voice_v3('echo', cloudlanguagetools.constants.Gender.Male),
             self.build_tts_voice_v3('fable', cloudlanguagetools.constants.Gender.Female),
             self.build_tts_voice_v3('onyx', cloudlanguagetools.constants.Gender.Male),
             self.build_tts_voice_v3('nova', cloudlanguagetools.constants.Gender.Female),
+            self.build_tts_voice_v3('sage', cloudlanguagetools.constants.Gender.Female),
             self.build_tts_voice_v3('shimmer', cloudlanguagetools.constants.Gender.Female)
+            self.build_tts_voice_v3('verse', cloudlanguagetools.constants.Gender.Male)
         ]
         return result
 

@@ -198,7 +198,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
             self.build_tts_voice_v3('onyx', cloudlanguagetools.constants.Gender.Male),
             self.build_tts_voice_v3('nova', cloudlanguagetools.constants.Gender.Female),
             self.build_tts_voice_v3('sage', cloudlanguagetools.constants.Gender.Female),
-            self.build_tts_voice_v3('shimmer', cloudlanguagetools.constants.Gender.Female)
+            self.build_tts_voice_v3('shimmer', cloudlanguagetools.constants.Gender.Female),
             self.build_tts_voice_v3('verse', cloudlanguagetools.constants.Gender.Male)
         ]
         return result
@@ -223,6 +223,6 @@ class OpenAIService(cloudlanguagetools.service.Service):
             response_format=response_format_parameter,
             speed=speed
         )
-        response.stream_to_file(output_temp_file.name)
+        response.write_to_file(output_temp_file.name)
 
         return output_temp_file

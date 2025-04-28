@@ -235,13 +235,16 @@ class OpenAIService(cloudlanguagetools.service.Service):
             AudioFormat.wav: 'wav'
         }, options, AudioFormat.mp3)
 
-        response = self.client.audio.speech.create(
-            model=model,
-            voice=voice_key['name'],
-            input=text,
+        audio_parameters = {
+            'model': model,
+            'voice': voice_key['name'],
+            'input': text,
+            'response_format': response_format_parameter,
+            'speed': speed
+        }
 
-            response_format=response_format_parameter,
-            speed=speed
+        response = self.client.audio.speech.create(
+            **audio_parameters
         )
         response.write_to_file(output_temp_file.name)
 

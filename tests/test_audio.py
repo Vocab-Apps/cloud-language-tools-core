@@ -804,3 +804,16 @@ class TestAudio(unittest.TestCase):
     def test_openai_french(self):
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.OpenAI, AudioLanguage.fr_FR, 'fr-FR')
+
+    def test_openai_english_gpt4o_mini(self):
+        service = 'OpenAI'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {
+            "name": "onyx"
+        }
+        options = {'model': 'gpt-4o-mini-tts'}
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)

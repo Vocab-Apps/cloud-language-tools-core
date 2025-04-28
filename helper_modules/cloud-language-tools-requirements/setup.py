@@ -6,7 +6,7 @@ from setuptools import setup
 
 
 setup(name='clt_requirements',
-      version='2.0',
+      version='2.1',
       description='Helper module for Cloud Language Tools, additional dependencies',
       url='https://github.com/Vocab-Apps/cloud-language-tools-core',
       author='Luc',
@@ -26,7 +26,7 @@ setup(name='clt_requirements',
         'jieba',
         'cryptography',
         'pydub',
-        'openai>=1.7.2',
+        'openai>=1.76.0',
         'pydantic',
         'cachetools',
         'clt_wenlin',

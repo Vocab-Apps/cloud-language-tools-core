@@ -19,6 +19,17 @@ logger = logging.getLogger(__name__)
 DEFAULT_TTS_SPEED = 1.0
 DEFAULT_INSTRUCTIONS = ''
 DEFAULT_MODEL = 'tts-1-hd'
+DEFAULT_MODEL_GPT_4O = 'gpt-4o-mini-tts'
+
+MODELS_ALL = [
+    'gpt-4o-mini-tts',
+    'tts-1-hd',
+    'tts-1'
+]
+
+MODELS_GPT_4O_ONLY = [
+    'gpt-4o-mini-tts'
+]
 
 VOICE_OPTIONS = {
             'speed' : {
@@ -52,6 +63,15 @@ VOICE_OPTIONS = {
                 'default': cloudlanguagetools.options.AudioFormat.mp3.name
             }
 }
+
+# https://platform.openai.com/docs/guides/text-to-speech#voice-options
+# Afrikaans, Arabic, Armenian, Azerbaijani, Belarusian, Bosnian, Bulgarian, Catalan, 
+# Chinese, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, Galician, 
+# German, Greek, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, 
+# Kannada, Kazakh, Korean, Latvian, Lithuanian, Macedonian, Malay, Marathi, Maori, 
+# Nepali, Norwegian, Persian, Polish, Portuguese, Romanian, Russian, Serbian, Slovak, 
+# Slovenian, Spanish, Swahili, Swedish, Tagalog, Tamil, Thai, Turkish, Ukrainian, 
+# Urdu, Vietnamese, and Welsh.
 
 TTS_SUPPORTED_LANGUAGES = [
             AudioLanguage.af_ZA,
@@ -188,14 +208,23 @@ class OpenAIService(cloudlanguagetools.service.Service):
         transcript = self.client.audio.transcriptions.create(model="whisper-1", file=audio_file)
         return transcript.text
     
-    
+    def get_default_model(self, voice_name):
+        # these voices don't seem to support tts-1-hd
+        if voice_name in ['ballad', 'verse']:
+            return DEFAULT_MODEL_GPT_4O
+        return DEFAULT_MODEL
+
     def build_tts_voice_v3(self, voice_name, gender):
+        options = VOICE_OPTIONS
+        if self.get_default_model(voice_name) == DEFAULT_MODEL_GPT_4O:
+            options['model']['values'] = MODELS_GPT_4O_ONLY
+            options['model']['default'] = DEFAULT_MODEL_GPT_4O
         return cloudlanguagetools.ttsvoice.TtsVoice_v3(
             name=voice_name,
             voice_key={
                 'name': voice_name
             },
-            options=VOICE_OPTIONS,
+            options=options,
             service=cloudlanguagetools.constants.Service.OpenAI,
             gender=gender,
             audio_languages=TTS_SUPPORTED_LANGUAGES,
@@ -208,12 +237,13 @@ class OpenAIService(cloudlanguagetools.service.Service):
         result = [
             self.build_tts_voice_v3('alloy', cloudlanguagetools.constants.Gender.Female),
             self.build_tts_voice_v3('ash', cloudlanguagetools.constants.Gender.Male),
+            # ballad is only available with gpt-4o
             self.build_tts_voice_v3('ballad', cloudlanguagetools.constants.Gender.Male),
             self.build_tts_voice_v3('coral', cloudlanguagetools.constants.Gender.Female),
             self.build_tts_voice_v3('echo', cloudlanguagetools.constants.Gender.Male),
             self.build_tts_voice_v3('fable', cloudlanguagetools.constants.Gender.Female),
-            self.build_tts_voice_v3('onyx', cloudlanguagetools.constants.Gender.Male),
             self.build_tts_voice_v3('nova', cloudlanguagetools.constants.Gender.Female),
+            self.build_tts_voice_v3('onyx', cloudlanguagetools.constants.Gender.Male),
             self.build_tts_voice_v3('sage', cloudlanguagetools.constants.Gender.Female),
             self.build_tts_voice_v3('shimmer', cloudlanguagetools.constants.Gender.Female),
             self.build_tts_voice_v3('verse', cloudlanguagetools.constants.Gender.Male)
@@ -226,8 +256,9 @@ class OpenAIService(cloudlanguagetools.service.Service):
         
         output_temp_file = tempfile.NamedTemporaryFile()
 
+        voice_name = voice_key['name']
         speed = options.get('speed', DEFAULT_TTS_SPEED)
-        model = options.get('model', DEFAULT_MODEL)
+        model = options.get('model', self.get_default_model(voice_name))
 
         response_format_parameter, audio_format = self.get_request_audio_format({
             AudioFormat.mp3: 'mp3',
@@ -235,13 +266,19 @@ class OpenAIService(cloudlanguagetools.service.Service):
             AudioFormat.wav: 'wav'
         }, options, AudioFormat.mp3)
 
+        instructions = options.get('instructions', DEFAULT_INSTRUCTIONS)
+
         audio_parameters = {
             'model': model,
-            'voice': voice_key['name'],
+            'voice': voice_name,
             'input': text,
             'response_format': response_format_parameter,
             'speed': speed
         }
+        if instructions != DEFAULT_INSTRUCTIONS:
+            audio_parameters['instructions'] = instructions
+
+        logger.debug(f'audio_parameters: {pprint.pformat(audio_parameters)}')
 
         response = self.client.audio.speech.create(
             **audio_parameters

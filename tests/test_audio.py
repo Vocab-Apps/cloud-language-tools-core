@@ -805,6 +805,36 @@ class TestAudio(unittest.TestCase):
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.OpenAI, AudioLanguage.fr_FR, 'fr-FR')
 
+    def test_openai_ballad(self):
+        # ballad seems to open support gpt-4o-mini-tts
+        service = 'OpenAI'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {
+            "name": "ballad"
+        }
+        options = {}
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
+
+    @pytest.mark.skip(reason="this is a test of unsupported cases")
+    def test_openai_unsupported(self):
+        service = 'OpenAI'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {
+            # "name": "onyx"
+            "name": "verse"
+        }
+        options = {'model': 'tts-1-hd'}
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
+
+
     def test_openai_english_gpt4o_mini(self):
         service = 'OpenAI'
         source_text = self.ENGLISH_INPUT_TEXT
@@ -817,3 +847,30 @@ class TestAudio(unittest.TestCase):
 
         self.recognize_and_verify_text(
             audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
+
+    def test_openai_english_gpt4o_instructions(self):
+        service = 'OpenAI'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {
+            "name": "onyx"
+        }
+        options = {
+            'model': 'gpt-4o-mini-tts',
+            'instructions': """
+Accent/Affect: Warm, refined, and gently instructive, reminiscent of a friendly art instructor.
+
+Tone: Calm, encouraging, and articulate, clearly describing each step with patience.
+
+Pacing: Slow and deliberate, pausing often to allow the listener to follow instructions comfortably.
+
+Emotion: Cheerful, supportive, and pleasantly enthusiastic; convey genuine enjoyment and appreciation of art.
+
+Pronunciation: Clearly articulate artistic terminology (e.g., "brushstrokes," "landscape," "palette") with gentle emphasis.
+
+Personality Affect: Friendly and approachable with a hint of sophistication; speak confidently and reassuringly, guiding users through each painting step patiently and warmly."""}
+
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)            

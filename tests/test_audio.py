@@ -819,6 +819,23 @@ class TestAudio(unittest.TestCase):
         self.recognize_and_verify_text(
             audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
 
+    def test_openai_model_options(self):
+        # ballad should only have gpt-4o-mini-tts
+        voice_ballad = self.get_voice_by_lambda(Service.OpenAI,
+            lambda x: x.name == 'ballad', assert_unique=True)
+        self.assertEqual(voice_ballad.options['model']['values'], ['gpt-4o-mini-tts'])
+
+        voice_verse = self.get_voice_by_lambda(Service.OpenAI,
+            lambda x: x.name == 'verse', assert_unique=True)
+        self.assertEqual(voice_verse.options['model']['values'], ['gpt-4o-mini-tts'])        
+
+        # alloy should have all options
+        voice_alloy = self.get_voice_by_lambda(Service.OpenAI,
+            lambda x: x.name == 'alloy', assert_unique=True)
+        self.assertEqual(voice_alloy.options['model']['values'], ['gpt-4o-mini-tts',
+            'tts-1-hd',
+            'tts-1'])
+
     @pytest.mark.skip(reason="this is a test of unsupported cases")
     def test_openai_unsupported(self):
         service = 'OpenAI'

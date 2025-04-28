@@ -1,5 +1,6 @@
 from openai import OpenAI
 
+import copy
 import logging
 import tempfile
 import pydub
@@ -217,6 +218,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
     def build_tts_voice_v3(self, voice_name, gender):
         options = VOICE_OPTIONS
         if self.get_default_model(voice_name) == DEFAULT_MODEL_GPT_4O:
+            options = copy.deepcopy(options)
             options['model']['values'] = MODELS_GPT_4O_ONLY
             options['model']['default'] = DEFAULT_MODEL_GPT_4O
         return cloudlanguagetools.ttsvoice.TtsVoice_v3(

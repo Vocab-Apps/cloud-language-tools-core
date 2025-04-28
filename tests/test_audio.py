@@ -94,6 +94,10 @@ class TestAudio(unittest.TestCase):
         subset = [x for x in self.voice_list if x['audio_language_code'] == audio_language.name and x['service'] == service.name]
         return subset        
 
+    def get_voice_list_service_audio_language_v3(self, service, audio_language):
+        subset = [x for x in self.voice_list if audio_language in x.audio_languages and x.service == service]
+        return subset                
+
     def get_voice_by_service_and_name(self, service: Service, voice_name) -> cloudlanguagetools.ttsvoice.TtsVoice_v3:
         subset = [x for x in self.voice_list_v3 if voice_name in x.name and x.service == service]
         num_voices = len(subset)
@@ -183,6 +187,18 @@ class TestAudio(unittest.TestCase):
             voices = random.sample(voices, max_voices)
         for voice in voices:
             self.verify_voice(voice, text, recognition_language)
+
+    def verify_service_audio_language_v3(self, text, service, audio_language, recognition_language):
+        # logging.info(f'verify_service_audio: service: {service} audio_language: {audio_language}')
+        voices = self.get_voice_list_service_audio_language_v3(service, audio_language)
+        self.assertGreaterEqual(len(voices), 1, f'at least one voice for service {service}, language {audio_language}')
+
+        # pick 3 random voices
+        max_voices = 3
+        if len(voices) > max_voices:
+            voices = random.sample(voices, max_voices)
+        for voice in voices:
+            self.verify_voice_v3(voice, text, recognition_language)
 
     def verify_service_japanese(self, service: Service):
         source_text = self.JAPANESE_INPUT_TEXT
@@ -782,7 +798,7 @@ class TestAudio(unittest.TestCase):
 
     def test_openai_english(self):
         source_text = 'This is the best restaurant in town.'
-        self.verify_service_audio_language(source_text, Service.OpenAI, AudioLanguage.en_US, 'en-US')
+        self.verify_service_audio_language_v3(source_text, Service.OpenAI, AudioLanguage.en_US, 'en-US')
 
     @pytest.mark.skip(reason="detection of openai french is unreliable")
     def test_openai_french(self):

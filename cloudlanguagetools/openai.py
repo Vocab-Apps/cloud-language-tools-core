@@ -7,6 +7,7 @@ import pydub
 import pprint
 from typing import List
 
+import cloudlanguagetools.constants
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
@@ -283,7 +284,8 @@ class OpenAIService(cloudlanguagetools.service.Service):
         logger.debug(f'audio_parameters: {pprint.pformat(audio_parameters)}')
 
         response = self.client.audio.speech.create(
-            **audio_parameters
+            **audio_parameters,
+            timeout=cloudlanguagetools.constants.RequestTimeout
         )
         response.write_to_file(output_temp_file.name)
 

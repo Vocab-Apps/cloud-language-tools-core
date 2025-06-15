@@ -74,3 +74,4 @@ Each service module (e.g., `azure.py`, `google.py`) follows this pattern:
 - Mock services (`test_services.py`) for testing without API calls
 - Integration tests against real APIs (when keys available)
 - Audio processing tests using `pydub` for validation
+- Audio tests should be in `tests/test_audio.py` and should follow the same pattern as for example `test_mandarin_amazon`

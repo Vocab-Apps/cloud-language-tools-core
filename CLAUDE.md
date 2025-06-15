@@ -9,6 +9,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Run tests in parallel: `pytest -n auto` (requires pytest-xdist)
 - Run specific test: `pytest tests/test_audio.py`
 - Run with logging output: `pytest --log-cli-level=INFO`
+- **Audio tests make real API calls**: Tests in `test_audio.py` will invoke cloud APIs and may incur costs
+  - This is normal and expected behavior for integration testing
+  - Requires valid API keys in `services_configuration.json`
+  - Only use `@skip_unreliable_clt_test()` for services that are genuinely unreliable
 
 ### Package Management
 - Install development dependencies: `pip install -r requirements.dev.txt`
@@ -74,4 +78,8 @@ Each service module (e.g., `azure.py`, `google.py`) follows this pattern:
 - Mock services (`test_services.py`) for testing without API calls
 - Integration tests against real APIs (when keys available)
 - Audio processing tests using `pydub` for validation
-- Audio tests should be in `tests/test_audio.py` and should follow the same pattern as for example `test_mandarin_amazon`
+- **Audio tests**: Located in `tests/test_audio.py` and follow the pattern of existing tests like `test_mandarin_amazon`
+  - Make actual API calls and verify audio generation works correctly
+  - **Normal behavior**: It's expected and acceptable for tests to invoke cloud APIs and incur costs
+  - **@skip_unreliable_clt_test()**: Only use this decorator for services that are genuinely unreliable or frequently fail
+  - **Environment variable**: Some legacy tests may require `CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE=yes` but new services should not

@@ -82,6 +82,7 @@ class Service(enum.StrEnum):
     LibreTranslate = 'LibreTranslate'
     ElevenLabs = 'ElevenLabs'
     Alibaba = 'Alibaba'
+    Gemini = 'Gemini'
     TestServiceA = 'TestServiceA'
     TestServiceB = 'TestServiceB'
 

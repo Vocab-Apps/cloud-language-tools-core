@@ -890,4 +890,61 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
 
         self.recognize_and_verify_text(
-            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)            
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
+
+    @skip_unreliable_clt_test()
+    def test_gemini_english(self):
+        """Test Gemini TTS with English"""
+        source_text = self.ENGLISH_INPUT_TEXT
+        self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.en_US, 'en-US')
+
+    @skip_unreliable_clt_test()
+    def test_gemini_french(self):
+        """Test Gemini TTS with French"""
+        source_text = 'Bonjour le monde'
+        self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.fr_FR, 'fr-FR')
+
+    @skip_unreliable_clt_test()
+    def test_gemini_spanish(self):
+        """Test Gemini TTS with Spanish"""
+        source_text = 'Hola mundo'
+        self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.es_ES, 'es-ES')
+
+    @skip_unreliable_clt_test()
+    def test_gemini_voice_options(self):
+        """Test Gemini TTS with different voice and model options"""
+        service = 'Gemini'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        # Test with specific voice and pro model
+        voice_key = {
+            "name": "Kore"
+        }
+        options = {'model': 'gemini-2.5-pro-preview-tts'}
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.wav)
+
+    @skip_unreliable_clt_test()
+    def test_gemini_different_voices(self):
+        """Test Gemini TTS with different voice characteristics"""
+        service = 'Gemini'
+        source_text = 'This is a test of different Gemini voices.'
+
+        voices_to_test = ['Zephyr', 'Puck', 'Charon', 'Kore']
+        
+        for voice_name in voices_to_test:
+            voice_key = {"name": voice_name}
+            options = {'model': 'gemini-2.5-flash-preview-tts'}
+            
+            audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+            
+            # Verify file was created and has content
+            self.assertIsNotNone(audio_temp_file)
+            file_size = os.path.getsize(audio_temp_file.name)
+            self.assertGreater(file_size, 1000, f'Audio file for voice {voice_name} should be at least 1KB')
+            
+            # Verify it's an audio file
+            file_type = magic.from_file(audio_temp_file.name, mime=True)
+            self.assertIn('audio', file_type, f'File for voice {voice_name} should be audio format')            

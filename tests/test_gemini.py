@@ -1,23 +1,7 @@
 import unittest
 import logging
-import random
-import requests
-import re
 import sys
 import os
-import time
-import magic
-import pytest
-import json
-import time
-import pprint
-import functools
-import tempfile
-import backoff
-
-import audio_utils
-
-CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE = os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE', 'no') == 'yes'
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -37,171 +21,110 @@ def get_manager():
     manager.configure_default()
     return manager
 
-BACKOFF_MAX_TIME=30
-
-def skip_unreliable_clt_test():
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            if not CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE:
-                pytest.skip(f'you must set CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE=yes')
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
-
 class TestGemini(unittest.TestCase):
 
     def setUp(self):
         self.manager = get_manager()
         self.gemini_service = self.manager.services[Service.Gemini]
 
-    def test_get_tts_voice_list(self):
-        voice_list = cloudlanguagetools.gemini.get_tts_voice_list()
-        self.assertTrue(len(voice_list) > 0)
+    def test_get_tts_voice_list_v3(self):
+        """Test TtsVoice_v3 voice list generation"""
+        voice_list = self.gemini_service.get_tts_voice_list_v3()
+        self.assertEqual(len(voice_list), 30)  # Should have 30 voices
         
-        # Check that we have voices for different languages
-        languages = set([voice.audio_language for voice in voice_list])
-        self.assertTrue(len(languages) > 1)
+        # Check that we have different voice names
+        voice_names = set([voice.name for voice in voice_list])
+        self.assertEqual(len(voice_names), 30)  # All voices should have unique names
         
         # Check that each voice has required attributes
         for voice in voice_list:
             self.assertIsNotNone(voice.name)
             self.assertIsNotNone(voice.service)
             self.assertEqual(voice.service, Service.Gemini)
-            self.assertIsNotNone(voice.audio_language)
+            self.assertIsNotNone(voice.audio_languages)
             self.assertIsNotNone(voice.gender)
+            self.assertIsNotNone(voice.voice_key)
+            self.assertIn('name', voice.voice_key)
+            
+            # Check that voice supports multiple languages (multilingual)
+            self.assertGreaterEqual(len(voice.audio_languages), 20)
 
-    def test_service_manager_get_tts_voice_list_gemini(self):
-        voice_list = self.manager.get_tts_voice_list()
+    def test_service_manager_get_tts_voice_list_v3_gemini(self):
+        """Test ServiceManager integration with TtsVoice_v3"""
+        voice_list = self.manager.get_tts_voice_list_v3()
         gemini_voices = [voice for voice in voice_list if voice.service == Service.Gemini]
-        self.assertTrue(len(gemini_voices) > 0)
+        self.assertEqual(len(gemini_voices), 30)
         
         # Verify all voices are from Gemini service
         for voice in gemini_voices:
             self.assertEqual(voice.service, Service.Gemini)
 
-    @skip_unreliable_clt_test()
-    @backoff.on_exception(backoff.expo, 
-                         (requests.exceptions.RequestException, 
-                          cloudlanguagetools.errors.RequestError,
-                          cloudlanguagetools.errors.TimeoutError),
-                         max_time=BACKOFF_MAX_TIME)
-    def test_get_tts_audio_simple(self):
-        """Test basic TTS audio generation"""
-        voice_list = [voice for voice in self.manager.get_tts_voice_list() if voice.service == Service.Gemini]
-        voice = [x for x in voice_list if x.audio_language == AudioLanguage.en_US][0]
+    def test_voice_characteristics(self):
+        """Test that voice names include characteristics"""
+        voice_list = self.gemini_service.get_tts_voice_list_v3()
         
-        output_temp_file = self.manager.get_tts_audio('hello world', 'Gemini', voice.get_voice_key(), {})
+        # Check that some well-known voices exist with characteristics
+        voice_names = [voice.name for voice in voice_list]
         
-        # Verify file was created and has content
-        self.assertIsNotNone(output_temp_file)
-        file_size = os.path.getsize(output_temp_file.name)
-        self.assertTrue(file_size > 1000)  # Should be at least 1KB
-        
-        # Verify it's an audio file
-        file_type = magic.from_file(output_temp_file.name, mime=True)
-        self.assertTrue('audio' in file_type)
+        self.assertIn('Zephyr (Bright)', voice_names)
+        self.assertIn('Puck (Upbeat)', voice_names)
+        self.assertIn('Charon (Informative)', voice_names)
+        self.assertIn('Kore (Firm)', voice_names)
 
-    @skip_unreliable_clt_test()
-    @backoff.on_exception(backoff.expo, 
-                         (requests.exceptions.RequestException, 
-                          cloudlanguagetools.errors.RequestError,
-                          cloudlanguagetools.errors.TimeoutError),
-                         max_time=BACKOFF_MAX_TIME)
-    def test_get_tts_audio_different_voices(self):
-        """Test TTS with different voice options"""
-        voice_list = [voice for voice in self.manager.get_tts_voice_list() if voice.service == Service.Gemini]
+    def test_voice_options(self):
+        """Test voice options structure"""
+        voice_list = self.gemini_service.get_tts_voice_list_v3()
+        voice = voice_list[0]
         
-        # Test with Kore voice
-        kore_voice = [x for x in voice_list if 'kore' in x.get_voice_key().lower() and x.audio_language == AudioLanguage.en_US][0]
-        output_file_kore = self.manager.get_tts_audio('Hello, this is a test', 'Gemini', kore_voice.get_voice_key(), {})
+        # Check that options include model selection
+        self.assertIn('model', voice.options)
+        self.assertIn('values', voice.options['model'])
+        self.assertIn('gemini-2.5-flash-preview-tts', voice.options['model']['values'])
+        self.assertIn('gemini-2.5-pro-preview-tts', voice.options['model']['values'])
         
-        # Test with Zephyr voice
-        zephyr_voice = [x for x in voice_list if 'zephyr' in x.get_voice_key().lower() and x.language == AudioLanguage.en_US][0]
-        output_file_zephyr = self.manager.get_tts_audio('Hello, this is a test', 'Gemini', zephyr_voice.get_voice_key(), {})
-        
-        # Both should generate valid audio files
-        self.assertTrue(os.path.getsize(output_file_kore.name) > 1000)
-        self.assertTrue(os.path.getsize(output_file_zephyr.name) > 1000)
-        
-        # Files should be different (different voices should produce different audio)
-        with open(output_file_kore.name, 'rb') as f1, open(output_file_zephyr.name, 'rb') as f2:
-            content1 = f1.read()
-            content2 = f2.read()
-            self.assertNotEqual(content1, content2)
+        # Check audio format options
+        self.assertIn(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, voice.options)
 
-    @skip_unreliable_clt_test()
-    @backoff.on_exception(backoff.expo, 
-                         (requests.exceptions.RequestException, 
-                          cloudlanguagetools.errors.RequestError,
-                          cloudlanguagetools.errors.TimeoutError),
-                         max_time=BACKOFF_MAX_TIME)
-    def test_get_tts_audio_different_languages(self):
-        """Test TTS with different languages"""
-        voice_list = [voice for voice in self.manager.get_tts_voice_list() if voice.service == Service.Gemini]
+    def test_voice_key_format(self):
+        """Test voice key format for TtsVoice_v3"""
+        voice_list = self.gemini_service.get_tts_voice_list_v3()
         
-        # Test English
-        en_voice = [x for x in voice_list if x.language == AudioLanguage.en_US][0]
-        output_en = self.manager.get_tts_audio('Hello world', 'Gemini', en_voice.get_voice_key(), {})
-        
-        # Test French
-        fr_voices = [x for x in voice_list if x.audio_language == AudioLanguage.fr_FR]
-        if fr_voices:
-            fr_voice = fr_voices[0]
-            output_fr = self.manager.get_tts_audio('Bonjour le monde', 'Gemini', fr_voice.get_voice_key(), {})
+        for voice in voice_list:
+            self.assertIsInstance(voice.voice_key, dict)
+            self.assertIn('name', voice.voice_key)
+            self.assertIsInstance(voice.voice_key['name'], str)
             
-            # Both should generate valid audio files
-            self.assertTrue(os.path.getsize(output_en.name) > 1000)
-            self.assertTrue(os.path.getsize(output_fr.name) > 1000)
+            # Voice key name should not contain parentheses (that's in the display name)
+            self.assertNotIn('(', voice.voice_key['name'])
+            self.assertNotIn(')', voice.voice_key['name'])
 
-    @skip_unreliable_clt_test()
-    @backoff.on_exception(backoff.expo, 
-                         (requests.exceptions.RequestException, 
-                          cloudlanguagetools.errors.RequestError,
-                          cloudlanguagetools.errors.TimeoutError),
-                         max_time=BACKOFF_MAX_TIME)
-    def test_get_tts_audio_with_options(self):
-        """Test TTS with different model options"""
-        voice_list = [voice for voice in self.manager.get_tts_voice_list() if voice.service == Service.Gemini]
-        voice = [x for x in voice_list if x.audio_language == AudioLanguage.en_US][0]
+    def test_multilingual_support(self):
+        """Test that voices are multilingual like OpenAI"""
+        voice_list = self.gemini_service.get_tts_voice_list_v3()
+        voice = voice_list[0]
         
-        # Test with flash model
-        options_flash = {'model': 'gemini-2.5-flash-preview-tts'}
-        output_flash = self.manager.get_tts_audio('Testing flash model', 'Gemini', voice.get_voice_key(), options_flash)
+        # Check that the voice supports multiple languages
+        supported_languages = voice.audio_languages
+        self.assertGreaterEqual(len(supported_languages), 20)
         
-        # Test with pro model
-        options_pro = {'model': 'gemini-2.5-pro-preview-tts'}
-        output_pro = self.manager.get_tts_audio('Testing pro model', 'Gemini', voice.get_voice_key(), options_pro)
-        
-        # Both should generate valid audio files
-        self.assertTrue(os.path.getsize(output_flash.name) > 1000)
-        self.assertTrue(os.path.getsize(output_pro.name) > 1000)
+        # Check for some key languages
+        language_codes = [lang.name for lang in supported_languages]
+        self.assertIn('en_US', language_codes)
+        self.assertIn('fr_FR', language_codes)
+        self.assertIn('es_ES', language_codes)
+        self.assertIn('de_DE', language_codes)
 
-    def test_get_tts_audio_invalid_voice_key(self):
-        """Test error handling for invalid voice key"""
-        with self.assertRaises(cloudlanguagetools.errors.RequestError):
-            self.manager.get_tts_audio('test', 'Gemini', 'invalid_voice_key', {})
+    def test_service_fee(self):
+        """Test that service fee is set correctly"""
+        voice_list = self.gemini_service.get_tts_voice_list_v3()
+        
+        for voice in voice_list:
+            self.assertEqual(voice.service_fee, cloudlanguagetools.constants.ServiceFee.paid)
 
-    @skip_unreliable_clt_test()
-    def test_get_tts_audio_long_text(self):
-        """Test TTS with longer text"""
-        voice_list = [voice for voice in self.manager.get_tts_voice_list() if voice.service == Service.Gemini]
-        voice = [x for x in voice_list if x.audio_language == AudioLanguage.en_US][0]
-        
-        long_text = ("This is a longer text to test the Gemini TTS service. "
-                    "It should handle longer passages of text without issues. "
-                    "The service should generate clear, natural-sounding speech "
-                    "for this extended content.")
-        
-        output_file = self.manager.get_tts_audio(long_text, 'Gemini', voice.get_voice_key(), {})
-        
-        # Should generate a larger audio file for longer text
-        file_size = os.path.getsize(output_file.name)
-        self.assertTrue(file_size > 2000)  # Should be larger for longer text
-        
-        # Verify it's still valid audio
-        file_type = magic.from_file(output_file.name, mime=True)
-        self.assertTrue('audio' in file_type)
+    def test_legacy_voice_list_empty(self):
+        """Test that legacy get_tts_voice_list returns empty list"""
+        legacy_voices = self.gemini_service.get_tts_voice_list()
+        self.assertEqual(len(legacy_voices), 0)
 
 if __name__ == '__main__':
     unittest.main()

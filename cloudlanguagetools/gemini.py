@@ -28,16 +28,6 @@ VOICE_OPTIONS = {
         ],
         'default': DEFAULT_MODEL
     },
-    'voice_name': {
-        'type': cloudlanguagetools.options.ParameterType.list.name,
-        'values': [
-            'Kore',
-            'Zephyr',
-            'Puck',
-            'Charon'
-        ],
-        'default': DEFAULT_VOICE
-    },
     cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
         'type': cloudlanguagetools.options.ParameterType.list.name,
         'values': [
@@ -75,30 +65,56 @@ TTS_SUPPORTED_LANGUAGES = [
     AudioLanguage.hu_HU
 ]
 
-class GeminiVoice(cloudlanguagetools.ttsvoice.TtsVoice):
-    def __init__(self, voice_name, audio_language):
-        self.service = cloudlanguagetools.constants.Service.Gemini
-        self.service_fee = cloudlanguagetools.constants.ServiceFee.paid
-        self.audio_language = audio_language
-        self.name = voice_name
-        self.gender = cloudlanguagetools.constants.Gender.Any
-        
-    def get_voice_key(self):
-        return f'gemini_tts_{self.name.lower()}_{self.audio_language.name}'
-        
-    def get_voice_shortname(self):
-        return self.name
-        
-    def get_options(self):
-        return VOICE_OPTIONS
+GEMINI_VOICES = [
+    ('Zephyr', 'Bright', cloudlanguagetools.constants.Gender.Any),
+    ('Puck', 'Upbeat', cloudlanguagetools.constants.Gender.Any),
+    ('Charon', 'Informative', cloudlanguagetools.constants.Gender.Any),
+    ('Kore', 'Firm', cloudlanguagetools.constants.Gender.Any),
+    ('Fenrir', 'Excitable', cloudlanguagetools.constants.Gender.Any),
+    ('Leda', 'Youthful', cloudlanguagetools.constants.Gender.Any),
+    ('Orus', 'Firm', cloudlanguagetools.constants.Gender.Any),
+    ('Aoede', 'Breezy', cloudlanguagetools.constants.Gender.Any),
+    ('Callirrhoe', 'Easy-going', cloudlanguagetools.constants.Gender.Any),
+    ('Autonoe', 'Bright', cloudlanguagetools.constants.Gender.Any),
+    ('Enceladus', 'Breathy', cloudlanguagetools.constants.Gender.Any),
+    ('Iapetus', 'Clear', cloudlanguagetools.constants.Gender.Any),
+    ('Umbriel', 'Easy-going', cloudlanguagetools.constants.Gender.Any),
+    ('Algieba', 'Smooth', cloudlanguagetools.constants.Gender.Any),
+    ('Despina', 'Smooth', cloudlanguagetools.constants.Gender.Any),
+    ('Erinome', 'Clear', cloudlanguagetools.constants.Gender.Any),
+    ('Algenib', 'Gravelly', cloudlanguagetools.constants.Gender.Any),
+    ('Rasalgethi', 'Informative', cloudlanguagetools.constants.Gender.Any),
+    ('Laomedeia', 'Upbeat', cloudlanguagetools.constants.Gender.Any),
+    ('Achernar', 'Soft', cloudlanguagetools.constants.Gender.Any),
+    ('Alnilam', 'Firm', cloudlanguagetools.constants.Gender.Any),
+    ('Schedar', 'Even', cloudlanguagetools.constants.Gender.Any),
+    ('Gacrux', 'Mature', cloudlanguagetools.constants.Gender.Any),
+    ('Pulcherrima', 'Forward', cloudlanguagetools.constants.Gender.Any),
+    ('Achird', 'Friendly', cloudlanguagetools.constants.Gender.Any),
+    ('Zubenelgenubi', 'Casual', cloudlanguagetools.constants.Gender.Any),
+    ('Vindemiatrix', 'Gentle', cloudlanguagetools.constants.Gender.Any),
+    ('Sadachbia', 'Lively', cloudlanguagetools.constants.Gender.Any),
+    ('Sadaltager', 'Knowledgeable', cloudlanguagetools.constants.Gender.Any),
+    ('Sulafat', 'Warm', cloudlanguagetools.constants.Gender.Any),
+]
 
 def get_tts_voice_list():
-    voices = []
-    for language in TTS_SUPPORTED_LANGUAGES:
-        for voice_name in VOICE_OPTIONS['voice_name']['values']:
-            voice = GeminiVoice(voice_name, language)
-            voices.append(voice)
-    return voices
+    """Legacy method for backwards compatibility"""
+    return []
+
+def build_tts_voice_v3(voice_name, description, gender):
+    """Build a TtsVoice_v3 instance for a Gemini voice"""
+    return cloudlanguagetools.ttsvoice.TtsVoice_v3(
+        name=f'{voice_name} ({description})',
+        voice_key={
+            'name': voice_name
+        },
+        options=VOICE_OPTIONS,
+        service=cloudlanguagetools.constants.Service.Gemini,
+        gender=gender,
+        audio_languages=TTS_SUPPORTED_LANGUAGES,
+        service_fee=cloudlanguagetools.constants.ServiceFee.paid
+    )
 
 class GeminiService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -114,15 +130,22 @@ class GeminiService(cloudlanguagetools.service.Service):
     def get_tts_voice_list(self):
         return get_tts_voice_list()
 
+    def get_tts_voice_list_v3(self):
+        """Return list of TtsVoice_v3 instances for all Gemini voices"""
+        result = []
+        for voice_name, description, gender in GEMINI_VOICES:
+            voice = build_tts_voice_v3(voice_name, description, gender)
+            result.append(voice)
+        return result
+
     def get_tts_audio(self, text, voice_key, options):
         """Generate TTS audio using Google Gemini API"""
         
-        # Parse voice key to extract voice name and language
-        voice_parts = voice_key.split('_')
-        if len(voice_parts) < 4:
+        # Extract voice name from voice_key dict
+        if isinstance(voice_key, dict) and 'name' in voice_key:
+            voice_name = voice_key['name']
+        else:
             raise cloudlanguagetools.errors.RequestError(f'Invalid voice key format: {voice_key}')
-        
-        voice_name = voice_parts[2].capitalize()
         
         # Get model and format from options
         model = options.get('model', DEFAULT_MODEL)

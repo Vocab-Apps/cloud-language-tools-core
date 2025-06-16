@@ -13,6 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - This is normal and expected behavior for integration testing
   - Requires valid API keys in `services_configuration.json`
   - Only use `@skip_unreliable_clt_test()` for services that are genuinely unreliable
+- Tests should be located in the `tests/` directory
 
 ### Package Management
 - Install development dependencies: `pip install -r requirements.dev.txt`

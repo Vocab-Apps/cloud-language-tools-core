@@ -14,6 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Requires valid API keys in `services_configuration.json`
   - Only use `@skip_unreliable_clt_test()` for services that are genuinely unreliable
 - Tests should be located in the `tests/` directory
+- Python imports should always be placed at the top of the file.
 
 ### Package Management
 - Install development dependencies: `pip install -r requirements.dev.txt`

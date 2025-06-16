@@ -10,7 +10,7 @@ shell_command_before:
 windows:
 - window_name: clt-core
   focus: true
-- window_name: aider
+- window_name: ai
 - window_name: git
 - window_name: htop
   panes:

@@ -124,6 +124,7 @@ class GeminiService(cloudlanguagetools.service.Service):
     def configure(self, config):
         self.config = config
         self.api_key = config.get('api_key', None)
+        logger.debug(f'Configuring Gemini service with api_key: {self.api_key[:20] if self.api_key else None}...')
         if self.api_key is None:
             raise cloudlanguagetools.errors.AuthenticationError('api_key not set')
 
@@ -162,11 +163,11 @@ class GeminiService(cloudlanguagetools.service.Service):
                 }
             ],
             "generationConfig": {
-                "response_modalities": ["AUDIO"],
-                "speech_config": {
-                    "voice_config": {
-                        "prebuilt_voice_config": {
-                            "voice_name": voice_name
+                "responseModalities": ["AUDIO"],
+                "speechConfig": {
+                    "voiceConfig": {
+                        "prebuiltVoiceConfig": {
+                            "voiceName": voice_name
                         }
                     }
                 }
@@ -183,10 +184,15 @@ class GeminiService(cloudlanguagetools.service.Service):
         }
 
         try:
+            logger.debug(f'Making Gemini TTS request to: {url}')
+            logger.debug(f'Request payload: {json.dumps(payload, indent=2)}')
+            
             response = self.post_request(url, 
                                        json=payload, 
                                        headers=headers, 
                                        params=params)
+            
+            logger.debug(f'Response status: {response.status_code}')
             
             if response.status_code >= 400:
                 error_msg = f'Gemini TTS request failed with status {response.status_code}: {response.text}'
@@ -211,6 +217,8 @@ class GeminiService(cloudlanguagetools.service.Service):
                     break
             
             if audio_part is None:
+                # More detailed error with actual response structure
+                logger.error(f'Full response: {json.dumps(response_data, indent=2)}')
                 raise cloudlanguagetools.errors.RequestError('No audio data found in response')
             
             # Decode base64 audio data

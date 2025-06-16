@@ -942,4 +942,29 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
             
             # Verify it's an audio file
             file_type = magic.from_file(audio_temp_file.name, mime=True)
-            self.assertIn('audio', file_type, f'File for voice {voice_name} should be audio format')            
+            self.assertIn('audio', file_type, f'File for voice {voice_name} should be audio format')
+
+    def test_gemini_ogg_format(self):
+        """Test Gemini TTS with OGG format"""
+        service = 'Gemini'
+        source_text = self.ENGLISH_INPUT_TEXT
+        
+        # Test with OGG format
+        voice_key = {
+            "name": "Zephyr"
+        }
+        options = {
+            'model': 'gemini-2.5-flash-preview-tts',
+            'audio_format': 'ogg_opus'
+        }
+        
+        audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+        
+        # Verify file was created and has content
+        self.assertIsNotNone(audio_temp_file)
+        file_size = os.path.getsize(audio_temp_file.name)
+        self.assertGreater(file_size, 1000, 'OGG audio file should be at least 1KB')
+        
+        # Verify it's an OGG audio file
+        file_type = magic.from_file(audio_temp_file.name, mime=True)
+        self.assertIn('ogg', file_type, 'File should be OGG format')            

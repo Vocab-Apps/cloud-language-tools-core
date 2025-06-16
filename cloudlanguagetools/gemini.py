@@ -32,7 +32,8 @@ VOICE_OPTIONS = {
         'type': cloudlanguagetools.options.ParameterType.list.name,
         'values': [
             cloudlanguagetools.options.AudioFormat.mp3.name,
-            cloudlanguagetools.options.AudioFormat.wav.name
+            cloudlanguagetools.options.AudioFormat.wav.name,
+            cloudlanguagetools.options.AudioFormat.ogg_opus.name
         ],
         'default': cloudlanguagetools.options.AudioFormat.mp3.name
     }
@@ -220,6 +221,41 @@ class GeminiService(cloudlanguagetools.service.Service):
                 os.unlink(temp_file.name)
                 
                 return output_temp_file
+                
+            elif audio_format == 'ogg_opus':
+                # Convert PCM to OGG using pydub
+                from pydub import AudioSegment
+                import io
+                
+                # First create a temporary WAV file from PCM data
+                wav_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_wav_', suffix='.wav', delete=False)
+                with wave.open(wav_temp_file.name, "wb") as wf:
+                    wf.setnchannels(1)  # mono
+                    wf.setsampwidth(2)  # 16-bit
+                    wf.setframerate(24000)  # 24kHz
+                    wf.writeframes(audio_data)
+                
+                # Convert WAV to OGG using pydub
+                audio_segment = AudioSegment.from_wav(wav_temp_file.name)
+                
+                # Create OGG output file
+                output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.ogg', delete=False)
+                audio_segment.export(output_temp_file.name, format="ogg", codec="libopus")
+                
+                # Clean up the intermediate WAV file
+                import os
+                os.unlink(wav_temp_file.name)
+                
+                # Reopen as NamedTemporaryFile for compatibility with existing code
+                final_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.ogg')
+                with open(output_temp_file.name, 'rb') as src:
+                    final_temp_file.write(src.read())
+                final_temp_file.seek(0)
+                
+                # Clean up the intermediate OGG file
+                os.unlink(output_temp_file.name)
+                
+                return final_temp_file
                 
             else:  # Default to MP3
                 # Convert PCM to MP3 using pydub

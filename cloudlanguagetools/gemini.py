@@ -1,9 +1,10 @@
-import json
-import requests
 import tempfile
-import base64
 import logging
+import wave
 from typing import List
+
+from google import genai
+from google.genai import types
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -31,9 +32,10 @@ VOICE_OPTIONS = {
     cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
         'type': cloudlanguagetools.options.ParameterType.list.name,
         'values': [
+            cloudlanguagetools.options.AudioFormat.mp3.name,
             cloudlanguagetools.options.AudioFormat.wav.name
         ],
-        'default': cloudlanguagetools.options.AudioFormat.wav.name
+        'default': cloudlanguagetools.options.AudioFormat.mp3.name
     }
 }
 
@@ -120,6 +122,7 @@ class GeminiService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.service = cloudlanguagetools.constants.Service.Gemini
         self.api_key_required = True
+        self.client = None
 
     def configure(self, config):
         self.config = config
@@ -127,6 +130,9 @@ class GeminiService(cloudlanguagetools.service.Service):
         logger.debug(f'Configuring Gemini service with api_key: {self.api_key[:20] if self.api_key else None}...')
         if self.api_key is None:
             raise cloudlanguagetools.errors.AuthenticationError('api_key not set')
+        
+        # Initialize the genai client
+        self.client = genai.Client(api_key=self.api_key)
 
     def get_tts_voice_list(self):
         return get_tts_voice_list()
@@ -140,7 +146,7 @@ class GeminiService(cloudlanguagetools.service.Service):
         return result
 
     def get_tts_audio(self, text, voice_key, options):
-        """Generate TTS audio using Google Gemini API"""
+        """Generate TTS audio using Google Gemini API via google-genai SDK"""
         
         # Extract voice name from voice_key dict
         if isinstance(voice_key, dict) and 'name' in voice_key:
@@ -150,94 +156,108 @@ class GeminiService(cloudlanguagetools.service.Service):
         
         # Get model and format from options
         model = options.get('model', DEFAULT_MODEL)
+        audio_format = options.get('audio_format', 'mp3')
         
-        # Prepare request payload
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {
-                            "text": text
-                        }
-                    ]
-                }
-            ],
-            "generationConfig": {
-                "responseModalities": ["AUDIO"],
-                "speechConfig": {
-                    "voiceConfig": {
-                        "prebuiltVoiceConfig": {
-                            "voiceName": voice_name
-                        }
-                    }
-                }
-            }
-        }
-
-        # Make API request
-        url = f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent'
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        params = {
-            'key': self.api_key
-        }
-
         try:
-            logger.debug(f'Making Gemini TTS request to: {url}')
-            logger.debug(f'Request payload: {json.dumps(payload, indent=2)}')
+            logger.debug(f'Making Gemini TTS request with voice: {voice_name}, model: {model}, format: {audio_format}')
             
-            response = self.post_request(url, 
-                                       json=payload, 
-                                       headers=headers, 
-                                       params=params)
+            # Generate content with audio response using the SDK
+            response = self.client.models.generate_content(
+                model=model,
+                contents=text,
+                config=types.GenerateContentConfig(
+                    response_modalities=["AUDIO"],
+                    speech_config=types.SpeechConfig(
+                        voice_config=types.VoiceConfig(
+                            prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                                voice_name=voice_name,
+                            )
+                        )
+                    ),
+                )
+            )
             
-            logger.debug(f'Response status: {response.status_code}')
-            
-            if response.status_code >= 400:
-                error_msg = f'Gemini TTS request failed with status {response.status_code}: {response.text}'
-                logger.error(error_msg)
-                raise cloudlanguagetools.errors.RequestError(error_msg)
-
-            response_data = response.json()
-            
-            # Extract audio data
-            if 'candidates' not in response_data or len(response_data['candidates']) == 0:
+            # Extract audio data from response
+            if not response.candidates or len(response.candidates) == 0:
                 raise cloudlanguagetools.errors.RequestError('No audio candidates in response')
             
-            candidate = response_data['candidates'][0]
-            if 'content' not in candidate or 'parts' not in candidate['content']:
+            candidate = response.candidates[0]
+            if not candidate.content or not candidate.content.parts:
                 raise cloudlanguagetools.errors.RequestError('No content parts in response')
             
             # Find the audio part
             audio_part = None
-            for part in candidate['content']['parts']:
-                if 'inline_data' in part and part['inline_data'].get('mime_type', '').startswith('audio/'):
+            for part in candidate.content.parts:
+                if hasattr(part, 'inline_data') and part.inline_data:
                     audio_part = part
                     break
             
-            if audio_part is None:
-                # More detailed error with actual response structure
-                logger.error(f'Full response: {json.dumps(response_data, indent=2)}')
+            if audio_part is None or not audio_part.inline_data:
                 raise cloudlanguagetools.errors.RequestError('No audio data found in response')
             
-            # Decode base64 audio data
-            audio_data = base64.b64decode(audio_part['inline_data']['data'])
+            # Get the raw audio data (PCM format from Gemini)
+            audio_data = audio_part.inline_data.data
             
-            # Create temporary file
-            output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.wav')
-            with open(output_temp_file.name, 'wb') as f:
-                f.write(audio_data)
+            # Convert audio format as requested
+            if audio_format == 'wav':
+                # Create WAV file directly
+                temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.wav', delete=False)
+                
+                # Write PCM data as WAV file (24kHz, 16-bit, mono as per Gemini docs)
+                with wave.open(temp_file.name, "wb") as wf:
+                    wf.setnchannels(1)  # mono
+                    wf.setsampwidth(2)  # 16-bit
+                    wf.setframerate(24000)  # 24kHz
+                    wf.writeframes(audio_data)
+                
+                # Reopen as NamedTemporaryFile for compatibility with existing code
+                output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.wav')
+                with open(temp_file.name, 'rb') as src:
+                    output_temp_file.write(src.read())
+                output_temp_file.seek(0)
+                
+                # Clean up the intermediate file
+                import os
+                os.unlink(temp_file.name)
+                
+                return output_temp_file
+                
+            else:  # Default to MP3
+                # Convert PCM to MP3 using pydub
+                from pydub import AudioSegment
+                import io
+                
+                # First create a temporary WAV file from PCM data
+                wav_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_wav_', suffix='.wav', delete=False)
+                with wave.open(wav_temp_file.name, "wb") as wf:
+                    wf.setnchannels(1)  # mono
+                    wf.setsampwidth(2)  # 16-bit
+                    wf.setframerate(24000)  # 24kHz
+                    wf.writeframes(audio_data)
+                
+                # Convert WAV to MP3 using pydub
+                audio_segment = AudioSegment.from_wav(wav_temp_file.name)
+                
+                # Create MP3 output file
+                output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.mp3', delete=False)
+                audio_segment.export(output_temp_file.name, format="mp3")
+                
+                # Clean up the intermediate WAV file
+                import os
+                os.unlink(wav_temp_file.name)
+                
+                # Reopen as NamedTemporaryFile for compatibility with existing code
+                final_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.mp3')
+                with open(output_temp_file.name, 'rb') as src:
+                    final_temp_file.write(src.read())
+                final_temp_file.seek(0)
+                
+                # Clean up the intermediate MP3 file
+                os.unlink(output_temp_file.name)
+                
+                return final_temp_file
             
-            return output_temp_file
-            
-        except requests.exceptions.Timeout:
-            raise cloudlanguagetools.errors.TimeoutError('Timeout while retrieving Gemini TTS audio')
-        except requests.exceptions.RequestException as e:
-            error_msg = f'Request error while retrieving Gemini TTS audio: {str(e)}'
-            logger.exception(error_msg)
-            raise cloudlanguagetools.errors.RequestError(error_msg)
         except Exception as e:
-            error_msg = f'Unexpected error while retrieving Gemini TTS audio: {str(e)}'
+            error_msg = f'Error while retrieving Gemini TTS audio: {str(e)}'
             logger.exception(error_msg)
             raise cloudlanguagetools.errors.RequestError(error_msg)

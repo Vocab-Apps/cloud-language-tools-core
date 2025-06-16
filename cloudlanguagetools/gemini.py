@@ -18,7 +18,6 @@ from cloudlanguagetools.options import AudioFormat
 logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = 'gemini-2.5-flash-preview-tts'
-DEFAULT_VOICE = 'Kore'
 
 VOICE_OPTIONS = {
     'model': {

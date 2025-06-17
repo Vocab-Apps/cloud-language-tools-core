@@ -129,6 +129,10 @@ def convert_pcm_to_audio_file(audio_data, audio_format):
         
     Returns:
         tempfile.NamedTemporaryFile containing the converted audio
+        
+    Note:
+        Gemini returns 24kHz, mono, 16-bit PCM audio data.
+        Ref: https://ai.google.dev/gemini-api/docs/speech-generation
     """
     
     # First create a temporary WAV file from PCM data

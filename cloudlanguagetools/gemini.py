@@ -204,6 +204,7 @@ class GeminiService(cloudlanguagetools.service.Service):
                 temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.wav', delete=False)
                 
                 # Write PCM data as WAV file (24kHz, 16-bit, mono as per Gemini docs)
+                # Ref: https://ai.google.dev/gemini-api/docs/speech-generation - Audio output is 24kHz, mono, 16-bit PCM
                 with wave.open(temp_file.name, "wb") as wf:
                     wf.setnchannels(1)  # mono
                     wf.setsampwidth(2)  # 16-bit

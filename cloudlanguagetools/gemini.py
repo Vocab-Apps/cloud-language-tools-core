@@ -1,10 +1,12 @@
 import tempfile
 import logging
 import wave
+import os
 from typing import List
 
 from google import genai
 from google.genai import types
+from pydub import AudioSegment
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -118,6 +120,62 @@ def build_tts_voice_v3(voice_name, description, gender):
         service_fee=cloudlanguagetools.constants.ServiceFee.paid
     )
 
+def convert_pcm_to_audio_file(audio_data, audio_format):
+    """Convert PCM audio data to the requested format and return a NamedTemporaryFile.
+    
+    Args:
+        audio_data: Raw PCM audio data from Gemini (24kHz, 16-bit, mono)
+        audio_format: Target format ('wav', 'mp3', 'ogg_opus')
+        
+    Returns:
+        tempfile.NamedTemporaryFile containing the converted audio
+    """
+    
+    # First create a temporary WAV file from PCM data
+    wav_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_wav_', suffix='.wav', delete=False)
+    with wave.open(wav_temp_file.name, "wb") as wf:
+        wf.setnchannels(1)  # mono
+        wf.setsampwidth(2)  # 16-bit
+        wf.setframerate(24000)  # 24kHz
+        wf.writeframes(audio_data)
+    
+    if audio_format == 'wav':
+        # For WAV, just return the file we already created
+        output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.wav')
+        with open(wav_temp_file.name, 'rb') as src:
+            output_temp_file.write(src.read())
+        output_temp_file.seek(0)
+        os.unlink(wav_temp_file.name)
+        return output_temp_file
+    
+    # For other formats, convert using pydub
+    audio_segment = AudioSegment.from_wav(wav_temp_file.name)
+    
+    if audio_format == 'ogg_opus':
+        # Convert to OGG Opus
+        output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.ogg', delete=False)
+        audio_segment.export(output_temp_file.name, format="ogg", codec="libopus")
+        suffix = '.ogg'
+    else:  # Default to MP3
+        # Convert to MP3
+        output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.mp3', delete=False)
+        audio_segment.export(output_temp_file.name, format="mp3")
+        suffix = '.mp3'
+    
+    # Clean up the intermediate WAV file
+    os.unlink(wav_temp_file.name)
+    
+    # Reopen as NamedTemporaryFile for compatibility with existing code
+    final_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix=suffix)
+    with open(output_temp_file.name, 'rb') as src:
+        final_temp_file.write(src.read())
+    final_temp_file.seek(0)
+    
+    # Clean up the intermediate output file
+    os.unlink(output_temp_file.name)
+    
+    return final_temp_file
+
 class GeminiService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.service = cloudlanguagetools.constants.Service.Gemini
@@ -198,100 +256,8 @@ class GeminiService(cloudlanguagetools.service.Service):
             # Get the raw audio data (PCM format from Gemini)
             audio_data = audio_part.inline_data.data
             
-            # Convert audio format as requested
-            if audio_format == 'wav':
-                # Create WAV file directly
-                temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.wav', delete=False)
-                
-                # Write PCM data as WAV file (24kHz, 16-bit, mono as per Gemini docs)
-                # Ref: https://ai.google.dev/gemini-api/docs/speech-generation - Audio output is 24kHz, mono, 16-bit PCM
-                with wave.open(temp_file.name, "wb") as wf:
-                    wf.setnchannels(1)  # mono
-                    wf.setsampwidth(2)  # 16-bit
-                    wf.setframerate(24000)  # 24kHz
-                    wf.writeframes(audio_data)
-                
-                # Reopen as NamedTemporaryFile for compatibility with existing code
-                output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.wav')
-                with open(temp_file.name, 'rb') as src:
-                    output_temp_file.write(src.read())
-                output_temp_file.seek(0)
-                
-                # Clean up the intermediate file
-                import os
-                os.unlink(temp_file.name)
-                
-                return output_temp_file
-                
-            elif audio_format == 'ogg_opus':
-                # Convert PCM to OGG using pydub
-                from pydub import AudioSegment
-                import io
-                
-                # First create a temporary WAV file from PCM data
-                wav_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_wav_', suffix='.wav', delete=False)
-                with wave.open(wav_temp_file.name, "wb") as wf:
-                    wf.setnchannels(1)  # mono
-                    wf.setsampwidth(2)  # 16-bit
-                    wf.setframerate(24000)  # 24kHz
-                    wf.writeframes(audio_data)
-                
-                # Convert WAV to OGG using pydub
-                audio_segment = AudioSegment.from_wav(wav_temp_file.name)
-                
-                # Create OGG output file
-                output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.ogg', delete=False)
-                audio_segment.export(output_temp_file.name, format="ogg", codec="libopus")
-                
-                # Clean up the intermediate WAV file
-                import os
-                os.unlink(wav_temp_file.name)
-                
-                # Reopen as NamedTemporaryFile for compatibility with existing code
-                final_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.ogg')
-                with open(output_temp_file.name, 'rb') as src:
-                    final_temp_file.write(src.read())
-                final_temp_file.seek(0)
-                
-                # Clean up the intermediate OGG file
-                os.unlink(output_temp_file.name)
-                
-                return final_temp_file
-                
-            else:  # Default to MP3
-                # Convert PCM to MP3 using pydub
-                from pydub import AudioSegment
-                import io
-                
-                # First create a temporary WAV file from PCM data
-                wav_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_wav_', suffix='.wav', delete=False)
-                with wave.open(wav_temp_file.name, "wb") as wf:
-                    wf.setnchannels(1)  # mono
-                    wf.setsampwidth(2)  # 16-bit
-                    wf.setframerate(24000)  # 24kHz
-                    wf.writeframes(audio_data)
-                
-                # Convert WAV to MP3 using pydub
-                audio_segment = AudioSegment.from_wav(wav_temp_file.name)
-                
-                # Create MP3 output file
-                output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.mp3', delete=False)
-                audio_segment.export(output_temp_file.name, format="mp3")
-                
-                # Clean up the intermediate WAV file
-                import os
-                os.unlink(wav_temp_file.name)
-                
-                # Reopen as NamedTemporaryFile for compatibility with existing code
-                final_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.mp3')
-                with open(output_temp_file.name, 'rb') as src:
-                    final_temp_file.write(src.read())
-                final_temp_file.seek(0)
-                
-                # Clean up the intermediate MP3 file
-                os.unlink(output_temp_file.name)
-                
-                return final_temp_file
+            # Convert audio format as requested using the helper function
+            return convert_pcm_to_audio_file(audio_data, audio_format)
             
         except Exception as e:
             error_msg = f'Error while retrieving Gemini TTS audio: {str(e)}'

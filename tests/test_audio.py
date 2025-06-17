@@ -66,6 +66,7 @@ class TestAudio(unittest.TestCase):
 
     ENGLISH_INPUT_TEXT = 'This is the best restaurant in town.'
     FRENCH_INPUT_TEXT = 'Bonjour'
+    SPANISH_INPUT_TEXT = 'Hola'
     JAPANESE_INPUT_TEXT = 'すみません'
     CHINESE_INPUT_TEXT = '你好'
     CHINESE_INPUT_TEXT_2 = '信用卡'
@@ -901,12 +902,12 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
 
     def test_gemini_french(self):
         """Test Gemini TTS with French"""
-        source_text = 'Bonjour le monde'
+        source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.fr_FR, 'fr-FR')
 
     def test_gemini_spanish(self):
         """Test Gemini TTS with Spanish"""
-        source_text = 'Hola mundo'
+        source_text = self.SPANISH_INPUT_TEXT
         self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.es_ES, 'es-ES')
 
     def test_gemini_voice_options(self):

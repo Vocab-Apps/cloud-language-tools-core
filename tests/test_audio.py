@@ -122,8 +122,10 @@ class TestAudio(unittest.TestCase):
     @backoff.on_exception(backoff.expo,
                         cloudlanguagetools.errors.TransientError,
                         max_time=BACKOFF_MAX_TIME)
-    def get_tts_audio_with_retry(self, text, voice_service, voice_key):
-        audio_temp_file = self.manager.get_tts_audio(text, voice_service, voice_key, {})
+    def get_tts_audio_with_retry(self, text, voice_service, voice_key, options=None):
+        if options is None:
+            options = {}
+        audio_temp_file = self.manager.get_tts_audio(text, voice_service, voice_key, options)
         return audio_temp_file
 
     def verify_voice_internal(self, voice_key, voice_service, text, recognition_language):
@@ -933,7 +935,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
             voice_key = {"name": voice_name}
             options = {'model': 'gemini-2.5-flash-preview-tts'}
             
-            audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
+            audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
             
             # Verify file was created and has content
             self.assertIsNotNone(audio_temp_file)

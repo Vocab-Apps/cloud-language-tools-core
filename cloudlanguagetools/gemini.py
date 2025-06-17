@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = 'gemini-2.5-flash-preview-tts'
 
+# note the rate limits:
+# https://ai.google.dev/gemini-api/docs/rate-limits#tier-1
+
 VOICE_OPTIONS = {
     'model': {
         'type': cloudlanguagetools.options.ParameterType.list.name,

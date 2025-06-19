@@ -327,19 +327,6 @@ class GeminiService(cloudlanguagetools.service.Service):
                     retry_after=retry_after
                 )
             
-            # Check for rate limit keywords in error message
-            error_str = str(e).lower()
-            if 'resource_exhausted' in error_str or 'resource has been exhausted' in error_str or '429' in error_str:
-                # Try to extract retry time
-                retry_after = None
-                retry_match = re.search(r'retry in (\d+) seconds', error_str)
-                if retry_match:
-                    retry_after = int(retry_match.group(1))
-                    
-                raise cloudlanguagetools.errors.RateLimitError(
-                    'Gemini API rate limit exceeded', 
-                    retry_after=retry_after
-                )
-            
+           
             # For other errors, raise a simplified RequestError
             raise cloudlanguagetools.errors.RequestError('Error retrieving Gemini TTS audio')

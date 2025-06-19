@@ -286,19 +286,26 @@ class GeminiService(cloudlanguagetools.service.Service):
             
             # Convert audio format as requested using the helper function
             return convert_pcm_to_audio_file(audio_data, audio_format)
-            
-        except Exception as e:
-            # Log the full exception details for debugging
-            logger.exception(f'Error while retrieving Gemini TTS audio: {str(e)}')
-            
+
+        except genai.errors.ClientError as e:
+            logger.exception(f'Client Error while retrieving Gemini TTS audio')
+
             # Check if this is a rate limit error (ClientError with code 429)
             if hasattr(e, 'code') and e.code == 429:
+                # Check if this is a daily quota exhaustion error
+                error_str = str(e)
+                if 'generativelanguage.googleapis.com/generate_requests_per_model_per_day' in error_str:
+                    # This is a daily quota exhaustion, not a rate limit
+                    raise cloudlanguagetools.errors.RequestError(
+                        'Gemini TTS global daily quota exhausted. Please try again tomorrow.'
+                    )
+                
+                # Otherwise, it's a regular rate limit error
                 # Extract retry time from error details if available
                 retry_after = None
                 
                 # The Google GenAI ClientError includes structured error information
                 # First, try to extract from the string representation which includes the full error
-                error_str = str(e)
                 retry_match = re.search(r"'retryDelay':\s*'(\d+)s'", error_str)
                 if retry_match:
                     retry_after = int(retry_match.group(1))
@@ -327,7 +334,10 @@ class GeminiService(cloudlanguagetools.service.Service):
                     'Gemini API rate limit exceeded', 
                     retry_after=retry_after
                 )
-            
+
+        except Exception as e:
+            # Log the full exception details for debugging
+            logger.exception(f'Unknown Error while retrieving Gemini TTS audio')
            
             # For other errors, raise a simplified RequestError
             raise cloudlanguagetools.errors.RequestError('Error retrieving Gemini TTS audio')

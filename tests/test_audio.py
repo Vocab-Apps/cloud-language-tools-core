@@ -896,21 +896,25 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         self.recognize_and_verify_text(
             audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
 
+    @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_english(self):
         """Test Gemini TTS with English"""
         source_text = self.ENGLISH_INPUT_TEXT
         self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.en_US, 'en-US')
 
+    @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_french(self):
         """Test Gemini TTS with French"""
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.fr_FR, 'fr-FR')
 
+    @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_spanish(self):
         """Test Gemini TTS with Spanish"""
         source_text = self.SPANISH_INPUT_TEXT
         self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.es_ES, 'es-ES')
 
+    @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_voice_options(self):
         """Test Gemini TTS with different voice and model options"""
         service = 'Gemini'
@@ -926,6 +930,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         self.recognize_and_verify_text(
             audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.wav)
 
+    @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_different_voices(self):
         """Test Gemini TTS with different voice characteristics"""
         service = 'Gemini'

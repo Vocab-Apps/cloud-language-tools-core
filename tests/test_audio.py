@@ -37,7 +37,7 @@ def get_manager():
 
     return manager
 
-BACKOFF_MAX_TIME=30
+BACKOFF_MAX_TIME=90
 
 def skip_unreliable_clt_test():
     def decorator(func):

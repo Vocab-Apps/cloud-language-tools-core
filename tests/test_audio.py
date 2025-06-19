@@ -50,6 +50,8 @@ def skip_unreliable_clt_test():
     return decorator
 
 
+
+
 @backoff.on_exception(backoff.expo,
                       requests.exceptions.RequestException,
                       max_time=BACKOFF_MAX_TIME)
@@ -126,8 +128,19 @@ class TestAudio(unittest.TestCase):
     def get_tts_audio_with_retry(self, text, voice_service, voice_key, options=None):
         if options is None:
             options = {}
-        audio_temp_file = self.manager.get_tts_audio(text, voice_service, voice_key, options)
-        return audio_temp_file
+        try:
+            audio_temp_file = self.manager.get_tts_audio(text, voice_service, voice_key, options)
+            return audio_temp_file
+        except cloudlanguagetools.errors.RateLimitError as e:
+            # Handle rate limit with custom wait time if available
+            if e.retry_after:
+                logger.info(f"Rate limited. Waiting {e.retry_after} seconds as requested by server")
+                time.sleep(e.retry_after)
+                # Retry once after waiting
+                return self.manager.get_tts_audio(text, voice_service, voice_key, options)
+            else:
+                # Re-raise to let backoff handle it
+                raise
 
     def verify_voice_internal(self, voice_key, voice_service, text, recognition_language):
 

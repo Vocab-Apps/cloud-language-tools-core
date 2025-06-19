@@ -247,32 +247,27 @@ class GeminiService(cloudlanguagetools.service.Service):
             if not response.candidates or len(response.candidates) == 0:
                 # This can happen due to safety filters, rate limits, or API errors
                 logger.error(f'No candidates in Gemini response. Full response: {response}')
+                # Check if this looks like a rate limit issue
+                response_str = str(response).lower()
+                if '429' in response_str or 'rate limit' in response_str:
+                    raise cloudlanguagetools.errors.RateLimitError('Gemini API rate limit exceeded')
                 raise cloudlanguagetools.errors.RequestError('No audio candidates in response')
             
             candidate = response.candidates[0]
             if not candidate.content or not candidate.content.parts:
                 # This might occur if content was filtered or if there's an API issue
-                # Check if there's a finish_reason that might explain why
                 finish_reason = getattr(candidate, 'finish_reason', None)
-                logger.error(f'No content parts in response. Finish reason: {finish_reason}, Candidate: {candidate} response: {pprint.pformat(response)}')
+                logger.error(f'No content parts in response. Finish reason: {finish_reason}, Response: {pprint.pformat(response)}')
                 
-                # Provide more specific error messages based on finish_reason
-                if finish_reason:
-                    finish_reason_str = str(finish_reason)
-                    if 'OTHER' in finish_reason_str:
-                        error_msg = f'No content parts in response (finish_reason: {finish_reason}) - This is often a transient API issue, consider retrying'
-                    elif 'SAFETY' in finish_reason_str:
-                        error_msg = f'No content parts in response (finish_reason: {finish_reason}) - Content was blocked by safety filters'
-                    elif 'RECITATION' in finish_reason_str:
-                        error_msg = f'No content parts in response (finish_reason: {finish_reason}) - Content was blocked due to recitation/copyright detection'
-                    elif 'BLOCKLIST' in finish_reason_str:
-                        error_msg = f'No content parts in response (finish_reason: {finish_reason}) - Content was blocked by terminology blocklist'
-                    else:
-                        error_msg = f'No content parts in response (finish_reason: {finish_reason})'
+                # Simplified error message
+                if finish_reason and 'SAFETY' in str(finish_reason):
+                    raise cloudlanguagetools.errors.RequestError('Content blocked by safety filters')
+                elif finish_reason and 'RECITATION' in str(finish_reason):
+                    raise cloudlanguagetools.errors.RequestError('Content blocked due to copyright detection')
+                elif finish_reason and 'BLOCKLIST' in str(finish_reason):
+                    raise cloudlanguagetools.errors.RequestError('Content blocked by terminology blocklist')
                 else:
-                    error_msg = 'No content parts in response'
-                
-                raise cloudlanguagetools.errors.RequestError(error_msg)
+                    raise cloudlanguagetools.errors.RequestError('No content generated')
             
             # Find the audio part
             audio_part = None
@@ -291,6 +286,20 @@ class GeminiService(cloudlanguagetools.service.Service):
             return convert_pcm_to_audio_file(audio_data, audio_format)
             
         except Exception as e:
-            error_msg = f'Error while retrieving Gemini TTS audio: {str(e)}'
-            logger.exception(error_msg)
-            raise cloudlanguagetools.errors.RequestError(error_msg)
+            # Log the full exception details for debugging
+            logger.exception(f'Error while retrieving Gemini TTS audio: {str(e)}')
+            
+            # Check if this is a rate limit error
+            error_str = str(e).lower()
+            if '429' in error_str or 'rate limit' in error_str or 'quota exceeded' in error_str:
+                # Try to extract retry-after time if available
+                retry_after = None
+                # Note: The genai SDK may not provide retry-after header directly
+                # This is a placeholder for future enhancement
+                raise cloudlanguagetools.errors.RateLimitError(
+                    'Gemini API rate limit exceeded', 
+                    retry_after=retry_after
+                )
+            
+            # For other errors, raise a simplified RequestError
+            raise cloudlanguagetools.errors.RequestError('Error retrieving Gemini TTS audio')

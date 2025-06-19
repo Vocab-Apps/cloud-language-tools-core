@@ -3,6 +3,7 @@ import logging
 import wave
 import os
 import pprint
+import re
 from typing import List
 
 from google import genai
@@ -289,13 +290,52 @@ class GeminiService(cloudlanguagetools.service.Service):
             # Log the full exception details for debugging
             logger.exception(f'Error while retrieving Gemini TTS audio: {str(e)}')
             
-            # Check if this is a rate limit error
-            error_str = str(e).lower()
-            if '429' in error_str or 'rate limit' in error_str or 'quota exceeded' in error_str:
-                # Try to extract retry-after time if available
+            # Check if this is a rate limit error (ClientError with code 429)
+            if hasattr(e, 'code') and e.code == 429:
+                # Extract retry time from error details if available
                 retry_after = None
-                # Note: The genai SDK may not provide retry-after header directly
-                # This is a placeholder for future enhancement
+                
+                # The Google GenAI ClientError includes structured error information
+                # First, try to extract from the string representation which includes the full error
+                error_str = str(e)
+                retry_match = re.search(r"'retryDelay':\s*'(\d+)s'", error_str)
+                if retry_match:
+                    retry_after = int(retry_match.group(1))
+                
+                # Try to get from response if available  
+                error_dict = {}
+                if hasattr(e, 'response') and hasattr(e.response, 'json') and callable(e.response.json):
+                    try:
+                        error_dict = e.response.json()
+                    except:
+                        pass
+                
+                # Look for RetryInfo in error details
+                if 'error' in error_dict and 'details' in error_dict['error']:
+                    for detail in error_dict['error']['details']:
+                        if detail.get('@type') == 'type.googleapis.com/google.rpc.RetryInfo':
+                            retry_delay = detail.get('retryDelay', '')
+                            # Extract seconds from format like "20s"
+                            if retry_delay.endswith('s'):
+                                try:
+                                    retry_after = int(retry_delay[:-1])
+                                except ValueError:
+                                    pass
+                
+                raise cloudlanguagetools.errors.RateLimitError(
+                    'Gemini API rate limit exceeded', 
+                    retry_after=retry_after
+                )
+            
+            # Check for rate limit keywords in error message
+            error_str = str(e).lower()
+            if 'resource_exhausted' in error_str or 'resource has been exhausted' in error_str or '429' in error_str:
+                # Try to extract retry time
+                retry_after = None
+                retry_match = re.search(r'retry in (\d+) seconds', error_str)
+                if retry_match:
+                    retry_after = int(retry_match.group(1))
+                    
                 raise cloudlanguagetools.errors.RateLimitError(
                     'Gemini API rate limit exceeded', 
                     retry_after=retry_after

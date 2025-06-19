@@ -96,7 +96,7 @@ class TestAudio(unittest.TestCase):
         return subset        
 
     def get_voice_list_service_audio_language_v3(self, service, audio_language):
-        subset = [x for x in self.voice_list if audio_language in x.audio_languages and x.service == service]
+        subset = [x for x in self.voice_list_v3 if audio_language in x.audio_languages and x.service == service]
         return subset                
 
     def get_voice_by_service_and_name(self, service: Service, voice_name) -> cloudlanguagetools.ttsvoice.TtsVoice_v3:
@@ -589,18 +589,6 @@ class TestAudio(unittest.TestCase):
         
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
-
-    def verify_service_audio_language_v3(self, text, service, audio_language, recognition_language):
-        """Version using voice_list_v3"""
-        voices = [x for x in self.voice_list_v3 if x.service == service and audio_language in x.audio_languages]
-        self.assertGreaterEqual(len(voices), 1, f'at least one voice for service {service}, language {audio_language}')
-
-        # pick 3 random voices
-        max_voices = 3
-        if len(voices) > max_voices:
-            voices = random.sample(voices, max_voices)
-        for voice in voices:
-            self.verify_voice_v3(voice, text, recognition_language)
 
     def verify_wav_voice(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, recognition_language: str):
         # assert that the wav format is in the list of supported formats

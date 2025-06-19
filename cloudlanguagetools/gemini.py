@@ -4,6 +4,7 @@ import wave
 import os
 import pprint
 import re
+import pprint
 from typing import List
 
 from google import genai
@@ -247,7 +248,7 @@ class GeminiService(cloudlanguagetools.service.Service):
             # Extract audio data from response
             if not response.candidates or len(response.candidates) == 0:
                 # This can happen due to safety filters, rate limits, or API errors
-                logger.error(f'No candidates in Gemini response. Full response: {response}')
+                logger.error(f'No candidates in Gemini response. Full response: {pprint.pformat(response)}')
                 # Check if this looks like a rate limit issue
                 response_str = str(response).lower()
                 if '429' in response_str or 'rate limit' in response_str:

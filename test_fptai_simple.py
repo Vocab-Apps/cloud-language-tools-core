@@ -16,6 +16,25 @@ headers = {
     "Content-Type": "application/json"
 }
 
+# First, list available models
+print("="*50)
+print("STEP 1: List available models")
+print("="*50)
+models_response = requests.get("https://mkp-api.fptcloud.com/v1/models", headers={"Authorization": f"Bearer {API_KEY}"})
+print(f"GET /v1/models - Status: {models_response.status_code}")
+if models_response.status_code == 200:
+    models = models_response.json()
+    print("Available models:")
+    pprint.pprint(models)
+    if models.get('data'):
+        model_id = models['data'][0]['id']
+        print(f"\nFirst model ID: {model_id}")
+print()
+
+print("="*50)
+print("STEP 2: Try TTS with the model from Step 1")
+print("="*50)
+
 data = {
     "model": "FPT.AI-TTS",
     "input": "xin chào, chúng tôi là FPT",
@@ -27,7 +46,7 @@ print("\nRequest Headers:")
 pprint.pprint(headers)
 print("\nRequest Body:")
 pprint.pprint(data)
-print("\n" + "="*50)
+print()
 
 response = requests.post(API_URL, headers=headers, json=data)
 

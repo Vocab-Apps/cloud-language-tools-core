@@ -5,6 +5,7 @@ Simple reproduction script for FPT.AI TTS API issue
 
 import requests
 import json
+import pprint
 
 # API configuration
 API_KEY = "sk-xyNBKkYUjL9-1GqNGX2a6w"
@@ -20,6 +21,13 @@ data = {
     "input": "xin chào, chúng tôi là FPT",
     "voice": "std_kimngan"
 }
+
+print("Request URL:", API_URL)
+print("\nRequest Headers:")
+pprint.pprint(headers)
+print("\nRequest Body:")
+pprint.pprint(data)
+print("\n" + "="*50)
 
 response = requests.post(API_URL, headers=headers, json=data)
 

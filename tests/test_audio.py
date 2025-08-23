@@ -632,7 +632,7 @@ class TestAudio(unittest.TestCase):
 
     def test_elevenlabs_format_wav(self):
         fr_voice = self.get_voice_by_lambda(Service.ElevenLabs, 
-            lambda x: 'Charlotte' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
+            lambda x: 'Rachel' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
         self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')        
 
     def test_google_format_wav(self):

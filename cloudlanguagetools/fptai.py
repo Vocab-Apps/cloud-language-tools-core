@@ -67,8 +67,9 @@ class FptAiService(cloudlanguagetools.service.Service):
             'Content-Type': 'application/json'
         }
         
+        # documentation: https://marketplace.fptcloud.com/en/ai-product/FPT.AI/FPT.AI-VITs
         data = {
-            'model': 'FPT.AI-TTS',
+            'model': 'FPT.AI-VITs',
             'input': text,
             'voice': voice_key['voice_id']
         }

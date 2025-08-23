@@ -1,6 +1,7 @@
 import requests
 import tempfile
 import logging
+import pprint
 from typing import List, Dict
 
 import cloudlanguagetools.constants
@@ -23,6 +24,7 @@ class Service():
     def get_tts_audio_base_post_request(self, url, **kwargs):
         try:
             kwargs['timeout'] = cloudlanguagetools.constants.RequestTimeout
+            logger.debug(f'{self.get_service_name()} TTS request - URL: {url}, kwargs: {pprint.pformat(kwargs)}')
             response = self.post_request(url, **kwargs)
             if response.status_code >= 400:
                 logger.error(f'{self.get_service_name()} audio request failed with status code {response.status_code}: {response.content}')

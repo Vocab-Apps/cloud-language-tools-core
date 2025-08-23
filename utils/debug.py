@@ -485,6 +485,40 @@ def get_elevenlabs_models():
     data = response.json()
     pprint.pprint(data)
 
+def list_elevenlabs_voices():
+    manager = get_manager()
+    elevenlabs_service = manager.services[cloudlanguagetools.constants.Service.ElevenLabs.name]
+    headers = elevenlabs_service.get_headers()
+    
+    # Use the same URL pattern as in elevenlabs.py (though the filter doesn't work on API side)
+    url = "https://api.elevenlabs.io/v1/voices?category=premade"
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    
+    data = response.json()
+    all_voices = data.get('voices', [])
+    
+    # Filter to only include premade voices (API doesn't respect the category parameter)
+    premade_voices = [voice for voice in all_voices if voice.get('category') == 'premade']
+    
+    print(f"Total voices returned by API: {len(all_voices)}")
+    print(f"Premade voices (filtered): {len(premade_voices)}")
+    print("\nPremade voice names:")
+    for voice in premade_voices:
+        print(f"  - {voice['name']}")
+        
+    # Also show categories breakdown for all voices
+    categories = {}
+    for voice in all_voices:
+        category = voice.get('category', 'no_category')
+        if category not in categories:
+            categories[category] = []
+        categories[category].append(voice['name'])
+    
+    print(f"\nAll voices by category:")
+    for category, voice_names in categories.items():
+        print(f"  {category}: {len(voice_names)} voices")
+
 
 def print_all_languages():
     languages = [language for language in cloudlanguagetools.languages.Language]

@@ -131,7 +131,8 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             'pt': cloudlanguagetools.languages.AudioLanguage.pt_PT,
             'en-uk': cloudlanguagetools.languages.AudioLanguage.en_GB,
             'zh': cloudlanguagetools.languages.AudioLanguage.zh_CN,
-            'id': cloudlanguagetools.languages.AudioLanguage.id_ID
+            'id': cloudlanguagetools.languages.AudioLanguage.id_ID,
+            'as': cloudlanguagetools.languages.AudioLanguage.as_IN, # Assamese
         }
         if language_id in override_map:
             return override_map[language_id]
@@ -192,7 +193,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
         # now, retrieve voice list
         # call elevenlabs API to list TTS voices
-        url = "https://api.elevenlabs.io/v1/voices"
+        url = "https://api.elevenlabs.io/v1/voices?category=premade"
 
         response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         response.raise_for_status()
@@ -200,6 +201,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         data = response.json()
 
         for model in model_data:
+            logger.debug(f'processing voices for model: {pprint.pformat(model)}')
             model_id = model['model_id']
             model_name = model['name']
             model_short_name = model_name.replace('Eleven ', '').strip()
@@ -259,7 +261,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
         # now, retrieve voice list
         # call elevenlabs API to list TTS voices
-        url = "https://api.elevenlabs.io/v1/voices"
+        url = "https://api.elevenlabs.io/v1/voices?category=premade"
 
         response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         response.raise_for_status()
@@ -267,6 +269,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         data = response.json()
 
         for model in model_data:
+            logger.debug(f'processing voices for model: {pprint.pformat(model)}')
             model_id = model['model_id']
             model_name = model['name']
             model_short_name = model_name.replace('Eleven ', '').strip()

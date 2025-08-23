@@ -313,6 +313,7 @@ class AudioLanguage(enum.Enum):
     bn_ANY = (Language.bn, "Bengali (Any Country)")
     bs_BA = (Language.bs, "Bosnian (Bosnia and Herzegovina)")
     ca_ES = (Language.ca, "Catalan")
+    ceb_PH = (Language.ceb, "Cebuano (Philippines)")
     cs_CZ = (Language.cs, "Czech")
     cy_GB = (Language.cy, "Welsh")
     da_DK = (Language.da, "Danish (Denmark)")

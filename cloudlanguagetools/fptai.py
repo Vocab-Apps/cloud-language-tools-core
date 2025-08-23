@@ -3,14 +3,19 @@ import requests
 import tempfile
 import logging
 import time
+import os
+
+from pydub import AudioSegment
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
+import cloudlanguagetools.options
 import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.errors
+from cloudlanguagetools.options import AudioFormat
 
 
 FPTAI_VOICE_SPEED_DEFAULT = 1.0
@@ -41,7 +46,16 @@ class FptAiVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'min': 0.5,
                 'max': 2.0,
                 'default': FPTAI_VOICE_SPEED_DEFAULT
-            },            
+            },
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [
+                    cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.wav.name,
+                    cloudlanguagetools.options.AudioFormat.ogg_opus.name
+                ],
+                'default': cloudlanguagetools.options.AudioFormat.mp3.name
+            }
         }
 
 
@@ -57,8 +71,12 @@ class FptAiService(cloudlanguagetools.service.Service):
 
 
     def get_tts_audio(self, text, voice_key, options):
-        output_temp_file = tempfile.NamedTemporaryFile(suffix='.wav')
-        output_temp_filename = output_temp_file.name
+        # Get the requested audio format from options
+        audio_format = options.get('audio_format', 'mp3')
+        
+        # Create temporary WAV file to store the initial response
+        wav_temp_file = tempfile.NamedTemporaryFile(prefix='cloudlanguagetools_fptai_', suffix='.wav', delete=False)
+        wav_temp_filename = wav_temp_file.name
 
         api_url = "https://mkp-api.fptcloud.com/v1/audio/speech"
         
@@ -82,10 +100,46 @@ class FptAiService(cloudlanguagetools.service.Service):
             timeout=cloudlanguagetools.constants.RequestTimeout)
 
         if response.status_code == 200:
-            # The new API returns audio directly
-            with open(output_temp_filename, 'wb') as audio:
+            # The API returns WAV audio directly
+            with open(wav_temp_filename, 'wb') as audio:
                 audio.write(response.content)
-            return output_temp_file
+            
+            # If WAV format is requested, return as-is
+            if audio_format == 'wav':
+                output_temp_file = tempfile.NamedTemporaryFile(prefix='cloudlanguagetools_fptai_', suffix='.wav')
+                with open(wav_temp_filename, 'rb') as src:
+                    output_temp_file.write(src.read())
+                output_temp_file.seek(0)
+                os.unlink(wav_temp_filename)
+                return output_temp_file
+            
+            # For other formats, convert using pydub
+            audio_segment = AudioSegment.from_wav(wav_temp_filename)
+            
+            if audio_format == 'ogg_opus':
+                # Convert to OGG Opus
+                output_temp_file = tempfile.NamedTemporaryFile(prefix='cloudlanguagetools_fptai_', suffix='.ogg', delete=False)
+                audio_segment.export(output_temp_file.name, format="ogg", codec="libopus")
+                suffix = '.ogg'
+            else:  # Default to MP3
+                # Convert to MP3
+                output_temp_file = tempfile.NamedTemporaryFile(prefix='cloudlanguagetools_fptai_', suffix='.mp3', delete=False)
+                audio_segment.export(output_temp_file.name, format="mp3")
+                suffix = '.mp3'
+            
+            # Clean up the intermediate WAV file
+            os.unlink(wav_temp_filename)
+            
+            # Reopen as NamedTemporaryFile for compatibility with existing code
+            final_temp_file = tempfile.NamedTemporaryFile(prefix='cloudlanguagetools_fptai_', suffix=suffix)
+            with open(output_temp_file.name, 'rb') as src:
+                final_temp_file.write(src.read())
+            final_temp_file.seek(0)
+            
+            # Clean up the intermediate output file
+            os.unlink(output_temp_file.name)
+            
+            return final_temp_file
 
         error_message = f'could not retrieve FPT.AI audio: {response.content}'
         raise cloudlanguagetools.errors.RequestError(error_message)

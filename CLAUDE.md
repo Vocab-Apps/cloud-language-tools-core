@@ -85,3 +85,4 @@ Each service module (e.g., `azure.py`, `google.py`) follows this pattern:
   - **Normal behavior**: It's expected and acceptable for tests to invoke cloud APIs and incur costs
   - **@skip_unreliable_clt_test()**: Only use this decorator for services that are genuinely unreliable or frequently fail
   - **Environment variable**: Some legacy tests may require `CLOUDLANGUAGETOOLS_CORE_TEST_UNRELIABLE=yes` but new services should not
+- if you need to write some temporary code for debugging, add a new function in @utils/debug.py

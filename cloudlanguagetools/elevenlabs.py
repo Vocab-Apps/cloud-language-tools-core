@@ -21,7 +21,8 @@ from cloudlanguagetools.options import AudioFormat
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_STABILITY = 0.75
+# elevenlabs v3 requires discrete values for stability
+DEFAULT_STABILITY = 0.5
 DEFAULT_SIMILARITY_BOOST = 0.75
 
 GENDER_MAP = {

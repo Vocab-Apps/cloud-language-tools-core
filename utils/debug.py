@@ -519,6 +519,35 @@ def list_elevenlabs_voices():
     for category, voice_names in categories.items():
         print(f"  {category}: {len(voice_names)} voices")
 
+def test_elevenlabs_v3_params():
+    """Test ElevenLabs v3 model stability parameter restrictions"""
+    manager = get_manager()
+    elevenlabs_service = manager.services[cloudlanguagetools.constants.Service.ElevenLabs.name]
+    
+    # Get models first to check what's available
+    models = get_elevenlabs_models()
+    
+    # Test v3 stability values
+    text = "Test"
+    v3_stability_values = [0.0, 0.5, 1.0]  # Valid v3 values according to error message
+    
+    for stability in v3_stability_values:
+        print(f"\nTesting stability {stability} with v3 model...")
+        voice_key = {
+            'voice_id': 'FGY2WhTYpPnrIDTdsKH5',  # From the error log
+            'model_id': 'eleven_v3'
+        }
+        options = {
+            'stability': stability,
+            'similarity_boost': 0.75  # Keep this as is for now
+        }
+        
+        try:
+            result = elevenlabs_service.get_tts_audio(text, voice_key, options)
+            print(f"✓ Stability {stability} works with v3")
+        except Exception as e:
+            print(f"✗ Stability {stability} failed: {e}")
+
 
 def print_all_languages():
     languages = [language for language in cloudlanguagetools.languages.Language]

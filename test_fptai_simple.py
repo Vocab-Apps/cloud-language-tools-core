@@ -8,7 +8,7 @@ import json
 import pprint
 
 # API configuration
-API_KEY = "sk-xyNBKkYUjL9-1GqNGX2a6w"
+API_KEY = "sk-aRY-7_UWlaFfMLM6bdXd2w"
 API_URL = "https://mkp-api.fptcloud.com/v1/audio/speech"
 
 headers = {
@@ -36,7 +36,7 @@ print("STEP 2: Try TTS with the model from Step 1")
 print("="*50)
 
 data = {
-    "model": "FPT.AI-TTS",
+    "model": "FPT.AI-VITs",
     "input": "xin chào, chúng tôi là FPT",
     "voice": "std_kimngan"
 }

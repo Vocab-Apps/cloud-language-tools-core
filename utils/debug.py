@@ -473,6 +473,18 @@ def elevenlabs_api_test():
     response = requests.get(url, headers=headers)
     pprint.pprint(response.json())
 
+def get_elevenlabs_models():
+    manager = get_manager()
+    elevenlabs_service = manager.services[cloudlanguagetools.constants.Service.ElevenLabs.name]
+    headers = elevenlabs_service.get_headers()
+    
+    url = "https://api.elevenlabs.io/v1/models"
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    
+    data = response.json()
+    pprint.pprint(data)
+
 
 def print_all_languages():
     languages = [language for language in cloudlanguagetools.languages.Language]
@@ -1372,55 +1384,11 @@ if __name__ == '__main__':
                         stream=sys.stdout,
                         level=logging.DEBUG)
 
-    # generate_video_audio()
-    # test_azure_audio()
-    # test_google_audio()
-    # test_forvo_audio_tokipona()
-    # play_google_audio()
-    # play_azure_audio()
-    get_voice_list()
-    # get_azure_voice_list()
-    # get_voice_list_awesometts()
-    # get_elevenlabs_voice_list()
-    # elevenlabs_api_test()
-    # test_elevenlabs_api_categories()
-    # get_watson_voice_list()
-    # get_watson_translation_languages()
-    # get_amazon_voice_list()
-    # get_forvo_voice_list()
-    # get_amazon_voice_list_awesometts()
-    # get_azure_translation_languages()
-    # get_google_translation_languages()
-    # get_watson_translation_languages()
-    #output_languages_enum()
-    # get_translation_language_list()
-    # output_language_audio_mapping()
-    # detect_language()
-    # translate_google()
-    # translate_azure()
-    # azure_dictionary_lookup_list()
-    # dictionary_lookup_azure()
-    # dictionary_examples_azure()
-    # end_to_end_test()
-    # transliterate_azure()
-    # get_transliteration_language_list()
-    # print_all_languages()
-    # print_all_audio_languages()
-    # cereproc_authentication()
-    # cereproc_tts_voice_list()
-    # test_epitran()
-    # create_epitran_mappings()
-    # test_debounce()
-    # load_vocalware_voices()
-    # thai_tokenization()
-    # test_get_language_data()
-    # test_get_language_data_redis()
-    # test_wenlin_lookup()
-    # openai_test()
-    # microsoft_openai_test()
-    # openai_functioncalls_simple_example()
-    # openai_detect_language()
-    # openai_guess_from_to_language()
-    # openai_audio()
-    # get_azure_transliteration_languages()
-    # get_google_voice_list()
+    if len(sys.argv) > 1:
+        function_name = sys.argv[1]
+        if function_name in globals() and callable(globals()[function_name]):
+            globals()[function_name]()
+        else:
+            print(f"Function '{function_name}' not found or not callable")
+    else:
+        print("Please provide a function name as the first argument")

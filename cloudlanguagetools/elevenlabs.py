@@ -202,6 +202,15 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
         data = response.json()
         
+        # Assert that we got all voices without needing pagination
+        # According to ElevenLabs API docs, the response includes has_more, next_page_start_after, and page_size fields
+        if 'has_more' in data:
+            assert data['has_more'] == False, f"ElevenLabs API returned paginated results. has_more={data['has_more']}, we need to implement pagination support"
+        
+        # Also check if total_count matches the number of voices returned
+        if 'total_count' in data and 'voices' in data:
+            assert data['total_count'] == len(data['voices']), f"ElevenLabs API: total_count ({data['total_count']}) doesn't match voices returned ({len(data['voices'])})"
+        
         # Filter to only include premade voices (API doesn't respect the category parameter)
         filtered_voices = [voice for voice in data['voices'] if voice.get('category') == 'premade']
 
@@ -274,6 +283,15 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         response.raise_for_status()
 
         data = response.json()
+        
+        # Assert that we got all voices without needing pagination
+        # According to ElevenLabs API docs, the response includes has_more, next_page_start_after, and page_size fields
+        if 'has_more' in data:
+            assert data['has_more'] == False, f"ElevenLabs API returned paginated results. has_more={data['has_more']}, we need to implement pagination support"
+        
+        # Also check if total_count matches the number of voices returned
+        if 'total_count' in data and 'voices' in data:
+            assert data['total_count'] == len(data['voices']), f"ElevenLabs API: total_count ({data['total_count']}) doesn't match voices returned ({len(data['voices'])})"
         
         # Filter to only include premade voices (API doesn't respect the category parameter)
         filtered_voices = [voice for voice in data['voices'] if voice.get('category') == 'premade']

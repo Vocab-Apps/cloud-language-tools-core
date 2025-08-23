@@ -230,6 +230,61 @@ def get_elevenlabs_voice_list():
     for voice in voice_list:
         print(voice)
 
+def test_elevenlabs_pagination():
+    """Test that ElevenLabs API pagination assertions are working"""
+    manager = get_manager()
+    service = manager.services[cloudlanguagetools.constants.Service.ElevenLabs.name]
+    headers = service.get_headers()
+    
+    print("=" * 80)
+    print("ElevenLabs Pagination Test")
+    print("=" * 80)
+    
+    # Get raw API response to check pagination fields
+    url = "https://api.elevenlabs.io/v1/voices"
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    data = response.json()
+    
+    print(f"Response keys: {data.keys()}")
+    
+    if 'has_more' in data:
+        print(f"has_more: {data['has_more']}")
+    else:
+        print("has_more: field not present in response")
+    
+    if 'total_count' in data:
+        print(f"total_count: {data['total_count']}")
+    else:
+        print("total_count: field not present in response")
+        
+    if 'page_size' in data:
+        print(f"page_size: {data['page_size']}")
+    else:
+        print("page_size: field not present in response")
+    
+    if 'next_page_start_after' in data:
+        print(f"next_page_start_after: {data['next_page_start_after']}")
+    else:
+        print("next_page_start_after: field not present in response")
+    
+    print(f"Number of voices in response: {len(data['voices'])}")
+    
+    # Now test that our methods work with assertions
+    print("\nTesting get_tts_voice_list() with pagination assertions...")
+    try:
+        voice_list = service.get_tts_voice_list()
+        print(f"✓ get_tts_voice_list() succeeded, returned {len(voice_list)} voices")
+    except AssertionError as e:
+        print(f"✗ get_tts_voice_list() assertion failed: {e}")
+    
+    print("\nTesting get_tts_voice_list_v3() with pagination assertions...")
+    try:
+        voice_list_v3 = service.get_tts_voice_list_v3()
+        print(f"✓ get_tts_voice_list_v3() succeeded, returned {len(voice_list_v3)} voices")
+    except AssertionError as e:
+        print(f"✗ get_tts_voice_list_v3() assertion failed: {e}")
+
 def test_elevenlabs_voice_filtering():
     """Test that ElevenLabs voice filtering is working correctly after the fix"""
     manager = get_manager()

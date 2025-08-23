@@ -194,12 +194,16 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
         # now, retrieve voice list
         # call elevenlabs API to list TTS voices
+        # Note: The category=premade filter doesn't work on the API side, so we filter client-side
         url = "https://api.elevenlabs.io/v1/voices?category=premade"
 
         response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         response.raise_for_status()
 
         data = response.json()
+        
+        # Filter to only include premade voices (API doesn't respect the category parameter)
+        filtered_voices = [voice for voice in data['voices'] if voice.get('category') == 'premade']
 
         for model in model_data:
             logger.debug(f'processing voices for model: {pprint.pformat(model)}')
@@ -210,7 +214,8 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
                 try:
                     language_id = language_record['language_id']
                     audio_language_enum = self.get_audio_language(language_id)
-                    for voice_data in data['voices']:
+                    # Use filtered voices instead of all voices
+                    for voice_data in filtered_voices:
                         result.append(ElevenLabsVoice(voice_data, audio_language_enum, model_id, model_short_name))
                 except Exception as e:
                     logger.exception(f'ElevenLabs: error processing voice_data: {voice_data}')
@@ -262,12 +267,16 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
         # now, retrieve voice list
         # call elevenlabs API to list TTS voices
+        # Note: The category=premade filter doesn't work on the API side, so we filter client-side
         url = "https://api.elevenlabs.io/v1/voices?category=premade"
 
         response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
         response.raise_for_status()
 
         data = response.json()
+        
+        # Filter to only include premade voices (API doesn't respect the category parameter)
+        filtered_voices = [voice for voice in data['voices'] if voice.get('category') == 'premade']
 
         for model in model_data:
             logger.debug(f'processing voices for model: {pprint.pformat(model)}')
@@ -275,7 +284,8 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             model_name = model['name']
             model_short_name = model_name.replace('Eleven ', '').strip()
             # for language_record in model['languages']:
-            for voice_data in data['voices']:
+            # Use filtered voices instead of all voices
+            for voice_data in filtered_voices:
                 voice_name = voice_data['name']
                 try:
                     languages = model['languages']

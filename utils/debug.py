@@ -230,6 +230,178 @@ def get_elevenlabs_voice_list():
     for voice in voice_list:
         print(voice)
 
+def test_elevenlabs_voice_filtering():
+    """Test that ElevenLabs voice filtering is working correctly after the fix"""
+    manager = get_manager()
+    
+    # Get the voice list using the fixed method
+    voice_list = manager.services[cloudlanguagetools.constants.Service.ElevenLabs.name].get_tts_voice_list()
+    
+    # Check the underlying API data
+    service = manager.services[cloudlanguagetools.constants.Service.ElevenLabs.name]
+    headers = service.get_headers()
+    
+    # Get raw API response
+    url = "https://api.elevenlabs.io/v1/voices"
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    all_voices_data = response.json()
+    
+    # Count voices by category in raw API response
+    premade_count = sum(1 for v in all_voices_data['voices'] if v.get('category') == 'premade')
+    professional_count = sum(1 for v in all_voices_data['voices'] if v.get('category') == 'professional')
+    total_count = len(all_voices_data['voices'])
+    
+    print("=" * 80)
+    print("ElevenLabs Voice Filtering Test")
+    print("=" * 80)
+    print(f"Raw API response statistics:")
+    print(f"  Total voices: {total_count}")
+    print(f"  Premade voices: {premade_count}")
+    print(f"  Professional voices: {professional_count}")
+    
+    # Get models
+    url = "https://api.elevenlabs.io/v1/models"
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    model_data = response.json()
+    model_data = [model for model in model_data if model['can_do_text_to_speech']]
+    
+    # Calculate expected voice count
+    # Each premade voice should appear once for each model/language combination
+    total_languages = sum(len(model['languages']) for model in model_data)
+    expected_count = premade_count * total_languages
+    
+    print(f"\nModels and languages:")
+    for model in model_data:
+        print(f"  {model['name']}: {len(model['languages'])} languages")
+    
+    print(f"\nExpected voice count after filtering:")
+    print(f"  {premade_count} premade voices × {total_languages} model/language combinations = {expected_count}")
+    
+    print(f"\nActual voice count from get_tts_voice_list(): {len(voice_list)}")
+    
+    # Verify all voices are premade
+    print("\nVerifying first 5 voices are all premade:")
+    for i, voice in enumerate(voice_list[:5]):
+        print(f"  {i+1}. {voice.get_voice_shortname()}")
+    
+    if len(voice_list) == expected_count:
+        print("\n✓ SUCCESS: Voice filtering is working correctly!")
+    else:
+        print(f"\n✗ ERROR: Expected {expected_count} voices but got {len(voice_list)}")
+
+def test_elevenlabs_api_categories():
+    """Test ElevenLabs API to see what voices are returned with different category filters"""
+    config = cloudlanguagetools.encryption.decrypt()
+    api_key = config['ElevenLabs']['api_key']
+    
+    headers = {
+        "Accept": "application/json",
+        "xi-api-key": api_key
+    }
+    
+    # Test with category=premade
+    print("=" * 80)
+    print("Testing with category=premade")
+    print("=" * 80)
+    url_premade = "https://api.elevenlabs.io/v1/voices?category=premade"
+    response = requests.get(url_premade, headers=headers)
+    response.raise_for_status()
+    data_premade = response.json()
+    
+    print(f"Total voices with premade filter: {len(data_premade['voices'])}")
+    for voice in data_premade['voices'][:5]:  # Show first 5 voices
+        print(f"  - {voice['name']} (ID: {voice['voice_id']}, Category: {voice.get('category', 'N/A')})")
+        if 'labels' in voice:
+            print(f"    Labels: {voice['labels']}")
+    
+    # Test without category filter
+    print("\n" + "=" * 80)
+    print("Testing without category filter")
+    print("=" * 80)
+    url_all = "https://api.elevenlabs.io/v1/voices"
+    response = requests.get(url_all, headers=headers)
+    response.raise_for_status()
+    data_all = response.json()
+    
+    print(f"Total voices without filter: {len(data_all['voices'])}")
+    
+    # Analyze categories present in the data
+    categories = {}
+    for voice in data_all['voices']:
+        category = voice.get('category', 'no_category')
+        if category not in categories:
+            categories[category] = []
+        categories[category].append(voice['name'])
+    
+    print(f"\nCategories found in all voices:")
+    for cat, voices in categories.items():
+        print(f"  - {cat}: {len(voices)} voices")
+        if len(voices) <= 3:
+            for v in voices:
+                print(f"      * {v}")
+    
+    # Check what categories are in the "premade" filtered response
+    print("\nCategories in 'premade' filtered response:")
+    premade_categories = {}
+    for voice in data_premade['voices']:
+        category = voice.get('category', 'no_category') 
+        if category not in premade_categories:
+            premade_categories[category] = []
+        premade_categories[category].append(voice['name'])
+    
+    for cat, voices in premade_categories.items():
+        print(f"  - {cat}: {len(voices)} voices")
+        if cat == 'professional':
+            print(f"    First 3 professional voices: {voices[:3]}")
+    
+    # Check if premade voices are actually filtered
+    premade_ids = {v['voice_id'] for v in data_premade['voices']}
+    all_ids = {v['voice_id'] for v in data_all['voices']}
+    
+    print(f"\nVoices in 'premade' but not in 'all': {len(premade_ids - all_ids)}")
+    print(f"Voices in 'all' but not in 'premade': {len(all_ids - premade_ids)}")
+    
+    # Show some non-premade voices
+    non_premade = [v for v in data_all['voices'] if v['voice_id'] not in premade_ids]
+    if non_premade:
+        print(f"\nExamples of non-premade voices (first 5):")
+        for voice in non_premade[:5]:
+            print(f"  - {voice['name']} (Category: {voice.get('category', 'N/A')})")
+            if 'labels' in voice:
+                print(f"    Labels: {voice['labels']}")
+    
+    # Test other category values and parameter variations
+    print("\n" + "=" * 80)
+    print("Testing other category values and parameter variations")
+    print("=" * 80)
+    
+    # Test different parameter variations
+    test_urls = [
+        ("category=cloned", "https://api.elevenlabs.io/v1/voices?category=cloned"),
+        ("category=generated", "https://api.elevenlabs.io/v1/voices?category=generated"),
+        ("category=professional", "https://api.elevenlabs.io/v1/voices?category=professional"),
+        ("show_legacy=false", "https://api.elevenlabs.io/v1/voices?show_legacy=false"),
+        ("category=premade&show_legacy=false", "https://api.elevenlabs.io/v1/voices?category=premade&show_legacy=false"),
+    ]
+    
+    for param_desc, url_test in test_urls:
+        try:
+            response = requests.get(url_test, headers=headers)
+            if response.status_code == 200:
+                data_test = response.json()
+                print(f"  {param_desc}: {len(data_test['voices'])} voices")
+                # Check categories
+                test_categories = set()
+                for v in data_test['voices']:
+                    test_categories.add(v.get('category', 'no_category'))
+                print(f"    Categories present: {test_categories}")
+            else:
+                print(f"  {param_desc}: HTTP {response.status_code}")
+        except Exception as e:
+            print(f"  {param_desc}: Error - {e}")
+
 
 def elevenlabs_api_test():
     config = cloudlanguagetools.encryption.decrypt()
@@ -1156,6 +1328,7 @@ if __name__ == '__main__':
     # get_voice_list_awesometts()
     # get_elevenlabs_voice_list()
     # elevenlabs_api_test()
+    # test_elevenlabs_api_categories()
     # get_watson_voice_list()
     # get_watson_translation_languages()
     # get_amazon_voice_list()

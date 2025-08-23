@@ -133,6 +133,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             'zh': cloudlanguagetools.languages.AudioLanguage.zh_CN,
             'id': cloudlanguagetools.languages.AudioLanguage.id_ID,
             'as': cloudlanguagetools.languages.AudioLanguage.as_IN, # Assamese
+            'is': cloudlanguagetools.languages.AudioLanguage.is_IS, # Icelandic
         }
         if language_id in override_map:
             return override_map[language_id]

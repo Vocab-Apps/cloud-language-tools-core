@@ -738,10 +738,10 @@ class TestAudio(unittest.TestCase):
         source_text = 'xin chào bạn của tôi'
 
         voice_key = {
-            "voice_id": "leminh"
+            "voice_id": "std_leminh"
         }
 
-        options = {'speed': -0.5}
+        options = {'speed': 0.5}
 
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'vi-VN')

@@ -126,6 +126,41 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
 
 
+    def _get_models_and_voices(self):
+        """Common function to retrieve models and filtered voices data."""
+        # first, get all models to get list of languages
+        url = "https://api.elevenlabs.io/v1/models"
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
+        model_data = response.json()
+
+        # restrict to models that can do text to speech (elevenlabs introduced voice conversion)
+        model_data = [model for model in model_data if model['can_do_text_to_speech']]
+
+        # now, retrieve voice list
+        # call elevenlabs API to list TTS voices
+        # Note: The category=premade filter doesn't work on the API side, so we filter client-side
+        url = "https://api.elevenlabs.io/v1/voices?category=premade"
+
+        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
+        response.raise_for_status()
+
+        data = response.json()
+        
+        # Assert that we got all voices without needing pagination
+        # According to ElevenLabs API docs, the response includes has_more, next_page_start_after, and page_size fields
+        if 'has_more' in data:
+            assert data['has_more'] == False, f"ElevenLabs API returned paginated results. has_more={data['has_more']}, we need to implement pagination support"
+        
+        # Also check if total_count matches the number of voices returned
+        if 'total_count' in data and 'voices' in data:
+            assert data['total_count'] == len(data['voices']), f"ElevenLabs API: total_count ({data['total_count']}) doesn't match voices returned ({len(data['voices'])})"
+        
+        # Filter to only include premade voices (API doesn't respect the category parameter)
+        filtered_voices = [voice for voice in data['voices'] if voice.get('category') == 'premade']
+
+        return model_data, filtered_voices
+
     def get_audio_language(self, language_id) -> cloudlanguagetools.languages.AudioLanguage:
         logger.debug(f'processing language_id: {language_id}')
         override_map = {
@@ -155,67 +190,8 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
     def get_tts_voice_list(self) -> List[ElevenLabsVoice]:
         result = []
-
-        # first, get all models to get list of languages
-        url = "https://api.elevenlabs.io/v1/models"
-        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
-        response.raise_for_status()
-        model_data = response.json()
-
-        # restrict to models that can do text to speech (elevenlabs introduced voice conversion)
-        model_data = [model for model in model_data if model['can_do_text_to_speech']]
-
-        #pprint.pprint(model_data)
-        # model_data: 
-        # [{'can_be_finetuned': True,
-        # 'can_do_text_to_speech': True,
-        # 'can_do_voice_conversion': False,
-        # 'description': 'Use our standard English language model to generate speech '
-        #                 'in a variety of voices, styles and moods.',
-        # 'languages': [{'language_id': 'en', 'name': 'English'}],
-        # 'model_id': 'eleven_monolingual_v1',
-        # 'name': 'Eleven Monolingual v1',
-        # 'token_cost_factor': 1.0},
-        # {'can_be_finetuned': True,
-        # 'can_do_text_to_speech': True,
-        # 'can_do_voice_conversion': True,
-        # 'description': 'Generate lifelike speech in multiple languages and create '
-        #                 'content that resonates with a broader audience. ',
-        # 'languages': [{'language_id': 'en', 'name': 'English'},
-        #                 {'language_id': 'de', 'name': 'German'},
-        #                 {'language_id': 'pl', 'name': 'Polish'},
-        #                 {'language_id': 'es', 'name': 'Spanish'},
-        #                 {'language_id': 'it', 'name': 'Italian'},
-        #                 {'language_id': 'fr', 'name': 'French'},
-        #                 {'language_id': 'pt', 'name': 'Portuguese'},
-        #                 {'language_id': 'hi', 'name': 'Hindi'}],
-        # 'model_id': 'eleven_multilingual_v1',
-        # 'name': 'Eleven Multilingual v1',
-        # 'token_cost_factor': 1.0}]
-        #         
-
-
-        # now, retrieve voice list
-        # call elevenlabs API to list TTS voices
-        # Note: The category=premade filter doesn't work on the API side, so we filter client-side
-        url = "https://api.elevenlabs.io/v1/voices?category=premade"
-
-        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
-        response.raise_for_status()
-
-        data = response.json()
         
-        # Assert that we got all voices without needing pagination
-        # According to ElevenLabs API docs, the response includes has_more, next_page_start_after, and page_size fields
-        if 'has_more' in data:
-            assert data['has_more'] == False, f"ElevenLabs API returned paginated results. has_more={data['has_more']}, we need to implement pagination support"
-        
-        # Also check if total_count matches the number of voices returned
-        if 'total_count' in data and 'voices' in data:
-            assert data['total_count'] == len(data['voices']), f"ElevenLabs API: total_count ({data['total_count']}) doesn't match voices returned ({len(data['voices'])})"
-        
-        # Filter to only include premade voices (API doesn't respect the category parameter)
-        filtered_voices = [voice for voice in data['voices'] if voice.get('category') == 'premade']
+        model_data, filtered_voices = self._get_models_and_voices()
 
         for model in model_data:
             logger.debug(f'processing voices for model: {pprint.pformat(model)}')
@@ -237,67 +213,8 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
     def get_tts_voice_list_v3(self) -> List[cloudlanguagetools.ttsvoice.TtsVoice_v3]:
         result = []
-
-        # first, get all models to get list of languages
-        url = "https://api.elevenlabs.io/v1/models"
-        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
-        response.raise_for_status()
-        model_data = response.json()
-
-        # restrict to models that can do text to speech (elevenlabs introduced voice conversion)
-        model_data = [model for model in model_data if model['can_do_text_to_speech']]
-
-        #pprint.pprint(model_data)
-        # model_data: 
-        # [{'can_be_finetuned': True,
-        # 'can_do_text_to_speech': True,
-        # 'can_do_voice_conversion': False,
-        # 'description': 'Use our standard English language model to generate speech '
-        #                 'in a variety of voices, styles and moods.',
-        # 'languages': [{'language_id': 'en', 'name': 'English'}],
-        # 'model_id': 'eleven_monolingual_v1',
-        # 'name': 'Eleven Monolingual v1',
-        # 'token_cost_factor': 1.0},
-        # {'can_be_finetuned': True,
-        # 'can_do_text_to_speech': True,
-        # 'can_do_voice_conversion': True,
-        # 'description': 'Generate lifelike speech in multiple languages and create '
-        #                 'content that resonates with a broader audience. ',
-        # 'languages': [{'language_id': 'en', 'name': 'English'},
-        #                 {'language_id': 'de', 'name': 'German'},
-        #                 {'language_id': 'pl', 'name': 'Polish'},
-        #                 {'language_id': 'es', 'name': 'Spanish'},
-        #                 {'language_id': 'it', 'name': 'Italian'},
-        #                 {'language_id': 'fr', 'name': 'French'},
-        #                 {'language_id': 'pt', 'name': 'Portuguese'},
-        #                 {'language_id': 'hi', 'name': 'Hindi'}],
-        # 'model_id': 'eleven_multilingual_v1',
-        # 'name': 'Eleven Multilingual v1',
-        # 'token_cost_factor': 1.0}]
-        #         
-
-
-        # now, retrieve voice list
-        # call elevenlabs API to list TTS voices
-        # Note: The category=premade filter doesn't work on the API side, so we filter client-side
-        url = "https://api.elevenlabs.io/v1/voices?category=premade"
-
-        response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
-        response.raise_for_status()
-
-        data = response.json()
         
-        # Assert that we got all voices without needing pagination
-        # According to ElevenLabs API docs, the response includes has_more, next_page_start_after, and page_size fields
-        if 'has_more' in data:
-            assert data['has_more'] == False, f"ElevenLabs API returned paginated results. has_more={data['has_more']}, we need to implement pagination support"
-        
-        # Also check if total_count matches the number of voices returned
-        if 'total_count' in data and 'voices' in data:
-            assert data['total_count'] == len(data['voices']), f"ElevenLabs API: total_count ({data['total_count']}) doesn't match voices returned ({len(data['voices'])})"
-        
-        # Filter to only include premade voices (API doesn't respect the category parameter)
-        filtered_voices = [voice for voice in data['voices'] if voice.get('category') == 'premade']
+        model_data, filtered_voices = self._get_models_and_voices()
 
         for model in model_data:
             logger.debug(f'processing voices for model: {pprint.pformat(model)}')

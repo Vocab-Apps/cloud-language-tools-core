@@ -1,5 +1,5 @@
 # this image has all the pre-requisites
-FROM vocabai/clt-requirements:2.0
+FROM vocabai/clt-requirements:2.2
 ARG CLT_CORE_VERSION
 COPY dist/cloudlanguagetools-${CLT_CORE_VERSION}.tar.gz .
 RUN pip3 install --no-cache-dir cloudlanguagetools-${CLT_CORE_VERSION}.tar.gz

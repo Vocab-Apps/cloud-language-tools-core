@@ -195,7 +195,7 @@ class GeminiService(cloudlanguagetools.service.Service):
     def configure(self, config):
         self.config = config
         self.api_key = config.get('api_key', None)
-        logger.debug(f'Configuring Gemini service with api_key: {self.api_key[:20] if self.api_key else None}...')
+        # logger.debug(f'Configuring Gemini service with api_key: {self.api_key[:20] if self.api_key else None}...')
         if self.api_key is None:
             raise cloudlanguagetools.errors.AuthenticationError('api_key not set')
         

@@ -863,6 +863,7 @@ class TestAudio(unittest.TestCase):
         
         # Check that the error message mentions language enforcement or model compatibility
         error_msg = str(context.exception).lower()
+        logger.debug(f'elevenlabs unsupported parameter error message: [{error_msg}]')
         self.assertTrue(
             'language' in error_msg or 'model' in error_msg or 'turbo' in error_msg or 'flash' in error_msg,
             f"Error message should indicate model incompatibility: {error_msg}"

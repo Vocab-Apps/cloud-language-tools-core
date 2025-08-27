@@ -28,6 +28,15 @@ class Service():
             response = self.post_request(url, **kwargs)
             if response.status_code >= 400:
                 logger.error(f'{self.get_service_name()} audio request failed with status code {response.status_code}: {response.content}')
+                # Try to parse the error message from the API response
+                try:
+                    import json
+                    error_data = json.loads(response.content)
+                    if 'detail' in error_data and 'message' in error_data['detail']:
+                        error_message = error_data['detail']['message']
+                        raise cloudlanguagetools.errors.RequestError(f'{self.get_service_name()}: {error_message}')
+                except (json.JSONDecodeError, KeyError):
+                    pass  # Fall back to default error handling
             response.raise_for_status()
             output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_audio_')
             output_temp_filename = output_temp_file.name            
@@ -36,6 +45,8 @@ class Service():
             return output_temp_file            
         except requests.exceptions.ReadTimeout as exception:
             raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving {self.get_service_name()} audio')
+        except cloudlanguagetools.errors.RequestError:
+            raise  # Re-raise our custom error with the API message
         except Exception as exception:
             error_message = f'could not retrieve audio from {self.get_service_name()}'
             logger.exception(error_message)

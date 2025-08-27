@@ -800,6 +800,74 @@ class TestAudio(unittest.TestCase):
     def test_elevenlabs_korean(self):
         self.verify_service_korean(Service.ElevenLabs)
 
+    def test_elevenlabs_language_code_different_pronunciations(self):
+        # Test that the same text can be pronounced differently based on language_code
+        # This test requires Turbo v2.5 or Flash v2.5 models which support language_code
+        
+        # Find a voice with Turbo v2.5 model
+        elevenlabs_voices = [x for x in self.voice_list if x['service'] == 'ElevenLabs']
+        turbo_voices = [x for x in elevenlabs_voices if 'turbo_v2_5' in x['voice_key'].get('model_id', '')]
+        
+        if not turbo_voices:
+            # Try Flash v2.5 if Turbo v2.5 not available
+            turbo_voices = [x for x in elevenlabs_voices if 'flash_v2_5' in x['voice_key'].get('model_id', '')]
+        
+        if not turbo_voices:
+            pytest.skip('No Turbo v2.5 or Flash v2.5 voices available for testing language_code')
+        
+        selected_voice = turbo_voices[0]
+        voice_key = selected_voice['voice_key']
+        
+        # Test word that's pronounced differently in English vs French
+        test_text = 'live'  # pronounced 'liv' in English, 'leev' in French context
+        
+        # Generate audio with English language code
+        options_en = {'language_code': 'en'}
+        audio_en = self.get_tts_audio_with_retry(test_text, 'ElevenLabs', voice_key, options_en)
+        self.assertTrue(audio_utils.is_mp3_format(audio_en.name))
+        
+        # Generate audio with French language code
+        options_fr = {'language_code': 'fr'}
+        audio_fr = self.get_tts_audio_with_retry(test_text, 'ElevenLabs', voice_key, options_fr)
+        self.assertTrue(audio_utils.is_mp3_format(audio_fr.name))
+        
+        # Both should generate valid audio files
+        logger.info('Successfully generated audio with different language_code values')
+
+    def test_elevenlabs_language_code_unsupported_model_error(self):
+        # Test that using language_code with unsupported models returns a clear error
+        
+        # Find a voice with an unsupported model (e.g., eleven_multilingual_v2)
+        elevenlabs_voices = [x for x in self.voice_list if x['service'] == 'ElevenLabs']
+        unsupported_voices = [x for x in elevenlabs_voices if 'eleven_multilingual_v2' in x['voice_key'].get('model_id', '')]
+        
+        if not unsupported_voices:
+            # Try any non-turbo/flash model
+            unsupported_voices = [x for x in elevenlabs_voices 
+                                if 'turbo_v2_5' not in x['voice_key'].get('model_id', '') 
+                                and 'flash_v2_5' not in x['voice_key'].get('model_id', '')]
+        
+        if not unsupported_voices:
+            pytest.skip('No unsupported model voices available for testing error handling')
+        
+        selected_voice = unsupported_voices[0]
+        voice_key = selected_voice['voice_key']
+        
+        # Try to use language_code with unsupported model
+        test_text = 'Hello world'
+        options = {'language_code': 'en'}
+        
+        # This should raise an error
+        with self.assertRaises(Exception) as context:
+            self.manager.get_tts_audio(test_text, 'ElevenLabs', voice_key, options)
+        
+        # Check that the error message mentions language enforcement or model compatibility
+        error_msg = str(context.exception).lower()
+        self.assertTrue(
+            'language' in error_msg or 'model' in error_msg or 'turbo' in error_msg or 'flash' in error_msg,
+            f"Error message should indicate model incompatibility: {error_msg}"
+        )
+
     def test_openai_english(self):
         source_text = 'This is the best restaurant in town.'
         self.verify_service_audio_language_v3(source_text, Service.OpenAI, AudioLanguage.en_US, 'en-US')

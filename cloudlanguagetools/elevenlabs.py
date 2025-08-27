@@ -43,6 +43,10 @@ VOICE_OPTIONS = {
                 'max': 1.0,
                 'default': DEFAULT_SIMILARITY_BOOST
             },
+            'language_code' : {
+                'type': cloudlanguagetools.options.ParameterType.text.name,
+                'default': ''
+            },
             cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
                 'type': cloudlanguagetools.options.ParameterType.list.name,
                 'values': [
@@ -111,6 +115,11 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
                 "similarity_boost": options.get('similarity_boost', DEFAULT_SIMILARITY_BOOST)
             }
         }
+        
+        # Add language_code if provided (only supported by certain models)
+        language_code = options.get('language_code', '')
+        if language_code:
+            data['language_code'] = language_code
 
         query_params = {
             'output_format': response_format_parameter

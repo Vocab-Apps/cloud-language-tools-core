@@ -117,6 +117,11 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         }
         
         # Add language_code if provided (only supported by certain models)
+        # language_codestring or nullOptional
+        # Language code (ISO 639-1) used to enforce a language for the model. Currently only Turbo v2.5 and Flash v2.5 support language enforcement. 
+        # For other models, an error will be returned if language code is provided.
+        # https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
+
         language_code = options.get('language_code', '')
         if language_code:
             data['language_code'] = language_code

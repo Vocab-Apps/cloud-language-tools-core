@@ -197,7 +197,18 @@ def get_watson_translation_languages():
 
 def get_google_voice_list():
     manager = get_manager()
-    manager.services[cloudlanguagetools.constants.Service.Google.name].get_tts_voice_list()
+    voice_list = manager.services[cloudlanguagetools.constants.Service.Google.name].get_tts_voice_list()
+    
+    # Convert voice objects to JSON-serializable format
+    voice_list_json = [voice.__dict__ for voice in voice_list]
+    
+    output_filename = 'temp_data_files/google_voice_list.json'
+    with open(output_filename, 'w', encoding='utf8') as f:
+        f.write(json.dumps(voice_list_json, indent=4, sort_keys=True, ensure_ascii=False, default=str))
+        f.close()
+    print(f'wrote {output_filename}')
+    
+    return voice_list
 
 def get_amazon_voice_list():
     manager = get_manager()

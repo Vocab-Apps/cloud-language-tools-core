@@ -44,6 +44,8 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.name = voice_data.name
         self.google_ssml_gender = google.cloud.texttospeech.SsmlVoiceGender(voice_data.ssml_gender)
         self.gender = GENDER_MAP[self.google_ssml_gender]
+        if len(voice_data.language_codes) != 1:
+            logger.error(f'expected exactly one language code for voice {voice_data.name}, got {voice_data.language_codes}')
         self.google_language_code = voice_data.language_codes[0]
         self.audio_language = language_code_to_enum(self.google_language_code)
 
@@ -217,6 +219,19 @@ class GoogleService(cloudlanguagetools.service.Service):
         result = []
 
         for voice in voices.voices:
+            # in 2025/08, voices with no dashes such as "Leda" started appearing in this list
+            # they are not queryable directly, we get the error message
+            # {"error":"Could not generate audio: 400 This voice requires a model name to be specified."}, 
+            # data: {'text': 'success', 'service': 'Google', 'request_mode': 'batch', 'language_code': 'en', 
+            # 'voice_key': {'name': 'Leda', 'language_code': 'en-US', 'ssml_gender': 'FEMALE'}, 'options': {}}
+            # 
+            # these are most likely Gemini voices, it's annoying that the `list_voices()` API call doesn't allow
+            # us to distinguish them, so we exclude them for now.
+            #
+            # regular voices look like this: "name": "ar-XA-Chirp3-HD-Leda"
+            if '-' not in voice.name:
+                logger.warning(f'skipping voice with unexpected name format, is probably a Gemini voice: {voice.name}')
+                continue
             try:
                 result.append(GoogleVoice(voice))
             except KeyError:

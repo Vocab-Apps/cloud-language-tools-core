@@ -202,6 +202,33 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             audio_language_enum = cloudlanguagetools.languages.AudioLanguage[modified_language_id]
             return audio_language_enum
 
+    # Returns the options for a given model.
+    # Accepts a list of language IDs to build a list of available languages for the TTS API.
+    # The API will automatically detect the laguage based on the text provided by default.
+    # However, you can specify the language to use for the TTS model.
+    # This is useful if you want to ensure that the TTS model uses a specific language.
+    # This is useful in cases where the API gets confused and ends up adding some french pronunciation to dutch text.
+    # The list of language IDs are two letter ISO 639-1 language codes, e.g. 'en', 'de', 'fr', 'es', etc.
+    def get_voice_options(self, language_id_list) -> dict:
+        if language_id_list is None or len(language_id_list) == 1:
+            # Only one language, no need to specify
+            return VOICE_OPTIONS
+        else:
+            # If multiple languages are available we can include them in the options
+            # Include an empty item to allow the user to select "auto" language detection
+
+            voice_options = VOICE_OPTIONS.copy()
+            voice_options['language_code'] = {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': [],
+                'default': ''
+            }
+            for language_id in language_id_list:
+                voice_options['language_code']['values'].append(language_id)
+            voice_options['language_code']['values'].insert(0, '')  # Add empty item for auto-detection
+            return voice_options
+
+
     def get_tts_voice_list(self) -> List[ElevenLabsVoice]:
         result = []
         
@@ -243,13 +270,14 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
                     languages = model['languages']
                     language_id_list = [language_record['language_id'] for language_record in languages]
                     audio_language_enum_list = [self.get_audio_language(language_id) for language_id in language_id_list]
+                    language_options = self.get_voice_options(language_id_list)
                     voice = cloudlanguagetools.ttsvoice.TtsVoice_v3(
                         name=f'{voice_name} ({model_short_name})',
                         voice_key={
                             'voice_id': voice_data['voice_id'],
                             'model_id': model_id,
                         },
-                        options=VOICE_OPTIONS,
+                        options=language_options,
                         service=cloudlanguagetools.constants.Service.ElevenLabs,
                         gender=GENDER_MAP.get(voice_data['labels']['gender'], cloudlanguagetools.constants.Gender.Male),
                         audio_languages=audio_language_enum_list,

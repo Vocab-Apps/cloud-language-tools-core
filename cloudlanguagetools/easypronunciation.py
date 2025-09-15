@@ -8,6 +8,7 @@ import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import cloudlanguagetools.transliterationlanguage
+import cloudlanguagetools.constants
 
 VARIANT_JAPANESE_ROMAJI = 'Romaji'
 VARIANT_JAPANESE_KANA = 'Kana'
@@ -214,7 +215,9 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
 
         # print(full_url)
         try:
-            response = requests.get(full_url)
+            # 2025/09: the cloudflare certificate chain is not recognized well by the root certificate bundle
+            # disable verification for now
+            response = requests.get(full_url, verify=False, timeout=cloudlanguagetools.constants.RequestTimeout)
             response.raise_for_status()
             result = response.json()
 

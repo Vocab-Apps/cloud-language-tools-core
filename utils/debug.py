@@ -1467,6 +1467,72 @@ def openai_detect_language():
     # print(response['choices'][0]['message']['content'])        
 
 
+def test_gemini_rate_limit():
+    """Generate Gemini audio in a loop to test rate limits"""
+    import time
+
+    manager = get_manager()
+
+    service = 'Gemini'
+    text = "This is a test sentence to check Gemini TTS rate limits."
+    voice_key = {
+        'name': 'Zephyr'  # Bright voice
+    }
+    options = {}
+
+    print("=" * 80)
+    print("Gemini TTS Rate Limit Test")
+    print("=" * 80)
+    print(f"Voice: {voice_key['name']}")
+    print(f"Text: {text}")
+    print("=" * 80)
+
+    request_count = 0
+    start_time = time.time()
+
+    while True:
+        request_count += 1
+        request_start = time.time()
+
+        try:
+            result = manager.get_tts_audio(text, service, voice_key, options)
+            elapsed = time.time() - request_start
+            total_elapsed = time.time() - start_time
+
+            print(f"Request {request_count}: SUCCESS in {elapsed:.2f}s "
+                  f"(total: {total_elapsed:.1f}s, rate: {request_count/total_elapsed:.2f} req/s)")
+
+            # Clean up the temp file
+            if hasattr(result, 'name'):
+                try:
+                    os.unlink(result.name)
+                except:
+                    pass
+
+        except Exception as e:
+            elapsed = time.time() - request_start
+            total_elapsed = time.time() - start_time
+
+            error_type = type(e).__name__
+            print(f"\nRequest {request_count}: {error_type} after {elapsed:.2f}s")
+            print(f"  Total requests: {request_count}")
+            print(f"  Total time: {total_elapsed:.1f}s")
+            print(f"  Average rate before limit: {request_count/total_elapsed:.2f} req/s")
+            print(f"  Error: {e}")
+
+            # Check if it's a rate limit error with retry info
+            if hasattr(e, 'retry_after') and e.retry_after:
+                print(f"  Retry after: {e.retry_after}s")
+                print(f"\nWaiting {e.retry_after}s before continuing...")
+                time.sleep(e.retry_after)
+                print("Resuming...")
+            else:
+                # For other errors or rate limits without retry info, wait a bit and continue
+                print("\nWaiting 5s before continuing...")
+                time.sleep(5)
+                print("Resuming...")
+
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     while logger.hasHandlers():

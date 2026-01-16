@@ -126,12 +126,30 @@ def test_forvo_audio_tokipona():
     voice_key = {
         'language_code': "tok",
         'country_code': 'ANY'
-    }    
+    }
 
     result = manager.get_tts_audio(text, service, voice_key, {})
     permanent_file_name = 'google_output.mp3'
     shutil.copyfile(result.name, permanent_file_name)
-    print(f'tts result: {permanent_file_name}')    
+    print(f'tts result: {permanent_file_name}')
+
+
+def test_english_forvo():
+    """Test Forvo English audio retrieval - similar to test_audio.py::test_english_forvo"""
+    manager = get_manager()
+
+    service = 'Forvo'
+    text = 'absolutely'
+
+    voice_key = {
+        'language_code': 'en',
+        'country_code': 'ANY'
+    }
+
+    result = manager.get_tts_audio(text, service, voice_key, {})
+    permanent_file_name = 'forvo_english_output.mp3'
+    shutil.copyfile(result.name, permanent_file_name)
+    print(f'tts result: {permanent_file_name}')s
 
 
 def play_google_audio():

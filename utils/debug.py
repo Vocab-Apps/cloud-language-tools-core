@@ -149,7 +149,7 @@ def test_english_forvo():
     result = manager.get_tts_audio(text, service, voice_key, {})
     permanent_file_name = 'forvo_english_output.mp3'
     shutil.copyfile(result.name, permanent_file_name)
-    print(f'tts result: {permanent_file_name}')s
+    print(f'tts result: {permanent_file_name}')
 
 
 def play_google_audio():

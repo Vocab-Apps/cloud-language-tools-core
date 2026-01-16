@@ -215,9 +215,7 @@ class EasyPronunciationService(cloudlanguagetools.service.Service):
 
         # print(full_url)
         try:
-            # 2025/09: the cloudflare certificate chain is not recognized well by the root certificate bundle
-            # disable verification for now
-            response = requests.get(full_url, verify=False, timeout=cloudlanguagetools.constants.RequestTimeout)
+            response = requests.get(full_url, timeout=cloudlanguagetools.constants.RequestTimeout)
             response.raise_for_status()
             result = response.json()
 

@@ -45,7 +45,8 @@ class DeepLService(cloudlanguagetools.service.Service):
         override_map = {
             'id': 'id_',
             'zh': 'zh_cn',
-            'pt': 'pt_pt'
+            'pt': 'pt_pt',
+            'sr': 'sr_cyrl'
         }
         lowercase_str = override_map.get(lowercase_str, lowercase_str)
         language = cloudlanguagetools.languages.Language

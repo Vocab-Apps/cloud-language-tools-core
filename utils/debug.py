@@ -1474,7 +1474,7 @@ def test_gemini_rate_limit():
     manager = get_manager()
 
     service = 'Gemini'
-    text = "This is a test sentence to check Gemini TTS rate limits."
+    text = f"This is a test sentence to check Gemini TTS rate limits. Current time is {time.strftime('%Y-%m-%d %H:%M:%S')}."
     voice_key = {
         'name': 'Zephyr'  # Bright voice
     }

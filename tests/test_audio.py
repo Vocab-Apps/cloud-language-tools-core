@@ -131,16 +131,12 @@ class TestAudio(unittest.TestCase):
         try:
             audio_temp_file = self.manager.get_tts_audio(text, voice_service, voice_key, options)
             return audio_temp_file
-        except cloudlanguagetools.errors.RateLimitError as e:
-            # Handle rate limit with custom wait time if available
-            if e.retry_after:
-                logger.info(f"Rate limited. Waiting {e.retry_after} seconds as requested by server")
-                time.sleep(e.retry_after)
-                # Retry once after waiting
-                return self.manager.get_tts_audio(text, voice_service, voice_key, options)
-            else:
-                # Re-raise to let backoff handle it
-                raise
+        except cloudlanguagetools.errors.RateLimitRetryAfterError as e:
+            # Handle rate limit with server-specified wait time
+            logger.info(f"Rate limited. Waiting {e.retry_after} seconds as requested by server")
+            time.sleep(e.retry_after)
+            # Retry once after waiting
+            return self.manager.get_tts_audio(text, voice_service, voice_key, options)
 
     def verify_voice_internal(self, voice_key, voice_service, text, recognition_language):
 

@@ -205,7 +205,14 @@ class GoogleService(cloudlanguagetools.service.Service):
 
             return output_temp_file
         except google.api_core.exceptions.ResourceExhausted as resource_exhausted_exception:
-            logger.warning(f'Google TTS rate limit hit: {resource_exhausted_exception}')
+            retry_after = None
+            for detail in resource_exhausted_exception.details:
+                if hasattr(detail, 'retry_delay'):
+                    retry_after = detail.retry_delay.seconds
+                    break
+            logger.warning(f'Google TTS rate limit hit (retry_after={retry_after}s): {resource_exhausted_exception}')
+            if retry_after is not None:
+                raise cloudlanguagetools.errors.RateLimitRetryAfterError(str(resource_exhausted_exception), retry_after=retry_after)
             raise cloudlanguagetools.errors.RateLimitError(str(resource_exhausted_exception))
         except google.api_core.exceptions.BadRequest as bad_request_exception:
             logger.exception(bad_request_exception)

@@ -330,10 +330,12 @@ class GeminiService(cloudlanguagetools.service.Service):
                                 except ValueError:
                                     pass
                 
-                raise cloudlanguagetools.errors.RateLimitError(
-                    'Gemini API rate limit exceeded', 
-                    retry_after=retry_after
-                )
+                if retry_after is not None:
+                    raise cloudlanguagetools.errors.RateLimitRetryAfterError(
+                        'Gemini API rate limit exceeded',
+                        retry_after=retry_after
+                    )
+                raise cloudlanguagetools.errors.RateLimitError('Gemini API rate limit exceeded')
 
         except Exception as e:
             # Log the full exception details for debugging

@@ -22,6 +22,7 @@ import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.languages
 import cloudlanguagetools.constants
+import cloudlanguagetools.errors
 
 
 def get_manager():
@@ -1521,7 +1522,7 @@ def test_gemini_rate_limit():
             print(f"  Error: {e}")
 
             # Check if it's a rate limit error with retry info
-            if hasattr(e, 'retry_after') and e.retry_after:
+            if isinstance(e, cloudlanguagetools.errors.RateLimitRetryAfterError):
                 print(f"  Retry after: {e.retry_after}s")
                 print(f"\nWaiting {e.retry_after}s before continuing...")
                 time.sleep(e.retry_after)

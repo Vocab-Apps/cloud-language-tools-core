@@ -252,6 +252,7 @@ class GeminiService(cloudlanguagetools.service.Service):
                 # Check if this looks like a rate limit issue
                 response_str = str(response).lower()
                 if '429' in response_str or 'rate limit' in response_str:
+                    logger.warning(f'Gemini TTS rate limit hit (no candidates in response)')
                     raise cloudlanguagetools.errors.RateLimitError('Gemini API rate limit exceeded')
                 raise cloudlanguagetools.errors.RequestError('No audio candidates in response')
             
@@ -288,8 +289,6 @@ class GeminiService(cloudlanguagetools.service.Service):
             return convert_pcm_to_audio_file(audio_data, audio_format)
 
         except genai.errors.ClientError as e:
-            logger.exception(f'Client Error while retrieving Gemini TTS audio')
-
             # Check if this is a rate limit error (ClientError with code 429)
             if hasattr(e, 'code') and e.code == 429:
                 # Check if this is a daily quota exhaustion error
@@ -331,11 +330,17 @@ class GeminiService(cloudlanguagetools.service.Service):
                                     pass
                 
                 if retry_after is not None:
+                    logger.warning(f'Gemini TTS rate limit hit (retry_after={retry_after}s): {e}')
                     raise cloudlanguagetools.errors.RateLimitRetryAfterError(
                         'Gemini API rate limit exceeded',
                         retry_after=retry_after
                     )
+                logger.warning(f'Gemini TTS rate limit hit: {e}')
                 raise cloudlanguagetools.errors.RateLimitError('Gemini API rate limit exceeded')
+
+            # Non-rate-limit ClientError
+            logger.exception(f'Client Error while retrieving Gemini TTS audio')
+            raise cloudlanguagetools.errors.RequestError(f'Gemini TTS client error: {e}')
 
         except Exception as e:
             # Log the full exception details for debugging

@@ -11,6 +11,7 @@ import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.options
 import cloudlanguagetools.languages
+import cloudlanguagetools.errors
 
 logger = logging.getLogger(__name__)
 

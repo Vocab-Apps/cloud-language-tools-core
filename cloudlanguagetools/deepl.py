@@ -90,12 +90,11 @@ class DeepLService(cloudlanguagetools.service.Service):
 
 
         params = {
-            'auth_key': self.api_key,
             'text': text,
             'source_lang': from_language_key,
             'target_lang': to_language_key
         }
-        response = requests.get(self.base_url, params=params, timeout=cloudlanguagetools.constants.RequestTimeout)
+        response = requests.post(self.base_url, data=params, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
 
         if response.status_code == 200:
             # {'translations': [{'translation': 'Le coût est très bas.'}], 'word_count': 2, 'character_count': 4}

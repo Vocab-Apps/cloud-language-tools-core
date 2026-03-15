@@ -612,6 +612,29 @@ class TestTranslation(unittest.TestCase):
         # spanish
         self.verify_transliteration_single_option(Language.es, '¿A qué hora usted cierra?', service, '¿a ke oɾa usted siera?')
 
+    def test_deepl_all_languages_mapped(self):
+        # pytest tests/test_translation.py -rPP -k test_deepl_all_languages_mapped
+        # Verify no DeepL languages are silently skipped due to missing mappings
+        deepl_service = self.manager.services[Service.DeepL.name]
+        response = requests.get('https://api.deepl.com/v2/languages',
+                               headers=deepl_service.get_headers(),
+                               timeout=30)
+        response.raise_for_status()
+        api_languages = response.json()
+
+        # get_translation_language_list silently skips unmapped languages
+        mapped_languages = deepl_service.get_translation_language_list()
+
+        unmapped = []
+        for lang_entry in api_languages:
+            code = lang_entry['language']
+            if not any(ml.get_language_id() == code for ml in mapped_languages):
+                unmapped.append(lang_entry)
+
+        self.assertEqual(unmapped, [],
+            f"DeepL languages not mapped in get_language_enum: {unmapped}. "
+            f"Add mappings to the override_map in deepl.py")
+
     def test_transliteration_pythainlp(self):
         # pytest test_translation.py -rPP -k test_transliteration_pythainlp
 

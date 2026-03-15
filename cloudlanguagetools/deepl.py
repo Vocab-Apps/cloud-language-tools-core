@@ -43,7 +43,10 @@ class DeepLService(cloudlanguagetools.service.Service):
     def get_language_enum(self, deepl_language_code):
         lowercase_str = deepl_language_code.lower()
         override_map = {
+            'as': 'as_',
             'id': 'id_',
+            'is': 'is_',
+            'jv': 'jw',
             'zh': 'zh_cn',
             'pt': 'pt_pt',
             'sr': 'sr_cyrl'

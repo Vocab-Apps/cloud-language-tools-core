@@ -204,6 +204,9 @@ class GoogleService(cloudlanguagetools.service.Service):
                 out.write(response.audio_content)
 
             return output_temp_file
+        except google.api_core.exceptions.ResourceExhausted as resource_exhausted_exception:
+            logger.warning(f'Google TTS rate limit hit: {resource_exhausted_exception}')
+            raise cloudlanguagetools.errors.RateLimitError(str(resource_exhausted_exception))
         except google.api_core.exceptions.BadRequest as bad_request_exception:
             logger.exception(bad_request_exception)
             error_message = f'Could not generate audio: {str(bad_request_exception)}'

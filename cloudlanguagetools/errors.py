@@ -31,4 +31,4 @@ class OverQuotaError(PermanentError):
 class RateLimitError(TransientError):
     def __init__(self, message, retry_after=None):
         super().__init__(message)
-        self.retry_after = retry_after
+        self.retry_after = retry_after # retry after `retry_after` seconds

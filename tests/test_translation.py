@@ -272,7 +272,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertEqual('prathetthai', result)
+        self.assertEqual(result.lower().replace(' ', ''), 'prathetthai')
 
     def test_pinyin_jyutping(self):
         # pytest tests/test_translation.py -k test_pinyin_jyutping

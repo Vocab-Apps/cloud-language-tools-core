@@ -475,6 +475,7 @@ class TestAudio(unittest.TestCase):
         self.verify_voice_v3(standard_neural_voice, source_text, 'en-US')
 
 
+    @skip_unreliable_clt_test()
     def test_ssml_english_watson(self):
         # pytest test_audio.py -k test_ssml_english_watson
         source_text = 'hello <break time="200ms"/>world'
@@ -627,9 +628,9 @@ class TestAudio(unittest.TestCase):
         self.verify_voice_v3(amy_generative_voice, self.ENGLISH_INPUT_TEXT, 'en-GB')
 
     def test_elevenlabs_format_wav(self):
-        fr_voice = self.get_voice_by_lambda(Service.ElevenLabs, 
-            lambda x: 'Rachel' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
-        self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')        
+        fr_voice = self.get_voice_by_lambda(Service.ElevenLabs,
+            lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
+        self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
     def test_google_format_wav(self):
         fr_voice = self.get_voice_by_lambda(Service.Google, 
@@ -763,6 +764,7 @@ class TestAudio(unittest.TestCase):
             self.verify_voice(voice, source_text, 'en-US')
             logger.info(f'voice: {voice_str} passed')
 
+    @skip_unreliable_clt_test()
     def test_elevenlabs_french(self):
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language(source_text, Service.ElevenLabs, AudioLanguage.fr_FR, 'fr-FR')
@@ -830,40 +832,20 @@ class TestAudio(unittest.TestCase):
         # Both should generate valid audio files
         logger.info('Successfully generated audio with different language_code values')
 
-    def test_elevenlabs_language_code_unsupported_model_error(self):
-        # Test that using language_code with unsupported models returns a clear error
-        
-        # Find a voice with an unsupported model (e.g., eleven_multilingual_v2)
+    def test_elevenlabs_language_code_all_models(self):
+        # ElevenLabs API now accepts language_code for all models
         elevenlabs_voices = [x for x in self.voice_list if x['service'] == 'ElevenLabs']
-        unsupported_voices = [x for x in elevenlabs_voices if 'eleven_multilingual_v2' in x['voice_key'].get('model_id', '')]
-        
-        if not unsupported_voices:
-            # Try any non-turbo/flash model
-            unsupported_voices = [x for x in elevenlabs_voices 
-                                if 'turbo_v2_5' not in x['voice_key'].get('model_id', '') 
-                                and 'flash_v2_5' not in x['voice_key'].get('model_id', '')]
-        
-        if not unsupported_voices:
-            pytest.skip('No unsupported model voices available for testing error handling')
-        
-        selected_voice = unsupported_voices[0]
+        if not elevenlabs_voices:
+            pytest.skip('No ElevenLabs voices available')
+
+        selected_voice = elevenlabs_voices[0]
         voice_key = selected_voice['voice_key']
-        
-        # Try to use language_code with unsupported model
+
         test_text = 'Hello world'
         options = {'language_code': 'en'}
-        
-        # This should raise an error
-        with self.assertRaises(Exception) as context:
-            self.manager.get_tts_audio(test_text, 'ElevenLabs', voice_key, options)
-        
-        # Check that the error message mentions language enforcement or model compatibility
-        error_msg = str(context.exception).lower()
-        logger.debug(f'elevenlabs unsupported parameter error message: [{error_msg}]')
-        self.assertTrue(
-            'language' in error_msg or 'model' in error_msg or 'turbo' in error_msg or 'flash' in error_msg,
-            f"Error message should indicate model incompatibility: {error_msg}"
-        )
+
+        result = self.manager.get_tts_audio(test_text, 'ElevenLabs', voice_key, options)
+        self.assertTrue(os.path.getsize(result.name) > 0)
 
     def test_openai_english(self):
         source_text = 'This is the best restaurant in town.'

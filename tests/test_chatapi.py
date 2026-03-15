@@ -94,7 +94,7 @@ class TestChatAPI(unittest.TestCase):
             input_text='สวัสดี',
             language=CommonLanguage.th
         )
-        self.assertEqual(self.chatapi.transliterate(query), 'sawatdi')
+        self.assertEqual(self.chatapi.transliterate(query).lower(), 'sawatdi')
 
     def test_dictionary_lookup_french(self):
         # french

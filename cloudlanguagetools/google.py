@@ -218,6 +218,10 @@ class GoogleService(cloudlanguagetools.service.Service):
             logger.exception(bad_request_exception)
             error_message = f'Could not generate audio: {str(bad_request_exception)}'
             raise cloudlanguagetools.errors.RequestError(error_message)
+        except google.api_core.exceptions.GoogleAPICallError as api_error:
+            logger.exception(api_error)
+            error_message = f'Google Cloud TTS error: {str(api_error)}'
+            raise cloudlanguagetools.errors.RequestError(error_message)
 
 
     def get_tts_voice_list(self):

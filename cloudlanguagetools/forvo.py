@@ -93,7 +93,7 @@ class ForvoService(cloudlanguagetools.service.Service):
         try:
             response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout,
                                     verify=self.verify_ssl)
-            logger.debug(f'forvo response status={response.status_code} url={response.url} content={response.content}')
+            logger.info(f'forvo response status={response.status_code} url={response.url} content={response.content}')
             response.raise_for_status()
 
             data = response.json()

@@ -424,7 +424,7 @@ class TestAudio(unittest.TestCase):
         voice_key = {"name": "ntomoko"}
         options = {}
 
-        self.assertRaises(cloudlanguagetools.errors.RequestError, 
+        self.assertRaises(cloudlanguagetools.errors.InputError,
                           self.manager.get_tts_audio,
                           source_text, service, voice_key, options )
 

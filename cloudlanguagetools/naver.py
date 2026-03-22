@@ -126,7 +126,24 @@ class NaverService(cloudlanguagetools.service.Service):
         if audio_format == cloudlanguagetools.options.AudioFormat.wav:
             data['sampling-rate'] = 48000
 
-        return self.get_tts_audio_base_post_request(url, data=data, headers=headers)
+        response = self.post_request(url, data=data, headers=headers)
+        if response.status_code == 200:
+            output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_audio_')
+            with open(output_temp_file.name, 'wb') as audio:
+                audio.write(response.content)
+            return output_temp_file
+
+        # parse Naver-specific error response
+        try:
+            error_data = json.loads(response.content)
+            error_code = error_data.get('errorCode', '')
+            error_message = error_data.get('message', '')
+            error_details = error_data.get('details', '')
+            raise cloudlanguagetools.errors.InputError(
+                f'Naver TTS: {error_message} (error {error_code}: {error_details})')
+        except (json.JSONDecodeError, KeyError):
+            raise cloudlanguagetools.errors.RequestError(
+                f'Naver audio request failed with status code {response.status_code}: {response.content}')
 
     def get_tts_voice_list(self):
         # returns list of TtSVoice

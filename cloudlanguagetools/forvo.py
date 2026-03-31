@@ -94,6 +94,8 @@ class ForvoService(cloudlanguagetools.service.Service):
             response = requests.get(url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout,
                                     verify=self.verify_ssl)
             logger.info(f'forvo response status={response.status_code} url={response.url} content={response.content}')
+            if response.status_code == 414:
+                raise cloudlanguagetools.errors.InputError(f'Forvo: text too long')
             response.raise_for_status()
 
             data = response.json()

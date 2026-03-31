@@ -1046,4 +1046,104 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         
         # Verify it's an OGG audio file
         file_type = magic.from_file(audio_temp_file.name, mime=True)
-        self.assertIn('ogg', file_type, 'File should be OGG format')            
+        self.assertIn('ogg', file_type, 'File should be OGG format')
+
+    def test_azure_voice_list_v3_dragonhd_options(self):
+        """Verify DragonHD voices have the DragonHD-specific parameters."""
+        azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
+        dragonhd_voices = [x for x in azure_voices if x.voice_key.get('voice_type', '') == 'NeuralHD']
+        self.assertGreater(len(dragonhd_voices), 0, 'Should have at least one DragonHD voice')
+
+        voice = dragonhd_voices[0]
+        logger.info(f'DragonHD voice: {voice.name}, options: {pprint.pformat(voice.options)}')
+        self.assertIn('temperature', voice.options)
+        self.assertIn('top_p', voice.options)
+        self.assertIn('top_k', voice.options)
+        self.assertIn('cfg_scale', voice.options)
+        # DragonHD should also have rate and pitch
+        self.assertIn('rate', voice.options)
+        self.assertIn('pitch', voice.options)
+
+    def test_azure_voice_list_v3_style_options(self):
+        """Verify voices with styles have style/styledegree parameters."""
+        azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
+        style_voices = [x for x in azure_voices if 'style' in x.options]
+        self.assertGreater(len(style_voices), 0, 'Should have at least one voice with styles')
+
+        voice = style_voices[0]
+        logger.info(f'Style voice: {voice.name}, style values: {voice.options["style"]["values"]}')
+        self.assertIn('styledegree', voice.options)
+        self.assertGreater(len(voice.options['style']['values']), 1)  # at least '' + one style
+
+    def test_azure_voice_list_v3_role_options(self):
+        """Verify voices with roles have role parameter."""
+        azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
+        role_voices = [x for x in azure_voices if 'role' in x.options]
+        self.assertGreater(len(role_voices), 0, 'Should have at least one voice with roles')
+
+        voice = role_voices[0]
+        logger.info(f'Role voice: {voice.name}, role values: {voice.options["role"]["values"]}')
+        self.assertGreater(len(voice.options['role']['values']), 1)  # at least '' + one role
+
+    def test_azure_voice_list_v3_plain_voice_no_extra_options(self):
+        """Verify plain Neural voices don't have DragonHD/style/role parameters."""
+        azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
+        plain_voices = [x for x in azure_voices
+                        if x.voice_key.get('voice_type', '') == 'Neural'
+                        and 'style' not in x.options
+                        and 'role' not in x.options]
+        self.assertGreater(len(plain_voices), 0)
+
+        voice = plain_voices[0]
+        self.assertNotIn('temperature', voice.options)
+        self.assertNotIn('top_p', voice.options)
+        self.assertNotIn('style', voice.options)
+        self.assertNotIn('role', voice.options)
+        self.assertIn('rate', voice.options)
+        self.assertIn('pitch', voice.options)
+
+    def test_azure_dragonhd_audio(self):
+        """Generate audio with a DragonHD voice using custom parameters."""
+        azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
+        dragonhd_voices = [x for x in azure_voices
+                           if x.voice_key.get('voice_type', '') == 'NeuralHD'
+                           and AudioLanguage.en_US in x.audio_languages]
+        self.assertGreater(len(dragonhd_voices), 0, 'Should have at least one en-US DragonHD voice')
+
+        voice = dragonhd_voices[0]
+        logger.info(f'Testing DragonHD audio with voice: {voice.name}')
+        options = {
+            'temperature': 0.8,
+            'top_p': 0.8,
+            'top_k': 30,
+            'cfg_scale': 1.5
+        }
+        audio_temp_file = self.get_tts_audio_with_retry(
+            self.ENGLISH_INPUT_TEXT, voice.service.name, voice.voice_key, options)
+        self.assertIsNotNone(audio_temp_file)
+        file_size = os.path.getsize(audio_temp_file.name)
+        self.assertGreater(file_size, 1000, 'DragonHD audio file should be at least 1KB')
+
+    def test_azure_style_audio(self):
+        """Generate audio with a voice using style parameter."""
+        azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
+        style_voices = [x for x in azure_voices
+                        if 'style' in x.options
+                        and AudioLanguage.zh_CN in x.audio_languages]
+        self.assertGreater(len(style_voices), 0, 'Should have at least one zh-CN voice with styles')
+
+        voice = style_voices[0]
+        # pick a non-empty style
+        styles = [s for s in voice.options['style']['values'] if s]
+        self.assertGreater(len(styles), 0)
+        style = styles[0]
+        logger.info(f'Testing style audio with voice: {voice.name}, style: {style}')
+        options = {
+            'style': style,
+            'styledegree': 1.5
+        }
+        audio_temp_file = self.get_tts_audio_with_retry(
+            self.CHINESE_INPUT_TEXT, voice.service.name, voice.voice_key, options)
+        self.assertIsNotNone(audio_temp_file)
+        file_size = os.path.getsize(audio_temp_file.name)
+        self.assertGreater(file_size, 1000, 'Style audio file should be at least 1KB')

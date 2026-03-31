@@ -37,7 +37,7 @@ GENDER_MAP = {
     'Neutral': cloudlanguagetools.constants.Gender.Any,
 }
 
-VOICE_OPTIONS = {
+BASE_VOICE_OPTIONS = {
             'rate' : {
                 'type': cloudlanguagetools.options.ParameterType.number.name,
                 'min': 0.5,
@@ -61,6 +61,72 @@ VOICE_OPTIONS = {
             }
 }
 
+DEFAULT_TEMPERATURE = 0.7
+DEFAULT_TOP_P = 0.7
+DEFAULT_TOP_K = 22
+DEFAULT_CFG_SCALE = 1.4
+DEFAULT_STYLEDEGREE = 1.0
+
+def build_voice_options(voice_data):
+    import copy
+    options = copy.deepcopy(BASE_VOICE_OPTIONS)
+
+    voice_type = voice_data.get('VoiceType', '')
+    voice_name = voice_data.get('Name', '')
+
+    # DragonHD/Omni HD parameters (VoiceType is NeuralHD, Name contains DragonHD)
+    if 'DragonHD' in voice_name or voice_type == 'NeuralHD':
+        options['temperature'] = {
+            'type': cloudlanguagetools.options.ParameterType.number.name,
+            'min': 0.3,
+            'max': 1.0,
+            'default': DEFAULT_TEMPERATURE
+        }
+        options['top_p'] = {
+            'type': cloudlanguagetools.options.ParameterType.number.name,
+            'min': 0.3,
+            'max': 1.0,
+            'default': DEFAULT_TOP_P
+        }
+        options['top_k'] = {
+            'type': cloudlanguagetools.options.ParameterType.number_int.name,
+            'min': 1,
+            'max': 50,
+            'default': DEFAULT_TOP_K
+        }
+        options['cfg_scale'] = {
+            'type': cloudlanguagetools.options.ParameterType.number.name,
+            'min': 1.0,
+            'max': 2.0,
+            'default': DEFAULT_CFG_SCALE
+        }
+
+    # Style parameters (from Azure voice list API StyleList)
+    style_list = voice_data.get('StyleList', [])
+    if style_list:
+        options['style'] = {
+            'type': cloudlanguagetools.options.ParameterType.list.name,
+            'values': [''] + style_list,
+            'default': ''
+        }
+        options['styledegree'] = {
+            'type': cloudlanguagetools.options.ParameterType.number.name,
+            'min': 0.01,
+            'max': 2.0,
+            'default': DEFAULT_STYLEDEGREE
+        }
+
+    # Role parameters (from Azure voice list API RolePlayList)
+    role_list = voice_data.get('RolePlayList', [])
+    if role_list:
+        options['role'] = {
+            'type': cloudlanguagetools.options.ParameterType.list.name,
+            'values': [''] + role_list,
+            'default': ''
+        }
+
+    return options
+
 class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         # print(voice_data)
@@ -78,11 +144,13 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
         self.locale = locale
         self.voice_type = voice_data['VoiceType']
+        self.voice_data = voice_data
 
 
     def get_voice_key(self):
         return {
-            'name': self.name
+            'name': self.name,
+            'voice_type': self.voice_type
         }
 
     def get_voice_shortname(self):
@@ -92,7 +160,7 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
             return f'{self.display_name} ({self.voice_type})'
 
     def get_options(self):
-        return VOICE_OPTIONS
+        return build_voice_options(self.voice_data)
 
 def locale_to_audio_language(locale: str) -> cloudlanguagetools.languages.AudioLanguage:
 
@@ -118,9 +186,10 @@ def build_tts_voice_v3(voice_data) -> cloudlanguagetools.ttsvoice.TtsVoice_v3:
     else:
         voice_name = f'{display_name} ({voice_type})'    
     voice_key = {
-        'name': voice_data['Name']
+        'name': voice_data['Name'],
+        'voice_type': voice_type
     }
-    options = VOICE_OPTIONS
+    options = build_voice_options(voice_data)
     service = cloudlanguagetools.constants.Service.Azure
     gender = GENDER_MAP[voice_data['Gender']]
     service_fee = cloudlanguagetools.constants.ServiceFee.paid
@@ -286,24 +355,51 @@ class AzureService(cloudlanguagetools.service.Service):
         rate = options.get('rate', default_rate)
         rate_str = f'{rate:0.1f}'
 
-
-        prosody_start_str = ''
-        prosody_end_str = ''
-
-        if pitch != default_pitch or rate != default_rate:
-            prosody_start_str = f"""<prosody pitch="{pitch_str}" rate="{rate_str}" >"""
-            prosody_end_str = """</prosody>"""
-
         # do some cleaning on the text
         text = text.replace(' & ', ' &amp; ')
 
+        # build prosody wrapper
+        prosody_start = ''
+        prosody_end = ''
+        if pitch != default_pitch or rate != default_rate:
+            prosody_start = f'<prosody pitch="{pitch_str}" rate="{rate_str}">'
+            prosody_end = '</prosody>'
+
+        # build inner content (prosody + text)
+        inner_content = f'{prosody_start}{text}{prosody_end}'
+
+        # build style/role wrapper (mstts:express-as)
+        style = options.get('style', '')
+        role = options.get('role', '')
+        styledegree = options.get('styledegree', DEFAULT_STYLEDEGREE)
+        if style:
+            express_as_attrs = f'style="{style}"'
+            if styledegree != DEFAULT_STYLEDEGREE:
+                express_as_attrs += f' styledegree="{styledegree}"'
+            if role:
+                express_as_attrs += f' role="{role}"'
+            inner_content = f'<mstts:express-as {express_as_attrs}>{inner_content}</mstts:express-as>'
+
+        # build voice element with optional DragonHD parameters
+        voice_type = voice_key.get('voice_type', '')
+        voice_name = voice_key.get('name', '')
+        voice_attrs = f'name="{voice_name}"'
+        if 'DragonHD' in voice_name or voice_type == 'NeuralHD':
+            temperature = options.get('temperature', DEFAULT_TEMPERATURE)
+            top_p = options.get('top_p', DEFAULT_TOP_P)
+            top_k = int(options.get('top_k', DEFAULT_TOP_K))
+            cfg_scale = options.get('cfg_scale', DEFAULT_CFG_SCALE)
+            params_str = f'temperature={temperature};top_p={top_p};top_k={top_k};cfg_scale={cfg_scale}'
+            voice_attrs += f' parameters="{params_str}"'
+
         # the ssml str must be super optimized to have no whitespace, no extra characters
-        ssml_str = f"""<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
-<voice name="{voice_key['name']}">
-{prosody_start_str}""".replace('\n', '') + text + f"""
-{prosody_end_str}
-</voice>
-</speak>""".replace('\n', '')
+        ssml_str = (
+            f'<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">'
+            f'<voice {voice_attrs}>'
+            f'{inner_content}'
+            f'</voice>'
+            f'</speak>'
+        )
 
         # print(f'[{ssml_str}] len: {len(ssml_str)}')
 

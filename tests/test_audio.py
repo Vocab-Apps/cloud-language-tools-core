@@ -632,6 +632,28 @@ class TestAudio(unittest.TestCase):
             lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
         self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
+    def test_elevenlabs_format_ogg_opus(self):
+        voice = self.get_voice_by_lambda(Service.ElevenLabs,
+            lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
+        self.assertTrue(cloudlanguagetools.options.AudioFormat.ogg_opus.name in
+                        voice.options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER]['values'])
+        options = {cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.options.AudioFormat.ogg_opus.name}
+        audio_temp_file = self.manager.get_tts_audio(self.FRENCH_INPUT_TEXT, voice.service, voice.voice_key, options)
+        self.assertTrue(audio_utils.is_ogg_opus_format(audio_temp_file.name))
+        self.recognize_and_verify_text(
+            audio_temp_file, self.FRENCH_INPUT_TEXT, 'fr-FR',
+            cloudlanguagetools.options.AudioFormat.ogg_opus)
+
+    def test_elevenlabs_speed(self):
+        voice = self.get_voice_by_lambda(Service.ElevenLabs,
+            lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
+        options = {'speed': 1.2}
+        audio_temp_file = self.get_tts_audio_with_retry(self.FRENCH_INPUT_TEXT, voice.service, voice.voice_key, options)
+        self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
+        self.recognize_and_verify_text(
+            audio_temp_file, self.FRENCH_INPUT_TEXT, 'fr-FR',
+            cloudlanguagetools.options.AudioFormat.mp3)
+
     def test_google_format_wav(self):
         fr_voice = self.get_voice_by_lambda(Service.Google, 
             lambda x: AudioLanguage.fr_FR in x.audio_languages and 'Journey' not in x.name, assert_unique=False)

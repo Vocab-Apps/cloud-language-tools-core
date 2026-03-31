@@ -24,6 +24,9 @@ logger = logging.getLogger(__name__)
 # elevenlabs v3 requires discrete values for stability
 DEFAULT_STABILITY = 0.5
 DEFAULT_SIMILARITY_BOOST = 0.75
+DEFAULT_STYLE = 0.0
+DEFAULT_SPEED = 1.0
+DEFAULT_USE_SPEAKER_BOOST = 'false'
 
 GENDER_MAP = {
     'male': cloudlanguagetools.constants.Gender.Male,
@@ -43,6 +46,23 @@ VOICE_OPTIONS = {
                 'max': 1.0,
                 'default': DEFAULT_SIMILARITY_BOOST
             },
+            'style' : {
+                'type': cloudlanguagetools.options.ParameterType.number.name,
+                'min': 0.0,
+                'max': 1.0,
+                'default': DEFAULT_STYLE
+            },
+            'speed' : {
+                'type': cloudlanguagetools.options.ParameterType.number.name,
+                'min': 0.7,
+                'max': 1.2,
+                'default': DEFAULT_SPEED
+            },
+            'use_speaker_boost' : {
+                'type': cloudlanguagetools.options.ParameterType.list.name,
+                'values': ['true', 'false'],
+                'default': 'false'
+            },
             'language_code' : {
                 'type': cloudlanguagetools.options.ParameterType.text.name,
                 'default': ''
@@ -51,6 +71,7 @@ VOICE_OPTIONS = {
                 'type': cloudlanguagetools.options.ParameterType.list.name,
                 'values': [
                     cloudlanguagetools.options.AudioFormat.mp3.name,
+                    cloudlanguagetools.options.AudioFormat.ogg_opus.name,
                     cloudlanguagetools.options.AudioFormat.wav.name
                 ],
                 'default': cloudlanguagetools.options.AudioFormat.mp3.name
@@ -101,6 +122,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
 
         response_format_parameter, audio_format = self.get_request_audio_format({
             AudioFormat.mp3: 'mp3_44100_128',
+            AudioFormat.ogg_opus: 'opus_48000_192',
             AudioFormat.wav: 'pcm_44100'
         }, options, AudioFormat.mp3)
 
@@ -112,7 +134,10 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             "model_id": voice_key['model_id'],
             "voice_settings": {
                 "stability": options.get('stability', DEFAULT_STABILITY),
-                "similarity_boost": options.get('similarity_boost', DEFAULT_SIMILARITY_BOOST)
+                "similarity_boost": options.get('similarity_boost', DEFAULT_SIMILARITY_BOOST),
+                "style": options.get('style', DEFAULT_STYLE),
+                "speed": options.get('speed', DEFAULT_SPEED),
+                "use_speaker_boost": options.get('use_speaker_boost', DEFAULT_USE_SPEAKER_BOOST) == 'true'
             }
         }
         
@@ -132,10 +157,11 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         full_url = f'{url}?{urllib.parse.urlencode(query_params)}'
 
         if audio_format == cloudlanguagetools.options.AudioFormat.wav:
-            return cloudlanguagetools.audio_processing.wrap_pcm_data_wave(self.get_tts_audio_base_post_request(full_url, json=data, headers=headers), 
+            return cloudlanguagetools.audio_processing.wrap_pcm_data_wave(self.get_tts_audio_base_post_request(full_url, json=data, headers=headers),
                 num_channels=1,
-                sample_width=2, 
-                framerate=44100) # pcm_44100 - PCM format (S16LE) with 44.1kHz sample rate. 
+                sample_width=2,
+                framerate=44100) # pcm_44100 - PCM format (S16LE) with 44.1kHz sample rate.
+        # mp3 and ogg_opus are returned directly by the API
         return self.get_tts_audio_base_post_request(full_url, json=data, headers=headers)
 
 

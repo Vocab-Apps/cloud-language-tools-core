@@ -36,7 +36,7 @@ GENDER_MAP = {
     google.cloud.texttospeech.SsmlVoiceGender.FEMALE: cloudlanguagetools.constants.Gender.Female,
 }
 
-VOICES_WITHOUT_PITCH_SUPPORT = ['Neural2', 'Studio', 'Chirp', 'Journey', 'News']
+VOICES_WITHOUT_PITCH_SUPPORT = ['Studio', 'Chirp', 'Journey']
 
 class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
@@ -181,7 +181,7 @@ class GoogleService(cloudlanguagetools.service.Service):
                 'audio_encoding': audio_format_map[audio_format],
                 'speaking_rate': options.get('speaking_rate', 1.0),
             }
-            # newer voices (Neural2, Studio, Chirp, Journey, News) don't support pitch
+            # Studio, Chirp, and Journey voices don't support pitch
             # https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types
             voice_supports_pitch = not any(voice_type in voice_key['name'] for voice_type in VOICES_WITHOUT_PITCH_SUPPORT)
             if voice_supports_pitch:

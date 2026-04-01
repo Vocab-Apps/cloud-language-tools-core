@@ -67,6 +67,32 @@ DEFAULT_TOP_K = 22
 DEFAULT_CFG_SCALE = 1.4
 DEFAULT_STYLEDEGREE = 1.0
 
+def build_dragonhd_voice_attrs(voice_key, options):
+    """Build the voice attributes string for SSML, including DragonHD parameters only if they differ from defaults."""
+    voice_name = voice_key.get('name', '')
+    voice_type = voice_key.get('voice_type', '')
+    voice_attrs = f'name="{voice_name}"'
+
+    if 'DragonHD' in voice_name or voice_type == 'NeuralHD':
+        params = []
+        temperature = options.get('temperature', DEFAULT_TEMPERATURE)
+        if temperature != DEFAULT_TEMPERATURE:
+            params.append(f'temperature={temperature}')
+        top_p = options.get('top_p', DEFAULT_TOP_P)
+        if top_p != DEFAULT_TOP_P:
+            params.append(f'top_p={top_p}')
+        top_k = int(options.get('top_k', DEFAULT_TOP_K))
+        if top_k != DEFAULT_TOP_K:
+            params.append(f'top_k={top_k}')
+        cfg_scale = options.get('cfg_scale', DEFAULT_CFG_SCALE)
+        if cfg_scale != DEFAULT_CFG_SCALE:
+            params.append(f'cfg_scale={cfg_scale}')
+        if params:
+            params_str = ';'.join(params)
+            voice_attrs += f' parameters="{params_str}"'
+
+    return voice_attrs
+
 def build_voice_options(voice_data):
     import copy
     options = copy.deepcopy(BASE_VOICE_OPTIONS)
@@ -381,16 +407,7 @@ class AzureService(cloudlanguagetools.service.Service):
             inner_content = f'<mstts:express-as {express_as_attrs}>{inner_content}</mstts:express-as>'
 
         # build voice element with optional DragonHD parameters
-        voice_type = voice_key.get('voice_type', '')
-        voice_name = voice_key.get('name', '')
-        voice_attrs = f'name="{voice_name}"'
-        if 'DragonHD' in voice_name or voice_type == 'NeuralHD':
-            temperature = options.get('temperature', DEFAULT_TEMPERATURE)
-            top_p = options.get('top_p', DEFAULT_TOP_P)
-            top_k = int(options.get('top_k', DEFAULT_TOP_K))
-            cfg_scale = options.get('cfg_scale', DEFAULT_CFG_SCALE)
-            params_str = f'temperature={temperature};top_p={top_p};top_k={top_k};cfg_scale={cfg_scale}'
-            voice_attrs += f' parameters="{params_str}"'
+        voice_attrs = build_dragonhd_voice_attrs(voice_key, options)
 
         # the ssml str must be super optimized to have no whitespace, no extra characters
         ssml_str = (

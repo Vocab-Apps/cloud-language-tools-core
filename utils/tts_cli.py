@@ -98,7 +98,7 @@ class TTSRepl:
                 live_ref[0] = live
                 self.manager = cloudlanguagetools.servicemanager.ServiceManager()
                 self.manager.configure_default()
-                self.all_voices = self.manager.get_tts_voice_list_json()
+                self.all_voices = self.manager.get_tts_voice_list_v3()
                 self.filtered_voices = list(self.all_voices)
         finally:
             # restore stdout/stderr
@@ -116,34 +116,44 @@ class TTSRepl:
     def _fuzzy_match(self, value, pattern):
         return pattern.lower() in value.lower()
 
+    def _voice_matches_language(self, voice, pattern):
+        for al in voice.audio_languages:
+            if self._fuzzy_match(al.lang.name, pattern) or self._fuzzy_match(al.audio_lang_name, pattern):
+                return True
+        return False
+
+    def _voice_matches_locale(self, voice, pattern):
+        for al in voice.audio_languages:
+            if self._fuzzy_match(al.name, pattern) or self._fuzzy_match(al.audio_lang_name, pattern):
+                return True
+        return False
+
     def apply_filters(self):
         self.filtered_voices = list(self.all_voices)
         if self.filter_service:
             self.filtered_voices = [
                 v for v in self.filtered_voices
-                if self._fuzzy_match(v['service'], self.filter_service)
+                if self._fuzzy_match(v.service.name, self.filter_service)
             ]
         if self.filter_gender:
             self.filtered_voices = [
                 v for v in self.filtered_voices
-                if self._fuzzy_match(v['gender'], self.filter_gender)
+                if self._fuzzy_match(v.gender.name, self.filter_gender)
             ]
         if self.filter_language:
             self.filtered_voices = [
                 v for v in self.filtered_voices
-                if self._fuzzy_match(v['language_code'], self.filter_language)
-                or self._fuzzy_match(v['audio_language_name'], self.filter_language)
+                if self._voice_matches_language(v, self.filter_language)
             ]
         if self.filter_locale:
             self.filtered_voices = [
                 v for v in self.filtered_voices
-                if self._fuzzy_match(v['audio_language_code'], self.filter_locale)
-                or self._fuzzy_match(v['audio_language_name'], self.filter_locale)
+                if self._voice_matches_locale(v, self.filter_locale)
             ]
         if self.filter_name:
             self.filtered_voices = [
                 v for v in self.filtered_voices
-                if self._fuzzy_match(v['voice_name'], self.filter_name)
+                if self._fuzzy_match(v.name, self.filter_name)
             ]
         self.page = 0
 
@@ -165,20 +175,19 @@ class TTSRepl:
         table = Table(title=f"Voices (page {self.page + 1}/{total_pages}, {total} total)")
         table.add_column("#", style="dim", width=6)
         table.add_column("Service", style="cyan")
-        table.add_column("Language", style="green")
-        table.add_column("Locale")
+        table.add_column("Languages", style="green")
         table.add_column("Gender", style="magenta")
         table.add_column("Name", style="bold")
 
         for i in range(start, end):
             v = self.filtered_voices[i]
+            languages_str = ", ".join(al.audio_lang_name for al in v.audio_languages)
             table.add_row(
                 str(i),
-                v['service'],
-                v['audio_language_name'],
-                v['audio_language_code'],
-                v['gender'],
-                v['voice_name'],
+                v.service.name,
+                languages_str,
+                v.gender.name,
+                v.name,
             )
 
         console.print(table)
@@ -243,7 +252,7 @@ class TTSRepl:
         """Select a voice by index."""
         if not args:
             if self.selected_voice:
-                console.print(f"[green]Selected:[/green] {self.selected_voice['voice_description']}")
+                console.print(f"[green]Selected:[/green] {self.selected_voice.name}")
             else:
                 console.print("[yellow]No voice selected. Usage: select <index>[/yellow]")
             return
@@ -260,7 +269,7 @@ class TTSRepl:
 
         self.selected_voice = self.filtered_voices[idx]
         self.voice_options = {}
-        console.print(f"[green]Selected:[/green] {self.selected_voice['voice_description']}")
+        console.print(f"[green]Selected:[/green] {self.selected_voice.name}")
 
     def cmd_text(self, args):
         """Set input text."""
@@ -280,12 +289,12 @@ class TTSRepl:
             console.print("[red]No voice selected. Use 'select <index>' first.[/red]")
             return
 
-        options = self.selected_voice.get('options', {})
+        options = self.selected_voice.options or {}
         if not options:
             console.print("[yellow]This voice has no configurable options.[/yellow]")
             return
 
-        table = Table(title=f"Options for {self.selected_voice['voice_name']}")
+        table = Table(title=f"Options for {self.selected_voice.name}")
         table.add_column("Name", style="cyan")
         table.add_column("Type", style="magenta")
         table.add_column("Default")
@@ -320,7 +329,7 @@ class TTSRepl:
 
         name = args[0]
         value_str = " ".join(args[1:])
-        options = self.selected_voice.get('options', {})
+        options = self.selected_voice.options or {}
 
         if name not in options:
             console.print(f"[red]Unknown option '{name}'. Use 'options' to see available options.[/red]")
@@ -387,7 +396,7 @@ class TTSRepl:
             console.print("[red]No text set. Use 'text <your text>' first.[/red]")
             return
 
-        console.print(f"  [cyan]Voice:[/cyan]   {self.selected_voice['voice_description']}")
+        console.print(f"  [cyan]Voice:[/cyan]   {self.selected_voice.name}")
         console.print(f"  [cyan]Text:[/cyan]    {self.input_text}")
         if self.voice_options:
             opts_str = ", ".join(f"{k}={v}" for k, v in self.voice_options.items())
@@ -427,8 +436,8 @@ class TTSRepl:
             try:
                 audio_file = self.manager.get_tts_audio(
                     self.input_text,
-                    self.selected_voice['service'],
-                    self.selected_voice['voice_key'],
+                    self.selected_voice.service.name,
+                    self.selected_voice.voice_key,
                     self.voice_options,
                 )
             except Exception as e:
@@ -470,7 +479,7 @@ class TTSRepl:
         table.add_column("Setting", style="cyan")
         table.add_column("Value", style="green")
 
-        table.add_row("Voice", self.selected_voice['voice_description'] if self.selected_voice else "[dim]<none>[/dim]")
+        table.add_row("Voice", self.selected_voice.name if self.selected_voice else "[dim]<none>[/dim]")
         table.add_row("Text", self.input_text or "[dim]<none>[/dim]")
         table.add_row("Options", str(self.voice_options) if self.voice_options else "[dim]<none>[/dim]")
         console.print(table)
@@ -518,13 +527,13 @@ class TTSRepl:
             def _get_filter_values(self, field):
                 voices = repl.all_voices
                 if field == 'service':
-                    return sorted(set(v['service'] for v in voices))
+                    return sorted(set(v.service.name for v in voices))
                 elif field == 'gender':
-                    return sorted(set(v['gender'] for v in voices))
+                    return sorted(set(v.gender.name for v in voices))
                 elif field == 'language':
-                    return sorted(set(v['audio_language_name'] for v in voices))
+                    return sorted(set(al.audio_lang_name for v in voices for al in v.audio_languages))
                 elif field == 'locale':
-                    return sorted(set(v['audio_language_code'] for v in voices))
+                    return sorted(set(al.name for v in voices for al in v.audio_languages))
                 return []
 
             def get_completions(self, document, complete_event):
@@ -563,14 +572,14 @@ class TTSRepl:
 
                 elif cmd == 'set' and arg_index == 1:
                     if repl.selected_voice:
-                        for opt_name in repl.selected_voice.get('options', {}):
+                        for opt_name in (repl.selected_voice.options or {}):
                             if opt_name.startswith(arg_word.lower()):
                                 yield Completion(opt_name, start_position=-len(arg_word))
 
                 elif cmd == 'set' and arg_index == 2:
                     if repl.selected_voice and len(parts) >= 2:
                         opt_name = parts[1]
-                        opt = repl.selected_voice.get('options', {}).get(opt_name, {})
+                        opt = (repl.selected_voice.options or {}).get(opt_name, {})
                         if opt.get('type') == 'list':
                             for val in opt.get('values', []):
                                 if val.startswith(arg_word.lower()):

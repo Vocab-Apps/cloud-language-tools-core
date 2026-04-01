@@ -181,7 +181,12 @@ class TTSRepl:
 
         for i in range(start, end):
             v = self.filtered_voices[i]
-            languages_str = ", ".join(al.audio_lang_name for al in v.audio_languages)
+            if len(v.audio_languages) == 1:
+                languages_str = v.audio_languages[0].audio_lang_name
+            else:
+                num_languages = len(set(al.lang for al in v.audio_languages))
+                num_locales = len(v.audio_languages)
+                languages_str = f"{num_languages} Languages, {num_locales} AudioLanguages"
             table.add_row(
                 str(i),
                 v.service.name,

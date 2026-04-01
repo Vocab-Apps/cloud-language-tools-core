@@ -7,3 +7,6 @@ bump
 databind
 backoff
 setuptools
+prompt_toolkit
+typer
+rich

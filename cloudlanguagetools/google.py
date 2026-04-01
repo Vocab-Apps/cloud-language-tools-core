@@ -36,6 +36,8 @@ GENDER_MAP = {
     google.cloud.texttospeech.SsmlVoiceGender.FEMALE: cloudlanguagetools.constants.Gender.Female,
 }
 
+VOICES_WITHOUT_PITCH_SUPPORT = ['Neural2', 'Studio', 'Chirp', 'Journey', 'News']
+
 class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         logger.debug(f'processing voice {voice_data}')
@@ -50,6 +52,9 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         self.google_language_code = voice_data.language_codes[0]
         self.audio_language = language_code_to_enum(self.google_language_code)
 
+    def supports_pitch(self):
+        return not any(voice_type in self.name for voice_type in VOICES_WITHOUT_PITCH_SUPPORT)
+
     def get_voice_shortname(self):
         return self.name
 
@@ -61,18 +66,12 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
         }
 
     def get_options(self):
-        return {
+        options = {
             'speaking_rate': {
                 'type': 'number',
                 'min': 0.25,
                 'max': 4.0,
                 'default': 1.0
-            },
-            'pitch': {
-                'type': 'number',
-                'min': -20.0,
-                'max': 20.0,
-                'default': 0.0
             },
             cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
                 'type': cloudlanguagetools.options.ParameterType.list.name,
@@ -82,8 +81,16 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                     cloudlanguagetools.options.AudioFormat.wav.name
                 ],
                 'default': cloudlanguagetools.options.AudioFormat.mp3.name
-            }            
-        }        
+            }
+        }
+        if self.supports_pitch():
+            options['pitch'] = {
+                'type': 'number',
+                'min': -20.0,
+                'max': 20.0,
+                'default': 0.0
+            }
+        return options        
 
 
 def get_translation_language_enum(language_id):
@@ -170,11 +177,15 @@ class GoogleService(cloudlanguagetools.service.Service):
                 ssml_gender=google.cloud.texttospeech.SsmlVoiceGender[voice_key['ssml_gender']]
             )
 
-            audio_config = google.cloud.texttospeech.AudioConfig(
-                audio_encoding=audio_format_map[audio_format],
-                speaking_rate=options.get('speaking_rate', 1.0),
-                pitch=options.get('pitch', 0.0)
-            )
+            audio_config_params = {
+                'audio_encoding': audio_format_map[audio_format],
+                'speaking_rate': options.get('speaking_rate', 1.0),
+            }
+            # newer voices (Neural2, Studio, Chirp, Journey, News) don't support pitch
+            voice_supports_pitch = not any(voice_type in voice_key['name'] for voice_type in VOICES_WITHOUT_PITCH_SUPPORT)
+            if voice_supports_pitch:
+                audio_config_params['pitch'] = options.get('pitch', 0.0)
+            audio_config = google.cloud.texttospeech.AudioConfig(**audio_config_params)
 
 
             # prepare speech request

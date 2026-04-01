@@ -182,6 +182,7 @@ class GoogleService(cloudlanguagetools.service.Service):
                 'speaking_rate': options.get('speaking_rate', 1.0),
             }
             # newer voices (Neural2, Studio, Chirp, Journey, News) don't support pitch
+            # https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types
             voice_supports_pitch = not any(voice_type in voice_key['name'] for voice_type in VOICES_WITHOUT_PITCH_SUPPORT)
             if voice_supports_pitch:
                 audio_config_params['pitch'] = options.get('pitch', 0.0)

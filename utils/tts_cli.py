@@ -76,19 +76,37 @@ class TTSRepl:
         root_logger.handlers = [tail_handler]
         root_logger.setLevel(logging.INFO)
 
-        # redirect stdout/stderr so noisy services don't leak through
+        # redirect stdout/stderr at the file-descriptor level so that
+        # print()/pprint() calls inside service modules are fully suppressed
+        # save the real stdout fd to a new fd before overwriting fd 1
+        saved_stdout_fd = os.dup(1)
+        saved_stderr_fd = os.dup(2)
+        # create a file object that writes to the saved (real) stdout fd
+        live_file = os.fdopen(os.dup(saved_stdout_fd), 'w')
+        live_console = Console(file=live_file)
+
+        devnull_fd = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull_fd, 1)
+        os.dup2(devnull_fd, 2)
+        os.close(devnull_fd)
         real_stdout, real_stderr = sys.stdout, sys.stderr
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
 
         try:
-            with Live(build_display(), console=Console(file=real_stdout), refresh_per_second=8, transient=True) as live:
+            with Live(build_display(), console=live_console, refresh_per_second=8, transient=True) as live:
                 live_ref[0] = live
                 self.manager = cloudlanguagetools.servicemanager.ServiceManager()
                 self.manager.configure_default()
                 self.all_voices = self.manager.get_tts_voice_list_json()
                 self.filtered_voices = list(self.all_voices)
         finally:
+            # restore stdout/stderr
+            os.dup2(saved_stdout_fd, 1)
+            os.dup2(saved_stderr_fd, 2)
+            os.close(saved_stdout_fd)
+            os.close(saved_stderr_fd)
+            live_file.close()
             sys.stdout, sys.stderr = real_stdout, real_stderr
             root_logger.handlers = original_handlers
             root_logger.setLevel(original_level)

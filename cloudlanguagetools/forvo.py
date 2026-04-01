@@ -318,9 +318,9 @@ class ForvoService(cloudlanguagetools.service.Service):
                 language_voice_list = self.get_voices_for_language_entry(language)
                 voice_list.extend(language_voice_list)
 
-            pprint.pprint(data)
+            # pprint.pprint(data)
         else:
-            print(response.content)
+            logger.error(f'forvo language list request failed: status={response.status_code} content={response.content}')
 
         return voice_list
 

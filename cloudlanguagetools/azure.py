@@ -402,6 +402,7 @@ class AzureService(cloudlanguagetools.service.Service):
         )
 
         # print(f'[{ssml_str}] len: {len(ssml_str)}')
+        logger.info(f'sending SSML string: [{ssml_str}]')
 
         result = synthesizer.speak_ssml(ssml_str)
         if result.reason != azure.cognitiveservices.speech.ResultReason.SynthesizingAudioCompleted:

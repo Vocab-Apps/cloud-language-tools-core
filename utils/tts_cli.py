@@ -395,6 +395,32 @@ class TTSRepl:
 
         audio_file = None
         error = None
+        tail_lines = deque(maxlen=5)
+        live_ref = [None]
+
+        def build_play_display():
+            spinner_text = "[bold cyan]⠋ Generating audio...[/bold cyan]"
+            lines = list(tail_lines)
+            log_text = "\n".join(f"[dim]{l}[/dim]" for l in lines) if lines else ""
+            return Panel(
+                f"{spinner_text}\n{log_text}" if log_text else spinner_text,
+                border_style="cyan",
+                width=80,
+            )
+
+        class PlayLogHandler(logging.Handler):
+            def emit(self, record):
+                tail_lines.append(self.format(record))
+                if live_ref[0]:
+                    live_ref[0].update(build_play_display())
+
+        play_handler = PlayLogHandler()
+        play_handler.setFormatter(logging.Formatter("%(message)s"))
+        root_logger = logging.getLogger()
+        original_level = root_logger.level
+        original_handlers = root_logger.handlers[:]
+        root_logger.handlers = [play_handler]
+        root_logger.setLevel(logging.INFO)
 
         def generate():
             nonlocal audio_file, error
@@ -408,15 +434,18 @@ class TTSRepl:
             except Exception as e:
                 error = e
 
-        with Live(
-            Spinner("dots", text=Text("Generating audio...", style="bold cyan")),
-            console=console,
-            refresh_per_second=10,
-            transient=True,
-        ) as live:
-            thread = threading.Thread(target=generate)
-            thread.start()
-            thread.join()
+        try:
+            with Live(build_play_display(), console=console, refresh_per_second=8, transient=True) as live:
+                live_ref[0] = live
+                thread = threading.Thread(target=generate)
+                thread.start()
+                thread.join()
+        finally:
+            root_logger.handlers = original_handlers
+            root_logger.setLevel(original_level)
+
+        if tail_lines:
+            console.print(f"  [dim]{tail_lines[-1]}[/dim]")
 
         if error:
             console.print(f"[red]Audio generation failed: {error}[/red]")

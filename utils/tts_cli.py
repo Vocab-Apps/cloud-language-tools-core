@@ -387,6 +387,12 @@ class TTSRepl:
             console.print("[red]No text set. Use 'text <your text>' first.[/red]")
             return
 
+        console.print(f"  [cyan]Voice:[/cyan]   {self.selected_voice['voice_description']}")
+        console.print(f"  [cyan]Text:[/cyan]    {self.input_text}")
+        if self.voice_options:
+            opts_str = ", ".join(f"{k}={v}" for k, v in self.voice_options.items())
+            console.print(f"  [cyan]Options:[/cyan] {opts_str}")
+
         audio_file = None
         error = None
 

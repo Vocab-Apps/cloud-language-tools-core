@@ -1,8 +1,11 @@
 import os
 import sys
+import io
 import shlex
 import subprocess
 import threading
+import logging
+from collections import deque
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -15,6 +18,7 @@ from rich.table import Table
 from rich.live import Live
 from rich.spinner import Spinner
 from rich.text import Text
+from rich.panel import Panel
 
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.constants
@@ -45,11 +49,50 @@ class TTSRepl:
         self.page = 0
 
     def initialize(self):
-        with console.status("[bold green]Loading services and voices..."):
-            self.manager = cloudlanguagetools.servicemanager.ServiceManager()
-            self.manager.configure_default()
-            self.all_voices = self.manager.get_tts_voice_list_json()
-            self.filtered_voices = list(self.all_voices)
+        tail_lines = deque(maxlen=5)
+        live_ref = [None]
+
+        def build_display():
+            lines = list(tail_lines)
+            log_text = "\n".join(f"[dim]{l}[/dim]" for l in lines) if lines else ""
+            return Panel(
+                f"[bold cyan]⠋ Loading services and voices...[/bold cyan]\n{log_text}",
+                border_style="green",
+                width=80,
+            )
+
+        class TailHandler(logging.Handler):
+            def emit(self, record):
+                tail_lines.append(self.format(record))
+                if live_ref[0]:
+                    live_ref[0].update(build_display())
+
+        # capture logging into our tail buffer
+        tail_handler = TailHandler()
+        tail_handler.setFormatter(logging.Formatter("%(message)s"))
+        root_logger = logging.getLogger()
+        original_level = root_logger.level
+        original_handlers = root_logger.handlers[:]
+        root_logger.handlers = [tail_handler]
+        root_logger.setLevel(logging.INFO)
+
+        # redirect stdout/stderr so noisy services don't leak through
+        real_stdout, real_stderr = sys.stdout, sys.stderr
+        sys.stdout = io.StringIO()
+        sys.stderr = io.StringIO()
+
+        try:
+            with Live(build_display(), console=Console(file=real_stdout), refresh_per_second=8, transient=True) as live:
+                live_ref[0] = live
+                self.manager = cloudlanguagetools.servicemanager.ServiceManager()
+                self.manager.configure_default()
+                self.all_voices = self.manager.get_tts_voice_list_json()
+                self.filtered_voices = list(self.all_voices)
+        finally:
+            sys.stdout, sys.stderr = real_stdout, real_stderr
+            root_logger.handlers = original_handlers
+            root_logger.setLevel(original_level)
+
         console.print(f"[green]Loaded {len(self.all_voices)} voices.[/green]")
 
     def _fuzzy_match(self, value, pattern):

@@ -5,3 +5,4 @@ alias test_audio_mandarin_azure='pytest tests/test_audio.py -k test_mandarin_azu
 alias package='./package.sh'
 alias sync_languages_hypertts='scp cloudlanguagetools/languages.py anki:~/code/python/anki-hyper-tts/hypertts_addon/languages.py'
 alias sync_voicelist_hypertts='python utils/voice_list_hypertts.py && scp temp_data_files/hypertts_voicelist.py anki:~/code/python/anki-hyper-tts/hypertts_addon/services/voicelist.py'
+alias tts_cli='python utils/tts_cli.py'

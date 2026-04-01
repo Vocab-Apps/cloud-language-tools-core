@@ -470,12 +470,78 @@ class TTSRepl:
         console.print(table)
 
     def get_completer(self):
-        commands = [
-            'voices', 'next', 'prev', 'filter', 'clearfilters',
-            'select', 'text', 'options', 'set', 'clear', 'clearoptions',
-            'play', 'status', 'help', 'quit', 'exit',
-        ]
-        return WordCompleter(commands, ignore_case=True)
+        repl = self
+
+        class TTSCompleter(Completer):
+            commands = [
+                'voices', 'next', 'prev', 'filter', 'clearfilters',
+                'select', 'text', 'options', 'set', 'clear', 'clearoptions',
+                'play', 'status', 'help', 'quit', 'exit',
+            ]
+            filter_fields = ['service', 'gender', 'language', 'locale', 'name']
+
+            def _get_filter_values(self, field):
+                voices = repl.all_voices
+                if field == 'service':
+                    return sorted(set(v['service'] for v in voices))
+                elif field == 'gender':
+                    return sorted(set(v['gender'] for v in voices))
+                elif field == 'language':
+                    return sorted(set(v['audio_language_name'] for v in voices))
+                elif field == 'locale':
+                    return sorted(set(v['audio_language_code'] for v in voices))
+                return []
+
+            def get_completions(self, document, complete_event):
+                text = document.text_before_cursor.lstrip()
+                parts = text.split()
+
+                if len(parts) == 0 or (len(parts) == 1 and not text.endswith(' ')):
+                    # completing the command itself
+                    word = parts[0] if parts else ''
+                    for cmd in self.commands:
+                        if cmd.startswith(word.lower()):
+                            yield Completion(cmd, start_position=-len(word))
+                    return
+
+                cmd = parts[0].lower()
+                # number of args already typed (complete or in progress)
+                arg_word = parts[-1] if not text.endswith(' ') else ''
+                arg_index = len(parts) - 1 if not text.endswith(' ') else len(parts)
+
+                if cmd == 'filter' and arg_index == 1:
+                    for field in self.filter_fields:
+                        if field.startswith(arg_word.lower()):
+                            yield Completion(field, start_position=-len(arg_word))
+
+                elif cmd == 'filter' and arg_index == 2 and len(parts) >= 2:
+                    field = parts[1].lower()
+                    values = self._get_filter_values(field)
+                    for val in values:
+                        if val.lower().startswith(arg_word.lower()):
+                            yield Completion(val, start_position=-len(arg_word))
+
+                elif cmd == 'clear' and arg_index == 1:
+                    for opt_name in repl.voice_options:
+                        if opt_name.startswith(arg_word.lower()):
+                            yield Completion(opt_name, start_position=-len(arg_word))
+
+                elif cmd == 'set' and arg_index == 1:
+                    if repl.selected_voice:
+                        for opt_name in repl.selected_voice.get('options', {}):
+                            if opt_name.startswith(arg_word.lower()):
+                                yield Completion(opt_name, start_position=-len(arg_word))
+
+                elif cmd == 'set' and arg_index == 2:
+                    if repl.selected_voice and len(parts) >= 2:
+                        opt_name = parts[1]
+                        opt = repl.selected_voice.get('options', {}).get(opt_name, {})
+                        if opt.get('type') == 'list':
+                            for val in opt.get('values', []):
+                                if val.startswith(arg_word.lower()):
+                                    yield Completion(val, start_position=-len(arg_word))
+
+        return TTSCompleter()
 
     def run(self):
         self.initialize()

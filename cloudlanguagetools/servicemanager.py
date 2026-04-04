@@ -5,6 +5,7 @@ import logging
 import timeit
 import cachetools
 from typing import List
+import requests.exceptions
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import cloudlanguagetools.errors
@@ -217,6 +218,33 @@ class ServiceManager():
         service_enum = cloudlanguagetools.constants.Service[service_name]
         service = self.services[service_enum]
         return service.get_tts_audio(text, voice_id, options)
+
+    def get_tts_audio_v5(self, text, service_name, voice_id, options):
+        """Generate TTS audio, normalizing all exceptions to TransientError or PermanentError.
+
+        This method wraps get_tts_audio and ensures only exceptions derived from
+        errors.TransientError or errors.PermanentError are raised. This allows
+        callers to determine whether a failure can be retried (TransientError)
+        or not (PermanentError).
+
+        Raises:
+            errors.TimeoutError: On HTTP request timeouts (subclass of TransientError).
+            errors.TransientError: On failures that may succeed on retry.
+            errors.PermanentError: On failures that will not succeed on retry.
+        """
+        try:
+            service_enum = cloudlanguagetools.constants.Service[service_name]
+            service = self.services[service_enum]
+            return service.get_tts_audio(text, voice_id, options)
+        except (cloudlanguagetools.errors.TransientError, cloudlanguagetools.errors.PermanentError):
+            raise
+        except requests.exceptions.Timeout as e:
+            raise cloudlanguagetools.errors.TimeoutError(f'timeout generating TTS audio for {service_name}: {e}') from e
+        except KeyError as e:
+            raise cloudlanguagetools.errors.PermanentError(f'service not found: {service_name}: {e}') from e
+        except Exception as e:
+            logging.exception(f'unexpected error generating TTS audio for {service_name}')
+            raise cloudlanguagetools.errors.TransientError(f'unexpected error generating TTS audio for {service_name}: {e}') from e
 
     def get_translation(self, text, service_name: str, from_language_key, to_language_key):
         """return text"""

@@ -5,11 +5,13 @@ import unittest
 import json
 import pytest
 import pprint
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 LOAD_TEST_SERVICES_ONLY = os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', 'no') == 'yes'
 
+import requests.exceptions
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
 from cloudlanguagetools.languages import Language
@@ -98,9 +100,83 @@ class TestMockServices(unittest.TestCase):
 
     def test_service_cost(self):
         if not LOAD_TEST_SERVICES_ONLY:
-            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes')        
+            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes')
 
         manager = get_manager()
         # test services
         self.assertEqual(manager.service_cost('abcd', 'TestServiceA', cloudlanguagetools.constants.RequestType.transliteration), 0)
         self.assertEqual(manager.service_cost('abcd', 'TestServiceB', cloudlanguagetools.constants.RequestType.transliteration), 4)
+
+
+class TestTtsAudioV5(unittest.TestCase):
+    """Tests for get_tts_audio_v5 exception normalization."""
+
+    def setUp(self):
+        os.environ['CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES'] = 'yes'
+        self.manager = cloudlanguagetools.servicemanager.ServiceManager()
+
+    def tearDown(self):
+        if os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES') == 'yes':
+            os.environ.pop('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', None)
+
+    def test_success(self):
+        """Successful call returns a temp file."""
+        result = self.manager.get_tts_audio_v5('hello', 'TestServiceA', {'voice_id': 'paul'}, {})
+        self.assertIsNotNone(result)
+
+    def test_transient_error_passes_through(self):
+        """TransientError from the service is re-raised as-is."""
+        with patch.object(self.manager.services[Service.TestServiceA], 'get_tts_audio',
+                          side_effect=cloudlanguagetools.errors.RequestError('service unavailable')):
+            with self.assertRaises(cloudlanguagetools.errors.RequestError):
+                self.manager.get_tts_audio_v5('hello', 'TestServiceA', {'voice_id': 'paul'}, {})
+
+    def test_permanent_error_passes_through(self):
+        """PermanentError from the service is re-raised as-is."""
+        with patch.object(self.manager.services[Service.TestServiceA], 'get_tts_audio',
+                          side_effect=cloudlanguagetools.errors.AuthenticationError('bad key')):
+            with self.assertRaises(cloudlanguagetools.errors.AuthenticationError):
+                self.manager.get_tts_audio_v5('hello', 'TestServiceA', {'voice_id': 'paul'}, {})
+
+    def test_timeout_error_passes_through(self):
+        """errors.TimeoutError (already a TransientError) passes through."""
+        with patch.object(self.manager.services[Service.TestServiceA], 'get_tts_audio',
+                          side_effect=cloudlanguagetools.errors.TimeoutError('timed out')):
+            with self.assertRaises(cloudlanguagetools.errors.TimeoutError):
+                self.manager.get_tts_audio_v5('hello', 'TestServiceA', {'voice_id': 'paul'}, {})
+
+    def test_requests_timeout_becomes_timeout_error(self):
+        """requests.exceptions.Timeout is caught and re-raised as errors.TimeoutError."""
+        with patch.object(self.manager.services[Service.TestServiceA], 'get_tts_audio',
+                          side_effect=requests.exceptions.ReadTimeout('read timed out')):
+            with self.assertRaises(cloudlanguagetools.errors.TimeoutError):
+                self.manager.get_tts_audio_v5('hello', 'TestServiceA', {'voice_id': 'paul'}, {})
+
+    def test_requests_connect_timeout_becomes_timeout_error(self):
+        """requests.exceptions.ConnectTimeout is caught as Timeout subclass."""
+        with patch.object(self.manager.services[Service.TestServiceA], 'get_tts_audio',
+                          side_effect=requests.exceptions.ConnectTimeout('connect timed out')):
+            with self.assertRaises(cloudlanguagetools.errors.TimeoutError):
+                self.manager.get_tts_audio_v5('hello', 'TestServiceA', {'voice_id': 'paul'}, {})
+
+    def test_invalid_service_name_becomes_permanent_error(self):
+        """KeyError for unknown service becomes PermanentError."""
+        with self.assertRaises(cloudlanguagetools.errors.PermanentError):
+            self.manager.get_tts_audio_v5('hello', 'NonExistentService', {}, {})
+
+    def test_unexpected_exception_becomes_transient_error(self):
+        """Any unexpected exception is wrapped as TransientError."""
+        with patch.object(self.manager.services[Service.TestServiceA], 'get_tts_audio',
+                          side_effect=RuntimeError('something broke')):
+            with self.assertRaises(cloudlanguagetools.errors.TransientError) as ctx:
+                self.manager.get_tts_audio_v5('hello', 'TestServiceA', {'voice_id': 'paul'}, {})
+            self.assertNotIsInstance(ctx.exception, cloudlanguagetools.errors.PermanentError)
+
+    def test_unexpected_exception_preserves_cause(self):
+        """Unexpected exceptions are chained with __cause__."""
+        original = ValueError('bad value')
+        with patch.object(self.manager.services[Service.TestServiceA], 'get_tts_audio',
+                          side_effect=original):
+            with self.assertRaises(cloudlanguagetools.errors.TransientError) as ctx:
+                self.manager.get_tts_audio_v5('hello', 'TestServiceA', {'voice_id': 'paul'}, {})
+            self.assertIs(ctx.exception.__cause__, original)

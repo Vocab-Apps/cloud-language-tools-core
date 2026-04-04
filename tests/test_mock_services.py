@@ -108,16 +108,15 @@ class TestMockServices(unittest.TestCase):
         self.assertEqual(manager.service_cost('abcd', 'TestServiceB', cloudlanguagetools.constants.RequestType.transliteration), 4)
 
 
+@pytest.mark.skipif(
+    os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', 'no') != 'yes',
+    reason='you must set CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes'
+)
 class TestTtsAudioV5(unittest.TestCase):
     """Tests for get_tts_audio_v5 exception normalization."""
 
     def setUp(self):
-        os.environ['CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES'] = 'yes'
         self.manager = cloudlanguagetools.servicemanager.ServiceManager()
-
-    def tearDown(self):
-        if os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES') == 'yes':
-            os.environ.pop('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', None)
 
     def test_success(self):
         """Successful call returns a temp file."""

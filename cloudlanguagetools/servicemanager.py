@@ -237,12 +237,13 @@ class ServiceManager():
             service = self.services[service_enum]
             return service.get_tts_audio(text, voice_id, options)
         except (cloudlanguagetools.errors.TransientError, cloudlanguagetools.errors.PermanentError):
+            # these exceptions are already properly categorized, so just re-throw them
             raise
         except requests.exceptions.Timeout as e:
+            # transient error, use errors.TimeoutError
             raise cloudlanguagetools.errors.TimeoutError(f'timeout generating TTS audio for {service_name}: {e}') from e
-        except KeyError as e:
-            raise cloudlanguagetools.errors.PermanentError(f'service not found: {service_name}: {e}') from e
         except Exception as e:
+            # assume this is a transient error for now, and the error may later be categorized as permanent
             logging.exception(f'unexpected error generating TTS audio for {service_name}')
             raise cloudlanguagetools.errors.TransientError(f'unexpected error generating TTS audio for {service_name}: {e}') from e
 

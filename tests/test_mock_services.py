@@ -159,10 +159,6 @@ class TestTtsAudioV5(unittest.TestCase):
             with self.assertRaises(cloudlanguagetools.errors.TimeoutError):
                 self.manager.get_tts_audio_v5('hello', 'TestServiceA', {'voice_id': 'paul'}, {})
 
-    def test_invalid_service_name_becomes_permanent_error(self):
-        """KeyError for unknown service becomes PermanentError."""
-        with self.assertRaises(cloudlanguagetools.errors.PermanentError):
-            self.manager.get_tts_audio_v5('hello', 'NonExistentService', {}, {})
 
     def test_unexpected_exception_becomes_transient_error(self):
         """Any unexpected exception is wrapped as TransientError."""

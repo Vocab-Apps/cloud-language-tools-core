@@ -147,6 +147,7 @@ class NaverService(cloudlanguagetools.service.Service):
 
     def get_tts_voice_list(self):
         # returns list of TtSVoice
+        # https://api.ncloud-docs.com/docs/en/ai-naver-clovavoice-ttspremium#%EC%9D%8C%EC%84%B1%ED%95%A9%EC%84%B1%EB%AA%A9%EC%86%8C%EB%A6%AC%EB%AA%A9%EB%A1%9D
         return [
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.en_US, 'clara', cloudlanguagetools.constants.Gender.Female, 'Clara', 'General'),
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.en_US, 'danna', cloudlanguagetools.constants.Gender.Female, 'Anna', 'Premium'),
@@ -216,8 +217,8 @@ class NaverService(cloudlanguagetools.service.Service):
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nminsang', cloudlanguagetools.constants.Gender.Male, 'Minsang', 'Premium'),
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nminseo', cloudlanguagetools.constants.Gender.Female, 'Minseo', 'Premium'),
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nminyoung', cloudlanguagetools.constants.Gender.Female, 'Minyoung', 'Premium'),
+            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nmijin', cloudlanguagetools.constants.Gender.Female, 'Mijin', 'Premium'),
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nmovie', cloudlanguagetools.constants.Gender.Male, 'Choi Moobi', 'Premium'),
-            NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nnarae', cloudlanguagetools.constants.Gender.Female, 'Narae', 'Premium'),
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'noyj', cloudlanguagetools.constants.Gender.Female, 'Bomdal', 'Premium'),
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nraewon', cloudlanguagetools.constants.Gender.Male, 'Raewon', 'Premium'),
             NaverVoice(cloudlanguagetools.languages.AudioLanguage.ko_KR, 'nreview', cloudlanguagetools.constants.Gender.Male, 'Park Leebyu', 'Premium'),

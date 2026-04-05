@@ -1051,7 +1051,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
     def test_azure_voice_list_v3_dragonhd_options(self):
         """Verify DragonHD voices have the DragonHD-specific parameters."""
         azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
-        dragonhd_voices = [x for x in azure_voices if x.voice_key.get('voice_type', '') == 'NeuralHD']
+        dragonhd_voices = [x for x in azure_voices if 'DragonHD' in x.voice_key.get('name', '')]
         self.assertGreater(len(dragonhd_voices), 0, 'Should have at least one DragonHD voice')
 
         voice = dragonhd_voices[0]
@@ -1089,7 +1089,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         """Verify plain Neural voices don't have DragonHD/style/role parameters."""
         azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
         plain_voices = [x for x in azure_voices
-                        if x.voice_key.get('voice_type', '') == 'Neural'
+                        if 'DragonHD' not in x.voice_key.get('name', '')
                         and 'style' not in x.options
                         and 'role' not in x.options]
         self.assertGreater(len(plain_voices), 0)
@@ -1106,7 +1106,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         """Generate audio with a DragonHD voice using custom parameters."""
         azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]
         dragonhd_voices = [x for x in azure_voices
-                           if x.voice_key.get('voice_type', '') == 'NeuralHD'
+                           if 'DragonHD' in x.voice_key.get('name', '')
                            and AudioLanguage.en_US in x.audio_languages]
         self.assertGreater(len(dragonhd_voices), 0, 'Should have at least one en-US DragonHD voice')
 

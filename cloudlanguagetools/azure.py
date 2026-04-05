@@ -70,10 +70,9 @@ DEFAULT_STYLEDEGREE = 1.0
 def build_dragonhd_voice_attrs(voice_key, options):
     """Build the voice attributes string for SSML, including DragonHD parameters only if they differ from defaults."""
     voice_name = voice_key.get('name', '')
-    voice_type = voice_key.get('voice_type', '')
     voice_attrs = f'name="{voice_name}"'
 
-    if 'DragonHD' in voice_name or voice_type == 'NeuralHD':
+    if 'DragonHD' in voice_name:
         params = []
         temperature = options.get('temperature', DEFAULT_TEMPERATURE)
         if temperature != DEFAULT_TEMPERATURE:
@@ -175,8 +174,7 @@ class AzureVoice(cloudlanguagetools.ttsvoice.TtsVoice):
 
     def get_voice_key(self):
         return {
-            'name': self.name,
-            'voice_type': self.voice_type
+            'name': self.name
         }
 
     def get_voice_shortname(self):
@@ -212,8 +210,7 @@ def build_tts_voice_v3(voice_data) -> cloudlanguagetools.ttsvoice.TtsVoice_v3:
     else:
         voice_name = f'{display_name} ({voice_type})'    
     voice_key = {
-        'name': voice_data['Name'],
-        'voice_type': voice_type
+        'name': voice_data['Name']
     }
     options = build_voice_options(voice_data)
     service = cloudlanguagetools.constants.Service.Azure

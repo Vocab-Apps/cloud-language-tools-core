@@ -223,10 +223,11 @@ class GoogleService(cloudlanguagetools.service.Service):
                 if hasattr(detail, 'retry_delay'):
                     retry_after = detail.retry_delay.seconds
                     break
+            # default to 60 second retry: Google rate limits are often minute-based so this makes sense
+            if retry_after is None:
+                retry_after = 60
             logger.warning(f'Google TTS rate limit hit (retry_after={retry_after}s): {resource_exhausted_exception}')
-            if retry_after is not None:
-                raise cloudlanguagetools.errors.RateLimitRetryAfterError(str(resource_exhausted_exception), retry_after=retry_after)
-            raise cloudlanguagetools.errors.RateLimitError(str(resource_exhausted_exception))
+            raise cloudlanguagetools.errors.RateLimitRetryAfterError(str(resource_exhausted_exception), retry_after=retry_after)
         except google.api_core.exceptions.BadRequest as bad_request_exception:
             logger.exception(bad_request_exception)
             error_message = f'Could not generate audio: {str(bad_request_exception)}'

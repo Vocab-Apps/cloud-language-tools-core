@@ -1,6 +1,13 @@
 #!/bin/bash
 set -eoux pipefail
 
+# ensure we are on the main branch
+CURRENT_BRANCH=$(git branch --show-current)
+if [ "$CURRENT_BRANCH" != "main" ]; then
+  echo "Error: must be on the main branch to package (currently on '$CURRENT_BRANCH')"
+  exit 1
+fi
+
 # bump version argument
 # default should be patch, but could be major or minor
 BUMP_TYPE=${1:-patch}

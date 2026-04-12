@@ -244,7 +244,6 @@ class ServiceManager():
             raise cloudlanguagetools.errors.TimeoutError(f'timeout generating TTS audio for {service_name}: {e}') from e
         except Exception as e:
             # assume this is a transient error for now, and the error may later be categorized as permanent
-            logging.exception(f'unexpected error generating TTS audio for {service_name}')
             raise cloudlanguagetools.errors.TransientError(f'unexpected error generating TTS audio for {service_name}: {e}') from e
 
     def get_translation(self, text, service_name: str, from_language_key, to_language_key):

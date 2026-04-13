@@ -119,17 +119,17 @@ class ForvoService(cloudlanguagetools.service.Service):
             open(output_temp_filename, 'wb').write(audio_request.content)
             return output_temp_file
         except requests.exceptions.ReadTimeout as exception:
-            raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving forvo audio')
+            raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving forvo audio') from exception
         except cloudlanguagetools.errors.NotFoundError as exception:
-            raise exception
+            raise
         # handle json decode error
         except json.decoder.JSONDecodeError as exception:
-            logger.error(f'could not decode json response from forvo: {response.content}')
-            raise cloudlanguagetools.errors.RequestError('Unable to retrieve audio from Forvo')
+            logger.warning(f'could not decode json response from forvo: {response.content}')
+            raise cloudlanguagetools.errors.RequestError('Unable to retrieve audio from Forvo') from exception
         except Exception as exception:
             # make sure not to leak url and key
-            logger.exception('could not retrieve forvo audio')
-            raise cloudlanguagetools.errors.RequestError('Unable to retrieve audio from Forvo')
+            logger.warning(f'could not retrieve forvo audio: {str(exception)}')
+            raise cloudlanguagetools.errors.RequestError('Unable to retrieve audio from Forvo') from exception
 
 
     def get_language_enum(self, language_id):

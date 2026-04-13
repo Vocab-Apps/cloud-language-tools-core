@@ -44,13 +44,12 @@ class Service():
                 audio.write(response.content)
             return output_temp_file            
         except requests.exceptions.ReadTimeout as exception:
-            raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving {self.get_service_name()} audio')
+            raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving {self.get_service_name()} audio') from exception
         except cloudlanguagetools.errors.RequestError:
             raise  # Re-raise our custom error with the API message
         except Exception as exception:
-            error_message = f'could not retrieve audio from {self.get_service_name()}'
-            logger.exception(error_message)
-            raise cloudlanguagetools.errors.RequestError(error_message)
+            error_message = f'could not retrieve audio from {self.get_service_name()}: {str(exception)}'
+            raise cloudlanguagetools.errors.RequestError(error_message) from exception
 
     def get_request_audio_format(self, format_map: Dict, options: Dict, default_format: cloudlanguagetools.options.AudioFormat):
         response_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, 

@@ -61,10 +61,10 @@ class Service():
             return output_temp_file            
         except requests.exceptions.ReadTimeout as exception:
             raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving {self.get_service_name()} audio') from exception
-        except cloudlanguagetools.errors.RateLimitError:
+        except cloudlanguagetools.errors.TransientError:
             raise
-        except cloudlanguagetools.errors.RequestError:
-            raise  # Re-raise our custom error with the API message
+        except cloudlanguagetools.errors.PermanentError:
+            raise
         except Exception as exception:
             error_message = f'could not retrieve audio from {self.get_service_name()}: {str(exception)}'
             raise cloudlanguagetools.errors.RequestError(error_message) from exception

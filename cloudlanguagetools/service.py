@@ -2,6 +2,7 @@ import requests
 import tempfile
 import logging
 import pprint
+import json
 from typing import List, Dict
 
 import cloudlanguagetools.constants
@@ -26,16 +27,25 @@ class Service():
             kwargs['timeout'] = cloudlanguagetools.constants.RequestTimeout
             logger.debug(f'{self.get_service_name()} TTS request - URL: {url}, kwargs: {pprint.pformat(kwargs)}')
             response = self.post_request(url, **kwargs)
+            if response.status_code == 429:
+                logger.warning(f'{self.get_service_name()} rate limited (429): {response.content}')
+                error_message = f'{self.get_service_name()}: rate limited (429)'
+                try:
+                    error_data = json.loads(response.content)
+                    if 'detail' in error_data and 'message' in error_data['detail']:
+                        error_message = f'{self.get_service_name()}: {error_data["detail"]["message"]}'
+                except (json.JSONDecodeError, KeyError, TypeError):
+                    pass
+                raise cloudlanguagetools.errors.RateLimitError(error_message)
             if response.status_code >= 400:
-                logger.error(f'{self.get_service_name()} audio request failed with status code {response.status_code}: {response.content}')
+                logger.warning(f'{self.get_service_name()} audio request failed with status code {response.status_code}: {response.content}')
                 # Try to parse the error message from the API response
                 try:
-                    import json
                     error_data = json.loads(response.content)
                     if 'detail' in error_data and 'message' in error_data['detail']:
                         error_message = error_data['detail']['message']
                         raise cloudlanguagetools.errors.RequestError(f'{self.get_service_name()}: {error_message}')
-                except (json.JSONDecodeError, KeyError):
+                except (json.JSONDecodeError, KeyError, TypeError):
                     pass  # Fall back to default error handling
             response.raise_for_status()
             output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_audio_')
@@ -45,6 +55,8 @@ class Service():
             return output_temp_file            
         except requests.exceptions.ReadTimeout as exception:
             raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving {self.get_service_name()} audio') from exception
+        except cloudlanguagetools.errors.RateLimitError:
+            raise
         except cloudlanguagetools.errors.RequestError:
             raise  # Re-raise our custom error with the API message
         except Exception as exception:

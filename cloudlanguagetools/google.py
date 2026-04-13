@@ -228,14 +228,10 @@ class GoogleService(cloudlanguagetools.service.Service):
                 retry_after = 60
             logger.warning(f'Google TTS rate limit hit (retry_after={retry_after}s): {resource_exhausted_exception}')
             raise cloudlanguagetools.errors.RateLimitRetryAfterError(str(resource_exhausted_exception), retry_after=retry_after)
-        except google.api_core.exceptions.BadRequest as bad_request_exception:
-            logger.exception(bad_request_exception)
-            error_message = f'Could not generate audio: {str(bad_request_exception)}'
-            raise cloudlanguagetools.errors.RequestError(error_message)
         except google.api_core.exceptions.GoogleAPICallError as api_error:
-            logger.exception(api_error)
+            logger.warning(f'Google Cloud TTS error: {api_error}, code: {api_error.code}, details: {api_error.details}, errors: {api_error.errors}')
             error_message = f'Google Cloud TTS error: {str(api_error)}'
-            raise cloudlanguagetools.errors.RequestError(error_message)
+            raise cloudlanguagetools.errors.RequestError(error_message) from api_error
 
 
     def get_tts_voice_list(self):

@@ -95,7 +95,8 @@ class ForvoService(cloudlanguagetools.service.Service):
                                     verify=self.verify_ssl)
             logger.info(f'forvo response status={response.status_code} url={response.url} content={response.content}')
             if response.url == 'https://forvo.com/404':
-                raise cloudlanguagetools.errors.NotFoundError(f'Forvo returned 404 for word [{text}]')
+                error_message = f"Pronunciation not found in Forvo for word [{text}], language={language}, country={voice_key['country_code']}"
+                raise cloudlanguagetools.errors.NotFoundError(error_message)
             if response.status_code == 414:
                 raise cloudlanguagetools.errors.InputError(f'Forvo: text too long')
             response.raise_for_status()

@@ -76,36 +76,36 @@ TTS_SUPPORTED_LANGUAGES = [
 ]
 
 GEMINI_VOICES = [
-    ('Zephyr', 'Bright', cloudlanguagetools.constants.Gender.Any),
-    ('Puck', 'Upbeat', cloudlanguagetools.constants.Gender.Any),
-    ('Charon', 'Informative', cloudlanguagetools.constants.Gender.Any),
-    ('Kore', 'Firm', cloudlanguagetools.constants.Gender.Any),
-    ('Fenrir', 'Excitable', cloudlanguagetools.constants.Gender.Any),
-    ('Leda', 'Youthful', cloudlanguagetools.constants.Gender.Any),
-    ('Orus', 'Firm', cloudlanguagetools.constants.Gender.Any),
-    ('Aoede', 'Breezy', cloudlanguagetools.constants.Gender.Any),
-    ('Callirrhoe', 'Easy-going', cloudlanguagetools.constants.Gender.Any),
-    ('Autonoe', 'Bright', cloudlanguagetools.constants.Gender.Any),
-    ('Enceladus', 'Breathy', cloudlanguagetools.constants.Gender.Any),
-    ('Iapetus', 'Clear', cloudlanguagetools.constants.Gender.Any),
-    ('Umbriel', 'Easy-going', cloudlanguagetools.constants.Gender.Any),
-    ('Algieba', 'Smooth', cloudlanguagetools.constants.Gender.Any),
-    ('Despina', 'Smooth', cloudlanguagetools.constants.Gender.Any),
-    ('Erinome', 'Clear', cloudlanguagetools.constants.Gender.Any),
-    ('Algenib', 'Gravelly', cloudlanguagetools.constants.Gender.Any),
-    ('Rasalgethi', 'Informative', cloudlanguagetools.constants.Gender.Any),
-    ('Laomedeia', 'Upbeat', cloudlanguagetools.constants.Gender.Any),
-    ('Achernar', 'Soft', cloudlanguagetools.constants.Gender.Any),
-    ('Alnilam', 'Firm', cloudlanguagetools.constants.Gender.Any),
-    ('Schedar', 'Even', cloudlanguagetools.constants.Gender.Any),
-    ('Gacrux', 'Mature', cloudlanguagetools.constants.Gender.Any),
-    ('Pulcherrima', 'Forward', cloudlanguagetools.constants.Gender.Any),
-    ('Achird', 'Friendly', cloudlanguagetools.constants.Gender.Any),
-    ('Zubenelgenubi', 'Casual', cloudlanguagetools.constants.Gender.Any),
-    ('Vindemiatrix', 'Gentle', cloudlanguagetools.constants.Gender.Any),
-    ('Sadachbia', 'Lively', cloudlanguagetools.constants.Gender.Any),
-    ('Sadaltager', 'Knowledgeable', cloudlanguagetools.constants.Gender.Any),
-    ('Sulafat', 'Warm', cloudlanguagetools.constants.Gender.Any),
+    ('Zephyr', 'Bright', cloudlanguagetools.constants.Gender.Female),
+    ('Puck', 'Upbeat', cloudlanguagetools.constants.Gender.Male),
+    ('Charon', 'Informative', cloudlanguagetools.constants.Gender.Male),
+    ('Kore', 'Firm', cloudlanguagetools.constants.Gender.Female),
+    ('Fenrir', 'Excitable', cloudlanguagetools.constants.Gender.Male),
+    ('Leda', 'Youthful', cloudlanguagetools.constants.Gender.Female),
+    ('Orus', 'Firm', cloudlanguagetools.constants.Gender.Male),
+    ('Aoede', 'Breezy', cloudlanguagetools.constants.Gender.Female),
+    ('Callirrhoe', 'Easy-going', cloudlanguagetools.constants.Gender.Female),
+    ('Autonoe', 'Bright', cloudlanguagetools.constants.Gender.Female),
+    ('Enceladus', 'Breathy', cloudlanguagetools.constants.Gender.Male),
+    ('Iapetus', 'Clear', cloudlanguagetools.constants.Gender.Male),
+    ('Umbriel', 'Easy-going', cloudlanguagetools.constants.Gender.Male),
+    ('Algieba', 'Smooth', cloudlanguagetools.constants.Gender.Male),
+    ('Despina', 'Smooth', cloudlanguagetools.constants.Gender.Female),
+    ('Erinome', 'Clear', cloudlanguagetools.constants.Gender.Female),
+    ('Algenib', 'Gravelly', cloudlanguagetools.constants.Gender.Male),
+    ('Rasalgethi', 'Informative', cloudlanguagetools.constants.Gender.Male),
+    ('Laomedeia', 'Upbeat', cloudlanguagetools.constants.Gender.Female),
+    ('Achernar', 'Soft', cloudlanguagetools.constants.Gender.Female),
+    ('Alnilam', 'Firm', cloudlanguagetools.constants.Gender.Male),
+    ('Schedar', 'Even', cloudlanguagetools.constants.Gender.Male),
+    ('Gacrux', 'Mature', cloudlanguagetools.constants.Gender.Female),
+    ('Pulcherrima', 'Forward', cloudlanguagetools.constants.Gender.Female),
+    ('Achird', 'Friendly', cloudlanguagetools.constants.Gender.Male),
+    ('Zubenelgenubi', 'Casual', cloudlanguagetools.constants.Gender.Male),
+    ('Vindemiatrix', 'Gentle', cloudlanguagetools.constants.Gender.Female),
+    ('Sadachbia', 'Lively', cloudlanguagetools.constants.Gender.Male),
+    ('Sadaltager', 'Knowledgeable', cloudlanguagetools.constants.Gender.Male),
+    ('Sulafat', 'Warm', cloudlanguagetools.constants.Gender.Female),
 ]
 
 def get_tts_voice_list():
@@ -217,10 +217,7 @@ class GeminiService(cloudlanguagetools.service.Service):
         """Generate TTS audio using Google Gemini API via google-genai SDK"""
         
         # Extract voice name from voice_key dict
-        if isinstance(voice_key, dict) and 'name' in voice_key:
-            voice_name = voice_key['name']
-        else:
-            raise cloudlanguagetools.errors.RequestError(f'Invalid voice key format: {voice_key}')
+        voice_name = voice_key['name']
         
         # Get model and format from options
         model = options.get('model', DEFAULT_MODEL)
@@ -297,7 +294,7 @@ class GeminiService(cloudlanguagetools.service.Service):
                     # This is a daily quota exhaustion, not a rate limit
                     raise cloudlanguagetools.errors.RequestError(
                         'Gemini TTS global daily quota exhausted. Please try again tomorrow.'
-                    )
+                    ) from e
                 
                 # Otherwise, it's a regular rate limit error
                 # Extract retry time from error details if available
@@ -343,8 +340,6 @@ class GeminiService(cloudlanguagetools.service.Service):
             raise cloudlanguagetools.errors.RequestError(f'Gemini TTS client error: {e}')
 
         except Exception as e:
-            # Log the full exception details for debugging
-            logger.exception(f'Unknown Error while retrieving Gemini TTS audio')
            
             # For other errors, raise a simplified RequestError
-            raise cloudlanguagetools.errors.RequestError('Error retrieving Gemini TTS audio')
+            raise cloudlanguagetools.errors.RequestError('Error retrieving Gemini TTS audio') from e

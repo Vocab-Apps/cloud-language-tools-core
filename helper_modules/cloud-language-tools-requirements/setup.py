@@ -6,7 +6,7 @@ from setuptools import setup
 
 
 setup(name='clt_requirements',
-      version='2.2',
+      version='2.3',
       description='Helper module for Cloud Language Tools, additional dependencies',
       url='https://github.com/Vocab-Apps/cloud-language-tools-core',
       author='Luc',
@@ -20,7 +20,7 @@ setup(name='clt_requirements',
       install_requires=[
         'azure-cognitiveservices-speech',
         'requests',
-        'google-cloud-texttospeech',
+        'google-cloud-texttospeech>=2.29.0',
         'google-cloud-translate',
         'google-genai',
         'boto3',

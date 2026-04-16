@@ -258,14 +258,8 @@ class GeminiService(cloudlanguagetools.service.Service):
         self.client = None
 
     def configure(self, config):
-        self.config = config
-        self.api_key = config.get('api_key', None)
-        # logger.debug(f'Configuring Gemini service with api_key: {self.api_key[:20] if self.api_key else None}...')
-        if self.api_key is None:
-            raise cloudlanguagetools.errors.AuthenticationError('api_key not set')
-        
-        # Initialize the genai client
-        self.client = genai.Client(api_key=self.api_key)
+        # we rely on os.environ['GOOGLE_APPLICATION_CREDENTIALS'] from the Google service
+        pass
 
     def get_tts_voice_list(self):
         return get_tts_voice_list()

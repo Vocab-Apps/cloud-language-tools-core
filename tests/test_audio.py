@@ -965,7 +965,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         self.recognize_and_verify_text(
             audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
 
-    @skip_unreliable_clt_test() # rate limiting on gemini
+    # @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_english(self):
         """Test Gemini TTS with English"""
         source_text = self.ENGLISH_INPUT_TEXT

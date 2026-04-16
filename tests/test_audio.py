@@ -993,7 +993,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         voice_key = {
             "name": "Kore"
         }
-        options = {'model': 'gemini-2.5-pro-preview-tts'}
+        options = {'model': 'gemini-2.5-pro-tts'}
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
 
         self.recognize_and_verify_text(
@@ -1009,7 +1009,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         
         for voice_name in voices_to_test:
             voice_key = {"name": voice_name}
-            options = {'model': 'gemini-2.5-flash-preview-tts'}
+            options = {'model': 'gemini-2.5-flash-tts'}
             
             audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
             
@@ -1033,8 +1033,8 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
             "name": "Zephyr"
         }
         options = {
-            'model': 'gemini-2.5-flash-preview-tts',
-            'audio_format': 'ogg_opus'
+            'model': 'gemini-2.5-flash-tts',
+            'format': 'ogg_opus'
         }
         
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)

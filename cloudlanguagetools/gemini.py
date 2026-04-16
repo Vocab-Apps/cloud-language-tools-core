@@ -1,15 +1,11 @@
 import tempfile
 import logging
-import wave
-import os
-import pprint
-import re
 import pprint
 from typing import List
 
-from google import genai
-from google.genai import types
-from pydub import AudioSegment
+from google.api_core.client_options import ClientOptions
+import google.cloud.texttospeech
+import google.api_core.exceptions
 
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
@@ -18,21 +14,19 @@ import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.errors
 from cloudlanguagetools.languages import AudioLanguage
-from cloudlanguagetools.options import AudioFormat
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = 'gemini-2.5-flash-preview-tts'
-
-# note the rate limits:
-# https://ai.google.dev/gemini-api/docs/rate-limits#tier-1
+DEFAULT_MODEL = 'gemini-2.5-flash-tts'
 
 VOICE_OPTIONS = {
     'model': {
         'type': cloudlanguagetools.options.ParameterType.list.name,
         'values': [
-            'gemini-2.5-flash-preview-tts',
-            'gemini-2.5-pro-preview-tts'
+            'gemini-2.5-flash-tts',
+            'gemini-2.5-pro-tts',
+            'gemini-2.5-flash-lite-preview-tts',
+            'gemini-3.1-flash-tts-preview',
         ],
         'default': DEFAULT_MODEL
     },
@@ -191,75 +185,18 @@ def build_tts_voice_v3(voice_name, description, gender):
         service_fee=cloudlanguagetools.constants.ServiceFee.paid
     )
 
-def convert_pcm_to_audio_file(audio_data, audio_format):
-    """Convert PCM audio data to the requested format and return a NamedTemporaryFile.
-    
-    Args:
-        audio_data: Raw PCM audio data from Gemini (24kHz, 16-bit, mono)
-        audio_format: Target format ('wav', 'mp3', 'ogg_opus')
-        
-    Returns:
-        tempfile.NamedTemporaryFile containing the converted audio
-        
-    Note:
-        Gemini returns 24kHz, mono, 16-bit PCM audio data.
-        Ref: https://ai.google.dev/gemini-api/docs/speech-generation
-    """
-    
-    # First create a temporary WAV file from PCM data
-    wav_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_wav_', suffix='.wav', delete=False)
-    with wave.open(wav_temp_file.name, "wb") as wf:
-        wf.setnchannels(1)  # mono
-        wf.setsampwidth(2)  # 16-bit
-        wf.setframerate(24000)  # 24kHz
-        wf.writeframes(audio_data)
-    
-    if audio_format == 'wav':
-        # For WAV, just return the file we already created
-        output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.wav')
-        with open(wav_temp_file.name, 'rb') as src:
-            output_temp_file.write(src.read())
-        output_temp_file.seek(0)
-        os.unlink(wav_temp_file.name)
-        return output_temp_file
-    
-    # For other formats, convert using pydub
-    audio_segment = AudioSegment.from_wav(wav_temp_file.name)
-    
-    if audio_format == 'ogg_opus':
-        # Convert to OGG Opus
-        output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.ogg', delete=False)
-        audio_segment.export(output_temp_file.name, format="ogg", codec="libopus")
-        suffix = '.ogg'
-    else:  # Default to MP3
-        # Convert to MP3
-        output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.mp3', delete=False)
-        audio_segment.export(output_temp_file.name, format="mp3")
-        suffix = '.mp3'
-    
-    # Clean up the intermediate WAV file
-    os.unlink(wav_temp_file.name)
-    
-    # Reopen as NamedTemporaryFile for compatibility with existing code
-    final_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix=suffix)
-    with open(output_temp_file.name, 'rb') as src:
-        final_temp_file.write(src.read())
-    final_temp_file.seek(0)
-    
-    # Clean up the intermediate output file
-    os.unlink(output_temp_file.name)
-    
-    return final_temp_file
-
 class GeminiService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.service = cloudlanguagetools.constants.Service.Gemini
-        self.api_key_required = True
-        self.client = None
 
     def configure(self, config):
         # we rely on os.environ['GOOGLE_APPLICATION_CREDENTIALS'] from the Google service
         pass
+
+    def get_client(self):
+        return google.cloud.texttospeech.TextToSpeechClient(
+            client_options=ClientOptions(api_endpoint='texttospeech.googleapis.com')
+        )
 
     def get_tts_voice_list(self):
         return get_tts_voice_list()
@@ -273,132 +210,57 @@ class GeminiService(cloudlanguagetools.service.Service):
         return result
 
     def get_tts_audio(self, text, voice_key, options):
-        """Generate TTS audio using Google Gemini API via google-genai SDK"""
-        
-        # Extract voice name from voice_key dict
+        """Generate TTS audio using Cloud Text-to-Speech API with Gemini models"""
+
         voice_name = voice_key['name']
-        
-        # Get model and format from options
         model = options.get('model', DEFAULT_MODEL)
-        audio_format = options.get('audio_format', 'mp3')
-        
+
+        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
+        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
+
+        audio_format_map = {
+            cloudlanguagetools.options.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.MP3,
+            cloudlanguagetools.options.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS,
+            cloudlanguagetools.options.AudioFormat.wav: google.cloud.texttospeech.AudioEncoding.LINEAR16,
+        }
+
         try:
-            logger.debug(f'Making Gemini TTS request with voice: {voice_name}, model: {model}, format: {audio_format}')
-            
-            # Generate content with audio response using the SDK
-            response = self.client.models.generate_content(
-                model=model,
-                contents=text,
-                config=types.GenerateContentConfig(
-                    response_modalities=["AUDIO"],
-                    speech_config=types.SpeechConfig(
-                        voice_config=types.VoiceConfig(
-                            prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                                voice_name=voice_name,
-                            )
-                        )
-                    ),
-                )
+            client = self.get_client()
+
+            voice = google.cloud.texttospeech.VoiceSelectionParams(
+                language_code='en-US',
+                name=voice_name,
+                model_name=model,
             )
-            
-            # Extract audio data from response
-            if not response.candidates or len(response.candidates) == 0:
-                # This can happen due to safety filters, rate limits, or API errors
-                logger.error(f'No candidates in Gemini response. Full response: {pprint.pformat(response)}')
-                # Check if this looks like a rate limit issue
-                response_str = str(response).lower()
-                if '429' in response_str or 'rate limit' in response_str:
-                    logger.warning(f'Gemini TTS rate limit hit (no candidates in response)')
-                    raise cloudlanguagetools.errors.RateLimitError('Gemini API rate limit exceeded')
-                raise cloudlanguagetools.errors.RequestError('No audio candidates in response')
-            
-            candidate = response.candidates[0]
-            if not candidate.content or not candidate.content.parts:
-                # This might occur if content was filtered or if there's an API issue
-                finish_reason = getattr(candidate, 'finish_reason', None)
-                logger.error(f'No content parts in response. Finish reason: {finish_reason}, Response: {pprint.pformat(response)}')
-                
-                # Simplified error message
-                if finish_reason and 'SAFETY' in str(finish_reason):
-                    raise cloudlanguagetools.errors.RequestError('Content blocked by safety filters')
-                elif finish_reason and 'RECITATION' in str(finish_reason):
-                    raise cloudlanguagetools.errors.RequestError('Content blocked due to copyright detection')
-                elif finish_reason and 'BLOCKLIST' in str(finish_reason):
-                    raise cloudlanguagetools.errors.RequestError('Content blocked by terminology blocklist')
-                else:
-                    raise cloudlanguagetools.errors.RequestError('No content generated')
-            
-            # Find the audio part
-            audio_part = None
-            for part in candidate.content.parts:
-                if hasattr(part, 'inline_data') and part.inline_data:
-                    audio_part = part
+
+            audio_config = google.cloud.texttospeech.AudioConfig(
+                audio_encoding=audio_format_map[audio_format],
+            )
+
+            input_text = google.cloud.texttospeech.SynthesisInput(text=text)
+
+            logger.debug(f'Making Gemini TTS request with voice: {voice_name}, model: {model}, format: {audio_format_str}')
+
+            response = client.synthesize_speech(
+                request={"input": input_text, "voice": voice, "audio_config": audio_config}
+            )
+
+            output_temp_file = tempfile.NamedTemporaryFile()
+            with open(output_temp_file.name, "wb") as out:
+                out.write(response.audio_content)
+
+            return output_temp_file
+
+        except google.api_core.exceptions.ResourceExhausted as e:
+            retry_after = None
+            for detail in e.details:
+                if hasattr(detail, 'retry_delay'):
+                    retry_after = detail.retry_delay.seconds
                     break
-            
-            if audio_part is None or not audio_part.inline_data:
-                raise cloudlanguagetools.errors.RequestError('No audio data found in response')
-            
-            # Get the raw audio data (PCM format from Gemini)
-            audio_data = audio_part.inline_data.data
-            
-            # Convert audio format as requested using the helper function
-            return convert_pcm_to_audio_file(audio_data, audio_format)
-
-        except genai.errors.ClientError as e:
-            # Check if this is a rate limit error (ClientError with code 429)
-            if hasattr(e, 'code') and e.code == 429:
-                # Check if this is a daily quota exhaustion error
-                error_str = str(e)
-                if 'generativelanguage.googleapis.com/generate_requests_per_model_per_day' in error_str:
-                    # This is a daily quota exhaustion, not a rate limit
-                    raise cloudlanguagetools.errors.RequestError(
-                        'Gemini TTS global daily quota exhausted. Please try again tomorrow.'
-                    ) from e
-                
-                # Otherwise, it's a regular rate limit error
-                # Extract retry time from error details if available
-                retry_after = None
-                
-                # The Google GenAI ClientError includes structured error information
-                # First, try to extract from the string representation which includes the full error
-                retry_match = re.search(r"'retryDelay':\s*'(\d+)s'", error_str)
-                if retry_match:
-                    retry_after = int(retry_match.group(1))
-                
-                # Try to get from response if available  
-                error_dict = {}
-                if hasattr(e, 'response') and hasattr(e.response, 'json') and callable(e.response.json):
-                    try:
-                        error_dict = e.response.json()
-                    except:
-                        pass
-                
-                # Look for RetryInfo in error details
-                if 'error' in error_dict and 'details' in error_dict['error']:
-                    for detail in error_dict['error']['details']:
-                        if detail.get('@type') == 'type.googleapis.com/google.rpc.RetryInfo':
-                            retry_delay = detail.get('retryDelay', '')
-                            # Extract seconds from format like "20s"
-                            if retry_delay.endswith('s'):
-                                try:
-                                    retry_after = int(retry_delay[:-1])
-                                except ValueError:
-                                    pass
-                
-                if retry_after is not None:
-                    logger.warning(f'Gemini TTS rate limit hit (retry_after={retry_after}s): {e}')
-                    raise cloudlanguagetools.errors.RateLimitRetryAfterError(
-                        'Gemini API rate limit exceeded',
-                        retry_after=retry_after
-                    )
-                logger.warning(f'Gemini TTS rate limit hit: {e}')
-                raise cloudlanguagetools.errors.RateLimitError('Gemini API rate limit exceeded')
-
-            # Non-rate-limit ClientError
-            logger.exception(f'Client Error while retrieving Gemini TTS audio')
-            raise cloudlanguagetools.errors.RequestError(f'Gemini TTS client error: {e}')
-
-        except Exception as e:
-           
-            # For other errors, raise a simplified RequestError
-            raise cloudlanguagetools.errors.RequestError('Error retrieving Gemini TTS audio') from e
+            if retry_after is None:
+                retry_after = 60
+            logger.warning(f'Gemini TTS rate limit hit (retry_after={retry_after}s): {e}')
+            raise cloudlanguagetools.errors.RateLimitRetryAfterError(str(e), retry_after=retry_after)
+        except google.api_core.exceptions.GoogleAPICallError as e:
+            logger.warning(f'Gemini TTS error: {e}, code: {e.code}')
+            raise cloudlanguagetools.errors.RequestError(f'Gemini TTS error: {str(e)}') from e

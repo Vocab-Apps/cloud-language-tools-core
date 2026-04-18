@@ -420,12 +420,15 @@ class AzureService(cloudlanguagetools.service.Service):
 
         result = synthesizer.speak_ssml(ssml_str)
         if result.reason != azure.cognitiveservices.speech.ResultReason.SynthesizingAudioCompleted:
-            logger.warning(f'Azure TTS synthesis failed: reason={result.cancellation_details.reason}, error_details={result.cancellation_details.error_details}')
+            error_details = result.cancellation_details.error_details
+            logger.warning(f'Azure TTS synthesis failed: reason={result.cancellation_details.reason}, error_details={error_details}')
             # special case errors:
-            if 'standard voices will no longer be supported' in result.cancellation_details.error_details:
+            if 'standard voices will no longer be supported' in error_details:
                 error_message = 'Azure Standard voices are not supported anymore, please switch to Neural voices.'
+            elif 'timeout waiting for the first audio chunk' in error_details:
+                raise cloudlanguagetools.errors.TimeoutError(f'Azure TTS timed out: {error_details}')
             else:
-                error_message = f'Could not generate audio: {result.cancellation_details.reason} {result.cancellation_details.error_details}'
+                error_message = f'Could not generate audio: {result.cancellation_details.reason} {error_details}'
             raise cloudlanguagetools.errors.RequestError(error_message)
 
         stream = azure.cognitiveservices.speech.AudioDataStream(result)

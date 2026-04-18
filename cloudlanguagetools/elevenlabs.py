@@ -212,6 +212,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             'is': cloudlanguagetools.languages.AudioLanguage.is_IS, # Icelandic,
             'jv': cloudlanguagetools.languages.AudioLanguage.jv_ID, # Javanese,
             'sr': cloudlanguagetools.languages.AudioLanguage.sr_RS, # Serbian
+            'sd': cloudlanguagetools.languages.AudioLanguage.sd_PK, # Sindhi
         }
         if language_id in override_map:
             return override_map[language_id]

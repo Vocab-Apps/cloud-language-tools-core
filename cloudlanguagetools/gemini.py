@@ -17,16 +17,16 @@ from cloudlanguagetools.languages import AudioLanguage
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = 'gemini-2.5-flash-tts'
+DEFAULT_MODEL = 'gemini-3.1-flash-tts-preview'
 
 VOICE_OPTIONS = {
     'model': {
         'type': cloudlanguagetools.options.ParameterType.list.name,
         'values': [
+            'gemini-3.1-flash-tts-preview',
             'gemini-2.5-flash-tts',
             'gemini-2.5-pro-tts',
             'gemini-2.5-flash-lite-preview-tts',
-            'gemini-3.1-flash-tts-preview',
         ],
         'default': DEFAULT_MODEL
     },

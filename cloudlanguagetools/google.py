@@ -229,6 +229,10 @@ class GoogleService(cloudlanguagetools.service.Service):
             logger.warning(f'Google TTS rate limit hit (retry_after={retry_after}s): {resource_exhausted_exception}')
             rate_limit_message = f'Google TTS rate limit hit. Please retry after {retry_after} seconds.'
             raise cloudlanguagetools.errors.RateLimitRetryAfterError(rate_limit_message, retry_after=retry_after) from resource_exhausted_exception
+        except google.api_core.exceptions.InvalidArgument as invalid_argument_error:
+            logger.warning(f'Google Cloud TTS invalid argument: {invalid_argument_error}, code: {invalid_argument_error.code}, details: {invalid_argument_error.details}, errors: {invalid_argument_error.errors}')
+            error_message = f'Google Cloud TTS error: {str(invalid_argument_error)}'
+            raise cloudlanguagetools.errors.InputError(error_message) from invalid_argument_error
         except google.api_core.exceptions.GoogleAPICallError as api_error:
             logger.warning(f'Google Cloud TTS error: {api_error}, code: {api_error.code}, details: {api_error.details}, errors: {api_error.errors}')
             error_message = f'Google Cloud TTS error: {str(api_error)}'

@@ -63,6 +63,33 @@ class TestGoogleVoicePitchSupport(unittest.TestCase):
         self.assertNotIn('pitch', voice.get_options())
 
 
+class TestGoogleTtsInvalidArgument(unittest.TestCase):
+
+    VOICE_KEY = {
+        'name': 'en-US-Standard-A',
+        'language_code': 'en-US',
+        'ssml_gender': 'FEMALE',
+    }
+    OPTIONS = {}
+
+    @patch.object(cloudlanguagetools.google.GoogleService, 'get_client')
+    def test_invalid_argument_raises_input_error(self, mock_get_client):
+        """InvalidArgument from Google (e.g. sentence too long) must raise InputError to prevent client retries."""
+        exc = google.api_core.exceptions.InvalidArgument(
+            'This request contains sentences that are too long. '
+            'Consider splitting up long sentences with sentence ending punctuation e.g. periods. '
+            'Sentence starting with: "\U0001d410\U0001d410 Eg" is too long.'
+        )
+
+        mock_client = MagicMock()
+        mock_client.synthesize_speech.side_effect = exc
+        mock_get_client.return_value = mock_client
+
+        service = cloudlanguagetools.google.GoogleService()
+        with self.assertRaises(cloudlanguagetools.errors.InputError):
+            service.get_tts_audio('hello', self.VOICE_KEY, self.OPTIONS)
+
+
 class TestGoogleTtsRateLimit(unittest.TestCase):
 
     VOICE_KEY = {

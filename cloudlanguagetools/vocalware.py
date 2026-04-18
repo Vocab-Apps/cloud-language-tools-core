@@ -82,6 +82,7 @@ class VocalWareService(cloudlanguagetools.service.Service):
         # reformat certain error messages
         if response.status_code == 503:
             error_message = f'VocalWare service temporarily unavailable (503)'
+            raise cloudlanguagetools.errors.TimeoutError(error_message)
 
         raise cloudlanguagetools.errors.RequestError(error_message)
 

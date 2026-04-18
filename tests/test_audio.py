@@ -977,7 +977,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.fr_FR, 'fr-FR')
 
-    # @skip_unreliable_clt_test() # rate limiting on gemini
+    @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_spanish(self):
         """Test Gemini TTS with Spanish"""
         source_text = self.SPANISH_INPUT_TEXT

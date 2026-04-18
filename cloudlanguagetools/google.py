@@ -227,7 +227,8 @@ class GoogleService(cloudlanguagetools.service.Service):
             if retry_after is None:
                 retry_after = 60
             logger.warning(f'Google TTS rate limit hit (retry_after={retry_after}s): {resource_exhausted_exception}')
-            raise cloudlanguagetools.errors.RateLimitRetryAfterError(str(resource_exhausted_exception), retry_after=retry_after)
+            rate_limit_message = f'Google TTS rate limit hit. Please retry after {retry_after} seconds.'
+            raise cloudlanguagetools.errors.RateLimitRetryAfterError(rate_limit_message, retry_after=retry_after)
         except google.api_core.exceptions.GoogleAPICallError as api_error:
             logger.warning(f'Google Cloud TTS error: {api_error}, code: {api_error.code}, details: {api_error.details}, errors: {api_error.errors}')
             error_message = f'Google Cloud TTS error: {str(api_error)}'

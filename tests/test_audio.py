@@ -971,19 +971,19 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         source_text = self.ENGLISH_INPUT_TEXT
         self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.en_US, 'en-US')
 
-    @skip_unreliable_clt_test() # rate limiting on gemini
+    # @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_french(self):
         """Test Gemini TTS with French"""
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.fr_FR, 'fr-FR')
 
-    @skip_unreliable_clt_test() # rate limiting on gemini
+    # @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_spanish(self):
         """Test Gemini TTS with Spanish"""
         source_text = self.SPANISH_INPUT_TEXT
         self.verify_service_audio_language_v3(source_text, Service.Gemini, AudioLanguage.es_ES, 'es-ES')
 
-    @skip_unreliable_clt_test() # rate limiting on gemini
+    # @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_voice_options(self):
         """Test Gemini TTS with different voice and model options"""
         service = 'Gemini'
@@ -997,9 +997,9 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         audio_temp_file = self.manager.get_tts_audio(source_text, service, voice_key, options)
 
         self.recognize_and_verify_text(
-            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.wav)
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
 
-    @skip_unreliable_clt_test() # rate limiting on gemini
+    # @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_different_voices(self):
         """Test Gemini TTS with different voice characteristics"""
         service = 'Gemini'
@@ -1022,7 +1022,7 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
             file_type = magic.from_file(audio_temp_file.name, mime=True)
             self.assertIn('audio', file_type, f'File for voice {voice_name} should be audio format')
 
-    @skip_unreliable_clt_test() # rate limiting on gemini
+    # @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_ogg_format(self):
         """Test Gemini TTS with OGG format"""
         service = 'Gemini'
@@ -1047,6 +1047,37 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         # Verify it's an OGG audio file
         file_type = magic.from_file(audio_temp_file.name, mime=True)
         self.assertIn('ogg', file_type, 'File should be OGG format')
+
+    # @skip_unreliable_clt_test() # rate limiting on gemini
+    def test_gemini_language_code_french(self):
+        """Test Gemini TTS honors the language_code option for French."""
+        service = 'Gemini'
+        source_text = self.FRENCH_INPUT_TEXT
+
+        voice_key = {"name": "Kore"}
+        options = {'language_code': 'fr-FR'}
+
+        audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'fr-FR', cloudlanguagetools.options.AudioFormat.mp3)
+
+    # @skip_unreliable_clt_test() # rate limiting on gemini
+    def test_gemini_prompt_option(self):
+        """Test Gemini TTS forwards the prompt option to SynthesisInput."""
+        service = 'Gemini'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {"name": "Zephyr"}
+        options = {
+            'model': 'gemini-3.1-flash-tts-preview',
+            'prompt': 'Speak in a calm, warm tone.',
+        }
+
+        audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
 
     def test_azure_voice_list_v3_dragonhd_options(self):
         """Verify DragonHD voices have the DragonHD-specific parameters."""

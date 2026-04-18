@@ -30,6 +30,14 @@ VOICE_OPTIONS = {
         ],
         'default': DEFAULT_MODEL
     },
+    'language_code': {
+        'type': cloudlanguagetools.options.ParameterType.text.name,
+        'default': 'en-US'
+    },
+    'prompt': {
+        'type': cloudlanguagetools.options.ParameterType.text.name,
+        'default': ''
+    },
     cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
         'type': cloudlanguagetools.options.ParameterType.list.name,
         'values': [
@@ -214,6 +222,8 @@ class GeminiService(cloudlanguagetools.service.Service):
 
         voice_name = voice_key['name']
         model = options.get('model', DEFAULT_MODEL)
+        language_code = options.get('language_code', 'en-US')
+        prompt = options.get('prompt', '')
 
         audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
         audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
@@ -228,7 +238,7 @@ class GeminiService(cloudlanguagetools.service.Service):
             client = self.get_client()
 
             voice = google.cloud.texttospeech.VoiceSelectionParams(
-                language_code='en-US',
+                language_code=language_code,
                 name=voice_name,
                 model_name=model,
             )
@@ -237,9 +247,12 @@ class GeminiService(cloudlanguagetools.service.Service):
                 audio_encoding=audio_format_map[audio_format],
             )
 
-            input_text = google.cloud.texttospeech.SynthesisInput(text=text)
+            if prompt:
+                input_text = google.cloud.texttospeech.SynthesisInput(text=text, prompt=prompt)
+            else:
+                input_text = google.cloud.texttospeech.SynthesisInput(text=text)
 
-            logger.debug(f'Making Gemini TTS request with voice: {voice_name}, model: {model}, format: {audio_format_str}')
+            logger.debug(f'Making Gemini TTS request with voice: {voice_name}, model: {model}, language_code: {language_code}, prompt: {prompt!r}, format: {audio_format_str}')
 
             response = client.synthesize_speech(
                 request={"input": input_text, "voice": voice, "audio_config": audio_config}

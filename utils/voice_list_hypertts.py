@@ -42,7 +42,7 @@ def process_voice(voice: cloudlanguagetools.ttsvoice.TtsVoice_v3):
             service='{voice.service.name}',
             gender=constants.Gender.{voice.gender.name},
             audio_languages=[
-                {', '.join([f'languages.AudioLanguage.{audio_lang.name}' for audio_lang in voice.audio_languages])}
+                {', '.join([f'languages.AudioLanguage.{audio_lang.name}' for audio_lang in sorted(voice.audio_languages, key=lambda lang: lang.name)])}
             ],
             service_fee=constants.ServiceFee.{voice.service_fee.name}
         )

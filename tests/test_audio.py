@@ -1079,6 +1079,19 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
         self.recognize_and_verify_text(
             audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
 
+    # @skip_unreliable_clt_test() # rate limiting on gemini
+    def test_gemini_model_flash_lite(self):
+        """Test Gemini TTS with gemini-2.5-flash-lite-preview-tts model."""
+        service = 'Gemini'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {"name": "Kore"}
+        options = {'model': 'gemini-2.5-flash-lite-preview-tts'}
+        audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
+
     def test_azure_voice_list_v3_dragonhd_options(self):
         """Verify DragonHD voices have the DragonHD-specific parameters."""
         azure_voices = [x for x in self.voice_list_v3 if x.service == Service.Azure]

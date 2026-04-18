@@ -2,7 +2,6 @@ import requests
 import urllib
 import hashlib
 import tempfile
-import time
 import logging
 
 import cloudlanguagetools.service
@@ -66,31 +65,19 @@ class VocalWareService(cloudlanguagetools.service.Service):
         url_parameters = f"""EID={voice_key['engine_id']}&LID={voice_key['language_id']}&VID={voice_key['voice_id']}&TXT={urlencoded_text}&ACC={self.account_id}&API={self.api_id}&CS={checksum}"""
         url = f"""http://www.vocalware.com/tts/gen.php?{url_parameters}"""
 
-        retry_count = 3
-        has_timeout_response_header = False
-        while retry_count > 0:
-            logger.debug(f'retrieving url {url}, retry_count: {retry_count}')
-            try:
-                response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
-                logger.debug(f'response.status_code: {response.status_code}')
-                has_timeout_response_header = False
-                if '408 Request Timeout' in response.headers.get('X-Error', ''):
-                    logger.warn(f"found timeout in response header: {response.headers['X-Error']}, {response.headers['X-ErrorLine']}")
-                    has_timeout_response_header = True
-                if response.status_code == 200 and has_timeout_response_header == False:
-                    with open(output_temp_filename, 'wb') as audio:
-                        audio.write(response.content)
-                    return output_temp_file
-            except requests.exceptions.ConnectionError as exception:
-                pass # allow the retry logic to proceed
-            retry_count -= 1
-            time.sleep(1)
+        logger.debug(f'retrieving url {url}')
+        response = requests.get(url, timeout=cloudlanguagetools.constants.RequestTimeout)
+        logger.debug(f'response.status_code: {response.status_code}')
+        if '408 Request Timeout' in response.headers.get('X-Error', ''):
+            logger.warning(f"found timeout in response header: {response.headers['X-Error']}, {response.headers['X-ErrorLine']}")
+            raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving VocalWare audio')
+        if response.status_code == 200:
+            with open(output_temp_filename, 'wb') as audio:
+                audio.write(response.content)
+            return output_temp_file
 
         response_data = response.content
         error_message = f'Status code: {response.status_code}: {response_data}'
-
-        if has_timeout_response_header:
-            raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving VocalWare audio')
 
         # reformat certain error messages
         if response.status_code == 503:

@@ -284,7 +284,7 @@ class GoogleService(cloudlanguagetools.service.Service):
             result = client.translate(text, source_language=from_language_key, target_language=to_language_key)
             return html.unescape(result["translatedText"])
         except google.api_core.exceptions.BadRequest as error:
-            raise cloudlanguagetools.errors.RequestError(str(error))
+            raise cloudlanguagetools.errors.RequestError(str(error)) from error
 
     def get_translation_languages(self):
         translate_client = google.cloud.translate_v2.Client()

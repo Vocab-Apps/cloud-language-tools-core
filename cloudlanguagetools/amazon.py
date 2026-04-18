@@ -168,7 +168,7 @@ class AmazonService(cloudlanguagetools.service.Service):
                     response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=response_format_parameter, VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
             logger.error(f'Amazon Polly exception: {type(error)}')
-            raise cloudlanguagetools.errors.RequestError(str(error))
+            raise cloudlanguagetools.errors.RequestError(str(error)) from error
 
         if "AudioStream" in response:
             # Note: Closing the stream is important because the service throttles on the

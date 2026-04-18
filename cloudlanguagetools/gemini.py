@@ -274,6 +274,9 @@ class GeminiService(cloudlanguagetools.service.Service):
                 retry_after = 60
             logger.warning(f'Gemini TTS rate limit hit (retry_after={retry_after}s): {e}')
             raise cloudlanguagetools.errors.RateLimitRetryAfterError(str(e), retry_after=retry_after) from e
+        except google.api_core.exceptions.InvalidArgument as e:
+            logger.warning(f'Gemini TTS invalid argument: {e}, code: {e.code}')
+            raise cloudlanguagetools.errors.InputError(f'Gemini TTS error: {str(e)}') from e
         except google.api_core.exceptions.GoogleAPICallError as e:
             logger.warning(f'Gemini TTS error: {e}, code: {e.code}')
             raise cloudlanguagetools.errors.RequestError(f'Gemini TTS error: {str(e)}') from e

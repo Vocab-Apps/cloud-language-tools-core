@@ -47,11 +47,11 @@ class Service():
             response = self.post_request(url, **kwargs)
             if response.status_code == 429:
                 msg = self._get_response_error_message(response)
-                logger.warning(f'{self.get_service_name()} rate limited (429): {msg}')
+                logger.warning(f'{self.get_service_name()} rate limited (429): {msg} | full response: {response.text}')
                 raise cloudlanguagetools.errors.RateLimitError(f'{self.get_service_name()}: {msg}')
             if response.status_code >= 400:
                 msg = self._get_response_error_message(response)
-                logger.warning(f'{self.get_service_name()} audio request failed with status code {response.status_code}: {msg}')
+                logger.warning(f'{self.get_service_name()} audio request failed with status code {response.status_code}: {msg} | full response: {response.text}')
                 raise cloudlanguagetools.errors.RequestError(f'{self.get_service_name()}: {msg}')
             response.raise_for_status()
             output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_audio_')

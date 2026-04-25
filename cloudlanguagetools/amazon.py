@@ -167,7 +167,7 @@ class AmazonService(cloudlanguagetools.service.Service):
                     logger.info(f'voice: {voice_key}, generating ssml format: {ssml_str}')
                     response = self.polly_client.synthesize_speech(Text=ssml_str, TextType="ssml", OutputFormat=response_format_parameter, VoiceId=voice_key['voice_id'], Engine=voice_key['engine'])
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as error:
-            logger.error(f'Amazon Polly exception: {type(error)}')
+            logger.warning(f'Amazon Polly exception: {type(error).__name__}: {error}')
             raise cloudlanguagetools.errors.RequestError(str(error)) from error
 
         if "AudioStream" in response:

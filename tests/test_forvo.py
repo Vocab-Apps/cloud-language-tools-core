@@ -3,6 +3,9 @@ import sys
 import unittest
 from unittest.mock import patch, MagicMock
 
+import requests
+import urllib3
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import cloudlanguagetools.forvo
@@ -44,3 +47,23 @@ class TestForvoGetTtsAudio(unittest.TestCase):
             self.service.get_tts_audio('rareword', self.voice_key, self.options)
 
         self.assertIn('rareword', str(ctx.exception))
+
+    @patch('cloudlanguagetools.forvo.requests.get')
+    def test_forvo_read_timeout_raises_timeout(self, mock_get):
+        """A read timeout from requests.exceptions.Timeout maps to TimeoutError."""
+        mock_get.side_effect = requests.exceptions.ReadTimeout('Read timed out.')
+
+        with self.assertRaises(cloudlanguagetools.errors.TimeoutError):
+            self.service.get_tts_audio('word', self.voice_key, self.options)
+
+    @patch('cloudlanguagetools.forvo.requests.get')
+    def test_forvo_body_read_timeout_raises_timeout(self, mock_get):
+        """When requests wraps urllib3 ReadTimeoutError in ConnectionError
+        (timeout during response body read), it must still map to TimeoutError."""
+        wrapped = urllib3.exceptions.ReadTimeoutError(
+            None, None, "Read timed out."
+        )
+        mock_get.side_effect = requests.exceptions.ConnectionError(wrapped)
+
+        with self.assertRaises(cloudlanguagetools.errors.TimeoutError):
+            self.service.get_tts_audio('word', self.voice_key, self.options)

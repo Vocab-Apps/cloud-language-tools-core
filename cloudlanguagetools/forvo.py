@@ -1,6 +1,7 @@
 import json
 import requests
 import urllib
+import urllib3
 import tempfile
 import logging
 import os
@@ -123,6 +124,13 @@ class ForvoService(cloudlanguagetools.service.Service):
             return output_temp_file
         except requests.exceptions.Timeout as exception:
             raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving forvo audio') from exception
+        except requests.exceptions.ConnectionError as exception:
+            # requests wraps urllib3.exceptions.ReadTimeoutError in ConnectionError
+            # when the timeout happens while reading the response body
+            if exception.args and isinstance(exception.args[0], urllib3.exceptions.TimeoutError):
+                raise cloudlanguagetools.errors.TimeoutError(f'timeout while retrieving forvo audio') from exception
+            logger.warning(f'could not retrieve forvo audio: {str(exception)}')
+            raise cloudlanguagetools.errors.RequestError('Unable to retrieve audio from Forvo') from exception
         except cloudlanguagetools.errors.NotFoundError as exception:
             raise
         # handle json decode error

@@ -117,7 +117,7 @@ class ForvoService(cloudlanguagetools.service.Service):
             # Check content type to ensure we received audio
             content_type = audio_request.headers.get('Content-Type', '')
             if content_type != 'audio/mpeg':
-                logger.error(f'unexpected content type from forvo audio request: {content_type}')
+                logger.error(f'unexpected content type from forvo audio request: {content_type!r}, content: {audio_request.content!r}')
                 raise cloudlanguagetools.errors.RequestError(f'Unexpected content type from Forvo: {content_type}')
 
             open(output_temp_filename, 'wb').write(audio_request.content)

@@ -254,9 +254,10 @@ class GeminiService(cloudlanguagetools.service.Service):
 
             logger.debug(f'Making Gemini TTS request with voice: {voice_name}, model: {model}, language_code: {language_code}, prompt: {prompt!r}, format: {audio_format_str}')
 
+            # use the longer timeout because Gemini-based voices can take noticeably longer to synthesize
             response = client.synthesize_speech(
                 request={"input": input_text, "voice": voice, "audio_config": audio_config},
-                timeout=cloudlanguagetools.constants.RequestTimeout
+                timeout=cloudlanguagetools.constants.RequestTimeoutLong
             )
 
             output_temp_file = tempfile.NamedTemporaryFile()
@@ -265,6 +266,10 @@ class GeminiService(cloudlanguagetools.service.Service):
 
             return output_temp_file
 
+        except google.api_core.exceptions.DeadlineExceeded as deadline_exceeded_exception:
+            logger.warning(f'Gemini TTS deadline exceeded: {deadline_exceeded_exception}')
+            error_message = f'Gemini TTS timed out: {str(deadline_exceeded_exception)}'
+            raise cloudlanguagetools.errors.TimeoutError(error_message) from deadline_exceeded_exception
         except google.api_core.exceptions.ResourceExhausted as e:
             retry_after = None
             for detail in e.details:

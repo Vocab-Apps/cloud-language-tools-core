@@ -90,6 +90,29 @@ class TestGoogleTtsInvalidArgument(unittest.TestCase):
             service.get_tts_audio('hello', self.VOICE_KEY, self.OPTIONS)
 
 
+class TestGoogleTtsDeadlineExceeded(unittest.TestCase):
+
+    VOICE_KEY = {
+        'name': 'en-US-Standard-A',
+        'language_code': 'en-US',
+        'ssml_gender': 'FEMALE',
+    }
+    OPTIONS = {}
+
+    @patch.object(cloudlanguagetools.google.GoogleService, 'get_client')
+    def test_deadline_exceeded_raises_timeout_error(self, mock_get_client):
+        """DeadlineExceeded from Google must raise TimeoutError so callers can retry."""
+        exc = google.api_core.exceptions.DeadlineExceeded('Deadline Exceeded')
+
+        mock_client = MagicMock()
+        mock_client.synthesize_speech.side_effect = exc
+        mock_get_client.return_value = mock_client
+
+        service = cloudlanguagetools.google.GoogleService()
+        with self.assertRaises(cloudlanguagetools.errors.TimeoutError):
+            service.get_tts_audio('hello', self.VOICE_KEY, self.OPTIONS)
+
+
 class TestGoogleTtsRateLimit(unittest.TestCase):
 
     VOICE_KEY = {

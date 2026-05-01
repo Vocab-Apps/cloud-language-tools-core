@@ -213,11 +213,15 @@ class GoogleService(cloudlanguagetools.service.Service):
 
             # The response's audio_content is binary.
             output_temp_file = tempfile.NamedTemporaryFile()
-            output_temp_filename = output_temp_file.name        
+            output_temp_filename = output_temp_file.name
             with open(output_temp_filename, "wb") as out:
                 out.write(response.audio_content)
 
             return output_temp_file
+        except google.api_core.exceptions.DeadlineExceeded as deadline_exceeded_exception:
+            logger.warning(f'Google Cloud TTS deadline exceeded: {deadline_exceeded_exception}')
+            error_message = f'Google Cloud TTS timed out: {str(deadline_exceeded_exception)}'
+            raise cloudlanguagetools.errors.TimeoutError(error_message) from deadline_exceeded_exception
         except google.api_core.exceptions.ResourceExhausted as resource_exhausted_exception:
             retry_after = None
             for detail in resource_exhausted_exception.details:

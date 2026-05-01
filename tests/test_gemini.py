@@ -31,5 +31,24 @@ class TestGeminiTtsInvalidArgument(unittest.TestCase):
             service.get_tts_audio('hello', self.VOICE_KEY, self.OPTIONS)
 
 
+class TestGeminiTtsDeadlineExceeded(unittest.TestCase):
+
+    VOICE_KEY = {'name': 'Zephyr'}
+    OPTIONS = {}
+
+    @patch.object(cloudlanguagetools.gemini.GeminiService, 'get_client')
+    def test_deadline_exceeded_raises_timeout_error(self, mock_get_client):
+        """DeadlineExceeded from Gemini must raise TimeoutError so callers can retry."""
+        exc = google.api_core.exceptions.DeadlineExceeded('Deadline Exceeded')
+
+        mock_client = MagicMock()
+        mock_client.synthesize_speech.side_effect = exc
+        mock_get_client.return_value = mock_client
+
+        service = cloudlanguagetools.gemini.GeminiService()
+        with self.assertRaises(cloudlanguagetools.errors.TimeoutError):
+            service.get_tts_audio('hello', self.VOICE_KEY, self.OPTIONS)
+
+
 if __name__ == '__main__':
     unittest.main()

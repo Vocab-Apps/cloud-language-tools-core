@@ -255,7 +255,8 @@ class GeminiService(cloudlanguagetools.service.Service):
             logger.debug(f'Making Gemini TTS request with voice: {voice_name}, model: {model}, language_code: {language_code}, prompt: {prompt!r}, format: {audio_format_str}')
 
             response = client.synthesize_speech(
-                request={"input": input_text, "voice": voice, "audio_config": audio_config}
+                request={"input": input_text, "voice": voice, "audio_config": audio_config},
+                timeout=cloudlanguagetools.constants.RequestTimeout
             )
 
             output_temp_file = tempfile.NamedTemporaryFile()

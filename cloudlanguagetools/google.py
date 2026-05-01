@@ -207,7 +207,8 @@ class GoogleService(cloudlanguagetools.service.Service):
 
             speech_request = {"input": input_text, "voice": voice, "audio_config": audio_config}
             response = client.synthesize_speech(
-                request=speech_request
+                request=speech_request,
+                timeout=cloudlanguagetools.constants.RequestTimeout
             )
 
             # The response's audio_content is binary.

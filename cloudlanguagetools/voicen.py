@@ -121,7 +121,7 @@ class VoicenService(cloudlanguagetools.service.Service):
 
         retrieve_url = f'https://tts.voicen.com/api/v1/jobs/{job_id}/synthesize/'
         logging.info(f'retrieving result from url {retrieve_url}')
-        response = requests.get(retrieve_url, headers=self.get_headers())
+        response = requests.get(retrieve_url, headers=self.get_headers(), timeout=cloudlanguagetools.constants.RequestTimeout)
 
         if response.status_code == 200:
             with open(output_temp_filename, 'wb') as audio:

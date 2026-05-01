@@ -3,6 +3,7 @@ import requests
 import tempfile
 import uuid
 import operator
+import concurrent.futures
 import pydub
 import logging
 import pprint
@@ -418,7 +419,18 @@ class AzureService(cloudlanguagetools.service.Service):
         # print(f'[{ssml_str}] len: {len(ssml_str)}')
         logger.debug(f'sending SSML string: [{ssml_str}]')
 
-        result = synthesizer.speak_ssml(ssml_str)
+        timeout_seconds = cloudlanguagetools.constants.RequestTimeout
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        try:
+            future = executor.submit(synthesizer.speak_ssml, ssml_str)
+            try:
+                result = future.result(timeout=timeout_seconds)
+            except concurrent.futures.TimeoutError as exception:
+                raise cloudlanguagetools.errors.TimeoutError(
+                    f'Azure TTS timed out after {timeout_seconds} seconds') from exception
+        finally:
+            executor.shutdown(wait=False)
+
         if result.reason != azure.cognitiveservices.speech.ResultReason.SynthesizingAudioCompleted:
             error_details = result.cancellation_details.error_details
             logger.warning(f'Azure TTS synthesis failed: reason={result.cancellation_details.reason}, error_details={error_details}')

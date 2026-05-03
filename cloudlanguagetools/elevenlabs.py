@@ -247,7 +247,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
                     for voice_data in filtered_voices:
                         result.append(ElevenLabsVoice(voice_data, audio_language_enum, model_id, model_short_name))
                 except Exception as e:
-                    logger.exception(f'ElevenLabs: error processing voice_data: {voice_data}')
+                    logger.exception(f'ElevenLabs: error {e} processing voice_data: {voice_data}')
 
         return result
 

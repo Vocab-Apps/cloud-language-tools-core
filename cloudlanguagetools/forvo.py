@@ -103,6 +103,15 @@ class ForvoService(cloudlanguagetools.service.Service):
             response.raise_for_status()
 
             data = response.json()
+            # forvo sometimes returns an unexpected json shape (e.g. a bare bool or list)
+            # instead of the documented {"items": [...]} object. log it so we can identify
+            # the root cause instead of failing with an opaque TypeError.
+            if not isinstance(data, dict) or 'items' not in data:
+                logger.error(f'unexpected forvo response shape for word [{text}], language={language}, '
+                             f'country={voice_key["country_code"]}: status={response.status_code} '
+                             f'url={response.url} type={type(data).__name__} data={data!r} '
+                             f'raw_content={response.content!r}')
+                raise cloudlanguagetools.errors.RequestError('Unable to retrieve audio from Forvo')
             items = data['items']
             if len(items) == 0:
                 error_message = f"Pronunciation not found in Forvo for word [{text}], language={language}, country={voice_key['country_code']}"
@@ -132,6 +141,9 @@ class ForvoService(cloudlanguagetools.service.Service):
             logger.warning(f'could not retrieve forvo audio: {str(exception)}')
             raise cloudlanguagetools.errors.RequestError('Unable to retrieve audio from Forvo') from exception
         except cloudlanguagetools.errors.NotFoundError as exception:
+            raise
+        except cloudlanguagetools.errors.RequestError as exception:
+            # already logged with full context above, don't re-wrap and lose the message
             raise
         # handle json decode error
         except json.decoder.JSONDecodeError as exception:

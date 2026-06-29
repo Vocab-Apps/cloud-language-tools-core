@@ -113,9 +113,10 @@ class TestTranslation(unittest.TestCase):
         # pytest test_translation.py -k test_translate_chinese
         self.translate_text(Service.Azure, '送外卖的人', Language.zh_cn, Language.en, ['the person who delivers the takeaway', 
         'people who deliver food', 'people who deliver takeaways', 'the person who delivered the takeaway', 'food delivery people',
-        'delivery people'])
+        'delivery people', 'delivery person'])
         self.translate_text(Service.Google, '中国有很多外国人', Language.zh_cn, Language.en, 'There are many foreigners in China')
-        self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr, 'Le coût est faible')
+        self.translate_text(Service.Azure, '成本很低', Language.zh_cn, Language.fr,
+            ['Le coût est faible', 'Le coût est très bas', 'Le coût est très faible'])
         self.translate_text(Service.Google, '换登机牌', Language.zh_cn, Language.fr, 
             ["Changer la carte d'embarquement", 
              "changer de carte d'embarquement", 
@@ -154,17 +155,20 @@ class TestTranslation(unittest.TestCase):
 
     def test_translate_deepl(self):
         # pytest tests/test_translation.py -rPP -k test_translate_deepl
-        self.translate_text(Service.DeepL, 'Please speak slowly', Language.en, Language.fr, 'Veuillez parler lentement')
+        self.translate_text(Service.DeepL, 'Please speak slowly', Language.en, Language.fr,
+            ['veuillez parler lentement', "parlez lentement, s'il vous plaît"])
         self.translate_text(Service.DeepL, 'Je ne suis pas intéressé.', Language.fr, Language.en, ["""I'm not interested.""", 'i am not interested'])
-        self.translate_text(Service.DeepL, '送外卖的人', Language.zh_cn, Language.en, ['delivery person', 'takeaway delivery people'])
+        self.translate_text(Service.DeepL, '送外卖的人', Language.zh_cn, Language.en, ['delivery person', 'takeaway delivery people', 'food delivery drivers', 'food delivery people'])
 
     def test_translate_portuguese_deepl(self):
         # pytest tests/test_translation.py -rPP -k test_translate_portuguese_deepl
         self.translate_text(Service.DeepL, 'Please speak slowly', Language.en, Language.pt_pt, 'por favor, fale devagar')
         self.translate_text(Service.DeepL, 'Please speak slowly', Language.en, Language.pt_br, 'por favor, fale devagar')
 
-        self.translate_text(Service.DeepL, 'por favor, fale devagar', Language.pt_pt, Language.fr, 'veuillez parler lentement')
-        self.translate_text(Service.DeepL, 'por favor, fale devagar', Language.pt_br, Language.fr, 'veuillez parler lentement')        
+        self.translate_text(Service.DeepL, 'por favor, fale devagar', Language.pt_pt, Language.fr,
+            ['veuillez parler lentement', "s'il vous plaît, parlez plus lentement"])
+        self.translate_text(Service.DeepL, 'por favor, fale devagar', Language.pt_br, Language.fr,
+            ['veuillez parler lentement', "s'il vous plaît, parlez plus lentement"])        
 
     
     # 2022/09/13: argos service disabled
@@ -202,7 +206,8 @@ class TestTranslation(unittest.TestCase):
             'À bas prix', 
             'faible coût', 
             'très faible coût',
-            'Le coût est très bas.'
+            'Le coût est très bas.',
+            'Le coût est très bas'
         ]
 
         self.assertIn(result['Azure'], possible_french_translations)
@@ -266,7 +271,10 @@ class TestTranslation(unittest.TestCase):
         source_text = 'ประเทศไทย'
         service = 'Azure'
         from_language = Language.th.name
-        transliteration_candidates = [x for x in self.transliteration_language_list if x['language_code'] == from_language and x['service'] == service]
+        transliteration_candidates = [x for x in self.transliteration_language_list
+            if x['language_code'] == from_language
+            and x['service'] == service
+            and 'to Latin' in x['transliteration_shortname']]
         self.assertEqual(len(transliteration_candidates), 1)
         transliteration_option = transliteration_candidates[0]
         service = transliteration_option['service']

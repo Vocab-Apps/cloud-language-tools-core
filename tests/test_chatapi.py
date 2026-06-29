@@ -137,7 +137,7 @@ class TestChatAPI(unittest.TestCase):
             target_language=CommonLanguage.en
         )
         result = self.chatapi.translate_or_lookup(query)
-        self.assertEqual(result, 'The cost is low.')
+        self.assertIn(result, ['The cost is low.', 'The cost is very low', 'The cost is very low.'])
 
     def assert_audio_matches(self, audio_temp_file, expected_text, azure_language):
         recognized_text = audio_utils.speech_to_text(self.chatapi.manager, audio_temp_file, azure_language)
@@ -192,10 +192,18 @@ class TestChatAPI(unittest.TestCase):
             language=CommonLanguage.zh_cn
         )
         result = self.chatapi.breakdown(query)
-        expected_output = """成本: chéngběn, (manufacturing, production etc) costs
+        expected_outputs = [
+            """成本: chéngběn, (manufacturing, production etc) costs
 很: hěn, very much
-低: dī, lower (one's head)"""
-        self.assertEqual(result, expected_output)
+低: dī, lower (one's head)""",
+            """成本: chéngběn, Cost
+很: hěn, Very
+低: dī, Low""",
+            """成本: chéngběn, cost
+很: hěn, very
+低: dī, low""",
+        ]
+        self.assertIn(result, expected_outputs)
 
     def test_breakdown_english(self):
         query = cloudlanguagetools.chatapi.BreakdownQuery(

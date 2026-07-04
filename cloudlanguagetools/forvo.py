@@ -107,6 +107,12 @@ class ForvoService(cloudlanguagetools.service.Service):
             # instead of the documented {"items": [...]} object. log it so we can identify
             # the root cause instead of failing with an opaque TypeError.
             if not isinstance(data, dict) or 'items' not in data:
+                # forvo returns a bare `false` json body (HTTP 200) when no
+                # pronunciations exist for the requested word. this is a
+                # permanent "not found" condition, not a transient failure.
+                if data is False:
+                    error_message = f"Pronunciation not found in Forvo for word [{text}], language={language}, country={voice_key['country_code']}"
+                    raise cloudlanguagetools.errors.NotFoundError(error_message)
                 logger.error(f'unexpected forvo response shape for word [{text}], language={language}, '
                              f'country={voice_key["country_code"]}: status={response.status_code} '
                              f'url={response.url} type={type(data).__name__} data={data!r} '

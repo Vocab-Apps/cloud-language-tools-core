@@ -49,6 +49,23 @@ class TestForvoGetTtsAudio(unittest.TestCase):
         self.assertIn('rareword', str(ctx.exception))
 
     @patch('cloudlanguagetools.forvo.requests.get')
+    def test_forvo_false_body_raises_not_found(self, mock_get):
+        """When Forvo returns a bare `false` json body (HTTP 200) for a word
+        with no pronunciations, raise NotFoundError rather than RequestError."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.url = 'https://apicommercial.forvo.com/some-endpoint'
+        mock_response.content = b'false'
+        mock_response.json.return_value = False
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        with self.assertRaises(cloudlanguagetools.errors.NotFoundError) as ctx:
+            self.service.get_tts_audio('0', self.voice_key, self.options)
+
+        self.assertIn('0', str(ctx.exception))
+
+    @patch('cloudlanguagetools.forvo.requests.get')
     def test_forvo_read_timeout_raises_timeout(self, mock_get):
         """A read timeout from requests.exceptions.Timeout maps to TimeoutError."""
         mock_get.side_effect = requests.exceptions.ReadTimeout('Read timed out.')

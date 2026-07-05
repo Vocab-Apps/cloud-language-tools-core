@@ -1,3 +1,198 @@
+"""
+Forvo (https://forvo.com) service integration.
+
+Forvo is a crowdsourced pronunciation dictionary: real human recordings of words
+in many languages, contributed and rated by its community. It is exposed to
+HyperTTS as a `constants.ServiceType.dictionary` service, so each "voice" is
+really a (language, country, gender) filter over Forvo's contributor pool, and
+the audio returned is a real human recording, not synthesised speech.
+
+------------------------------------------------------------------------------
+Forvo API reference
+------------------------------------------------------------------------------
+
+The Forvo API is a REST-style, key-authenticated, URL-path-parameter API. There
+are two hosts:
+
+- ``https://apifree.forvo.com``    -- free tier
+- ``https://apicommercial.forvo.com`` -- paid/commercial tier (used here)
+
+Every request has the shape::
+
+    {url_base}/key/{api_key}/format/{format}/action/{action}/<...params...>
+
+where:
+
+- ``key``     : the account's API key (see https://api.forvo.com/account/).
+- ``format``  : response encoding. One of:
+                  - ``xml``
+                  - ``json`` (used throughout this module; for JSONP, add a
+                    ``callback/function_name`` parameter)
+                  - ``js-tag`` (returns a <script> tag per pronunciation with a
+                    play icon, for direct embedding in a web page)
+- ``action``  : the endpoint name (see the endpoint list below).
+
+Authentication is solely via the ``key`` path segment; there is no header-based
+auth or OAuth. Requests must carry a browser-like ``User-Agent`` header because
+Forvo sits behind Cloudflare, which rejects empty/default UA strings.
+
+------------------------------------------------------------------------------
+Documented endpoints (https://api.forvo.com/documentation/)
+------------------------------------------------------------------------------
+
+All endpoints are read-only. The Forvo API exposes **no write endpoints**: you
+cannot rate, vote, upload, edit, or delete pronunciations through the API. The
+only rating-related capabilities are read-side filters/sorts (see
+``word-pronunciations`` below). Submitting ratings, uploading audio, etc. is
+only possible through the forvo.com website UI for logged-in users.
+
+1. word-pronunciations   -- the main endpoint used by HyperTTS.
+   Doc: https://api.forvo.com/documentation/word-pronunciations/
+
+   Returns all pronunciations Forvo has for a given word, optionally filtered.
+
+   Required parameters:
+     - ``word``   : the word to look up (URL-encoded).
+
+   Optional parameters (all are server-side filters/sorts):
+     - ``language``  : Forvo language code (e.g. ``en``, ``zh``, ``yue``,
+                       ``nan``, ``wuu``). Restricts results to recordings
+                       contributed under that language. See the language-list
+                       endpoint for the full set of codes; Forvo exposes many
+                       distinct Chinese-variety codes (``zh`` = Mandarin
+                       Chinese, ``yue`` = Cantonese, ``nan`` = Min Nan,
+                       ``wuu`` = Wu Chinese, ``jliu`` = Jiaoliao Mandarin,
+                       ``jlua`` = Jilu Mandarin, ``juai`` = Lower Yangtze
+                       Mandarin, ``xghu`` = Southwestern Mandarin, ``hak`` =
+                       Hakka, ``gan`` = Gan Chinese, ``cjy`` = Jin Chinese,
+                       ``hsn`` = Xiang Chinese, ``cdo`` = Min Dong,
+                       ``tisa`` = Toisanese Cantonese, ``jusi`` =
+                       Shanghainese, ``taiu`` = Taihu Wu, ``ltc`` = Middle
+                       Chinese, ``plig`` = Changzhou, ``fzho`` = Fuzhou).
+     - ``country``   : ISO 3166-1 Alpha-3 country code of the *contributor*
+                       (e.g. ``USA``, ``GBR``, ``CHN``, ``TWN``, ``HKG``).
+                       Filters by the contributor's country, not by the
+                       language's region. There is no sub-national filter, so
+                       ``country/CHN`` cannot distinguish Liaoning from
+                       Sichuan.
+     - ``username``  : a specific Forvo contributor's username. Returns only
+                       that user's recording(s) for the word. Used by this
+                       module's ``preferred_user`` voice-key feature.
+     - ``sex``       : ``m`` (male) or ``f`` (female).
+     - ``rate``      : integer minimum rating. Returns only recordings rated
+                       at least this high.
+     - ``order``     : sort order. One of:
+                         - ``date-desc`` (newest first)
+                         - ``date-asc``  (oldest first)
+                         - ``rate-desc`` (highest rated first) [used here]
+                         - ``rate-asc``  (lowest rated first)
+     - ``limit``     : integer; maximum number of pronunciations to return.
+                       This module uses ``limit/1`` because it only needs one
+                       recording per request.
+     - ``group-in-languages``: ``true`` / ``false`` (default ``false``).
+                       Groups the returned items by language.
+
+   Response (JSON): an object with an ``items`` array. Each item includes at
+   least:
+     - ``pathmp3``      : URL of the MP3 recording (fetched separately).
+     - ``username``     : contributor's Forvo username.
+     - ``sex``          : ``m`` / ``f``.
+     - ``country``      : Alpha-3 code of the contributor's country.
+     - ``rate``         : integer rating (counts of positive votes, roughly).
+     - ``num_votes``    : number of votes received.
+     - ``addtime``      : when the recording was added.
+     - ``lang``         : Forvo language code of the recording.
+     - ``standard``     : whether this is the "standard" pronunciation.
+
+   Quirks handled by this module:
+     - HTTP 200 with a bare ``false`` JSON body when the word exists but has
+       no pronunciations; treated as NotFoundError.
+     - HTTP 200 with an empty ``{"items": []}``; treated as NotFoundError.
+     - Redirect to ``https://forvo.com/404`` (HTTP 403 from Cloudflare) when
+       the word truly does not exist; treated as NotFoundError.
+     - HTTP 414 when the input text is too long for the URL; treated as
+       InputError.
+     - Occasional non-``{"items": ...}`` JSON shapes (bare bools, lists);
+       logged and surfaced as RequestError.
+
+2. standard-pronunciation
+   Doc: https://api.forvo.com/documentation/standard-pronunciation/
+
+   Returns Forvo's designated "standard" pronunciation for a word in a given
+   language (the recording Forvo's editors have marked as canonical). Takes the
+   same ``word`` and ``language`` parameters as ``word-pronunciations``. Not
+   currently used by this module.
+
+3. language-list
+   Doc: https://api.forvo.com/documentation/language-list/
+
+   Returns the list of languages Forvo has recordings for. Used by this module
+   in ``get_tts_voice_list`` to discover the available languages (with a
+   ``min-pronunciations`` filter to skip near-empty languages). Each item
+   carries a ``code`` (the value to pass as ``language/`` to
+   ``word-pronunciations``), an ``en`` name, and the native ``language`` name.
+   A cached copy lives at ``temp_data_files/forvo_language_list``.
+
+   Optional parameter:
+     - ``min-pronunciations`` : integer; only list languages with at least
+                                this many recordings. This module uses 5000.
+
+4. language-popular
+   Doc: https://api.forvo.com/documentation/language-popular/
+
+   Returns the most popular languages on Forvo. Not used by this module.
+
+5. pronounced-words-search
+   Doc: https://api.forvo.com/documentation/pronounced-words-search/
+
+   Searches for words that have been pronounced, by substring. Not used by
+   this module.
+
+6. words-search
+   Doc: https://api.forvo.com/documentation/words-search/
+
+   General word search across Forvo's dictionary. Not used by this module.
+
+7. popular-pronounced-words
+   Doc: https://api.forvo.com/documentation/popular-pronounced-words/
+
+   Returns the most popularly pronounced words (optionally per language). Not
+   used by this module.
+
+------------------------------------------------------------------------------
+What the API does *not* let us do
+------------------------------------------------------------------------------
+
+- Rate or vote on a recording (no write endpoint).
+- Upload, replace, or delete a recording (no write endpoint).
+- Filter by sub-national region (only by contributor's country, Alpha-3).
+- Filter by dialect tag other than the top-level ``language`` code. Forvo's
+  dialect granularity is entirely encoded in the ``language`` parameter: each
+  recognized variety has its own code (``zh`` vs ``yue`` vs ``nan`` vs
+  ``wuu`` vs ``jliu`` etc.). Varieties without a dedicated code (e.g.
+  Zhongyuan Mandarin / Lanyin Mandarin) cannot be targeted at all and fall
+  into the generic ``zh`` bucket.
+- Authenticate via headers/OAuth (key is a path segment only).
+- Paginate explicitly; ``limit`` truncates, there is no cursor/offset.
+
+------------------------------------------------------------------------------
+How this module uses the API
+------------------------------------------------------------------------------
+
+- ``get_tts_voice_list`` calls ``language-list`` to discover languages, then
+  expands each into one ``ForvoVoice`` per (audio_language, gender) pair.
+- ``get_tts_audio`` calls ``word-pronunciations`` with
+  ``language``, optional ``sex``, optional ``country``, optional
+  ``username`` (the ``preferred_user`` feature), ``order/rate-desc`` and
+  ``limit/1``, then downloads the MP3 at ``items[0].pathmp3``.
+
+See ``20260705_CLT_FORVO_CHINESE_ISSUE.md`` for the known issue around
+Chinese-dialect voices where ``get_voices_for_language_entry`` does not yet
+override the ``language_code`` per ``audio_language``, causing e.g.
+``nan_CN`` / ``wuu_CN`` / ``zh_CN_liaoning`` voices to all request
+``language/zh``.
+"""
+
 import json
 import requests
 import urllib
@@ -71,7 +266,29 @@ class ForvoService(cloudlanguagetools.service.Service):
         return {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'}
 
     def get_tts_audio(self, text, voice_key, options):
+        """Fetch a single pronunciation MP3 from Forvo for ``text``.
 
+        Calls the ``word-pronunciations`` endpoint
+        (https://api.forvo.com/documentation/word-pronunciations/) with:
+
+        - ``word``      : the input text, URL-encoded.
+        - ``language``  : ``voice_key['language_code']`` (a Forvo language
+                          code such as ``en``, ``zh``, ``yue``, ``nan``).
+        - ``sex``       : ``voice_key['gender']`` (``m``/``f``), if present.
+        - ``country``   : ``voice_key['country_code']`` (ISO 3166-1 Alpha-3),
+                          unless it equals ``COUNTRY_ANY``.
+        - ``username``  : ``voice_key['preferred_user']``, if present (picks
+                          a specific contributor's recording).
+        - ``order``     : ``rate-desc`` (highest-rated first).
+        - ``limit``     : ``1`` (we only need one recording).
+
+        Then downloads the MP3 at ``items[0].pathmp3`` and returns it as a
+        temp file. Raises ``NotFoundError`` for any "word has no
+        pronunciations" condition (404 redirect, bare ``false`` body, or
+        empty ``items``), ``InputError`` for over-long text (HTTP 414),
+        ``TimeoutError`` for network timeouts, and ``RequestError`` for
+        everything else.
+        """
         language = voice_key['language_code']
 
         sex_param = ''
@@ -162,6 +379,9 @@ class ForvoService(cloudlanguagetools.service.Service):
 
 
     def get_language_enum(self, language_id):
+        """Map a Forvo language code (e.g. ``zh``, ``ind``, ``pt``) to our
+        internal ``Language`` enum. A few Forvo codes don't match our enum
+        names directly and are remapped via ``forvo_language_id_map``."""
         forvo_language_id_map = {
             'zh': 'zh_cn',
             'ind': 'id_',
@@ -175,6 +395,10 @@ class ForvoService(cloudlanguagetools.service.Service):
         pass
 
     def get_country_code(self, audio_language):
+        """Map an ``AudioLanguage`` to an ISO 3166-1 Alpha-3 country code for
+        the Forvo ``country`` parameter. Returns ``'ANY'`` (a sentinel that
+        ``get_tts_audio`` translates to "no country filter") when no specific
+        country applies. See https://en.wikipedia.org/wiki/ISO_3166-1."""
         # https://en.wikipedia.org/wiki/ISO_3166-1
         country_code_map = {
             cloudlanguagetools.languages.AudioLanguage.fr_FR: 'FRA',
@@ -288,6 +512,22 @@ class ForvoService(cloudlanguagetools.service.Service):
         return country_code_map[audio_language]
 
     def get_voices_for_language_entry(self, language):
+        """Expand one Forvo ``language-list`` entry into a list of
+        ``ForvoVoice`` objects, one per (audio_language, gender) pair.
+
+        ``language`` is a single item from the ``language-list`` response and
+        carries ``code`` (the Forvo language code), ``en`` and ``language``
+        (display names).
+
+        The Forvo ``code`` is used verbatim as ``voice_key['language_code']``
+        for every audio language in the bucket. This is correct when the
+        bucket maps 1:1 to a Forvo language (e.g. ``en`` -> ``en_US`` etc.),
+        but is **wrong** for languages where our ``AudioLanguage`` set is
+        finer-grained than Forvo's codes -- most notably Chinese, where
+        ``nan_CN`` / ``wuu_CN`` / ``zh_CN_liaoning`` etc. all inherit
+        ``language_code='zh'`` and therefore all hit the same Forvo bucket.
+        See ``20260705_CLT_FORVO_CHINESE_ISSUE.md``.
+        """
         try:
             language_code = language['code']
             language_enum = self.get_language_enum(language_code)
@@ -332,6 +572,12 @@ class ForvoService(cloudlanguagetools.service.Service):
             
 
     def get_tts_voice_list(self):
+        """Return the full list of Forvo voices by calling the
+        ``language-list`` endpoint
+        (https://api.forvo.com/documentation/language-list/) with
+        ``min-pronunciations/5000`` to skip near-empty languages, then
+        expanding each returned language via
+        ``get_voices_for_language_entry``."""
         # returns list of TtSVoice
 
         voice_list = []

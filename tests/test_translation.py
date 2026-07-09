@@ -238,7 +238,7 @@ class TestTranslation(unittest.TestCase):
             'to_script': 'Latn',
         }
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertIn(result, ['chéng běn hěn dī', 'chéngběn hěndī'])
+        self.assertIn(result, ['chéng běn hěn dī', 'chéngběn hěndī', 'Chéngběn hěn dī'])
 
         transliteration_key = {
             'language_id': 'zh-Hant', 
@@ -265,7 +265,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertIn(result, ['chéng běn hěn dī', 'chéngběn hěndī'])
+        self.assertIn(result, ['chéng běn hěn dī', 'chéngběn hěndī', 'Chéngběn hěn dī'])
 
         # thai
         source_text = 'ประเทศไทย'

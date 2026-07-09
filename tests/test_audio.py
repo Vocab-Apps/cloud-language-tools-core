@@ -689,6 +689,14 @@ class TestAudio(unittest.TestCase):
             lambda x: x.name == 'cmn-CN-Chirp3-HD-Leda', assert_unique=True)
         self.verify_voice_v3(chirp_zh_voice, self.CHINESE_INPUT_TEXT_2, 'zh-CN')
 
+    def test_google_chirp3_ssml(self):
+        # https://github.com/Vocab-Apps/anki-hyper-tts/issues/357
+        # SSML / pauses should work on Chirp3 HD voices, not be read literally
+        chirp_en_voice = self.get_voice_by_lambda(Service.Google,
+            lambda x: x.name == 'en-US-Chirp3-HD-Charon', assert_unique=True)
+        source_text = 'hello <break time="50ms"/>world'
+        self.verify_voice_v3(chirp_en_voice, source_text, 'en-US')
+
     @pytest.mark.skip(reason="journey voice seems to be gone")
     def test_google_voice_journey_old(self):
         service = 'Google'

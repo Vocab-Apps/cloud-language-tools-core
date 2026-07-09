@@ -682,7 +682,7 @@ class TestAudio(unittest.TestCase):
     def test_google_chirp_hd_english(self):
         chirp_en_voice = self.get_voice_by_lambda(Service.Google,
             lambda x: x.name == 'en-US-Chirp-HD-O', assert_unique=True)
-        self.verify_voice_v3(chirp_en_voice, self.ENGLISH_INPUT_TEXT, 'en-US')        
+        self.verify_voice_v3(chirp_en_voice, self.ENGLISH_INPUT_TEXT, 'en-US')
 
     def test_google_chirp3_mandarin(self):
         chirp_zh_voice = self.get_voice_by_lambda(Service.Google,

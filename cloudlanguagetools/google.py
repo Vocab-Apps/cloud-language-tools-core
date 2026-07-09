@@ -38,6 +38,12 @@ GENDER_MAP = {
 
 VOICES_WITHOUT_PITCH_SUPPORT = ['Studio', 'Chirp', 'Journey']
 
+# Determines whether a given voice name supports SSML input.
+# Chirp3-HD voices support SSML, but regular Chirp and Journey voices do not.
+voice_supports_ssml = lambda voice_name: not (
+    any(v in voice_name for v in ['Chirp', 'Journey']) and 'Chirp3-HD' not in voice_name
+)
+
 class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def __init__(self, voice_data):
         logger.debug(f'processing voice {voice_data}')
@@ -188,20 +194,12 @@ class GoogleService(cloudlanguagetools.service.Service):
                 audio_config_params['pitch'] = options.get('pitch', 0.0)
             audio_config = google.cloud.texttospeech.AudioConfig(**audio_config_params)
 
-
-            # prepare speech request
-            ssml_text = '<speak>' + text + '</speak>'
-            input_text = google.cloud.texttospeech.SynthesisInput(ssml=ssml_text)
-
             # some voices don't support SSML and it's weirdly not documented
-            non_ssml_voices = ['Chirp', 'Journey']
-            non_ssml_voice_found = False
-            for voice_name in non_ssml_voices:
-                if voice_name in voice_key['name']:
-                    logger.info(f'with voice {voice_key}, use non-ssml input')
-                    non_ssml_voice_found = True
-                    break
-            if non_ssml_voice_found:
+            # see voice_supports_ssml for details
+            if voice_supports_ssml(voice_key['name']):
+                ssml_text = '<speak>' + text + '</speak>'
+                input_text = google.cloud.texttospeech.SynthesisInput(ssml=ssml_text)
+            else:
                 logger.info(f'with voice {voice_key}, use non-ssml input')
                 input_text = google.cloud.texttospeech.SynthesisInput(text=text)
 

@@ -63,6 +63,33 @@ class TestGoogleVoicePitchSupport(unittest.TestCase):
         self.assertNotIn('pitch', voice.get_options())
 
 
+class TestGoogleVoiceSupportsSsml(unittest.TestCase):
+
+    def test_chirp3_hd_supports_ssml(self):
+        self.assertTrue(cloudlanguagetools.google.voice_supports_ssml('en-US-Chirp3-HD-Charon'))
+
+    def test_chirp3_hd_arabic_supports_ssml(self):
+        self.assertTrue(cloudlanguagetools.google.voice_supports_ssml('ar-XA-Chirp3-HD-Leda'))
+
+    def test_chirp_hd_no_ssml(self):
+        self.assertFalse(cloudlanguagetools.google.voice_supports_ssml('en-US-Chirp-HD-O'))
+
+    def test_journey_no_ssml(self):
+        self.assertFalse(cloudlanguagetools.google.voice_supports_ssml('en-US-Journey-F'))
+
+    def test_neural2_supports_ssml(self):
+        self.assertTrue(cloudlanguagetools.google.voice_supports_ssml('en-US-Neural2-A'))
+
+    def test_wavenet_supports_ssml(self):
+        self.assertTrue(cloudlanguagetools.google.voice_supports_ssml('en-US-Wavenet-A'))
+
+    def test_standard_supports_ssml(self):
+        self.assertTrue(cloudlanguagetools.google.voice_supports_ssml('en-US-Standard-A'))
+
+    def test_studio_supports_ssml(self):
+        self.assertTrue(cloudlanguagetools.google.voice_supports_ssml('en-US-Studio-O'))
+
+
 class TestGoogleTtsInvalidArgument(unittest.TestCase):
 
     VOICE_KEY = {

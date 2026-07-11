@@ -360,7 +360,7 @@ class AzureService(cloudlanguagetools.service.Service):
         # https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech?tabs=streaming#audio-outputs
         # https://learn.microsoft.com/en-us/python/api/azure-cognitiveservices-speech/azure.cognitiveservices.speech.speechsynthesisoutputformat?view=azure-python
         response_format_parameter, audio_format = self.get_request_audio_format({
-            AudioFormat.mp3: 'Audio24Khz96KBitRateMonoMp3',
+            AudioFormat.mp3: 'Audio48Khz192KBitRateMonoMp3',
             AudioFormat.ogg_opus: 'Ogg48Khz16BitMonoOpus',
             AudioFormat.wav: 'Riff48Khz16BitMonoPcm'
         }, options, AudioFormat.mp3)

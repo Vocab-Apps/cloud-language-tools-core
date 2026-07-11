@@ -13,6 +13,7 @@ import cloudlanguagetools.options
 import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.errors
+import cloudlanguagetools.audio_processing
 from cloudlanguagetools.languages import AudioLanguage
 
 logger = logging.getLogger(__name__)
@@ -228,8 +229,12 @@ class GeminiService(cloudlanguagetools.service.Service):
         audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
         audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
 
+        # Gemini's native mp3 encoding is a fixed ~32 kbps and noticeably lossy
+        # (especially for tonal languages). For mp3 output we instead request
+        # lossless LINEAR16 and re-encode locally at a higher bitrate. OGG Opus
+        # is already good quality and returned directly.
         audio_format_map = {
-            cloudlanguagetools.options.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.MP3,
+            cloudlanguagetools.options.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.LINEAR16,
             cloudlanguagetools.options.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS,
             cloudlanguagetools.options.AudioFormat.wav: google.cloud.texttospeech.AudioEncoding.LINEAR16,
         }
@@ -263,6 +268,11 @@ class GeminiService(cloudlanguagetools.service.Service):
             output_temp_file = tempfile.NamedTemporaryFile()
             with open(output_temp_file.name, "wb") as out:
                 out.write(response.audio_content)
+
+            # for mp3 we requested lossless LINEAR16 above; re-encode it to mp3
+            # at our target bitrate (much better than Gemini's native ~32 kbps).
+            if audio_format == cloudlanguagetools.options.AudioFormat.mp3:
+                output_temp_file = cloudlanguagetools.audio_processing.encode_wav_to_mp3(output_temp_file)
 
             return output_temp_file
 

@@ -1,7 +1,22 @@
 import wave
 import tempfile
 
+import pydub
+
+import cloudlanguagetools.constants
+
 # audio utilities
+
+
+# re-encode a lossless WAV audio file to mp3 at the given bitrate.
+# Google/Gemini only emit mp3 at a fixed ~32 kbps, so we request lossless
+# LINEAR16 from them and re-encode here for much better quality.
+def encode_wav_to_mp3(wav_temp_file: tempfile.NamedTemporaryFile,
+        bitrate=cloudlanguagetools.constants.AUDIO_MP3_ENCODE_BITRATE) -> tempfile.NamedTemporaryFile:
+    audio_segment = pydub.AudioSegment.from_wav(wav_temp_file.name)
+    mp3_temp_file = tempfile.NamedTemporaryFile(prefix='clt_mp3_audio_', suffix='.mp3')
+    audio_segment.export(mp3_temp_file.name, format='mp3', bitrate=bitrate)
+    return mp3_temp_file
 
 
 # take PCM audio and wrap it in a WAV container

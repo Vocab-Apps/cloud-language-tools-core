@@ -22,11 +22,20 @@ from rich.panel import Panel
 
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.constants
+import cloudlanguagetools.languages
 
 app = typer.Typer()
 console = Console()
 
 PAGE_SIZE = 20
+
+# an exactly-typed enum member name (which is what tab-completion inserts) should select
+# that member alone. filters otherwise fall back to a substring search, and substrings
+# bleed: 'zh_CN' is inside 'zh_CN_liaoning', and 'Male' is inside 'Female'.
+LANGUAGE_NAMES = frozenset(lang.name.lower() for lang in cloudlanguagetools.languages.Language)
+AUDIO_LANGUAGE_NAMES = frozenset(al.name.lower() for al in cloudlanguagetools.languages.AudioLanguage)
+SERVICE_NAMES = frozenset(service.name.lower() for service in cloudlanguagetools.constants.Service)
+GENDER_NAMES = frozenset(gender.name.lower() for gender in cloudlanguagetools.constants.Gender)
 
 
 class TTSRepl:
@@ -116,45 +125,75 @@ class TTSRepl:
     def _fuzzy_match(self, value, pattern):
         return pattern.lower() in value.lower()
 
+    def _match_name(self, pattern, name, known_names, *display_names):
+        """Match `pattern` against one enum member.
+
+        If the pattern is exactly some member's name, only that member matches -- so
+        `locale zh_CN` means zh_CN, not the ten members it is a substring of. Anything
+        else (a partial like `zh_CN_`, or a word like `cantonese`) falls back to a
+        substring search over the member name and its display names."""
+        if pattern.lower() in known_names:
+            return name.lower() == pattern.lower()
+        return any(self._fuzzy_match(value, pattern) for value in (name,) + display_names)
+
+    def _audio_language_matches_language(self, al, pattern):
+        # match at the Language level (en, yue), not the AudioLanguage level. matching
+        # al.audio_lang_name here would make this filter a duplicate of the locale one.
+        return self._match_name(pattern, al.lang.name, LANGUAGE_NAMES, al.lang.lang_name)
+
+    def _audio_language_matches_locale(self, al, pattern):
+        return self._match_name(pattern, al.name, AUDIO_LANGUAGE_NAMES, al.audio_lang_name)
+
     def _voice_matches_language(self, voice, pattern):
-        for al in voice.audio_languages:
-            if self._fuzzy_match(al.lang.name, pattern) or self._fuzzy_match(al.audio_lang_name, pattern):
-                return True
-        return False
+        return any(self._audio_language_matches_language(al, pattern)
+                   for al in voice.audio_languages)
 
     def _voice_matches_locale(self, voice, pattern):
-        for al in voice.audio_languages:
-            if self._fuzzy_match(al.name, pattern) or self._fuzzy_match(al.audio_lang_name, pattern):
-                return True
-        return False
+        return any(self._audio_language_matches_locale(al, pattern)
+                   for al in voice.audio_languages)
+
+    def voices_matching_filters(self, exclude_field=None):
+        """Voices matching every active filter, optionally ignoring one field.
+
+        Completions for a field ignore that field's own filter, so suggestions narrow
+        to what the other filters allow while you can still switch to a different
+        value for the field you're currently editing."""
+        voices = list(self.all_voices)
+        if self.filter_service and exclude_field != 'service':
+            voices = [v for v in voices
+                      if self._match_name(self.filter_service, v.service.name, SERVICE_NAMES)]
+        if self.filter_gender and exclude_field != 'gender':
+            voices = [v for v in voices
+                      if self._match_name(self.filter_gender, v.gender.name, GENDER_NAMES)]
+        if self.filter_language and exclude_field != 'language':
+            voices = [v for v in voices
+                      if self._voice_matches_language(v, self.filter_language)]
+        if self.filter_locale and exclude_field != 'locale':
+            voices = [v for v in voices
+                      if self._voice_matches_locale(v, self.filter_locale)]
+        if self.filter_name and exclude_field != 'name':
+            voices = [v for v in voices if self._fuzzy_match(v.name, self.filter_name)]
+        return voices
+
+    def relevant_audio_languages(self, voices, exclude_field=None):
+        """The audio languages of `voices` that themselves satisfy the active
+        language/locale filters.
+
+        Filtering the voice list is not enough: a voice can carry many audio languages
+        (some carry 90+), so a single multilingual voice that matched on one of them
+        would otherwise drag all the rest into the suggestions."""
+        for voice in voices:
+            for al in voice.audio_languages:
+                if (self.filter_language and exclude_field != 'language'
+                        and not self._audio_language_matches_language(al, self.filter_language)):
+                    continue
+                if (self.filter_locale and exclude_field != 'locale'
+                        and not self._audio_language_matches_locale(al, self.filter_locale)):
+                    continue
+                yield al
 
     def apply_filters(self):
-        self.filtered_voices = list(self.all_voices)
-        if self.filter_service:
-            self.filtered_voices = [
-                v for v in self.filtered_voices
-                if self._fuzzy_match(v.service.name, self.filter_service)
-            ]
-        if self.filter_gender:
-            self.filtered_voices = [
-                v for v in self.filtered_voices
-                if self._fuzzy_match(v.gender.name, self.filter_gender)
-            ]
-        if self.filter_language:
-            self.filtered_voices = [
-                v for v in self.filtered_voices
-                if self._voice_matches_language(v, self.filter_language)
-            ]
-        if self.filter_locale:
-            self.filtered_voices = [
-                v for v in self.filtered_voices
-                if self._voice_matches_locale(v, self.filter_locale)
-            ]
-        if self.filter_name:
-            self.filtered_voices = [
-                v for v in self.filtered_voices
-                if self._fuzzy_match(v.name, self.filter_name)
-            ]
+        self.filtered_voices = self.voices_matching_filters()
         self.page = 0
 
     def cmd_voices(self, args):
@@ -530,15 +569,20 @@ class TTSRepl:
             filter_fields = ['service', 'gender', 'language', 'locale', 'name']
 
             def _get_filter_values(self, field):
-                voices = repl.all_voices
+                """Return (value, description) pairs. `value` is what gets inserted on
+                the command line (the enum member name, which is what the filters match
+                on); `description` is the human-readable name shown alongside it."""
+                voices = repl.voices_matching_filters(exclude_field=field)
                 if field == 'service':
-                    return sorted(set(v.service.name for v in voices))
+                    return [(name, '') for name in sorted(set(v.service.name for v in voices))]
                 elif field == 'gender':
-                    return sorted(set(v.gender.name for v in voices))
+                    return [(name, '') for name in sorted(set(v.gender.name for v in voices))]
                 elif field == 'language':
-                    return sorted(set(al.audio_lang_name for v in voices for al in v.audio_languages))
+                    return sorted(set((al.lang.name, al.lang.lang_name)
+                                      for al in repl.relevant_audio_languages(voices, field)))
                 elif field == 'locale':
-                    return sorted(set(al.name for v in voices for al in v.audio_languages))
+                    return sorted(set((al.name, al.audio_lang_name)
+                                      for al in repl.relevant_audio_languages(voices, field)))
                 return []
 
             def get_completions(self, document, complete_event):
@@ -565,10 +609,13 @@ class TTSRepl:
 
                 elif cmd == 'filter' and arg_index == 2 and len(parts) >= 2:
                     field = parts[1].lower()
-                    values = self._get_filter_values(field)
-                    for val in values:
-                        if val.lower().startswith(arg_word.lower()):
-                            yield Completion(val, start_position=-len(arg_word))
+                    word = arg_word.lower()
+                    for val, description in self._get_filter_values(field):
+                        # match the enum name by prefix, the full name by substring, so
+                        # `filter language cant` finds yue (Chinese (Cantonese, ...))
+                        if val.lower().startswith(word) or (word and word in description.lower()):
+                            yield Completion(val, start_position=-len(arg_word),
+                                             display=val, display_meta=description)
 
                 elif cmd == 'clear' and arg_index == 1:
                     for opt_name in repl.voice_options:

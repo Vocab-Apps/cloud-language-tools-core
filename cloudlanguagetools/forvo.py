@@ -186,11 +186,13 @@ How this module uses the API
   ``username`` (the ``preferred_user`` feature), ``order/rate-desc`` and
   ``limit/1``, then downloads the MP3 at ``items[0].pathmp3``.
 
-See ``20260705_CLT_FORVO_CHINESE_ISSUE.md`` for the known issue around
-Chinese-dialect voices where ``get_voices_for_language_entry`` does not yet
-override the ``language_code`` per ``audio_language``, causing e.g.
-``nan_CN`` / ``wuu_CN`` / ``zh_CN_liaoning`` voices to all request
-``language/zh``.
+The ``language-list`` endpoint returns coarser buckets than
+``word-pronunciations`` accepts: every Chinese variety comes back under
+``zh``, yet ``word-pronunciations`` will happily filter on ``nan``, ``wuu``,
+``jliu`` and the rest. ``AUDIO_LANGUAGE_TO_FORVO_CODE`` bridges that gap by
+overriding the bucket code per ``AudioLanguage``, and
+``FORVO_EXCLUDED_AUDIO_LANGUAGES`` drops the varieties Forvo has no code for
+at all. See ``20260705_CLT_FORVO_CHINESE_ISSUE.md`` for the full analysis.
 """
 
 import json
@@ -216,6 +218,42 @@ GENDER_MAP = {
 }
 
 COUNTRY_ANY = 'ANY'
+
+_AudioLanguage = cloudlanguagetools.languages.AudioLanguage
+
+# Forvo's `language` parameter is its only dialect lever. Our AudioLanguage set is
+# finer-grained than the bucket-level codes returned by the language-list endpoint
+# (Chinese in particular: everything lands in the `zh` bucket), so map each
+# AudioLanguage to the Forvo code that actually targets it. Anything not listed here
+# keeps the bucket's own code.
+AUDIO_LANGUAGE_TO_FORVO_CODE = {
+    _AudioLanguage.nan_CN:           'nan',   # Min Nan
+    _AudioLanguage.wuu_CN:           'wuu',   # Wu Chinese
+    _AudioLanguage.zh_CN_liaoning:   'jliu',  # Jiaoliao Mandarin
+    _AudioLanguage.zh_CN_shandong:   'jlua',  # Jilu Mandarin
+    _AudioLanguage.zh_CN_anhui:      'juai',  # Lower Yangtze Mandarin
+    _AudioLanguage.zh_CN_sichuan:    'xghu',  # Southwestern Mandarin
+    _AudioLanguage.zh_CN_hunan:      'hsn',   # Xiang Chinese
+    _AudioLanguage.hak_CN:           'hak',   # Hakka
+    _AudioLanguage.gan_CN:           'gan',   # Gan Chinese
+    _AudioLanguage.cjy_CN:           'cjy',   # Jin Chinese
+    _AudioLanguage.cdo_CN:           'cdo',   # Min Dong
+    _AudioLanguage.cdo_CN_fuzhou:    'fzho',  # Fuzhou
+    _AudioLanguage.wuu_CN_shanghai:  'jusi',  # Shanghainese
+    _AudioLanguage.wuu_CN_changzhou: 'plig',  # Changzhou
+    _AudioLanguage.ltc_CN:           'ltc',   # Middle Chinese
+    _AudioLanguage.yue_CN_toisan:    'tisa',  # Toisanese Cantonese
+}
+
+# Forvo has no dedicated language code for these, so they would silently fall back to
+# the generic `zh` bucket and serve Standard Mandarin under a dialect label. Don't
+# advertise them at all rather than mis-serve them.
+FORVO_EXCLUDED_AUDIO_LANGUAGES = {
+    _AudioLanguage.zh_CN_henan,    # Zhongyuan Mandarin, no forvo code
+    _AudioLanguage.zh_CN_shaanxi,  # Zhongyuan Mandarin, no forvo code
+    _AudioLanguage.zh_CN_gansu,    # Lanyin Mandarin, no forvo code
+    _AudioLanguage.zh_CN_guangxi,  # only `xghu`, which zh_CN_sichuan already owns
+}
 
 logger = logging.getLogger(__name__)
 
@@ -511,6 +549,17 @@ class ForvoService(cloudlanguagetools.service.Service):
             logging.error(f'no country code found for {audio_language}')
         return country_code_map[audio_language]
 
+    def get_forvo_language_code(self, audio_language, bucket_language_code):
+        """Return the Forvo ``language`` code to request for ``audio_language``.
+
+        Forvo's ``language-list`` groups several of our ``AudioLanguage``
+        values under one bucket code (all Chinese varieties come back under
+        ``zh``), but the ``word-pronunciations`` endpoint accepts far more
+        codes than the bucket list exposes. ``AUDIO_LANGUAGE_TO_FORVO_CODE``
+        holds those per-audio_language overrides; anything not listed keeps
+        the bucket's own code."""
+        return AUDIO_LANGUAGE_TO_FORVO_CODE.get(audio_language, bucket_language_code)
+
     def get_voices_for_language_entry(self, language):
         """Expand one Forvo ``language-list`` entry into a list of
         ``ForvoVoice`` objects, one per (audio_language, gender) pair.
@@ -519,14 +568,13 @@ class ForvoService(cloudlanguagetools.service.Service):
         carries ``code`` (the Forvo language code), ``en`` and ``language``
         (display names).
 
-        The Forvo ``code`` is used verbatim as ``voice_key['language_code']``
-        for every audio language in the bucket. This is correct when the
-        bucket maps 1:1 to a Forvo language (e.g. ``en`` -> ``en_US`` etc.),
-        but is **wrong** for languages where our ``AudioLanguage`` set is
-        finer-grained than Forvo's codes -- most notably Chinese, where
-        ``nan_CN`` / ``wuu_CN`` / ``zh_CN_liaoning`` etc. all inherit
-        ``language_code='zh'`` and therefore all hit the same Forvo bucket.
-        See ``20260705_CLT_FORVO_CHINESE_ISSUE.md``.
+        The bucket's ``code`` is used as ``voice_key['language_code']`` unless
+        ``AUDIO_LANGUAGE_TO_FORVO_CODE`` overrides it for a particular audio
+        language -- see ``get_forvo_language_code``. Audio languages Forvo
+        cannot target at all are dropped via
+        ``FORVO_EXCLUDED_AUDIO_LANGUAGES``. Together these guarantee that no
+        two Forvo voices share a voice key. See
+        ``20260705_CLT_FORVO_CHINESE_ISSUE.md``.
         """
         try:
             language_code = language['code']
@@ -543,17 +591,27 @@ class ForvoService(cloudlanguagetools.service.Service):
                     cloudlanguagetools.languages.AudioLanguage.pt_BR
                 ]
 
+            audio_language_list = [audio_language for audio_language in audio_language_list
+                                   if audio_language not in FORVO_EXCLUDED_AUDIO_LANGUAGES]
+
             voices = []
 
             for gender in cloudlanguagetools.constants.Gender:
                 if len(audio_language_list) == 1:
-                    country_code = COUNTRY_ANY
-                    voices.append(ForvoVoice(language_code, country_code, audio_language_list[0], gender))
+                    audio_language = audio_language_list[0]
+                    forvo_language_code = self.get_forvo_language_code(audio_language, language_code)
+                    voices.append(ForvoVoice(forvo_language_code, COUNTRY_ANY, audio_language, gender))
                 else:
                     # logging.info(f'multiple audio languages found: {audio_language_list}')
                     for audio_language in audio_language_list:
-                        country_code = self.get_country_code(audio_language)
-                        voices.append(ForvoVoice(language_code, country_code, audio_language, gender))
+                        forvo_language_code = self.get_forvo_language_code(audio_language, language_code)
+                        if forvo_language_code != language_code:
+                            # the forvo language code already carries the dialect, a country
+                            # filter can only shrink the result set, never sharpen it
+                            country_code = COUNTRY_ANY
+                        else:
+                            country_code = self.get_country_code(audio_language)
+                        voices.append(ForvoVoice(forvo_language_code, country_code, audio_language, gender))
 
             return voices
 

@@ -1,6 +1,7 @@
 import os
 import sys
 import io
+import html
 import shlex
 import subprocess
 import threading
@@ -28,6 +29,8 @@ app = typer.Typer()
 console = Console()
 
 PAGE_SIZE = 20
+
+FILTER_FIELDS = ['service', 'gender', 'language', 'locale', 'name']
 
 # an exactly-typed enum member name (which is what tab-completion inserts) should select
 # that member alone. filters otherwise fall back to a substring search, and substrings
@@ -195,6 +198,30 @@ class TTSRepl:
     def apply_filters(self):
         self.filtered_voices = self.voices_matching_filters()
         self.page = 0
+        self._autoselect_voice()
+
+    def _autoselect_voice(self):
+        """Keep a usable voice selected as the filters change.
+
+        Picks the first match when the current selection has been filtered out, and
+        calls out the case where the filters have narrowed things down to one voice.
+        An empty result leaves the selection alone -- a typo'd filter shouldn't cost
+        you the voice you had."""
+        if not self.filtered_voices:
+            return
+
+        only_match = len(self.filtered_voices) == 1
+        still_visible = any(voice is self.selected_voice for voice in self.filtered_voices)
+        if still_visible and not only_match:
+            return
+
+        voice = self.filtered_voices[0]
+        if voice is not self.selected_voice:
+            self.selected_voice = voice
+            # options are voice-specific, don't carry them over to a different voice
+            self.voice_options = {}
+        reason = "only match" if only_match else "previous selection filtered out"
+        console.print(f"[green]Selected:[/green] {voice.name} [dim]({reason})[/dim]")
 
     def cmd_voices(self, args):
         """List voices with pagination."""
@@ -256,9 +283,8 @@ class TTSRepl:
         field = args[0].lower()
         value = " ".join(args[1:]) if len(args) > 1 else None
 
-        valid_fields = ['service', 'gender', 'language', 'locale', 'name']
-        if field not in valid_fields:
-            console.print(f"[red]Unknown filter field '{field}'. Valid: {', '.join(valid_fields)}[/red]")
+        if field not in FILTER_FIELDS:
+            console.print(f"[red]Unknown filter field '{field}'. Valid: {', '.join(FILTER_FIELDS)}[/red]")
             return
 
         if value is None:
@@ -276,7 +302,7 @@ class TTSRepl:
         table = Table(title="Active Filters")
         table.add_column("Field", style="cyan")
         table.add_column("Value", style="green")
-        for field in ['service', 'gender', 'language', 'locale', 'name']:
+        for field in FILTER_FIELDS:
             val = getattr(self, f'filter_{field}')
             table.add_row(field, val or "[dim]<not set>[/dim]")
         console.print(table)
@@ -517,6 +543,40 @@ class TTSRepl:
         except subprocess.CalledProcessError as e:
             console.print(f"[red]mpv playback error: {e}[/red]")
 
+    def _bottom_toolbar(self):
+        """Persistent status line rendered under the prompt by prompt_toolkit.
+
+        Re-evaluated on every render, so it always reflects the current state."""
+        def cell(label, value, limit):
+            value = str(value) if value else '<none>'
+            if len(value) > limit:
+                value = value[:limit - 1] + '\u2026'
+            return f'<b>{label}:</b> {html.escape(value)}'
+
+        active_filters = ' '.join(
+            f'{field}={getattr(self, "filter_" + field)}'
+            for field in FILTER_FIELDS if getattr(self, 'filter_' + field)
+        )
+
+        voice_summary = None
+        if self.selected_voice:
+            voice = self.selected_voice
+            locales = [al.name for al in voice.audio_languages]
+            locales_str = ', '.join(locales[:3])
+            if len(locales) > 3:
+                locales_str += f' +{len(locales) - 3}'
+            voice_summary = f'{voice.name} [{voice.service.name}/{voice.gender.name}] {locales_str}'
+
+        options_summary = ', '.join(f'{name}={value}' for name, value in self.voice_options.items())
+
+        return HTML(
+            f'{cell("filters", active_filters, 90)}'
+            f'  <b>|</b>  {len(self.filtered_voices)} voices\n'
+            f'{cell("voice", voice_summary, 58)}'
+            f'  <b>|</b>  {cell("opts", options_summary, 28)}'
+            f'  <b>|</b>  {cell("text", self.input_text, 28)}'
+        )
+
     def cmd_status(self, args):
         """Show current state."""
         table = Table(title="Current State")
@@ -566,7 +626,7 @@ class TTSRepl:
                 'select', 'text', 'options', 'set', 'clear', 'clearoptions',
                 'play', 'status', 'help', 'quit', 'exit',
             ]
-            filter_fields = ['service', 'gender', 'language', 'locale', 'name']
+            filter_fields = FILTER_FIELDS
 
             def _get_filter_values(self, field):
                 """Return (value, description) pairs. `value` is what gets inserted on
@@ -642,7 +702,8 @@ class TTSRepl:
     def run(self):
         self.initialize()
 
-        session = PromptSession(completer=self.get_completer())
+        session = PromptSession(completer=self.get_completer(),
+                                bottom_toolbar=self._bottom_toolbar)
         self.cmd_help([])
 
         dispatch = {

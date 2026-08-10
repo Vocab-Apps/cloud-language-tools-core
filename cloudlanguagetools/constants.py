@@ -60,6 +60,13 @@ ReadTimeout = 3 # 3 seconds read timeout
 
 TTLCacheTimeout = 86400 # 24 hours
 
+# Bitrate used when re-encoding lossless audio (e.g. Google/Gemini LINEAR16) to
+# mp3. Google's and Gemini's native mp3 encoding is a fixed ~32 kbps, which is
+# noticeably lossy (especially for tonal languages), so we request lossless
+# audio and re-encode at this bitrate. 128 kbps is generous headroom for the
+# 24 kHz mono source those services produce.
+AUDIO_MP3_ENCODE_BITRATE = '128k'
+
 class Service(enum.StrEnum):
     Azure = 'Azure'
     Google = 'Google'

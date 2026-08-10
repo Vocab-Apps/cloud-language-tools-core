@@ -120,8 +120,12 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         voice_id = voice_key['voice_id']
         url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'
 
+        # request 192 kbps mp3 to match the quality of the opus_48000_192 ogg
+        # path. Unlike the HyperTTS client this server always uses a paid
+        # (Creator-tier or above) account, so there's no need to probe and fall
+        # back to 128 kbps for free-tier accounts that can't produce 192 kbps.
         response_format_parameter, audio_format = self.get_request_audio_format({
-            AudioFormat.mp3: 'mp3_44100_128',
+            AudioFormat.mp3: 'mp3_44100_192',
             AudioFormat.ogg_opus: 'opus_48000_192',
             AudioFormat.wav: 'pcm_44100'
         }, options, AudioFormat.mp3)

@@ -124,6 +124,16 @@ class TestForvoChineseDialects(unittest.TestCase):
         self.service = cloudlanguagetools.forvo.ForvoService()
         self.service.key = 'fake_key'
 
+    def test_swahili_dialects_use_their_country_codes(self):
+        voices = self.service.get_voices_for_language_entry({'code': 'sw'})
+        country_codes = {
+            voice.audio_language: voice.country_code
+            for voice in voices
+        }
+
+        self.assertEqual(country_codes[AudioLanguage.sw_KE], 'KEN')
+        self.assertEqual(country_codes[AudioLanguage.sw_TZ], 'TZA')
+
     def get_language_code_map(self, forvo_language_code):
         """audio_language -> voice_key['language_code'] for one language-list entry.
         Only needs the `code` field, and touches no network."""

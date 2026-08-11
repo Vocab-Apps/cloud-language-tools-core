@@ -485,6 +485,8 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.ta_LK: 'LKA',
             cloudlanguagetools.languages.AudioLanguage.ur_PK: 'PAK',
             cloudlanguagetools.languages.AudioLanguage.en_TZ: 'TZA',
+            cloudlanguagetools.languages.AudioLanguage.sw_KE: 'KEN',
+            cloudlanguagetools.languages.AudioLanguage.sw_TZ: 'TZA',
             cloudlanguagetools.languages.AudioLanguage.ta_SG: 'SGP',
             cloudlanguagetools.languages.AudioLanguage.ta_MY: 'MYS',
 
@@ -680,4 +682,3 @@ class ForvoService(cloudlanguagetools.service.Service):
         return result
 
 
-    

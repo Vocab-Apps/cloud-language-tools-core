@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "cloudlanguagetools"
 # NOTE: `bump` (used by package.sh) rewrites the FIRST `version = "..."` line in
 # this file. Do not introduce another one above it.
-version = "16.1.1"
+version = "17.0.0"
 description = "Interface with various cloud APIs for language processing such as translation, text to speech"
 readme = "README.md"
 requires-python = ">=3.14"

@@ -70,6 +70,31 @@ class TestForvoGetTtsAudio(unittest.TestCase):
         self.assertIn('0', str(ctx.exception))
 
     @patch('cloudlanguagetools.forvo.requests.get')
+    def test_forvo_word_mismatch_raises_not_found(self, mock_get):
+        """When Forvo returns a pronunciation for a similar but different word
+        (e.g. Thai คล่อง requested, คลอง returned -- differing by a tone mark),
+        raise NotFoundError instead of serving the wrong word's audio. See issue #322."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.url = 'https://apicommercial.forvo.com/some-endpoint'
+        mock_response.json.return_value = {
+            'items': [{
+                'word': 'คลอง',
+                'original': 'คลอง',
+                'pathmp3': 'https://apicommercial.forvo.com/audio/should_not_be_fetched',
+            }]
+        }
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        with self.assertRaises(cloudlanguagetools.errors.NotFoundError) as ctx:
+            self.service.get_tts_audio('คล่อง', self.voice_key, self.options)
+
+        self.assertIn('คล่อง', str(ctx.exception))
+        # the mp3 download must not happen when the word mismatches
+        self.assertEqual(mock_get.call_count, 1)
+
+    @patch('cloudlanguagetools.forvo.requests.get')
     def test_forvo_read_timeout_raises_timeout(self, mock_get):
         """A read timeout from requests.exceptions.Timeout maps to TimeoutError."""
         mock_get.side_effect = requests.exceptions.ReadTimeout('Read timed out.')
@@ -98,6 +123,16 @@ class TestForvoChineseDialects(unittest.TestCase):
     def setUp(self):
         self.service = cloudlanguagetools.forvo.ForvoService()
         self.service.key = 'fake_key'
+
+    def test_swahili_dialects_use_their_country_codes(self):
+        voices = self.service.get_voices_for_language_entry({'code': 'sw'})
+        country_codes = {
+            voice.audio_language: voice.country_code
+            for voice in voices
+        }
+
+        self.assertEqual(country_codes[AudioLanguage.sw_KE], 'KEN')
+        self.assertEqual(country_codes[AudioLanguage.sw_TZ], 'TZA')
 
     def get_language_code_map(self, forvo_language_code):
         """audio_language -> voice_key['language_code'] for one language-list entry.

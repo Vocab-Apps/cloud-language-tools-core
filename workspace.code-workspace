@@ -5,7 +5,7 @@
 		}
 	],
 	"settings": {
-		"python.defaultInterpreterPath": "/home/luc/python-env/cloud-language-tools-core/bin/python",
+		"python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
 		"editor.minimap.enabled": false
 	}
 }

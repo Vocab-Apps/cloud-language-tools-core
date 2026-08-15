@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cloudlanguagetools"
+# NOTE: `bump` (used by package.sh) rewrites the FIRST `version = "..."` line in
+# this file. Do not introduce another one above it.
+version = "16.1.1"
+description = "Interface with various cloud APIs for language processing such as translation, text to speech"
+readme = "README.md"
+requires-python = ">=3.14"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Luc", email = "languagetools@mailc.net" },
+]
+keywords = ["translation", "text-to-speech", "transliteration", "dictionary", "language"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+    # pydub imports the stdlib audioop module, which was removed in python 3.13
+    "audioop-lts>=0.2.2",
+    "azure-cognitiveservices-speech>=1.51.1",
+    "boto3>=1.35",
+    "botocore>=1.35",
+    "cachetools>=5.5",
+    "cloud-language-tools-wenlin>=2.0.1",
+    "cryptography>=44",
+    "google-cloud-texttospeech>=2.29.0",
+    "google-cloud-translate>=3.16",
+    "openai>=1.76.0",
+    "pinyin-jyutping>=0.9",
+    "pydantic>=2.12",
+    "pydub>=0.25.1",
+    "requests>=2.32",
+    "urllib3>=2.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/Vocab-Apps/cloud-language-tools-core"
+Repository = "https://github.com/Vocab-Apps/cloud-language-tools-core"
+
+[dependency-groups]
+dev = [
+    "backoff>=2.2",
+    "bump>=1.4",
+    "databind>=4.5",
+    "prompt-toolkit>=3.0",
+    "pytest>=8.3",
+    "pytest-xdist>=3.6",
+    "python-magic>=0.4.27",
+    "rich>=13.9",
+    "typer>=0.15",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["cloudlanguagetools"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/cloudlanguagetools",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+    "/pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--show-capture=no"
+log_cli_level = "INFO"
+log_format = "%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s"
+log_date_format = "%H:%M:%S"

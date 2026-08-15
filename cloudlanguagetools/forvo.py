@@ -199,6 +199,7 @@ import json
 import requests
 import urllib
 import urllib3
+import unicodedata
 import tempfile
 import logging
 import os
@@ -377,6 +378,18 @@ class ForvoService(cloudlanguagetools.service.Service):
             if len(items) == 0:
                 error_message = f"Pronunciation not found in Forvo for word [{text}], language={language}, country={voice_key['country_code']}"
                 raise cloudlanguagetools.errors.NotFoundError(error_message)
+            # Forvo silently returns a pronunciation for a *similar* word when the
+            # exact word has no recording (e.g. Thai คล่อง vs คลอง, differing only
+            # by a tone mark). The returned item carries the word it actually
+            # pronounced in its `word` field, so reject the fallback. See issue #322.
+            returned_word = items[0].get('word')
+            if returned_word is not None:
+                if (unicodedata.normalize('NFC', returned_word).strip().lower()
+                        != unicodedata.normalize('NFC', text).strip().lower()):
+                    error_message = (f"Pronunciation not found in Forvo for word [{text}], "
+                                     f"language={language}, country={voice_key['country_code']}: "
+                                     f"received audio for a different word [{returned_word}]")
+                    raise cloudlanguagetools.errors.NotFoundError(error_message)
             audio_url = items[0]['pathmp3']
             output_temp_file = tempfile.NamedTemporaryFile()
             output_temp_filename = output_temp_file.name
@@ -472,6 +485,8 @@ class ForvoService(cloudlanguagetools.service.Service):
             cloudlanguagetools.languages.AudioLanguage.ta_LK: 'LKA',
             cloudlanguagetools.languages.AudioLanguage.ur_PK: 'PAK',
             cloudlanguagetools.languages.AudioLanguage.en_TZ: 'TZA',
+            cloudlanguagetools.languages.AudioLanguage.sw_KE: 'KEN',
+            cloudlanguagetools.languages.AudioLanguage.sw_TZ: 'TZA',
             cloudlanguagetools.languages.AudioLanguage.ta_SG: 'SGP',
             cloudlanguagetools.languages.AudioLanguage.ta_MY: 'MYS',
 
@@ -667,4 +682,3 @@ class ForvoService(cloudlanguagetools.service.Service):
         return result
 
 
-    

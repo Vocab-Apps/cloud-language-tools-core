@@ -1,6 +1,20 @@
+# syntax=docker/dockerfile:1.7
 ARG CLT_CORE_VERSION
 FROM vocabai/cloud-language-tools-core:${CLT_CORE_VERSION}
-COPY requirements.dev.txt ./
-RUN pip3 install --no-cache-dir -r requirements.dev.txt && pip3 cache purge
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+WORKDIR /app
+
+# dev/test dependencies, resolved from the same lockfile as the runtime deps.
+# pyproject.toml stays in place: it carries [tool.pytest.ini_options].
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv export --frozen --only-group dev --no-emit-project --output-file dev-requirements.txt && \
+    uv pip install --system --requirements dev-requirements.txt && \
+    rm dev-requirements.txt
+
 COPY tests tests
+
 CMD ["pytest", "tests"]

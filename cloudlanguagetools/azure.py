@@ -3,7 +3,6 @@ import requests
 import tempfile
 import uuid
 import operator
-import concurrent.futures
 import pydub
 import logging
 import pprint
@@ -369,6 +368,14 @@ class AzureService(cloudlanguagetools.service.Service):
         output_temp_filename = output_temp_file.name
         speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
         speech_config.set_speech_synthesis_output_format(azure.cognitiveservices.speech.SpeechSynthesisOutputFormat[response_format_parameter])
+        # bound how long synthesis can stall: the SDK cancels the request when the time since the
+        # last audio frame exceeds this interval (the SDK enforces a floor of 10 seconds) and the
+        # real-time factor exceeds the threshold below.
+        speech_config.set_property(
+            azure.cognitiveservices.speech.PropertyId.SpeechSynthesis_FrameTimeoutInterval,
+            str(int(cloudlanguagetools.constants.RequestTimeout * 1000)))
+        speech_config.set_property(
+            azure.cognitiveservices.speech.PropertyId.SpeechSynthesis_RtfTimeoutThreshold, '2')
         synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
         default_pitch = 0
@@ -419,17 +426,7 @@ class AzureService(cloudlanguagetools.service.Service):
         # print(f'[{ssml_str}] len: {len(ssml_str)}')
         logger.debug(f'sending SSML string: [{ssml_str}]')
 
-        timeout_seconds = cloudlanguagetools.constants.RequestTimeout
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-        try:
-            future = executor.submit(synthesizer.speak_ssml, ssml_str)
-            try:
-                result = future.result(timeout=timeout_seconds)
-            except concurrent.futures.TimeoutError as exception:
-                raise cloudlanguagetools.errors.TimeoutError(
-                    f'Azure TTS timed out after {timeout_seconds} seconds') from exception
-        finally:
-            executor.shutdown(wait=False)
+        result = synthesizer.speak_ssml(ssml_str)
 
         if result.reason != azure.cognitiveservices.speech.ResultReason.SynthesizingAudioCompleted:
             error_details = result.cancellation_details.error_details
@@ -437,7 +434,9 @@ class AzureService(cloudlanguagetools.service.Service):
             # special case errors:
             if 'standard voices will no longer be supported' in error_details:
                 error_message = 'Azure Standard voices are not supported anymore, please switch to Neural voices.'
-            elif 'timeout waiting for the first audio chunk' in error_details:
+            elif 'timeout' in error_details.lower():
+                # covers the SDK's first-audio-chunk timeout as well as the frame timeout
+                # configured on the speech config above
                 raise cloudlanguagetools.errors.TimeoutError(f'Azure TTS timed out: {error_details}')
             else:
                 error_message = f'Could not generate audio: {result.cancellation_details.reason} {error_details}'

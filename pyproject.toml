@@ -26,7 +26,6 @@ classifiers = [
 dependencies = [
     # pydub imports the stdlib audioop module, which was removed in python 3.13
     "audioop-lts>=0.2.2",
-    "azure-cognitiveservices-speech>=1.51.1",
     "boto3>=1.35",
     "botocore>=1.35",
     "cachetools>=5.5",

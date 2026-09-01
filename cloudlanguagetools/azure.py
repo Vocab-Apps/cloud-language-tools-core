@@ -1,3 +1,4 @@
+import io
 import json
 import requests
 import tempfile
@@ -21,9 +22,6 @@ import cloudlanguagetools.dictionarylookup
 import cloudlanguagetools.errors
 from cloudlanguagetools.options import AudioFormat
 
-
-import azure.cognitiveservices.speech
-import azure.cognitiveservices.speech.audio
 
 logger = logging.getLogger(__name__)
 
@@ -355,28 +353,50 @@ class AzureService(cloudlanguagetools.service.Service):
         }
         return headers        
 
+    def _raise_for_azure_response(self, response, operation, timeout_errors=False):
+        """Raise a cloud-language-tools error containing Azure's response body."""
+        if response.status_code < 400:
+            return
+
+        error_details = self._get_response_error_message(response).strip()
+        if not error_details:
+            error_details = response.reason or f'HTTP {response.status_code}'
+
+        logger.warning(
+            'Azure %s request failed with status %s: %s',
+            operation,
+            response.status_code,
+            error_details,
+        )
+
+        if response.status_code == 429:
+            raise cloudlanguagetools.errors.RateLimitError(f'Azure: {error_details}')
+        if timeout_errors and (
+                response.status_code in (408, 504) or
+                'timeout' in error_details.lower()):
+            raise cloudlanguagetools.errors.TimeoutError(
+                f'Azure {operation} timed out: {error_details}')
+        if 'standard voices will no longer be supported' in error_details.lower():
+            error_details = (
+                'Azure Standard voices are not supported anymore, '
+                'please switch to Neural voices.')
+
+        raise cloudlanguagetools.errors.RequestError(
+            f'Azure {operation} request failed ({response.status_code}): {error_details}')
+
     def get_tts_audio(self, text, voice_key, options):
         # https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech?tabs=streaming#audio-outputs
-        # https://learn.microsoft.com/en-us/python/api/azure-cognitiveservices-speech/azure.cognitiveservices.speech.speechsynthesisoutputformat?view=azure-python
-        response_format_parameter, audio_format = self.get_request_audio_format({
-            AudioFormat.mp3: 'Audio24Khz96KBitRateMonoMp3',
-            AudioFormat.ogg_opus: 'Ogg48Khz16BitMonoOpus',
-            AudioFormat.wav: 'Riff48Khz16BitMonoPcm'
-        }, options, AudioFormat.mp3)
+        voice_name = voice_key.get('name', '')
+        if voice_name.rstrip(')').endswith('RUS'):
+            raise cloudlanguagetools.errors.RequestError(
+                'Unsupported Azure Standard voice. Azure Standard voices are not '
+                'supported anymore; please switch to a Neural voice.')
 
-        output_temp_file = tempfile.NamedTemporaryFile(prefix=f'cloudlanguage_tools_{self.__class__.__name__}_audio', suffix=f'.{audio_format.name}')
-        output_temp_filename = output_temp_file.name
-        speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
-        speech_config.set_speech_synthesis_output_format(azure.cognitiveservices.speech.SpeechSynthesisOutputFormat[response_format_parameter])
-        # bound how long synthesis can stall: the SDK cancels the request when the time since the
-        # last audio frame exceeds this interval (the SDK enforces a floor of 10 seconds) and the
-        # real-time factor exceeds the threshold below.
-        speech_config.set_property(
-            azure.cognitiveservices.speech.PropertyId.SpeechSynthesis_FrameTimeoutInterval,
-            str(int(cloudlanguagetools.constants.RequestTimeout * 1000)))
-        speech_config.set_property(
-            azure.cognitiveservices.speech.PropertyId.SpeechSynthesis_RtfTimeoutThreshold, '2')
-        synthesizer = azure.cognitiveservices.speech.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
+        response_format_parameter, audio_format = self.get_request_audio_format({
+            AudioFormat.mp3: 'audio-24khz-96kbitrate-mono-mp3',
+            AudioFormat.ogg_opus: 'ogg-48khz-16bit-mono-opus',
+            AudioFormat.wav: 'riff-48khz-16bit-mono-pcm'
+        }, options, AudioFormat.mp3)
 
         default_pitch = 0
         default_rate = 1.0
@@ -426,24 +446,39 @@ class AzureService(cloudlanguagetools.service.Service):
         # print(f'[{ssml_str}] len: {len(ssml_str)}')
         logger.debug(f'sending SSML string: [{ssml_str}]')
 
-        result = synthesizer.speak_ssml(ssml_str)
+        url = f'https://{self.region}.tts.speech.microsoft.com/cognitiveservices/v1'
+        headers = {
+            'Ocp-Apim-Subscription-Key': self.key,
+            'Content-Type': 'application/ssml+xml',
+            'X-Microsoft-OutputFormat': response_format_parameter,
+            'User-Agent': 'cloud-language-tools',
+        }
+        try:
+            response = requests.post(
+                url,
+                headers=headers,
+                data=ssml_str.encode('utf-8'),
+                timeout=cloudlanguagetools.constants.RequestTimeout,
+            )
+        except requests.exceptions.Timeout as exception:
+            raise cloudlanguagetools.errors.TimeoutError(
+                'Azure TTS request timed out') from exception
+        except requests.exceptions.RequestException as exception:
+            raise cloudlanguagetools.errors.RequestError(
+                f'Azure TTS request failed: {exception}') from exception
 
-        if result.reason != azure.cognitiveservices.speech.ResultReason.SynthesizingAudioCompleted:
-            error_details = result.cancellation_details.error_details
-            logger.warning(f'Azure TTS synthesis failed: reason={result.cancellation_details.reason}, error_details={error_details}')
-            # special case errors:
-            if 'standard voices will no longer be supported' in error_details:
-                error_message = 'Azure Standard voices are not supported anymore, please switch to Neural voices.'
-            elif 'timeout' in error_details.lower():
-                # covers the SDK's first-audio-chunk timeout as well as the frame timeout
-                # configured on the speech config above
-                raise cloudlanguagetools.errors.TimeoutError(f'Azure TTS timed out: {error_details}')
-            else:
-                error_message = f'Could not generate audio: {result.cancellation_details.reason} {error_details}'
-            raise cloudlanguagetools.errors.RequestError(error_message)
+        self._raise_for_azure_response(response, 'TTS', timeout_errors=True)
+        if not response.content:
+            raise cloudlanguagetools.errors.RequestError(
+                'Azure TTS request returned an empty audio response')
 
-        stream = azure.cognitiveservices.speech.AudioDataStream(result)
-        stream.save_to_wav_file(output_temp_filename)
+        output_temp_file = tempfile.NamedTemporaryFile(
+            prefix=f'cloudlanguage_tools_{self.__class__.__name__}_audio',
+            suffix=f'.{audio_format.name}',
+        )
+        output_temp_file.write(response.content)
+        output_temp_file.flush()
+        output_temp_file.seek(0)
 
         return output_temp_file
 
@@ -514,7 +549,18 @@ class AzureService(cloudlanguagetools.service.Service):
         return response[0]['translations'][0]['text']
 
     def get_transliteration(self, text, transliteration_key):
-        return self.transliteration(text, transliteration_key['language_id'], transliteration_key['from_script'], transliteration_key['to_script'])
+        language_id = transliteration_key['language_id']
+        from_script = transliteration_key['from_script']
+        to_script = transliteration_key['to_script']
+
+        # Azure defines ``language`` as the language of the source script. A
+        # few callers historically identified Chinese by the desired output
+        # variant instead, so derive the source variant from the explicit
+        # script when the two disagree.
+        if language_id in ('zh-Hans', 'zh-Hant') and from_script in ('Hans', 'Hant'):
+            language_id = f'zh-{from_script}'
+
+        return self.transliteration(text, language_id, from_script, to_script)
 
     def get_translation_language_list(self):
         azure_data = self.get_supported_languages()
@@ -620,49 +666,63 @@ class AzureService(cloudlanguagetools.service.Service):
 
     # supported languages: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support#speech-to-text
     def speech_to_text(self, mp3_filepath, audio_format, language=None):
-        speech_config = azure.cognitiveservices.speech.SpeechConfig(subscription=self.key, region=self.region)
-
         if audio_format == cloudlanguagetools.options.AudioFormat.mp3:
             sound = pydub.AudioSegment.from_mp3(mp3_filepath)
         elif audio_format in [cloudlanguagetools.options.AudioFormat.ogg_opus, cloudlanguagetools.options.AudioFormat.ogg_vorbis]:
             sound = pydub.AudioSegment.from_ogg(mp3_filepath)
         elif audio_format == cloudlanguagetools.options.AudioFormat.wav:
             sound = pydub.AudioSegment.from_wav(mp3_filepath)
-        wav_filepath = tempfile.NamedTemporaryFile(suffix='.wav').name
-        sound.export(wav_filepath, format="wav")
-
-        audio_input = azure.cognitiveservices.speech.audio.AudioConfig(filename=wav_filepath)
-
-        # Creates a recognizer with the given settings
-        if language != None:
-            # we know which language
-            logger.info(f'configuration speech recognition for language {language}')
-            speech_recognizer = azure.cognitiveservices.speech.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input, language=language)
         else:
-            # language unknown
-            logger.info(f'configuration speech recognition for any language')
-            speech_recognizer = azure.cognitiveservices.speech.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input)
+            raise cloudlanguagetools.errors.RequestError(
+                f'Azure speech recognition does not support {audio_format.name} input')
 
-        # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-        # single utterance is determined by listening for silence at the end or until a maximum of 15
-        # seconds of audio is processed.  The task returns the recognition text as result. 
-        # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
-        # shot recognition like command or query. 
-        # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
-        result = speech_recognizer.recognize_once()
+        # The short-audio REST API accepts 16 kHz, mono, 16-bit PCM WAV.
+        sound = sound.set_frame_rate(16000).set_channels(1).set_sample_width(2)
+        wav_data = io.BytesIO()
+        sound.export(wav_data, format='wav')
 
-        # Checks result.
-        if result.reason == azure.cognitiveservices.speech.ResultReason.RecognizedSpeech:
-            return result.text
-        elif result.reason == azure.cognitiveservices.speech.ResultReason.NoMatch:
-            error_message = "No speech could be recognized: {}".format(result.no_match_details)
-            raise Exception(error_message)
-        elif result.reason == azure.cognitiveservices.speech.ResultReason.Canceled:
-            cancellation_details = result.cancellation_details
-            error_message = "Speech Recognition canceled: {}".format(cancellation_details)
-            raise Exception(error_message)
+        recognition_language = language or 'en-US'
+        logger.info(
+            'configuring Azure REST speech recognition for language %s',
+            recognition_language,
+        )
+        url = (
+            f'https://{self.region}.stt.speech.microsoft.com/'
+            'speech/recognition/conversation/cognitiveservices/v1'
+        )
+        headers = {
+            'Ocp-Apim-Subscription-Key': self.key,
+            'Content-Type': 'audio/wav; codecs=audio/pcm; samplerate=16000',
+            'Accept': 'application/json',
+        }
+        try:
+            response = requests.post(
+                url,
+                headers=headers,
+                params={'language': recognition_language, 'format': 'simple'},
+                data=wav_data.getvalue(),
+                timeout=cloudlanguagetools.constants.RequestTimeout,
+            )
+        except requests.exceptions.Timeout as exception:
+            raise cloudlanguagetools.errors.TimeoutError(
+                'Azure speech recognition request timed out') from exception
+        except requests.exceptions.RequestException as exception:
+            raise cloudlanguagetools.errors.RequestError(
+                f'Azure speech recognition request failed: {exception}') from exception
 
-        raise "unknown error"
+        self._raise_for_azure_response(response, 'speech recognition')
+        try:
+            result = response.json()
+        except (ValueError, TypeError) as exception:
+            raise cloudlanguagetools.errors.RequestError(
+                f'Azure speech recognition returned invalid JSON: {response.text}') from exception
+
+        recognition_status = result.get('RecognitionStatus')
+        if recognition_status == 'Success' and 'DisplayText' in result:
+            return result['DisplayText']
+
+        raise cloudlanguagetools.errors.RequestError(
+            f'Azure speech recognition failed: {recognition_status or result}')
 
     def get_dictionary_lookup_list(self):
         result = []

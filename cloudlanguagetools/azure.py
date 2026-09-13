@@ -393,7 +393,7 @@ class AzureService(cloudlanguagetools.service.Service):
                 'supported anymore; please switch to a Neural voice.')
 
         response_format_parameter, audio_format = self.get_request_audio_format({
-            AudioFormat.mp3: 'audio-24khz-96kbitrate-mono-mp3',
+            AudioFormat.mp3: 'audio-48khz-192kbitrate-mono-mp3',
             AudioFormat.ogg_opus: 'ogg-48khz-16bit-mono-opus',
             AudioFormat.wav: 'riff-48khz-16bit-mono-pcm'
         }, options, AudioFormat.mp3)

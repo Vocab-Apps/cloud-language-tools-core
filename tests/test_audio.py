@@ -615,7 +615,7 @@ class TestAudio(unittest.TestCase):
             cloudlanguagetools.options.AudioFormat.wav)
 
     def test_azure_format_wav(self):
-        fr_voice = self.get_voice_by_service_and_name(Service.Azure, 'Denise')
+        fr_voice = self.get_voice_by_lambda(Service.Azure, lambda x: x.name == 'Denise (Neural)')
         self.verify_wav_voice(fr_voice, self.FRENCH_INPUT_TEXT, 'fr-FR')
 
     def test_amazon_format_wav(self):

@@ -168,7 +168,7 @@ class TestAzureGetTtsAudioRestRequest:
     @pytest.mark.parametrize(
         ('audio_format', 'expected_output_format'),
         [
-            ('mp3', 'audio-24khz-96kbitrate-mono-mp3'),
+            ('mp3', 'audio-48khz-192kbitrate-mono-mp3'),
             ('ogg_opus', 'ogg-48khz-16bit-mono-opus'),
             ('wav', 'riff-48khz-16bit-mono-pcm'),
         ],

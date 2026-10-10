@@ -600,11 +600,12 @@ class TestAudio(unittest.TestCase):
         audio_text = audio_utils.speech_to_text(self.manager, audio_temp_file, 'fr-FR', audio_format=cloudlanguagetools.options.AudioFormat.ogg_opus)
         self.assertEqual(audio_utils.sanitize_recognized_text(source_text), audio_utils.sanitize_recognized_text(audio_text))        
 
-    def verify_wav_voice(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, recognition_language: str):
+    def verify_wav_voice(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, recognition_language: str, options=None):
         # assert that the wav format is in the list of supported formats
         self.assertTrue(cloudlanguagetools.options.AudioFormat.wav.name in 
                         voice.options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER]['values'])
-        options = {cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.options.AudioFormat.wav.name}
+        options = dict(options or {})
+        options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER] = cloudlanguagetools.options.AudioFormat.wav.name
         audio_temp_file = self.manager.get_tts_audio(text, voice.service, voice.voice_key, options)
         audio_utils.assert_is_wav_format(self, audio_temp_file.name)
 
@@ -1143,6 +1144,95 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
 
         self.recognize_and_verify_text(
             audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
+
+    # Gemini 3.8 models (Gemini Enterprise generateContent endpoint)
+    # ===============================================================
+
+    def test_gemini_3_8_flash_english(self):
+        """Gemini 3.8 Flash TTS, default options."""
+        service = 'Gemini'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {"name": "Kore"}
+        options = {'model': 'gemini-3.8-flash-tts'}
+        audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
+
+    def test_gemini_3_8_flash_lite_english(self):
+        """Gemini 3.8 Flash-Lite TTS."""
+        service = 'Gemini'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {"name": "Puck"}
+        options = {'model': 'gemini-3.8-flash-lite-tts'}
+        audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
+
+    def test_gemini_3_8_french_autodetect(self):
+        """Gemini 3.8 detects the input language without a language_code option."""
+        service = 'Gemini'
+        source_text = self.FRENCH_INPUT_TEXT
+
+        voice_key = {"name": "Kore"}
+        options = {'model': 'gemini-3.8-flash-tts'}
+        audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'fr-FR', cloudlanguagetools.options.AudioFormat.mp3)
+
+    def test_gemini_3_8_style_prompt(self):
+        """Gemini 3.8 forwards the prompt option as the speechMetadata style."""
+        service = 'Gemini'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {"name": "Zephyr"}
+        options = {
+            'model': 'gemini-3.8-flash-tts',
+            'prompt': 'Speak in a calm, warm tone.',
+        }
+        audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
+
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
+
+    def test_gemini_3_8_ogg_format(self):
+        """Gemini 3.8 ogg_opus output is transcoded locally from the WAV response."""
+        service = 'Gemini'
+        source_text = self.ENGLISH_INPUT_TEXT
+
+        voice_key = {"name": "Zephyr"}
+        options = {
+            'model': 'gemini-3.8-flash-tts',
+            'format': 'ogg_opus'
+        }
+        audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
+
+        self.assertTrue(audio_utils.is_ogg_opus_format(audio_temp_file.name))
+        self.recognize_and_verify_text(
+            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.ogg_opus)
+
+    def test_gemini_3_8_wav_format(self):
+        """Gemini 3.8 wav output."""
+        voice = self.get_voice_by_lambda(Service.Gemini, lambda x: 'Kore' in x.name, assert_unique=True)
+        self.verify_wav_voice(voice, self.ENGLISH_INPUT_TEXT, 'en-US', options={'model': 'gemini-3.8-flash-tts'})
+
+    def test_gemini_3_8_mp3_hq_bitrate(self):
+        voice = self.get_voice_by_lambda(Service.Gemini,
+            lambda x: 'Orus' in x.name, assert_unique=True)
+        options = {
+            'model': 'gemini-3.8-flash-tts',
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.options.AudioFormat.mp3_hq.name
+        }
+        audio_temp_file = self.get_tts_audio_with_retry(self.ENGLISH_INPUT_TEXT, voice.service, voice.voice_key, options)
+        self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
+        self.assertGreaterEqual(audio_utils.get_mp3_bitrate_kbps(audio_temp_file.name), 128)
+        self.recognize_and_verify_text(
+            audio_temp_file, self.ENGLISH_INPUT_TEXT, 'en-US',
+            cloudlanguagetools.options.AudioFormat.mp3_hq)
 
     def test_azure_voice_list_v3_dragonhd_options(self):
         """Verify DragonHD voices have the DragonHD-specific parameters."""

@@ -1,7 +1,10 @@
 """Audio format handling shared by the Google and Gemini services.
 
-Both services synthesize through the Google Cloud Text-to-Speech API, so they
-accept the same set of output formats and post-process the response the same way.
+Both services accept the same set of output formats. Cloud Text-to-Speech
+responses (Google voices, Gemini 2.5/3.1 models) are post-processed with
+write_audio_response(). Gemini 3.8 models go through the Gemini Enterprise
+generateContent endpoint, which only returns WAV, so their output is transcoded
+locally with convert_wav_to_format().
 """
 import tempfile
 import logging
@@ -52,3 +55,20 @@ def write_audio_response(audio_content: bytes, audio_format: AudioFormat) -> tem
         output_temp_file = cloudlanguagetools.audio_processing.encode_wav_to_mp3(output_temp_file)
 
     return output_temp_file
+
+
+def convert_wav_to_format(wav_temp_file: tempfile.NamedTemporaryFile, audio_format: AudioFormat) -> tempfile.NamedTemporaryFile:
+    """Transcode a WAV temp file to the requested format.
+
+    Used for endpoints that only return WAV (Gemini generateContent). There is no
+    native mp3 there, so both mp3 and mp3_hq are encoded locally at the mp3_hq bitrate.
+    """
+    if audio_format == AudioFormat.wav:
+        return wav_temp_file
+    if audio_format in (AudioFormat.mp3, AudioFormat.mp3_hq):
+        logger.debug('encoding WAV response to mp3')
+        return cloudlanguagetools.audio_processing.encode_wav_to_mp3(wav_temp_file)
+    if audio_format == AudioFormat.ogg_opus:
+        logger.debug('encoding WAV response to ogg opus')
+        return cloudlanguagetools.audio_processing.encode_wav_to_ogg_opus(wav_temp_file)
+    raise ValueError(f'unsupported audio format: {audio_format}')

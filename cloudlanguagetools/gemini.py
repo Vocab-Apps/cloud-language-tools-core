@@ -1,7 +1,14 @@
+import base64
 import logging
 import pprint
+import re
+import tempfile
 from typing import List
 
+import requests
+import google.auth
+import google.auth.exceptions
+import google.auth.transport.requests
 from google.api_core.client_options import ClientOptions
 import google.cloud.texttospeech
 import google.api_core.exceptions
@@ -12,17 +19,35 @@ import cloudlanguagetools.options
 import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.errors
+import cloudlanguagetools.audio_processing
 import cloudlanguagetools.google_tts_common
 from cloudlanguagetools.languages import AudioLanguage
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = 'gemini-3.1-flash-tts-preview'
+# The Gemini 3.8 TTS models are only served through generateContent (Gemini Enterprise /
+# Gemini API), not through the Cloud Text-to-Speech API used by the older Gemini models.
+# https://ai.google.dev/gemini-api/docs/speech-generation
+GENERATE_CONTENT_MODELS = {
+    'gemini-3.8-flash-tts',
+    'gemini-3.8-flash-lite-tts',
+}
+
+DEFAULT_MODEL = 'gemini-3.8-flash-tts'
+
+# Gemini Enterprise (formerly Vertex AI) endpoint, authenticated with the Google service account
+GEMINI_ENTERPRISE_URL = 'https://aiplatform.googleapis.com/v1/projects/{project}/locations/global/publishers/google/models/{model}:generateContent'
+GOOGLE_CLOUD_PLATFORM_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
+# generateContent returns 24 kHz, mono, 16-bit audio (WAV by default, or headerless audio/L16)
+GENERATE_CONTENT_SAMPLE_RATE = 24000
+DEFAULT_RATE_LIMIT_RETRY_AFTER = 60
 
 VOICE_OPTIONS = {
     'model': {
         'type': cloudlanguagetools.options.ParameterType.list.name,
         'values': [
+            'gemini-3.8-flash-tts',
+            'gemini-3.8-flash-lite-tts',
             'gemini-3.1-flash-tts-preview',
             'gemini-2.5-flash-tts',
             'gemini-2.5-pro-tts',
@@ -132,6 +157,51 @@ TTS_SUPPORTED_LANGUAGES = [
     AudioLanguage.sw_KE,
     AudioLanguage.sv_SE,
     AudioLanguage.ur_PK,
+    # Additional languages supported by the Gemini 3.8 models
+    # https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash-tts
+    AudioLanguage.ace_ID,
+    AudioLanguage.ak_GH,
+    AudioLanguage.as_IN,
+    AudioLanguage.awa_IN,
+    AudioLanguage.ba_RU,
+    AudioLanguage.ban_ID,
+    AudioLanguage.bem_ZM,
+    AudioLanguage.bho_IN,
+    AudioLanguage.bs_BA,
+    AudioLanguage.ckb_IQ,
+    AudioLanguage.crh_UA,
+    AudioLanguage.dz_BT,
+    AudioLanguage.ff_NG,
+    AudioLanguage.gn_PY,
+    AudioLanguage.ha_NG,
+    AudioLanguage.hne_IN,
+    AudioLanguage.ig_NG,
+    AudioLanguage.ilo_PH,
+    AudioLanguage.kk_KZ,
+    AudioLanguage.km_KH,
+    AudioLanguage.ks_IN,
+    AudioLanguage.ky_KG,
+    AudioLanguage.lg_UG,
+    AudioLanguage.ln_CD,
+    AudioLanguage.ltg_LV,
+    AudioLanguage.lus_IN,
+    AudioLanguage.min_ID,
+    AudioLanguage.mni_IN,
+    AudioLanguage.mt_MT,
+    AudioLanguage.nso_ZA,
+    AudioLanguage.ny_MW,
+    AudioLanguage.oc_FR,
+    AudioLanguage.pag_PH,
+    AudioLanguage.prs_AF,
+    AudioLanguage.rw_RW,
+    AudioLanguage.so_SO,
+    AudioLanguage.ss_SZ,
+    AudioLanguage.st_ZA,
+    AudioLanguage.tg_TJ,
+    AudioLanguage.ti_ET,
+    AudioLanguage.ug_CN,
+    AudioLanguage.uz_UZ,
+    AudioLanguage.zh_HK,
 ]
 
 GEMINI_VOICES = [
@@ -188,6 +258,8 @@ def build_tts_voice_v3(voice_name, description, gender):
 class GeminiService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.service = cloudlanguagetools.constants.Service.Gemini
+        self.google_credentials = None
+        self.google_project = None
 
     def configure(self, config):
         # we rely on os.environ['GOOGLE_APPLICATION_CREDENTIALS'] from the Google service
@@ -197,6 +269,19 @@ class GeminiService(cloudlanguagetools.service.Service):
         return google.cloud.texttospeech.TextToSpeechClient(
             client_options=ClientOptions(api_endpoint='texttospeech.googleapis.com')
         )
+
+    def get_access_token_and_project(self):
+        """Return (access token, project id) from the Google service account credentials."""
+        if self.google_credentials is None:
+            credentials, project = google.auth.default(scopes=[GOOGLE_CLOUD_PLATFORM_SCOPE])
+            if not project:
+                raise cloudlanguagetools.errors.AuthenticationError(
+                    'Gemini TTS: could not determine the Google Cloud project id from the credentials')
+            self.google_credentials = credentials
+            self.google_project = project
+        if not self.google_credentials.valid:
+            self.google_credentials.refresh(google.auth.transport.requests.Request())
+        return self.google_credentials.token, self.google_project
 
     def get_tts_voice_list(self):
         return get_tts_voice_list()
@@ -210,14 +295,25 @@ class GeminiService(cloudlanguagetools.service.Service):
         return result
 
     def get_tts_audio(self, text, voice_key, options):
-        """Generate TTS audio using Cloud Text-to-Speech API with Gemini models"""
+        """Generate TTS audio with a Gemini model.
 
+        The Gemini 3.8 models go through the Gemini Enterprise generateContent endpoint,
+        the older models go through the Cloud Text-to-Speech API.
+        """
         voice_name = voice_key['name']
         model = options.get('model', DEFAULT_MODEL)
+        audio_format = cloudlanguagetools.google_tts_common.get_audio_format(options)
+
+        if model in GENERATE_CONTENT_MODELS:
+            return self.get_tts_audio_generate_content(text, voice_name, model, options, audio_format)
+        return self.get_tts_audio_cloud_tts(text, voice_name, model, options, audio_format)
+
+    # Cloud Text-to-Speech API path (gemini-2.5-*, gemini-3.1-*)
+    # =============================================================
+
+    def get_tts_audio_cloud_tts(self, text, voice_name, model, options, audio_format):
         language_code = options.get('language_code', 'en-US')
         prompt = options.get('prompt', '')
-
-        audio_format = cloudlanguagetools.google_tts_common.get_audio_format(options)
 
         try:
             client = self.get_client()
@@ -258,7 +354,7 @@ class GeminiService(cloudlanguagetools.service.Service):
                     retry_after = detail.retry_delay.seconds
                     break
             if retry_after is None:
-                retry_after = 60
+                retry_after = DEFAULT_RATE_LIMIT_RETRY_AFTER
             logger.warning(f'Gemini TTS rate limit hit (retry_after={retry_after}s): {e}')
             raise cloudlanguagetools.errors.RateLimitRetryAfterError(str(e), retry_after=retry_after) from e
         except google.api_core.exceptions.InvalidArgument as e:
@@ -267,3 +363,133 @@ class GeminiService(cloudlanguagetools.service.Service):
         except google.api_core.exceptions.GoogleAPICallError as e:
             logger.warning(f'Gemini TTS error: {e}, code: {e.code}')
             raise cloudlanguagetools.errors.RequestError(f'Gemini TTS error: {str(e)}') from e
+
+    # generateContent path (gemini-3.8-*)
+    # ===================================
+
+    def build_generate_content_request(self, text, voice_name, options):
+        prompt = options.get('prompt', '')
+        # the 3.8 models detect the input language automatically, only pass a
+        # language code when the caller explicitly set one
+        language_code = options.get('language_code')
+
+        part = {'text': text}
+        if prompt:
+            part['speechMetadata'] = {'style': prompt}
+
+        speech_config = {'voiceConfig': {'voice': voice_name}}
+        if language_code:
+            speech_config['languageCode'] = language_code
+
+        return {
+            'contents': [{'role': 'user', 'parts': [part]}],
+            'generationConfig': {
+                'responseModalities': ['AUDIO'],
+                'speechConfig': speech_config,
+            }
+        }
+
+    def get_tts_audio_generate_content(self, text, voice_name, model, options, audio_format):
+        request_body = self.build_generate_content_request(text, voice_name, options)
+
+        try:
+            access_token, project = self.get_access_token_and_project()
+            url = GEMINI_ENTERPRISE_URL.format(project=project, model=model)
+            headers = {'Authorization': f'Bearer {access_token}'}
+
+            logger.debug(f'Making Gemini generateContent TTS request: model: {model}, voice: {voice_name}, format: {audio_format.name}, body: {pprint.pformat(request_body)}')
+
+            response = requests.post(url, headers=headers, json=request_body,
+                timeout=cloudlanguagetools.constants.RequestTimeoutLong)
+            self.raise_for_generate_content_error(response)
+
+            audio_bytes, mime_type = self.extract_generate_content_audio(response.json())
+            return self.write_generate_content_audio(audio_bytes, mime_type, audio_format)
+
+        except requests.exceptions.Timeout as e:
+            logger.warning(f'Gemini generateContent TTS request timed out: {e}')
+            raise cloudlanguagetools.errors.TimeoutError(f'Gemini TTS timed out: {str(e)}') from e
+        except google.auth.exceptions.GoogleAuthError as e:
+            logger.warning(f'Gemini generateContent TTS authentication error: {e}')
+            raise cloudlanguagetools.errors.AuthenticationError(f'Gemini TTS authentication error: {str(e)}') from e
+
+    def raise_for_generate_content_error(self, response):
+        """Map an error HTTP response from generateContent to a cloudlanguagetools error."""
+        status_code = response.status_code
+        if status_code < 400:
+            return
+
+        try:
+            error_data = response.json().get('error', {})
+        except (ValueError, TypeError, AttributeError):
+            error_data = {}
+        if not isinstance(error_data, dict):
+            error_data = {}
+        message = error_data.get('message', response.text)
+
+        logger.warning(f'Gemini generateContent TTS request failed with status code {status_code}: {message} | full response: {response.text}')
+
+        if status_code == 429:
+            retry_after = self.get_retry_after(error_data)
+            raise cloudlanguagetools.errors.RateLimitRetryAfterError(
+                f'Gemini TTS rate limit exceeded: {message}', retry_after=retry_after)
+        if status_code == 400:
+            raise cloudlanguagetools.errors.InputError(f'Gemini TTS error: {message}')
+        if status_code in (401, 403):
+            raise cloudlanguagetools.errors.AuthenticationError(
+                f'Gemini TTS authentication error (is the Vertex AI API enabled on the project and does '
+                f'the service account have the Vertex AI User role?): {message}')
+        if status_code in (408, 504):
+            raise cloudlanguagetools.errors.TimeoutError(f'Gemini TTS timed out: {message}')
+        raise cloudlanguagetools.errors.RequestError(f'Gemini TTS error (status code {status_code}): {message}')
+
+    @staticmethod
+    def get_retry_after(error_data):
+        """Extract the retry delay in seconds from a google.rpc.RetryInfo error detail."""
+        for detail in error_data.get('details', []):
+            if detail.get('@type') == 'type.googleapis.com/google.rpc.RetryInfo':
+                match = re.match(r'^(\d+)(?:\.\d+)?s$', str(detail.get('retryDelay', '')))
+                if match:
+                    return int(match.group(1))
+        return DEFAULT_RATE_LIMIT_RETRY_AFTER
+
+    @staticmethod
+    def extract_generate_content_audio(response_data):
+        """Return (audio bytes, mime type) from a generateContent response."""
+        candidates = response_data.get('candidates') or []
+        if len(candidates) == 0:
+            logger.error(f'No candidates in Gemini generateContent response: {pprint.pformat(response_data)}')
+            block_reason = (response_data.get('promptFeedback') or {}).get('blockReason')
+            if block_reason:
+                raise cloudlanguagetools.errors.RequestError(f'Gemini TTS request blocked: {block_reason}')
+            raise cloudlanguagetools.errors.RequestError('Gemini TTS: no audio candidates in response')
+
+        candidate = candidates[0]
+        parts = (candidate.get('content') or {}).get('parts') or []
+        for part in parts:
+            inline_data = part.get('inlineData')
+            if inline_data and inline_data.get('data'):
+                return base64.b64decode(inline_data['data']), inline_data.get('mimeType', '')
+
+        finish_reason = candidate.get('finishReason')
+        logger.error(f'No audio data in Gemini generateContent response (finish reason: {finish_reason}): {pprint.pformat(response_data)}')
+        raise cloudlanguagetools.errors.RequestError(f'Gemini TTS: no audio data in response (finish reason: {finish_reason})')
+
+    @staticmethod
+    def write_generate_content_audio(audio_bytes, mime_type, audio_format):
+        """Write the generateContent audio to a temp file and transcode it to the requested format."""
+        audio_temp_file = tempfile.NamedTemporaryFile(prefix='clt_gemini_audio_', suffix='.wav')
+        with open(audio_temp_file.name, 'wb') as f:
+            f.write(audio_bytes)
+
+        if not audio_bytes.startswith(b'RIFF'):
+            # headerless PCM (audio/L16;codec=pcm;rate=24000), wrap it in a WAV container
+            sample_rate = GENERATE_CONTENT_SAMPLE_RATE
+            rate_match = re.search(r'rate=(\d+)', mime_type)
+            if rate_match:
+                sample_rate = int(rate_match.group(1))
+            logger.debug(f'wrapping headerless PCM response ({mime_type}) in a WAV container at {sample_rate} Hz')
+            audio_temp_file = cloudlanguagetools.audio_processing.wrap_pcm_data_wave(
+                audio_temp_file, num_channels=1, sample_width=2, framerate=sample_rate)
+
+        return cloudlanguagetools.google_tts_common.convert_wav_to_format(audio_temp_file, audio_format)

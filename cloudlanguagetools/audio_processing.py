@@ -40,3 +40,10 @@ def wrap_pcm_data_wave(audio_temp_file: tempfile.NamedTemporaryFile,
     WAVEFORMAT.close()    
     
     return wav_audio_temp_file
+
+# re-encode a lossless WAV audio file to ogg opus
+def encode_wav_to_ogg_opus(wav_temp_file: tempfile.NamedTemporaryFile) -> tempfile.NamedTemporaryFile:
+    audio_segment = pydub.AudioSegment.from_wav(wav_temp_file.name)
+    ogg_temp_file = tempfile.NamedTemporaryFile(prefix='clt_ogg_audio_', suffix='.ogg')
+    audio_segment.export(ogg_temp_file.name, format='ogg', codec='libopus')
+    return ogg_temp_file

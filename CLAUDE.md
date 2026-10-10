@@ -60,6 +60,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pydub` imports the stdlib `audioop` module, which was removed in Python 3.13, so
   `audioop-lts` is a declared runtime dependency.
 - `utils/debug_3.py` imports `convertkit` lazily; it is deliberately not a declared dependency.
+- Gemini TTS (`gemini.py`) has two transports: the `gemini-3.8-*` models call the Gemini
+  Enterprise `generateContent` REST endpoint (`aiplatform.googleapis.com`) with a bearer token
+  from the Google service-account credentials and transcode the WAV response locally; the
+  `gemini-2.5-*` / `gemini-3.1-*` models go through the Cloud Text-to-Speech API.
 
 ## Architecture Overview
 

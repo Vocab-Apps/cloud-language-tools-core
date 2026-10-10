@@ -70,8 +70,15 @@ def sanitize_recognized_text(recognized_text):
 
 def is_mp3_format(filename):
     mime_type = magic.from_file(filename)
-    expected_mime_type_str = 'MPEG ADTS, layer III'    
+    expected_mime_type_str = 'MPEG ADTS, layer III'
     return expected_mime_type_str in mime_type
+
+def get_mp3_bitrate_kbps(filename):
+    # libmagic reports mp3 bitrate, e.g. "MPEG ADTS, layer III, v1, 192 kbps, 48 kHz, Monaural"
+    mime_type = magic.from_file(filename)
+    match = re.search(r'(\d+)\s*kbps', mime_type)
+    assert match is not None, f'could not find bitrate in mime type: [{mime_type}]'
+    return int(match.group(1))
 
 def is_ogg_opus_format(filename):
     mime_type = magic.from_file(filename)

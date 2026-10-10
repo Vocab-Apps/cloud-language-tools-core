@@ -654,6 +654,27 @@ class TestAudio(unittest.TestCase):
             audio_temp_file, self.FRENCH_INPUT_TEXT, 'fr-FR',
             cloudlanguagetools.options.AudioFormat.mp3)
 
+    # mp3 bitrate tests
+    # =================
+    # Azure and ElevenLabs both natively support 192 kbps mp3, verify we get it.
+
+    def verify_mp3_bitrate(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, min_bitrate_kbps: int):
+        options = {cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.options.AudioFormat.mp3.name}
+        audio_temp_file = self.get_tts_audio_with_retry(text, voice.service, voice.voice_key, options)
+        self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
+        bitrate_kbps = audio_utils.get_mp3_bitrate_kbps(audio_temp_file.name)
+        self.assertGreaterEqual(bitrate_kbps, min_bitrate_kbps,
+            f'{voice.service.name} mp3 bitrate {bitrate_kbps} kbps is below expected {min_bitrate_kbps} kbps')
+
+    def test_azure_mp3_bitrate(self):
+        voice = self.get_voice_by_lambda(Service.Azure, lambda x: x.name == 'Denise (Neural)')
+        self.verify_mp3_bitrate(voice, self.FRENCH_INPUT_TEXT, 192)
+
+    def test_elevenlabs_mp3_bitrate(self):
+        voice = self.get_voice_by_lambda(Service.ElevenLabs,
+            lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
+        self.verify_mp3_bitrate(voice, self.FRENCH_INPUT_TEXT, 192)
+
     def test_google_format_wav(self):
         fr_voice = self.get_voice_by_lambda(Service.Google, 
             lambda x: AudioLanguage.fr_FR in x.audio_languages and 'Journey' not in x.name, assert_unique=False)

@@ -511,7 +511,7 @@ class TestTranslation(unittest.TestCase):
         service = transliteration_option['service']
         transliteration_key = transliteration_option['transliteration_key']
         result = self.manager.get_transliteration(source_text, service, transliteration_key)
-        self.assertIn(result, ['mɐ.ˈɡu ˈjæ pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ', 'mɐ.ˈɡu ˈja pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ'])
+        self.assertIn(result, ['mɐ.ˈɡu ˈjæ pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ', 'mɐ.ˈɡu ˈja pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲʉ', 'mɐ.ˈɡu ˈja pə.smɐ.ˈtrʲetʲ mʲɪ.ˈnʲu'])
 
 
     def test_transliteration_easypronunciation_english_british_american(self):

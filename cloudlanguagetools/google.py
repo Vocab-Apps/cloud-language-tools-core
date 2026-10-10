@@ -12,6 +12,7 @@ import cloudlanguagetools.constants
 import cloudlanguagetools.options
 import cloudlanguagetools.languages
 import cloudlanguagetools.errors
+import cloudlanguagetools.google_tts_common
 
 logger = logging.getLogger(__name__)
 
@@ -79,15 +80,7 @@ class GoogleVoice(cloudlanguagetools.ttsvoice.TtsVoice):
                 'max': 4.0,
                 'default': 1.0
             },
-            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
-                'type': cloudlanguagetools.options.ParameterType.list.name,
-                'values': [
-                    cloudlanguagetools.options.AudioFormat.mp3.name,
-                    cloudlanguagetools.options.AudioFormat.ogg_opus.name,
-                    cloudlanguagetools.options.AudioFormat.wav.name
-                ],
-                'default': cloudlanguagetools.options.AudioFormat.mp3.name
-            }
+            cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.google_tts_common.AUDIO_FORMAT_OPTION
         }
         if self.supports_pitch():
             options['pitch'] = {
@@ -162,18 +155,10 @@ class GoogleService(cloudlanguagetools.service.Service):
         return translate_client
 
     def get_tts_audio(self, text, voice_key, options):
-        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
-        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
-
-        audio_format_map = {
-            cloudlanguagetools.options.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.MP3,
-            cloudlanguagetools.options.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS,
-            cloudlanguagetools.options.AudioFormat.wav: google.cloud.texttospeech.AudioEncoding.LINEAR16
-        }
+        audio_format = cloudlanguagetools.google_tts_common.get_audio_format(options)
 
         try:
             client = self.get_client()
-
 
             # Note: the voice can also be specified by name.
             # Names of voices can be retrieved with client.list_voices().
@@ -184,7 +169,7 @@ class GoogleService(cloudlanguagetools.service.Service):
             )
 
             audio_config_params = {
-                'audio_encoding': audio_format_map[audio_format],
+                'audio_encoding': cloudlanguagetools.google_tts_common.get_audio_encoding(audio_format),
                 'speaking_rate': options.get('speaking_rate', 1.0),
             }
             # Studio, Chirp, and Journey voices don't support pitch
@@ -209,13 +194,7 @@ class GoogleService(cloudlanguagetools.service.Service):
                 timeout=cloudlanguagetools.constants.RequestTimeout
             )
 
-            # The response's audio_content is binary.
-            output_temp_file = tempfile.NamedTemporaryFile()
-            output_temp_filename = output_temp_file.name
-            with open(output_temp_filename, "wb") as out:
-                out.write(response.audio_content)
-
-            return output_temp_file
+            return cloudlanguagetools.google_tts_common.write_audio_response(response.audio_content, audio_format)
         except google.api_core.exceptions.DeadlineExceeded as deadline_exceeded_exception:
             logger.warning(f'Google Cloud TTS deadline exceeded: {deadline_exceeded_exception}')
             error_message = f'Google Cloud TTS timed out: {str(deadline_exceeded_exception)}'

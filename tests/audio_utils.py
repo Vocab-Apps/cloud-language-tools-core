@@ -16,7 +16,7 @@ def speech_to_text(manager, audio_temp_file, language, audio_format=cloudlanguag
     return result
 
 def convert_to_wav(audio_temp_file, audio_format) -> tempfile.NamedTemporaryFile:
-    if audio_format == cloudlanguagetools.options.AudioFormat.mp3:
+    if audio_format in [cloudlanguagetools.options.AudioFormat.mp3, cloudlanguagetools.options.AudioFormat.mp3_hq]:
         sound = pydub.AudioSegment.from_mp3(audio_temp_file.name)
     elif audio_format == cloudlanguagetools.options.AudioFormat.ogg_opus:
         sound = pydub.AudioSegment.from_ogg(audio_temp_file.name)

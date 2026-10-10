@@ -60,6 +60,12 @@ ReadTimeout = 3 # 3 seconds read timeout
 
 TTLCacheTimeout = 86400 # 24 hours
 
+# Bitrate used for AudioFormat.mp3_hq, when lossless audio (e.g. Google/Gemini LINEAR16)
+# is re-encoded to mp3 locally. Chirp 3 HD and Gemini voices only emit mp3 at a fixed
+# 32 kbps natively. 128 kbps is generous headroom for the 24 kHz mono source those
+# services produce (MPEG-2 mp3 at 24 kHz caps at 160 kbps anyway).
+AUDIO_MP3_HQ_ENCODE_BITRATE = '128k'
+
 class Service(enum.StrEnum):
     Azure = 'Azure'
     Google = 'Google'

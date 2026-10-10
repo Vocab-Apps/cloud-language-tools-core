@@ -657,14 +657,19 @@ class TestAudio(unittest.TestCase):
     # mp3 bitrate tests
     # =================
     # Azure and ElevenLabs both natively support 192 kbps mp3, verify we get it.
+    # Google and Gemini only emit a fixed 32 kbps mp3 natively on their newer voices, so
+    # the mp3_hq format requests lossless LINEAR16 and re-encodes locally to 128 kbps.
 
-    def verify_mp3_bitrate(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, min_bitrate_kbps: int):
-        options = {cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.options.AudioFormat.mp3.name}
+    def verify_mp3_bitrate(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3, text: str, min_bitrate_kbps: int,
+            audio_format: cloudlanguagetools.options.AudioFormat = cloudlanguagetools.options.AudioFormat.mp3):
+        self.assertIn(audio_format.name, voice.options[cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER]['values'])
+        options = {cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: audio_format.name}
         audio_temp_file = self.get_tts_audio_with_retry(text, voice.service, voice.voice_key, options)
         self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
         bitrate_kbps = audio_utils.get_mp3_bitrate_kbps(audio_temp_file.name)
         self.assertGreaterEqual(bitrate_kbps, min_bitrate_kbps,
             f'{voice.service.name} mp3 bitrate {bitrate_kbps} kbps is below expected {min_bitrate_kbps} kbps')
+        return audio_temp_file
 
     def test_azure_mp3_bitrate(self):
         voice = self.get_voice_by_lambda(Service.Azure, lambda x: x.name == 'Denise (Neural)')
@@ -674,6 +679,24 @@ class TestAudio(unittest.TestCase):
         voice = self.get_voice_by_lambda(Service.ElevenLabs,
             lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_multilingual_v2')
         self.verify_mp3_bitrate(voice, self.FRENCH_INPUT_TEXT, 192)
+
+    def test_google_mp3_hq_bitrate(self):
+        voice = self.get_voice_by_lambda(Service.Google,
+            lambda x: x.name == 'fr-FR-Chirp3-HD-Charon', assert_unique=True)
+        audio_temp_file = self.verify_mp3_bitrate(voice, self.FRENCH_INPUT_TEXT, 128,
+            audio_format=cloudlanguagetools.options.AudioFormat.mp3_hq)
+        self.recognize_and_verify_text(
+            audio_temp_file, self.FRENCH_INPUT_TEXT, 'fr-FR',
+            cloudlanguagetools.options.AudioFormat.mp3_hq)
+
+    def test_gemini_mp3_hq_bitrate(self):
+        voice = self.get_voice_by_lambda(Service.Gemini,
+            lambda x: 'Orus' in x.name, assert_unique=True)
+        audio_temp_file = self.verify_mp3_bitrate(voice, self.ENGLISH_INPUT_TEXT, 128,
+            audio_format=cloudlanguagetools.options.AudioFormat.mp3_hq)
+        self.recognize_and_verify_text(
+            audio_temp_file, self.ENGLISH_INPUT_TEXT, 'en-US',
+            cloudlanguagetools.options.AudioFormat.mp3_hq)
 
     def test_google_format_wav(self):
         fr_voice = self.get_voice_by_lambda(Service.Google, 

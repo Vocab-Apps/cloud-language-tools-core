@@ -1,4 +1,3 @@
-import tempfile
 import logging
 import pprint
 from typing import List
@@ -13,6 +12,7 @@ import cloudlanguagetools.options
 import cloudlanguagetools.languages
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.errors
+import cloudlanguagetools.google_tts_common
 from cloudlanguagetools.languages import AudioLanguage
 
 logger = logging.getLogger(__name__)
@@ -38,15 +38,7 @@ VOICE_OPTIONS = {
         'type': cloudlanguagetools.options.ParameterType.text.name,
         'default': ''
     },
-    cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: {
-        'type': cloudlanguagetools.options.ParameterType.list.name,
-        'values': [
-            cloudlanguagetools.options.AudioFormat.mp3.name,
-            cloudlanguagetools.options.AudioFormat.wav.name,
-            cloudlanguagetools.options.AudioFormat.ogg_opus.name
-        ],
-        'default': cloudlanguagetools.options.AudioFormat.mp3.name
-    }
+    cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER: cloudlanguagetools.google_tts_common.AUDIO_FORMAT_OPTION
 }
 
 # Gemini TTS supported languages
@@ -225,14 +217,7 @@ class GeminiService(cloudlanguagetools.service.Service):
         language_code = options.get('language_code', 'en-US')
         prompt = options.get('prompt', '')
 
-        audio_format_str = options.get(cloudlanguagetools.options.AUDIO_FORMAT_PARAMETER, cloudlanguagetools.options.AudioFormat.mp3.name)
-        audio_format = cloudlanguagetools.options.AudioFormat[audio_format_str]
-
-        audio_format_map = {
-            cloudlanguagetools.options.AudioFormat.mp3: google.cloud.texttospeech.AudioEncoding.MP3,
-            cloudlanguagetools.options.AudioFormat.ogg_opus: google.cloud.texttospeech.AudioEncoding.OGG_OPUS,
-            cloudlanguagetools.options.AudioFormat.wav: google.cloud.texttospeech.AudioEncoding.LINEAR16,
-        }
+        audio_format = cloudlanguagetools.google_tts_common.get_audio_format(options)
 
         try:
             client = self.get_client()
@@ -244,7 +229,7 @@ class GeminiService(cloudlanguagetools.service.Service):
             )
 
             audio_config = google.cloud.texttospeech.AudioConfig(
-                audio_encoding=audio_format_map[audio_format],
+                audio_encoding=cloudlanguagetools.google_tts_common.get_audio_encoding(audio_format),
             )
 
             if prompt:
@@ -252,7 +237,7 @@ class GeminiService(cloudlanguagetools.service.Service):
             else:
                 input_text = google.cloud.texttospeech.SynthesisInput(text=text)
 
-            logger.debug(f'Making Gemini TTS request with voice: {voice_name}, model: {model}, language_code: {language_code}, prompt: {prompt!r}, format: {audio_format_str}')
+            logger.debug(f'Making Gemini TTS request with voice: {voice_name}, model: {model}, language_code: {language_code}, prompt: {prompt!r}, format: {audio_format.name}')
 
             # use the longer timeout because Gemini-based voices can take noticeably longer to synthesize
             response = client.synthesize_speech(
@@ -260,11 +245,7 @@ class GeminiService(cloudlanguagetools.service.Service):
                 timeout=cloudlanguagetools.constants.RequestTimeoutLong
             )
 
-            output_temp_file = tempfile.NamedTemporaryFile()
-            with open(output_temp_file.name, "wb") as out:
-                out.write(response.audio_content)
-
-            return output_temp_file
+            return cloudlanguagetools.google_tts_common.write_audio_response(response.audio_content, audio_format)
 
         except google.api_core.exceptions.DeadlineExceeded as deadline_exceeded_exception:
             logger.warning(f'Gemini TTS deadline exceeded: {deadline_exceeded_exception}')

@@ -361,6 +361,24 @@ class TestAudio(unittest.TestCase):
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_voice_v3(selected_voice, source_text, 'fr-FR')
 
+    def test_elevenlabs_v4_voices_present(self):
+        # the v4 models have language codes (kam, sn, wo) which used to be unmapped,
+        # which caused every v4 voice to be dropped from the voice list
+        v4_voices = [x for x in self.voice_list_v3
+                     if x.service == Service.ElevenLabs and x.voice_key['model_id'] == 'eleven_v4']
+        v4_turbo_voices = [x for x in self.voice_list_v3
+                           if x.service == Service.ElevenLabs and x.voice_key['model_id'] == 'eleven_v4_turbo']
+        self.assertGreater(len(v4_voices), 0)
+        self.assertGreater(len(v4_turbo_voices), 0)
+
+        selected_voice = v4_voices[0]
+        self.assertIn(AudioLanguage.sn_ZW, selected_voice.audio_languages)
+        self.assertIn(AudioLanguage.wo_SN, selected_voice.audio_languages)
+        self.assertIn(AudioLanguage.kam_KE, selected_voice.audio_languages)
+
+        source_text = 'This is the best restaurant in town.'
+        self.verify_voice_v3(selected_voice, source_text, 'en-US')
+
 
     @pytest.mark.skip('watson does not support chinese anymore')
     def test_mandarin_watson(self):

@@ -116,6 +116,15 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             "xi-api-key": self.api_key
         }
 
+    def get_request_error(self, response, message):
+        # ElevenLabs answers bad request parameters (e.g. a language_code the model
+        # doesn't support, or an invalid one such as 'zh-CN' instead of 'zh') with
+        # 400 {"detail": {"type": "validation_error", ...}} or a 422. Retrying the
+        # same request can't fix that, so report it as a permanent input error.
+        if response.status_code in (400, 422):
+            return cloudlanguagetools.errors.InputError(f'{self.get_service_name()}: {message}')
+        return super().get_request_error(response, message)
+
     def get_tts_audio(self, text, voice_key, options):
         voice_id = voice_key['voice_id']
         url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'
@@ -271,9 +280,17 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             for voice_data in filtered_voices:
                 voice_name = voice_data['name']
                 try:
-                    languages = model['languages']
-                    language_id_list = [language_record['language_id'] for language_record in languages]
-                    audio_language_enum_list = [self.get_audio_language(language_id) for language_id in language_id_list]
+                    audio_language_enum_list = []
+                    for language_record in model['languages']:
+                        language_id = language_record['language_id']
+                        try:
+                            audio_language_enum_list.append(self.get_audio_language(language_id))
+                        except Exception as e:
+                            # don't drop the whole voice because of one unknown language code
+                            logger.error(f'ElevenLabs: model {model_id}: cannot map language_id {language_id}: {e}')
+                    if len(audio_language_enum_list) == 0:
+                        logger.error(f'ElevenLabs: model {model_id}: no mappable languages, skipping voice {voice_name}')
+                        continue
                     voice = cloudlanguagetools.ttsvoice.TtsVoice_v3(
                         name=f'{voice_name} ({model_short_name})',
                         voice_key={

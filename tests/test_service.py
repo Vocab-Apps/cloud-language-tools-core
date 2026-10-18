@@ -5,6 +5,7 @@ from unittest.mock import patch, MagicMock
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.errors
+import cloudlanguagetools.elevenlabs
 
 
 class ConcreteService(cloudlanguagetools.service.Service):
@@ -178,3 +179,52 @@ class TestGetTtsAudioBasePostRequest(unittest.TestCase):
         service = ConcreteService()
         with self.assertRaises(cloudlanguagetools.errors.RateLimitError):
             service.get_tts_audio_base_post_request('https://example.com/tts', json={})
+
+
+class TestElevenLabsRequestErrors(unittest.TestCase):
+    """ElevenLabs rejects bad request parameters with 400 validation errors; these
+    fail identically on retry so they must surface as the permanent InputError."""
+
+    ELEVENLABS_URL = 'https://api.elevenlabs.io/v1/text-to-speech/abc'
+    UNSUPPORTED_LANGUAGE_BODY = {'detail': {
+        'type': 'validation_error',
+        'code': 'invalid_parameters',
+        'message': "Model 'eleven_v4' does not support language_code 'zh-CN'.",
+        'status': 'unsupported_language',
+        'param': 'language_code'}}
+
+    def setUp(self):
+        self.service = cloudlanguagetools.elevenlabs.ElevenLabsService()
+
+    @patch('requests.post')
+    def test_400_unsupported_language_code_is_input_error(self, mock_post):
+        mock_post.return_value = _make_mock_response(400, json_body=self.UNSUPPORTED_LANGUAGE_BODY)
+
+        with self.assertRaises(cloudlanguagetools.errors.InputError) as ctx:
+            self.service.get_tts_audio_base_post_request(self.ELEVENLABS_URL, json={})
+
+        self.assertNotIsInstance(ctx.exception, cloudlanguagetools.errors.TransientError)
+        self.assertEqual(str(ctx.exception), "ElevenLabs: Model 'eleven_v4' does not support language_code 'zh-CN'.")
+
+    @patch('requests.post')
+    def test_422_is_input_error(self, mock_post):
+        mock_post.return_value = _make_mock_response(422, json_body={'detail': [{'msg': 'field required'}]})
+
+        with self.assertRaises(cloudlanguagetools.errors.InputError):
+            self.service.get_tts_audio_base_post_request(self.ELEVENLABS_URL, json={})
+
+    @patch('requests.post')
+    def test_500_is_still_retryable(self, mock_post):
+        mock_post.return_value = _make_mock_response(500, json_body={'detail': {'message': 'internal error'}})
+
+        with self.assertRaises(cloudlanguagetools.errors.RequestError) as ctx:
+            self.service.get_tts_audio_base_post_request(self.ELEVENLABS_URL, json={})
+
+        self.assertIsInstance(ctx.exception, cloudlanguagetools.errors.TransientError)
+
+    @patch('requests.post')
+    def test_429_is_still_rate_limit_error(self, mock_post):
+        mock_post.return_value = _make_mock_response(429, json_body={'detail': {'message': 'heavy traffic'}})
+
+        with self.assertRaises(cloudlanguagetools.errors.RateLimitError):
+            self.service.get_tts_audio_base_post_request(self.ELEVENLABS_URL, json={})

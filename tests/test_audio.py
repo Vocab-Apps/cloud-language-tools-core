@@ -361,6 +361,24 @@ class TestAudio(unittest.TestCase):
         source_text = self.FRENCH_INPUT_TEXT
         self.verify_voice_v3(selected_voice, source_text, 'fr-FR')
 
+    def test_elevenlabs_v4_voices_present(self):
+        # the v4 models have language codes (kam, sn, wo) which used to be unmapped,
+        # which caused every v4 voice to be dropped from the voice list
+        v4_voices = [x for x in self.voice_list_v3
+                     if x.service == Service.ElevenLabs and x.voice_key['model_id'] == 'eleven_v4']
+        v4_turbo_voices = [x for x in self.voice_list_v3
+                           if x.service == Service.ElevenLabs and x.voice_key['model_id'] == 'eleven_v4_turbo']
+        self.assertGreater(len(v4_voices), 0)
+        self.assertGreater(len(v4_turbo_voices), 0)
+
+        selected_voice = v4_voices[0]
+        self.assertIn(AudioLanguage.sn_ZW, selected_voice.audio_languages)
+        self.assertIn(AudioLanguage.wo_SN, selected_voice.audio_languages)
+        self.assertIn(AudioLanguage.kam_KE, selected_voice.audio_languages)
+
+        source_text = 'This is the best restaurant in town.'
+        self.verify_voice_v3(selected_voice, source_text, 'en-US')
+
 
     @pytest.mark.skip('watson does not support chinese anymore')
     def test_mandarin_watson(self):
@@ -654,6 +672,24 @@ class TestAudio(unittest.TestCase):
         self.recognize_and_verify_text(
             audio_temp_file, self.FRENCH_INPUT_TEXT, 'fr-FR',
             cloudlanguagetools.options.AudioFormat.mp3)
+
+    def test_elevenlabs_language_code(self):
+        voice = self.get_voice_by_lambda(Service.ElevenLabs,
+            lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_v4')
+        # ElevenLabs expects an ISO 639-1 code such as 'zh'
+        options = {'language_code': 'zh'}
+        audio_temp_file = self.get_tts_audio_with_retry(self.CHINESE_INPUT_TEXT, voice.service, voice.voice_key, options)
+        self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
+
+    def test_elevenlabs_unsupported_language_code(self):
+        # a locale such as 'zh-CN' is rejected by ElevenLabs; this must be a permanent
+        # InputError, not a retryable error (sentry ANKI-HYPER-TTS-HH7)
+        voice = self.get_voice_by_lambda(Service.ElevenLabs,
+            lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_v4')
+        options = {'language_code': 'zh-CN'}
+        with self.assertRaises(cloudlanguagetools.errors.InputError) as ctx:
+            self.manager.get_tts_audio(self.CHINESE_INPUT_TEXT, voice.service.name, voice.voice_key, options)
+        self.assertIn("does not support language_code 'zh-CN'", str(ctx.exception))
 
     # mp3 bitrate tests
     # =================

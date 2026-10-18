@@ -40,6 +40,12 @@ class Service():
         except (ValueError, TypeError):
             return response.text
 
+    def get_request_error(self, response, message):
+        """Build the exception for a failed (>= 400, non-429) audio response.
+        Defaults to the retryable RequestError; services override this to flag
+        responses that will fail identically on retry (bad input) as PermanentError."""
+        return cloudlanguagetools.errors.RequestError(f'{self.get_service_name()}: {message}')
+
     def get_tts_audio_base_post_request(self, url, **kwargs):
         try:
             kwargs['timeout'] = cloudlanguagetools.constants.RequestTimeout
@@ -52,7 +58,7 @@ class Service():
             if response.status_code >= 400:
                 msg = self._get_response_error_message(response)
                 logger.warning(f'{self.get_service_name()} audio request failed with status code {response.status_code}: {msg} | full response: {response.text}')
-                raise cloudlanguagetools.errors.RequestError(f'{self.get_service_name()}: {msg}')
+                raise self.get_request_error(response, msg)
             response.raise_for_status()
             output_temp_file = tempfile.NamedTemporaryFile(prefix='clt_audio_')
             output_temp_filename = output_temp_file.name            

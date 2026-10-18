@@ -673,6 +673,24 @@ class TestAudio(unittest.TestCase):
             audio_temp_file, self.FRENCH_INPUT_TEXT, 'fr-FR',
             cloudlanguagetools.options.AudioFormat.mp3)
 
+    def test_elevenlabs_language_code(self):
+        voice = self.get_voice_by_lambda(Service.ElevenLabs,
+            lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_v4')
+        # ElevenLabs expects an ISO 639-1 code such as 'zh'
+        options = {'language_code': 'zh'}
+        audio_temp_file = self.get_tts_audio_with_retry(self.CHINESE_INPUT_TEXT, voice.service, voice.voice_key, options)
+        self.assertTrue(audio_utils.is_mp3_format(audio_temp_file.name))
+
+    def test_elevenlabs_unsupported_language_code(self):
+        # a locale such as 'zh-CN' is rejected by ElevenLabs; this must be a permanent
+        # InputError, not a retryable error (sentry ANKI-HYPER-TTS-HH7)
+        voice = self.get_voice_by_lambda(Service.ElevenLabs,
+            lambda x: 'Sarah' in x.name and x.voice_key['model_id'] == 'eleven_v4')
+        options = {'language_code': 'zh-CN'}
+        with self.assertRaises(cloudlanguagetools.errors.InputError) as ctx:
+            self.manager.get_tts_audio(self.CHINESE_INPUT_TEXT, voice.service.name, voice.voice_key, options)
+        self.assertIn("does not support language_code 'zh-CN'", str(ctx.exception))
+
     # mp3 bitrate tests
     # =================
     # Azure and ElevenLabs both natively support 192 kbps mp3, verify we get it.

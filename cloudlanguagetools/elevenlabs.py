@@ -116,6 +116,15 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
             "xi-api-key": self.api_key
         }
 
+    def get_request_error(self, response, message):
+        # ElevenLabs answers bad request parameters (e.g. a language_code the model
+        # doesn't support, or an invalid one such as 'zh-CN' instead of 'zh') with
+        # 400 {"detail": {"type": "validation_error", ...}} or a 422. Retrying the
+        # same request can't fix that, so report it as a permanent input error.
+        if response.status_code in (400, 422):
+            return cloudlanguagetools.errors.InputError(f'{self.get_service_name()}: {message}')
+        return super().get_request_error(response, message)
+
     def get_tts_audio(self, text, voice_key, options):
         voice_id = voice_key['voice_id']
         url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'

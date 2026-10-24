@@ -25,4 +25,4 @@ When the user asks for that type of "transformation", an LLM call will generate 
 This is particularly relevant for the Anki addon and the online spreadsheet, where running transformations over rows of input will be a very typical use case.
 
 
-# Use cases
+

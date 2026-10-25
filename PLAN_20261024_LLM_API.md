@@ -14,6 +14,17 @@ The parameters to those functions should be Pydantic models. This will allow us 
 
 The API should be versioned, it will evolve over time, and we should keep backward compatibility when we add a new version.
 
+# Discovery of parameters
+The exact parameters expected by services are opaque, so we will need a discovery method for them (for all the verbs). Implement something that makes sense here. We should also be able to validate that parameters are correct for example when we call `sound` before making the actual call.
+
+Each service will implement a Pydantic model which can verify its inputs.
+
+# Default selection
+when the user doesn't specify defaults, for example if they say "generate audio for this text", we will have a set of text rules that help the LLM decide the voice. For example "If the user doesn't specify which service to use for audio, choose Azure".
+
+# Python orientation
+we want to use generated python code because of its power and flexbility. We will worry about safety of executing code at another step.
+
 # Use cases
 This API will be used inside different products:
 - in an Anki addon, where the user will ask to create repeatable transformations, such as "generate japanese audio using Azure female voice"
@@ -24,5 +35,5 @@ When the user asks for that type of "transformation", an LLM call will generate 
 
 This is particularly relevant for the Anki addon and the online spreadsheet, where running transformations over rows of input will be a very typical use case.
 
-
-
+# Other Notes
+`cloudlanguagetools/chatapi.py` does something similar, but we want to design a new API from scratch which will replace `cloudlanguagetools/chatapi.py`. Remove `cloudlanguagetools/chatapi.py` and its tests.

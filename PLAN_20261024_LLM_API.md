@@ -1,5 +1,6 @@
 # Overview
 we want to transform the cloudlanguagetools API to allow use by LLM including through AI code generation. Let's call this the CLT-AI API.
+We also need some agentic code to orchestrate calls to this API, let's call it CLT-AI Agent.
 The user will ask for a transformation to be done on some text input, and the goal will be to generate python code which can accomplish this using the CLT-AI API.
 
 # API specifications
@@ -23,6 +24,9 @@ The exact parameters expected by services are opaque, so we will need a discover
 
 Each service will implement a Pydantic model which can verify its inputs.
 
+# Agentic code
+We will have some agentic code (we refer to this as CLT-AI Agent) using pydantic-ai which given an instruction, will discover how to best fulfill the instruction using the CLT-AI API, either by using it directly as a tool, or creating python code which will use the CLT-AI API. 
+
 # Default selection
 when the user doesn't specify defaults, for example if they say "generate audio for this text", we will have a set of text rules that help the LLM decide the voice. For example "If the user doesn't specify which service to use for audio, choose Azure".
 
@@ -44,7 +48,13 @@ This is particularly relevant for the Anki addon and the online spreadsheet, whe
 When used from an Anki addon, in most cases, the user will ask to create repeatable instructions. Using the python format allows us to store these repeatable instructions and reliably re-run them.
 Example may include:
 - "generate Japanese audio with female voice for the Kanji field, output to the sound field"
-- 
+- "generate pinyin for the chinese field"
+- "add translation for the french field"
+
+
+
+## Online Spreadsheet
+The online spreadsheet use case is very similar to Anki, for example the user could ask
 
 # Other Notes
 `cloudlanguagetools/chatapi.py` does something similar, but we want to design a new API from scratch which will replace `cloudlanguagetools/chatapi.py`. Remove `cloudlanguagetools/chatapi.py` and its tests.

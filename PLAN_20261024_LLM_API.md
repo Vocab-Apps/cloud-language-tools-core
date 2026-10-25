@@ -8,8 +8,10 @@ the API should have some well defined distinct entrypoint which correspond to ex
 - `sound`: when the user wants to create audio
 - `translate`: when the user wants to translate from one language to another
 - `transliterate`: when the user wants to for example convert from Chinese characters to Pinyin, or generate IPA text
-- `transcribe`: convert audio into text
+- `transcribe`: convert audio into text (implement this)
 - `llm`: when the user wants to answer a generic question or generate some text, which cannot be done with other functions.
+
+All these functions will accept well defined pydantic model as parameter, and will also return a pydantic model, including the `sound` function.
 
 These functions will be used in two ways:
 - when generating python code, they will be the entry point or the public API into the CLT-AI API. This is the more likely mode when working as an Anki addon or in the online spreadsheet. We'll call this "code generation mode"
@@ -21,6 +23,8 @@ The API should be versioned, it will evolve over time, and we should keep backwa
 
 # Discovery of parameters
 The exact parameters expected by services are opaque, so we will need a discovery method for them (for all the verbs). Implement something that makes sense here. We should also be able to validate that parameters are correct for example when we call `sound` before making the actual call.
+
+The CLT-AI agent can explore the available API functions and parameters by runninrg python code which will inspect the function signatures.
 
 Each service will implement a Pydantic model which can verify its inputs.
 
@@ -55,6 +59,11 @@ Using these prompts, the CLT-AI Agent should try to create python code that can 
 
 ## Online Spreadsheet
 The online spreadsheet use case is very similar to Anki, for example the user could ask "explain how to use this word" when referring to another column. When in code generation mode, if the user didn't specify what the other column is, we will have a tool to ask the user what the source column is.
+
+## Chatbot
+In chatbot mode, most of the focus will be to use the CLT-AI API as tools, in "instant mode". As the code generation mode will not make as much sense.
+In the chatbot, users will be able to program standing instructions such as: "if I give you chinese text, translate it to english, give me the pinyin, and generate audio".
+These tools from the CLI-AI API will be called in succession and the result will be returned to the user.
 
 # Other Notes
 `cloudlanguagetools/chatapi.py` does something similar, but we want to design a new API from scratch which will replace `cloudlanguagetools/chatapi.py`. Remove `cloudlanguagetools/chatapi.py` and its tests.

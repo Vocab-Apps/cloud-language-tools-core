@@ -12,8 +12,8 @@ the API should have some well defined distinct entrypoint which correspond to ex
 - `llm`: when the user wants to answer a generic question or generate some text, which cannot be done with other functions.
 
 These functions will be used in two ways:
-- when generating python code, they will be the entry point or the public API into the CLT-AI API. This is the more likely mode when working as an Anki addon or in the online spreadsheet.
-- when using them directly, they will be tools that the LLM has access to. This mode is more likely in Chatbot mode.
+- when generating python code, they will be the entry point or the public API into the CLT-AI API. This is the more likely mode when working as an Anki addon or in the online spreadsheet. We'll call this "code generation mode"
+- when using them directly, they will be tools that the LLM has access to. This mode is more likely in Chatbot mode. We'll call this "instant mode".
 
 The parameters to those functions should be Pydantic models. This will allow us to do strict validation, including on the parameters that may be specific to one service (for example voice parameters). The input parameters will clearly specify the language, and parameters to use that correspond to what the services expect.
 
@@ -51,10 +51,10 @@ Example may include:
 - "generate pinyin for the chinese field"
 - "add translation for the french field"
 
-
+Using these prompts, the CLT-AI Agent should try to create python code that can fulfill the request, using the correct CLT-AI API calls.
 
 ## Online Spreadsheet
-The online spreadsheet use case is very similar to Anki, for example the user could ask
+The online spreadsheet use case is very similar to Anki, for example the user could ask "explain how to use this word" when referring to another column. When in code generation mode, if the user didn't specify what the other column is, we will have a tool to ask the user what the source column is.
 
 # Other Notes
 `cloudlanguagetools/chatapi.py` does something similar, but we want to design a new API from scratch which will replace `cloudlanguagetools/chatapi.py`. Remove `cloudlanguagetools/chatapi.py` and its tests.

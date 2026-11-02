@@ -1,5 +1,5 @@
 # Overview
-we want to transform the cloudlanguagetools API to allow use by LLM including through AI code generation. Let's call this the CLT-AI API.
+we want to evolve the cloudlanguagetools API to allow use by LLM including through AI code generation. Let's call this the CLT-AI API.
 We also need some agentic code to orchestrate calls to this API, let's call it CLT-AI Agent.
 The user will ask for a transformation to be done on some text input, and the goal will be to generate python code which can accomplish this using the CLT-AI API.
 
@@ -21,6 +21,8 @@ The parameters to those functions should be Pydantic models. This will allow us 
 
 The API should be versioned, it will evolve over time, and we should keep backward compatibility when we add a new version. The way we version the API, there should be an enum `CltAPIVersion` which contains the versions, and when we instantiate the API client, we should pass the version to it.
 
+Note that the old CLT API in `servicemanager.py` (`get_tts_audio`, `get_tts_audio_v5`, etc) must be maintained for backward compatibility.
+
 # Discovery of parameters and Agentic code
 The exact parameters expected by services are opaque, so we will need a discovery method for them (for all the verbs). Implement something that makes sense here. We should also be able to validate that parameters are correct for example when we call `sound` before making the actual call.
 
@@ -37,6 +39,9 @@ when the user doesn't specify defaults, for example if they say "generate audio 
 
 # Python orientation
 we want to use generated python code because of its power and flexbility. We will worry about safety of executing code at another step.
+
+# Agent models
+Use state of the art OpenAI models. We have an API key available.
 
 # Use cases
 This API will be used inside different products:

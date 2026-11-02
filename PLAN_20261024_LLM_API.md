@@ -19,17 +19,18 @@ These functions will be used in two ways:
 
 The parameters to those functions should be Pydantic models. This will allow us to do strict validation, including on the parameters that may be specific to one service (for example voice parameters). The input parameters will clearly specify the language, and parameters to use that correspond to what the services expect.
 
-The API should be versioned, it will evolve over time, and we should keep backward compatibility when we add a new version.
+The API should be versioned, it will evolve over time, and we should keep backward compatibility when we add a new version. The way we version the API, there should be an enum `CltAPIVersion` which contains the versions, and when we instantiate the API client, we should pass the version to it.
 
-# Discovery of parameters
+# Discovery of parameters and Agentic code
 The exact parameters expected by services are opaque, so we will need a discovery method for them (for all the verbs). Implement something that makes sense here. We should also be able to validate that parameters are correct for example when we call `sound` before making the actual call.
 
 The CLT-AI agent can explore the available API functions and parameters by runninrg python code which will inspect the function signatures.
 
 Each service will implement a Pydantic model which can verify its inputs.
 
-# Agentic code
 We will have some agentic code (we refer to this as CLT-AI Agent) using pydantic-ai which given an instruction, will discover how to best fulfill the instruction using the CLT-AI API, either by using it directly as a tool, or creating python code which will use the CLT-AI API. 
+
+We will use a pydantic-ai to generate code which uses the CLT-AI API. It will discover the interface very similarly to a coding agent, and will discover extra parameters by exploring tools such as `rg`, `grep`, etc. We can assume those tools will be available.
 
 # Default selection
 when the user doesn't specify defaults, for example if they say "generate audio for this text", we will have a set of text rules that help the LLM decide the voice. For example "If the user doesn't specify which service to use for audio, choose Azure".

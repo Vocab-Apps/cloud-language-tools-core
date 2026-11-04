@@ -3,11 +3,14 @@ import sys
 import logging
 import pprint
 import shutil
+import json
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import cloudlanguagetools.servicemanager
 import cloudlanguagetools.encryption
 import cloudlanguagetools.constants
+import cloudlanguagetools.cltai
+import cloudlanguagetools.cltai.agent
 
 # temporary debugging helpers, run with: uv run python utils/debug.py <function name>
 
@@ -66,7 +69,37 @@ def elevenlabs_unmapped_languages():
             print('   ', f)
 
 
+def cltai_generate(instruction, sample_row_json='{}', answer=''):
+    """CLT-AI Agent code generation mode, e.g.
+    uv run python utils/debug.py cltai_generate "generate pinyin for the Chinese field" '{"Chinese": "你好", "Pinyin": ""}'
+    answer: canned reply to any ask_user question"""
+    clt = cloudlanguagetools.cltai.create_client(cloudlanguagetools.cltai.CltAPIVersion.v1)
+    agent = cloudlanguagetools.cltai.agent.CltAIAgent(clt)
+    sample_row = json.loads(sample_row_json)
+    def ask_user(question):
+        print(f'ASK_USER: {question} -> {answer}')
+        return answer
+    transformation = agent.generate_transformation(instruction, sample_row=sample_row or None,
+        ask_user=ask_user if answer else None)
+    print(transformation.description, transformation.input_fields, transformation.output_fields)
+    print(transformation.code)
+    if sample_row:
+        pprint.pprint(transformation.run(clt, sample_row))
+
+
+def cltai_instant(message, standing_instructions=''):
+    """CLT-AI Agent instant (chatbot) mode, e.g.
+    uv run python utils/debug.py cltai_instant "我想喝咖啡" "if I give you chinese text, translate it to english, give me the pinyin, and generate audio"
+    """
+    clt = cloudlanguagetools.cltai.create_client(cloudlanguagetools.cltai.CltAPIVersion.v1)
+    agent = cloudlanguagetools.cltai.agent.CltAIAgent(clt)
+    response = agent.run_instant(message, standing_instructions=standing_instructions or None)
+    print(response.text)
+    for result in response.results:
+        print(type(result).__name__, result.model_dump(mode='json'))
+
+
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s %(levelname)s %(message)s')
+    logging.basicConfig(level=getattr(logging, os.environ.get('LOG_LEVEL', 'DEBUG')), format='%(asctime)s %(name)s %(levelname)s %(message)s')
     function_name = sys.argv[1]
     globals()[function_name](*sys.argv[2:])

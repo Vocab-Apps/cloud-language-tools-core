@@ -4,14 +4,17 @@ import copy
 import logging
 import tempfile
 import pydub
+import os
 import pprint
-from typing import List
+import pydantic
+from typing import List, Literal, Optional
 
 import cloudlanguagetools.constants
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 import cloudlanguagetools.options
+import cloudlanguagetools.optionsmodels
 
 from cloudlanguagetools.languages import AudioLanguage
 from cloudlanguagetools.options import AudioFormat
@@ -65,6 +68,32 @@ VOICE_OPTIONS = {
                 'default': cloudlanguagetools.options.AudioFormat.mp3.name
             }
 }
+
+# CLT-AI transcription / llm defaults
+DEFAULT_TRANSCRIPTION_MODEL = 'gpt-4o-transcribe'
+DEFAULT_LLM_MODEL = 'gpt-5.4-mini'
+
+# file extensions accepted by the OpenAI transcription endpoint, it detects the format from the filename
+TRANSCRIPTION_FILE_EXTENSIONS = {
+    AudioFormat.mp3: 'mp3',
+    AudioFormat.mp3_hq: 'mp3',
+    AudioFormat.ogg_opus: 'ogg',
+    AudioFormat.ogg_vorbis: 'ogg',
+    AudioFormat.wav: 'wav',
+}
+
+class OpenAITranscriptionOptions(cloudlanguagetools.optionsmodels.ServiceOptions):
+    model: Literal['gpt-4o-transcribe', 'gpt-4o-mini-transcribe', 'whisper-1'] = pydantic.Field(
+        default=DEFAULT_TRANSCRIPTION_MODEL, description='OpenAI transcription model')
+    prompt: Optional[str] = pydantic.Field(default=None,
+        description='optional text to guide the transcription style or vocabulary')
+
+class OpenAILlmOptions(cloudlanguagetools.optionsmodels.ServiceOptions):
+    model: Literal['gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.4-nano'] = pydantic.Field(
+        default=DEFAULT_LLM_MODEL, description='OpenAI model. gpt-5.4-mini is fast and cheap, gpt-5.5 is the most capable')
+    max_output_tokens: Optional[int] = pydantic.Field(default=None, gt=0, description='maximum number of tokens to generate')
+    reasoning_effort: Optional[Literal['none', 'low', 'medium', 'high']] = pydantic.Field(default=None,
+        description='how much the model should reason before answering, leave unset for simple questions')
 
 # https://platform.openai.com/docs/guides/text-to-speech#voice-options
 # Afrikaans, Arabic, Armenian, Azerbaijani, Belarusian, Bosnian, Bulgarian, Catalan, 
@@ -206,6 +235,51 @@ class OpenAIService(cloudlanguagetools.service.Service):
         transcript = self.client.audio.transcriptions.create(model="whisper-1", file=audio_file)
         return transcript.text
     
+    # CLT-AI transcription and llm
+    # ===========================
+
+    def get_transcription_options_model(self):
+        return OpenAITranscriptionOptions
+
+    def get_transcription(self, audio_path, audio_format, language, options):
+        validated_options = OpenAITranscriptionOptions(**options)
+        extension = TRANSCRIPTION_FILE_EXTENSIONS[audio_format]
+        parameters = {
+            'model': validated_options.model,
+        }
+        if language is not None:
+            # OpenAI expects ISO-639-1 codes, Language enum names look like 'fr', 'zh_cn', 'as_'
+            parameters['language'] = language.name.split('_')[0]
+        if validated_options.prompt is not None:
+            parameters['prompt'] = validated_options.prompt
+        logger.debug(f'OpenAI transcription of {audio_path}, parameters: {parameters}')
+        with open(audio_path, 'rb') as audio_file:
+            # pass a filename with the proper extension, the API infers the format from it
+            transcript = self.client.audio.transcriptions.create(
+                file=(f'{os.path.basename(audio_path)}.{extension}', audio_file),
+                timeout=cloudlanguagetools.constants.RequestTimeoutLong,
+                **parameters)
+        return transcript.text
+
+    def get_llm_options_model(self):
+        return OpenAILlmOptions
+
+    def get_llm_response(self, prompt, instructions, options):
+        validated_options = OpenAILlmOptions(**options)
+        parameters = {
+            'model': validated_options.model,
+            'input': prompt,
+        }
+        if instructions:
+            parameters['instructions'] = instructions
+        if validated_options.max_output_tokens is not None:
+            parameters['max_output_tokens'] = validated_options.max_output_tokens
+        if validated_options.reasoning_effort is not None:
+            parameters['reasoning'] = {'effort': validated_options.reasoning_effort}
+        logger.debug(f'OpenAI llm request: {parameters}')
+        response = self.client.responses.create(**parameters)
+        return response.output_text
+
     def get_default_model(self, voice_name):
         # these voices don't seem to support tts-1-hd
         if voice_name in ['ballad', 'verse']:

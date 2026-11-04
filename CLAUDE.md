@@ -111,6 +111,35 @@ Each service module (e.g., `azure.py`, `google.py`) follows this pattern:
 - Implements required methods: `get_tts_audio()`, `get_translation()`, etc.
 - Uses common utilities from base class for HTTP requests and audio processing
 
+### CLT-AI API (`cloudlanguagetools/cltai/`)
+LLM-friendly, versioned API which replaced `chatapi.py`. The old ServiceManager API
+(`get_tts_audio`, `get_tts_audio_v5`, ...) is kept unchanged for backward compatibility.
+- `create_client(CltAPIVersion.v1, manager=None)` returns `CltAIClientV1`. `manager` is a configured
+  `ServiceManager`; when omitted one is built from `encryption.load_configuration()`. The client only
+  sees the services enabled in that configuration (the agent takes its OpenAI key from the `openai`
+  sub-model, falling back to `OPENAI_API_KEY`). Versions are listed in
+  `CltAPIVersion` (`types.py`); a new contract means a new client class registered in
+  `api.CLIENT_CLASSES`, never a breaking change to an existing version.
+- Verbs: `sound`, `translate`, `transliterate`, `transcribe`, `llm`. Each takes a request model and
+  returns a result model (`models.py`). `validate_<verb>()` resolves defaults and validates without any
+  API call, returning the fully resolved request. Discovery: `list_voices`, `list_transliterations`,
+  `list_translation_services`, `describe_voice_options`, ... and `describe_api()`.
+- Per-service option validation: `Service.get_tts_options_model(voice)` (default built from the voice
+  options schema by `cloudlanguagetools/optionsmodels.py`), `get_transcription_options_model()`,
+  `get_llm_options_model()` (None = verb unsupported). Transcription is implemented by OpenAI and Azure,
+  llm by OpenAI (`get_transcription` / `get_llm_response`).
+- Default selection rules (Azure for audio, DeepL for translation, female voice...) live in
+  `defaults.py`, both as preference lists used by the client and as text given to the agent.
+- Secret fields (`api_key`, e.g. in EasyPronunciation transliteration keys) are stripped from
+  everything returned by the client (`api.sanitize_key`).
+- CLT-AI Agent (`agent.py`, pydantic-ai + OpenAI `gpt-5.5`): `generate_transformation()` (code generation
+  mode, returns a storable `Transformation` with `transform(clt, row) -> dict` code) and `run_instant()`
+  (chatbot mode, verbs as tools). Generated code runs unsandboxed for now.
+- Tests: `tests/test_cltai_mock.py` (offline, mock services + scripted pydantic-ai FunctionModel),
+  `tests/test_cltai.py` (real API calls, including the agent).
+- Debug: `uv run python utils/debug.py cltai_generate "<instruction>" '<sample row json>'` and
+  `cltai_instant "<message>" "<standing instructions>"` (set `LOG_LEVEL=WARNING` to reduce noise).
+
 ### Configuration and Keys
 - `cloudlanguagetools/configuration.py`: `ServicesConfiguration` (version 1) has one optional sub-model per
   service (`azure`, `google`, `gemini`, `deepl`, ...). Present = enabled; absent = disabled, never consulted for

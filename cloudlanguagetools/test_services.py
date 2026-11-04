@@ -11,6 +11,7 @@ import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.dictionarylookup
 import cloudlanguagetools.errors
+import cloudlanguagetools.optionsmodels
 
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,9 @@ class TestServiceDictionaryLookup(cloudlanguagetools.dictionarylookup.Dictionary
     def get_lookup_shortname(self):
         return self.name
 
+class TestServiceLlmOptions(cloudlanguagetools.optionsmodels.ServiceOptions):
+    model: str = 'test-model'
+
 class TestServiceBase(cloudlanguagetools.service.Service):
     def __init__(self):
         pass
@@ -146,6 +150,25 @@ class TestServiceBase(cloudlanguagetools.service.Service):
         result.append(TestServiceDictionaryLookup(cloudlanguagetools.languages.Language.zh_cn, 'Chinese', 'zh', self.SERVICE, self.SERVICE_FEE))
         return result
 
+
+    def get_transcription_options_model(self):
+        return cloudlanguagetools.optionsmodels.ServiceOptions
+
+    def get_transcription(self, audio_path, audio_format, language, options):
+        # the test service audio files contain json, return the text that was used to create them
+        with open(audio_path, 'r') as f:
+            return json.loads(f.read())['text']
+
+    def get_llm_options_model(self):
+        return TestServiceLlmOptions
+
+    def get_llm_response(self, prompt, instructions, options):
+        return json.dumps({
+            'type': 'llm',
+            'prompt': prompt,
+            'instructions': instructions,
+            'options': options
+        })
 
     def get_dictionary_lookup(self, text, lookup_key):
         return json.dumps({

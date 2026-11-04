@@ -8,6 +8,8 @@ from typing import List, Dict
 import cloudlanguagetools.constants
 import cloudlanguagetools.ttsvoice
 import cloudlanguagetools.options
+import cloudlanguagetools.optionsmodels
+import cloudlanguagetools.errors
 
 logger = logging.getLogger(__name__)
 
@@ -119,3 +121,31 @@ class Service():
 
     def get_dictionary_lookup_list(self):
         return []
+
+    # CLT-AI support
+    # ==============
+    # each service can describe the options it accepts for a given verb with a pydantic model.
+    # the CLT-AI API (cloudlanguagetools.cltai) uses these models to validate requests before
+    # making any API call. A return value of None means the service doesn't support that verb.
+
+    def get_tts_options_model(self, voice: cloudlanguagetools.ttsvoice.TtsVoice_v3):
+        """pydantic model validating the TTS options for this voice. The default implementation
+        builds the model from the voice's options schema (voice.options); services may override."""
+        return cloudlanguagetools.optionsmodels.build_tts_options_model(voice.service, voice.options)
+
+    def get_transcription_options_model(self):
+        """pydantic model validating transcription (speech to text) options, None if unsupported"""
+        return None
+
+    def get_transcription(self, audio_path: str, audio_format: cloudlanguagetools.options.AudioFormat,
+            language, options: Dict) -> str:
+        """convert audio file into text. language is a languages.Language or None (auto-detect)"""
+        raise NotImplementedError(f'{self.get_service_name()} does not support transcription')
+
+    def get_llm_options_model(self):
+        """pydantic model validating llm (text generation) options, None if unsupported"""
+        return None
+
+    def get_llm_response(self, prompt: str, instructions, options: Dict) -> str:
+        """answer a prompt with an LLM, instructions is an optional system prompt"""
+        raise NotImplementedError(f'{self.get_service_name()} does not support llm')

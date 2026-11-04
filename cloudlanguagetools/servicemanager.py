@@ -392,6 +392,24 @@ class ServiceManager():
     def openai_full_query(self, messages, max_tokens=None):
         return self.get_service(Service.OpenAI).full_query(messages, max_tokens)
 
+    # transcription (speech to text) and llm, used by the CLT-AI API
+    # ===============================================================
+
+    def get_transcription_services(self) -> List[cloudlanguagetools.constants.Service]:
+        return [service_enum for service_enum, service in self.services.items() if service.get_transcription_options_model() is not None]
+
+    def get_transcription(self, audio_path, service_name: str, audio_format, language, options):
+        """convert audio into text. language is a languages.Language, or None"""
+        service = self.get_service(service_name)
+        return service.get_transcription(audio_path, audio_format, language, options)
+
+    def get_llm_services(self) -> List[cloudlanguagetools.constants.Service]:
+        return [service_enum for service_enum, service in self.services.items() if service.get_llm_options_model() is not None]
+
+    def get_llm_response(self, prompt, service_name: str, instructions, options):
+        service = self.get_service(service_name)
+        return service.get_llm_response(prompt, instructions, options)
+
     def detect_language(self, text_list):
         """returns an enum from languages.Language"""
         service = self.get_service(Service.Azure)

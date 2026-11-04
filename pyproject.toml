@@ -35,6 +35,7 @@ dependencies = [
     "openai>=1.76.0",
     "pinyin-jyutping>=0.9",
     "pydantic>=2.12",
+    "pydantic-ai-slim[openai]>=2.64.0",
     "pydub>=0.25.1",
     "requests>=2.32",
     "urllib3>=2.2",

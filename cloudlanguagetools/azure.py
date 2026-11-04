@@ -20,7 +20,10 @@ import cloudlanguagetools.translationlanguage
 import cloudlanguagetools.transliterationlanguage
 import cloudlanguagetools.dictionarylookup
 import cloudlanguagetools.errors
+import cloudlanguagetools.optionsmodels
 from cloudlanguagetools.options import AudioFormat
+from typing import Optional
+import pydantic
 
 
 logger = logging.getLogger(__name__)
@@ -326,6 +329,10 @@ class AzureDictionaryLookup(cloudlanguagetools.dictionarylookup.DictionaryLookup
 
     def get_lookup_shortname(self):
         return f'{self.service.name}, {self.language.lang_name}, {self.lookup_type.name}'
+
+class AzureTranscriptionOptions(cloudlanguagetools.optionsmodels.ServiceOptions):
+    audio_language: Optional[str] = pydantic.Field(default=None,
+        description='locale to recognize, AudioLanguage name such as fr_FR or en_GB. Defaults to the main locale of the requested language')
 
 class AzureService(cloudlanguagetools.service.Service):
     def __init__(self):
@@ -723,6 +730,24 @@ class AzureService(cloudlanguagetools.service.Service):
 
         raise cloudlanguagetools.errors.RequestError(
             f'Azure speech recognition failed: {recognition_status or result}')
+
+    def get_transcription_options_model(self):
+        return AzureTranscriptionOptions
+
+    def get_transcription(self, audio_path, audio_format, language, options):
+        validated_options = AzureTranscriptionOptions(**options)
+        if validated_options.audio_language is not None:
+            audio_language = cloudlanguagetools.languages.AudioLanguage[validated_options.audio_language]
+        elif language is not None:
+            if language not in cloudlanguagetools.languages.AudioLanguageDefaults:
+                raise cloudlanguagetools.errors.InputError(
+                    f'Azure transcription: no default locale for {language.lang_name}, specify audio_language')
+            audio_language = cloudlanguagetools.languages.AudioLanguageDefaults[language]
+        else:
+            raise cloudlanguagetools.errors.InputError('Azure transcription requires a language')
+        if audio_format == AudioFormat.mp3_hq:
+            audio_format = AudioFormat.mp3
+        return self.speech_to_text(audio_path, audio_format, language=audio_language.name.replace('_', '-'))
 
     def get_dictionary_lookup_list(self):
         result = []

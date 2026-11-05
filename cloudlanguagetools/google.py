@@ -1,7 +1,4 @@
-import os
-import tempfile
 import html
-import base64
 import logging
 import pprint
 import google.cloud.texttospeech
@@ -132,27 +129,17 @@ class GoogleTranslationLanguage(cloudlanguagetools.translationlanguage.Translati
 
 class GoogleService(cloudlanguagetools.service.Service):
     def __init__(self):
-        pass
+        self.service = cloudlanguagetools.constants.Service.Google
+        self.credentials = None
 
     def configure(self, config):
-        data_bytes = base64.b64decode(config['key'])
-        data_str = data_bytes.decode('utf-8')    
-        # write to file
-        # note: temp file needs to be a member so it doesn't get collected
-        self.google_key_temp_file = tempfile.NamedTemporaryFile()  
-        google_key_filename = self.google_key_temp_file.name
-        with open(google_key_filename, 'w') as f:
-            f.write(data_str)    
-            f.close()
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = google_key_filename
+        self.credentials = cloudlanguagetools.google_tts_common.get_service_account_credentials(config.service_account)
 
     def get_client(self):
-        client = google.cloud.texttospeech.TextToSpeechClient()
-        return client
+        return google.cloud.texttospeech.TextToSpeechClient(credentials=self.credentials)
 
     def get_translation_client(self):
-        translate_client = google.cloud.translate_v2.Client()
-        return translate_client
+        return google.cloud.translate_v2.Client(credentials=self.credentials)
 
     def get_tts_audio(self, text, voice_key, options):
         audio_format = cloudlanguagetools.google_tts_common.get_audio_format(options)
@@ -273,7 +260,7 @@ class GoogleService(cloudlanguagetools.service.Service):
             raise cloudlanguagetools.errors.RequestError(str(error)) from error
 
     def get_translation_languages(self):
-        translate_client = google.cloud.translate_v2.Client()
+        translate_client = self.get_translation_client()
 
         results = translate_client.get_languages()
 

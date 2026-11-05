@@ -108,7 +108,7 @@ class ElevenLabsService(cloudlanguagetools.service.Service):
         self.service = cloudlanguagetools.constants.Service.ElevenLabs
 
     def configure(self, config):
-        self.api_key = config['api_key']
+        self.api_key = config.api_key.get_secret_value()
 
     def get_headers(self):
         return {

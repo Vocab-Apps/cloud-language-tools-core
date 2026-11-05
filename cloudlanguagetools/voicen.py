@@ -42,7 +42,7 @@ class VoicenService(cloudlanguagetools.service.Service):
         pass
 
     def configure(self, config):
-        self.api_key = config['key']
+        self.api_key = config.api_key.get_secret_value()
 
     def get_translation_language_list(self):
         return []

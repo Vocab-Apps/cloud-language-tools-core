@@ -9,7 +9,7 @@ import cloudlanguagetools
 import cloudlanguagetools.encryption
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser = argparse.ArgumentParser(description='encrypt / decrypt the service configuration stored in cloudlanguagetools/keys.py')
     parser.add_argument('--action', choices=['encrypt', 'decrypt', 'decrypt_write_json'], required=True)
 
     args = parser.parse_args()
@@ -17,6 +17,8 @@ if __name__ == '__main__':
     if args.action == 'encrypt':
         cloudlanguagetools.encryption.encrypt()
     elif args.action == 'decrypt':
-        cloudlanguagetools.encryption.decrypt()
+        # validates the stored configuration and lists the enabled services (no secrets printed)
+        configuration = cloudlanguagetools.encryption.load_configuration()
+        print(', '.join(service.name for service in configuration.enabled_services()))
     elif args.action == 'decrypt_write_json':
         cloudlanguagetools.encryption.decrypt_write_json()

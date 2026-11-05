@@ -298,7 +298,7 @@ class ForvoService(cloudlanguagetools.service.Service):
         self.verify_ssl = True
 
     def configure(self, config):
-        self.key = config['key']
+        self.key = config.api_key.get_secret_value()
 
     def get_headers(self):
         # forvo uses cloudflare or something equivalent

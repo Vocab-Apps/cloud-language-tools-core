@@ -165,7 +165,7 @@ class OpenAIService(cloudlanguagetools.service.Service):
         self.chatbot_model = "gpt-3.5-turbo"
 
     def configure(self, config):
-        self.api_key = config['api_key']
+        self.api_key = config.api_key.get_secret_value()
         self.client = OpenAI(api_key=self.api_key)
 
     def single_prompt(self, prompt, max_tokens):

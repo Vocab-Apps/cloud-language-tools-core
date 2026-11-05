@@ -22,6 +22,7 @@ from rich.text import Text
 from rich.panel import Panel
 
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.encryption
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
 
@@ -108,8 +109,7 @@ class TTSRepl:
         try:
             with Live(build_display(), console=live_console, refresh_per_second=8, transient=True) as live:
                 live_ref[0] = live
-                self.manager = cloudlanguagetools.servicemanager.ServiceManager()
-                self.manager.configure_default()
+                self.manager = cloudlanguagetools.servicemanager.ServiceManager(cloudlanguagetools.encryption.load_configuration())
                 self.all_voices = self.manager.get_tts_voice_list_v3()
                 self.filtered_voices = list(self.all_voices)
         finally:

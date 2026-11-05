@@ -3,32 +3,30 @@ import sys
 import logging
 import unittest
 import json
-import pytest
 import pprint
 from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-LOAD_TEST_SERVICES_ONLY = os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', 'no') == 'yes'
-
 import requests.exceptions
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.configuration
 from cloudlanguagetools.languages import Language
 from cloudlanguagetools.constants import Service
 import cloudlanguagetools.errors
 
+TEST_SERVICES_CONFIGURATION = cloudlanguagetools.configuration.ServicesConfiguration(
+    test_service_a=cloudlanguagetools.configuration.TestServiceConfig(),
+    test_service_b=cloudlanguagetools.configuration.TestServiceConfig(),
+)
+
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
-    manager.configure_default()
-    return manager
+    return cloudlanguagetools.servicemanager.ServiceManager(TEST_SERVICES_CONFIGURATION)
 
 class TestMockServices(unittest.TestCase):
     
     def test_language_data(self):
-        if not LOAD_TEST_SERVICES_ONLY:
-            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes')
-
         manager = get_manager()
         language_data = manager.get_language_data_json_v2()
         self.assertTrue(len(language_data['premium']) > 0)
@@ -36,9 +34,6 @@ class TestMockServices(unittest.TestCase):
 
 
     def test_translation(self):
-        if not LOAD_TEST_SERVICES_ONLY:
-            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes')
-
         manager = get_manager()
         language_data = manager.get_language_data_json_v2()
         translation_options = language_data['free']['translation_options']
@@ -60,9 +55,6 @@ class TestMockServices(unittest.TestCase):
         self.assertEqual(translated_text_obj, translated_text_expected)
 
     def test_transliteration(self):
-        if not LOAD_TEST_SERVICES_ONLY:
-            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes')
-
         manager = get_manager()
         language_data = manager.get_language_data_json_v2()
         translation_options = language_data['free']['transliteration_options']
@@ -79,9 +71,6 @@ class TestMockServices(unittest.TestCase):
         self.assertEqual(transliterated_text_obj, transliterated_text_expected)
 
     def test_dictionary_lookup(self):
-        if not LOAD_TEST_SERVICES_ONLY:
-            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes')
-
         manager = get_manager()
         language_data = manager.get_language_data_json_v2()
         dict_lookup_options = language_data['free']['dictionary_lookup_options']
@@ -99,24 +88,17 @@ class TestMockServices(unittest.TestCase):
         self.assertEqual(transliterated_text_obj, transliterated_text_expected)
 
     def test_service_cost(self):
-        if not LOAD_TEST_SERVICES_ONLY:
-            pytest.skip('you must set CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes')
-
         manager = get_manager()
         # test services
         self.assertEqual(manager.service_cost('abcd', 'TestServiceA', cloudlanguagetools.constants.RequestType.transliteration), 0)
         self.assertEqual(manager.service_cost('abcd', 'TestServiceB', cloudlanguagetools.constants.RequestType.transliteration), 4)
 
 
-@pytest.mark.skipif(
-    os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', 'no') != 'yes',
-    reason='you must set CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes'
-)
 class TestTtsAudioV5(unittest.TestCase):
     """Tests for get_tts_audio_v5 exception normalization."""
 
     def setUp(self):
-        self.manager = cloudlanguagetools.servicemanager.ServiceManager()
+        self.manager = get_manager()
 
     def test_success(self):
         """Successful call returns a temp file."""

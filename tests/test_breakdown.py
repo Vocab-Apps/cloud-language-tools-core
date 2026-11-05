@@ -11,13 +11,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.encryption
 from cloudlanguagetools.languages import Language
 from cloudlanguagetools.constants import Service
 import cloudlanguagetools.errors
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
-    manager.configure_default()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(cloudlanguagetools.encryption.load_configuration())
     return manager
 
 class TestBreakdown(unittest.TestCase):

@@ -20,14 +20,14 @@ import secrets
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.encryption
 import cloudlanguagetools.languages
 import cloudlanguagetools.constants
 import cloudlanguagetools.errors
 
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
-    manager.configure_default()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(cloudlanguagetools.encryption.load_configuration())
     return manager
 
 
@@ -213,8 +213,8 @@ def test_elevenlabs_voice_filtering():
 
 def test_elevenlabs_api_categories():
     """Test ElevenLabs API to see what voices are returned with different category filters"""
-    config = cloudlanguagetools.encryption.decrypt()
-    api_key = config['ElevenLabs']['api_key']
+    config = cloudlanguagetools.encryption.load_configuration()
+    api_key = config.elevenlabs.api_key.get_secret_value()
 
     headers = {
         "Accept": "application/json",
@@ -324,9 +324,9 @@ def test_elevenlabs_api_categories():
 
 
 def elevenlabs_api_test():
-    config = cloudlanguagetools.encryption.decrypt()
+    config = cloudlanguagetools.encryption.load_configuration()
     # pprint.pprint(config)
-    api_key = config['ElevenLabs']['api_key']
+    api_key = config.elevenlabs.api_key.get_secret_value()
 
     url = "https://api.elevenlabs.io/v1/models"
 

@@ -1,4 +1,4 @@
-"""Audio format handling shared by the Google and Gemini services.
+"""Credentials and audio format handling shared by the Google and Gemini services.
 
 Both services accept the same set of output formats. Cloud Text-to-Speech
 responses (Google voices, Gemini 2.5/3.1 models) are post-processed with
@@ -10,12 +10,24 @@ import tempfile
 import logging
 
 import google.cloud.texttospeech
+import google.oauth2.service_account
 
 import cloudlanguagetools.options
+import cloudlanguagetools.configuration
 import cloudlanguagetools.audio_processing
 from cloudlanguagetools.options import AudioFormat
 
 logger = logging.getLogger(__name__)
+
+GOOGLE_CLOUD_PLATFORM_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
+
+
+def get_service_account_credentials(service_account: cloudlanguagetools.configuration.GoogleServiceAccount):
+    """Build in-memory credentials from a service account key, without writing a key file or
+    setting GOOGLE_APPLICATION_CREDENTIALS (so the Google and Gemini services can use different accounts)."""
+    return google.oauth2.service_account.Credentials.from_service_account_info(
+        service_account.get_info(), scopes=[GOOGLE_CLOUD_PLATFORM_SCOPE])
+
 
 DEFAULT_AUDIO_FORMAT = AudioFormat.mp3
 

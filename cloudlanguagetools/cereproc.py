@@ -53,8 +53,8 @@ class CereProcService(cloudlanguagetools.service.Service):
         self.service = cloudlanguagetools.constants.Service.CereProc
 
     def configure(self, config):
-        self.username = config['username']
-        self.password = config['password']
+        self.username = config.username
+        self.password = config.password.get_secret_value()
     
 
     def get_access_token(self):

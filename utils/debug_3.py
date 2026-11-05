@@ -20,14 +20,14 @@ import secrets
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.encryption
 import cloudlanguagetools.languages
 import cloudlanguagetools.constants
 import cloudlanguagetools.errors
 
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
-    manager.configure_default()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(cloudlanguagetools.encryption.load_configuration())
     return manager
 
 
@@ -599,10 +599,10 @@ def microsoft_openai_test():
     # api_key=openai_config['api_key'],
     # api_key=openai_config['api_key'])
 
-    azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+    azure_openai_config = cloudlanguagetools.encryption.load_configuration().openai
 
 
-    deployment_name=azure_openai_config['azure_deployment_name'] #This will correspond to the custom name you chose for your deployment when you deployed a model.
+    deployment_name=azure_openai_config.azure_deployment_name #This will correspond to the custom name you chose for your deployment when you deployed a model.
 
     response = client.chat.completions.create(model=deployment_name, # engine = "deployment_name".
     messages=[
@@ -628,7 +628,7 @@ def openai_functioncalls_simple_example():
     # api_key=openai_config['api_key'],
     # api_key=openai_config['api_key'])
 
-    azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+    azure_openai_config = cloudlanguagetools.encryption.load_configuration().openai
 
 
 
@@ -661,10 +661,10 @@ def openai_function_calls_telegram_bot():
     from openai import AzureOpenAI
 
     client = AzureOpenAI(api_key=os.getenv("OPENAI_API_KEY"),
-    azure_endpoint=azure_openai_config['azure_endpoint'],
+    azure_endpoint=azure_openai_config.azure_endpoint,
     api_version="2023-05-15")
 
-    azure_openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+    azure_openai_config = cloudlanguagetools.encryption.load_configuration().openai
 
 
 
@@ -757,7 +757,7 @@ def openai_detect_language():
 
     manager = get_manager()
 
-    openai_config = cloudlanguagetools.encryption.decrypt()['OpenAI']
+    openai_config = cloudlanguagetools.encryption.load_configuration().openai
 
 
     response = client.chat.completions.create(model="gpt-3.5-turbo-0613",

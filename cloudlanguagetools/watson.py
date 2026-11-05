@@ -90,10 +90,10 @@ class WatsonService(cloudlanguagetools.service.Service):
         pass
 
     def configure(self, config):
-        self.translator_key = config['translator_api_key']
-        self.translator_url = config['translator_url']
-        self.speech_key = config['speech_api_key']
-        self.speech_url = config['speech_url']
+        self.translator_key = config.translator_api_key.get_secret_value()
+        self.translator_url = config.translator_url
+        self.speech_key = config.speech_api_key.get_secret_value()
+        self.speech_url = config.speech_url
     
     def get_tts_voice_list(self):
         return []

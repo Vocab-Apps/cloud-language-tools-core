@@ -99,9 +99,9 @@ class AmazonService(cloudlanguagetools.service.Service):
         pass
 
     def configure(self, config):
-        aws_access_key_id = config['AWS_ACCESS_KEY_ID']
-        aws_secret_access_key = config['AWS_SECRET_ACCESS_KEY']
-        region_name = config['AWS_DEFAULT_REGION']
+        aws_access_key_id = config.access_key_id
+        aws_secret_access_key = config.secret_access_key.get_secret_value()
+        region_name = config.region
 
         self.polly_client = boto3.client("polly", 
             region_name=region_name,

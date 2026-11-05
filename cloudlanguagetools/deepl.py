@@ -30,7 +30,7 @@ class DeepLService(cloudlanguagetools.service.Service):
         self.base_url = 'https://api.deepl.com/v2/translate'
 
     def configure(self, config):
-        self.api_key = config['key']
+        self.api_key = config.api_key.get_secret_value()
     
     def get_tts_voice_list(self):
         return []

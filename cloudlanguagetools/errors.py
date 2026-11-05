@@ -35,3 +35,7 @@ class RateLimitRetryAfterError(RateLimitError):
     def __init__(self, message, retry_after):
         super().__init__(message)
         self.retry_after = retry_after # retry after `retry_after` seconds
+
+# the service was not enabled in the ServicesConfiguration (for example because no API key was provided for it)
+class ServiceNotEnabledError(PermanentError):
+    pass

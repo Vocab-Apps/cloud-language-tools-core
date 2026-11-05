@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import cloudlanguagetools
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.encryption
 import cloudlanguagetools.options
 import cloudlanguagetools.errors
 from cloudlanguagetools.languages import Language
@@ -32,8 +33,7 @@ from cloudlanguagetools.constants import Service
 logger = logging.getLogger(__name__)
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
-    manager.configure_default()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(cloudlanguagetools.encryption.load_configuration())
 
     return manager
 

@@ -64,7 +64,7 @@ class FptAiService(cloudlanguagetools.service.Service):
         pass
 
     def configure(self, config):
-        self.api_key = config['key']
+        self.api_key = config.api_key.get_secret_value()
 
     def get_translation(self, text, from_language_key, to_language_key):
         raise cloudlanguagetools.errors.RequestError('not supported')

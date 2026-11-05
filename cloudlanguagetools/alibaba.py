@@ -44,9 +44,9 @@ class AlibabaService(cloudlanguagetools.service.Service):
         self.access_token = None
         
     def configure(self, config):
-        self.access_key_id = config['access_key_id']
-        self.access_key_secret = config['access_key_secret']
-        self.app_key = config['app_key']
+        self.access_key_id = config.access_key_id
+        self.access_key_secret = config.access_key_secret.get_secret_value()
+        self.app_key = config.app_key
 
     def refresh_token(self):
         logger.info("refreshing token")

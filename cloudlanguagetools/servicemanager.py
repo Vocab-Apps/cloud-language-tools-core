@@ -1,10 +1,8 @@
-import os
-import base64
-import tempfile
 import logging
 import timeit
+import functools
 import cachetools
-from typing import List
+from typing import List, Optional
 import requests.exceptions
 import cloudlanguagetools.constants
 import cloudlanguagetools.languages
@@ -31,53 +29,87 @@ import cloudlanguagetools.libretranslate
 import cloudlanguagetools.openai
 import cloudlanguagetools.alibaba
 import cloudlanguagetools.gemini
-import cloudlanguagetools.encryption
+import cloudlanguagetools.configuration
+import cloudlanguagetools.test_services
 import cloudlanguagetools.translationlanguage
+from cloudlanguagetools.constants import Service
 
-LOAD_TEST_SERVICES_ONLY = os.environ.get('CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES', 'no') == 'yes'
+# service enum -> class implementing it
+SERVICE_CLASSES = {
+    Service.Azure: cloudlanguagetools.azure.AzureService,
+    Service.Google: cloudlanguagetools.google.GoogleService,
+    Service.Watson: cloudlanguagetools.watson.WatsonService,
+    Service.Naver: cloudlanguagetools.naver.NaverService,
+    Service.Amazon: cloudlanguagetools.amazon.AmazonService,
+    Service.Forvo: cloudlanguagetools.forvo.ForvoService,
+    Service.CereProc: cloudlanguagetools.cereproc.CereProcService,
+    Service.VocalWare: cloudlanguagetools.vocalware.VocalWareService,
+    Service.FptAi: cloudlanguagetools.fptai.FptAiService,
+    Service.ElevenLabs: cloudlanguagetools.elevenlabs.ElevenLabsService,
+    Service.EasyPronunciation: cloudlanguagetools.easypronunciation.EasyPronunciationService,
+    Service.Epitran: cloudlanguagetools.epitran.EpitranService,
+    Service.DeepL: cloudlanguagetools.deepl.DeepLService,
+    Service.PyThaiNLP: cloudlanguagetools.pythainlp.PyThaiNLPService,
+    Service.Spacy: cloudlanguagetools.spacy.SpacyService,
+    Service.MandarinCantonese: cloudlanguagetools.mandarincantonese.MandarinCantoneseService,
+    Service.Wenlin: cloudlanguagetools.wenlin.WenlinService,
+    Service.OpenAI: cloudlanguagetools.openai.OpenAIService,
+    Service.Alibaba: cloudlanguagetools.alibaba.AlibabaService,
+    Service.Gemini: cloudlanguagetools.gemini.GeminiService,
+    Service.TestServiceA: cloudlanguagetools.test_services.TestServiceA,
+    Service.TestServiceB: cloudlanguagetools.test_services.TestServiceB,
+}
 
-if LOAD_TEST_SERVICES_ONLY:
-    import cloudlanguagetools.test_services
+
+def cached_list(method):
+    """Cache the result of an argument-less list-retrieving method in the ServiceManager instance's
+    TTL cache, which configure() clears."""
+    @functools.wraps(method)
+    def wrapper(self):
+        key = method.__name__
+        if key in self.cache:
+            return self.cache[key]
+        result = method(self)
+        self.cache[key] = result
+        return result
+    return wrapper
 
 
 class ServiceManager():
-    def  __init__(self):
+    def __init__(self, configuration: Optional[cloudlanguagetools.configuration.ServicesConfiguration] = None):
+        """Create a service manager. Without a configuration no service is enabled, call configure()."""
         self.services = {}
+        self.configuration = cloudlanguagetools.configuration.ServicesConfiguration()
+        self.cache = cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout)
+        if configuration is not None:
+            self.configure(configuration)
 
-        if LOAD_TEST_SERVICES_ONLY:
-            self.services[cloudlanguagetools.constants.Service.TestServiceA] = cloudlanguagetools.test_services.TestServiceA()
-            self.services[cloudlanguagetools.constants.Service.TestServiceB] = cloudlanguagetools.test_services.TestServiceB()
-        else:
-            self.services[cloudlanguagetools.constants.Service.Azure] = cloudlanguagetools.azure.AzureService()
-            self.services[cloudlanguagetools.constants.Service.Google] = cloudlanguagetools.google.GoogleService()
-            self.services[cloudlanguagetools.constants.Service.Watson] = cloudlanguagetools.watson.WatsonService()
-            self.services[cloudlanguagetools.constants.Service.Naver] = cloudlanguagetools.naver.NaverService()
-            self.services[cloudlanguagetools.constants.Service.Amazon] = cloudlanguagetools.amazon.AmazonService()
-            self.services[cloudlanguagetools.constants.Service.Forvo] = cloudlanguagetools.forvo.ForvoService()
-            self.services[cloudlanguagetools.constants.Service.CereProc] = cloudlanguagetools.cereproc.CereProcService()
-            self.services[cloudlanguagetools.constants.Service.VocalWare] = cloudlanguagetools.vocalware.VocalWareService()
-            self.services[cloudlanguagetools.constants.Service.FptAi] = cloudlanguagetools.fptai.FptAiService()
-            self.services[cloudlanguagetools.constants.Service.ElevenLabs] = cloudlanguagetools.elevenlabs.ElevenLabsService()
-            self.services[cloudlanguagetools.constants.Service.EasyPronunciation] = cloudlanguagetools.easypronunciation.EasyPronunciationService()
-            self.services[cloudlanguagetools.constants.Service.Epitran] = cloudlanguagetools.epitran.EpitranService()
-            self.services[cloudlanguagetools.constants.Service.DeepL] = cloudlanguagetools.deepl.DeepLService()
-            self.services[cloudlanguagetools.constants.Service.PyThaiNLP] = cloudlanguagetools.pythainlp.PyThaiNLPService()
-            self.services[cloudlanguagetools.constants.Service.Spacy] = cloudlanguagetools.spacy.SpacyService()
-            self.services[cloudlanguagetools.constants.Service.MandarinCantonese] = cloudlanguagetools.mandarincantonese.MandarinCantoneseService()            
-            self.services[cloudlanguagetools.constants.Service.Wenlin] = cloudlanguagetools.wenlin.WenlinService()
-            self.services[cloudlanguagetools.constants.Service.OpenAI] = cloudlanguagetools.openai.OpenAIService()
-            self.services[cloudlanguagetools.constants.Service.Alibaba] = cloudlanguagetools.alibaba.AlibabaService()
-            self.services[cloudlanguagetools.constants.Service.Gemini] = cloudlanguagetools.gemini.GeminiService()
+    def configure(self, configuration: cloudlanguagetools.configuration.ServicesConfiguration):
+        """Enable and configure the services present in the configuration, replacing any previous
+        configuration. Services left out of the configuration are disabled."""
+        if not isinstance(configuration, cloudlanguagetools.configuration.ServicesConfiguration):
+            raise TypeError(f'expected a ServicesConfiguration, got {type(configuration).__name__}')
+        services = {}
+        for service_enum, service_config in configuration.enabled_services().items():
+            service = SERVICE_CLASSES[service_enum]()
+            service.configure(service_config)
+            services[service_enum] = service
+        self.services = services
+        self.configuration = configuration
+        self.cache.clear()
 
-    def configure_default(self):
-        # use the stored keys to configure services
-        self.configure_services(cloudlanguagetools.encryption.decrypt())
+    def is_enabled(self, service_name) -> bool:
+        return Service[service_name] in self.services
 
-    def configure_services(self, config):
-        for service_name, value in config.items():
-            service_enum = cloudlanguagetools.constants.Service[service_name]
-            if service_enum in self.services:
-                self.services[service_enum].configure(value)
+    def get_enabled_services(self) -> List[Service]:
+        return list(self.services.keys())
+
+    def get_service(self, service_name):
+        """Return the service instance, raise errors.ServiceNotEnabledError if it is not enabled."""
+        service_enum = Service[service_name]
+        if service_enum not in self.services:
+            raise cloudlanguagetools.errors.ServiceNotEnabledError(f'service {service_enum.name} is not enabled')
+        return self.services[service_enum]
 
     def get_language_data_json(self):
         # retrieve all language data (tts, translation, transliteration, etc)
@@ -145,7 +177,7 @@ class ServiceManager():
             result_dict[language.name] = language.lang_name
         return result_dict
 
-    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
+    @cached_list
     def get_tts_voice_list(self):
         result = []
         for key, service in self.services.items():
@@ -157,7 +189,7 @@ class ServiceManager():
         tts_voice_list = self.get_tts_voice_list()
         return [voice.json_obj() for voice in tts_voice_list]
 
-    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
+    @cached_list
     def get_tts_voice_list_v3(self):
         result = []
         for key, service in self.services.items():
@@ -165,7 +197,7 @@ class ServiceManager():
             result.extend(service.get_tts_voice_list_v3())
         return result
 
-    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
+    @cached_list
     def get_translation_language_list(self) -> List[cloudlanguagetools.translationlanguage.TranslationLanguage]:
         result = []
         for key, service in self.services.items():
@@ -177,7 +209,7 @@ class ServiceManager():
         language_list = self.get_translation_language_list()
         return [language.json_obj() for language in language_list]
 
-    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
+    @cached_list
     def get_transliteration_language_list(self):
         result = []
         for key, service in self.services.items():
@@ -189,7 +221,7 @@ class ServiceManager():
         language_list = self.get_transliteration_language_list()
         return [language.json_obj() for language in language_list]
 
-    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
+    @cached_list
     def get_tokenization_options(self):
         result = []
         for key, service in self.services.items():
@@ -203,7 +235,7 @@ class ServiceManager():
 
     # dictionary lookups
 
-    @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=cloudlanguagetools.constants.TTLCacheTimeout))
+    @cached_list
     def get_dictionary_lookup_options(self):
         result = []
         for key, service in self.services.items():
@@ -215,8 +247,7 @@ class ServiceManager():
         return [dict_lookup_option.json_obj() for dict_lookup_option in dictionary_lookup_list]
 
     def get_tts_audio(self, text, service_name, voice_id, options):
-        service_enum = cloudlanguagetools.constants.Service[service_name]
-        service = self.services[service_enum]
+        service = self.get_service(service_name)
         return service.get_tts_audio(text, voice_id, options)
 
     def get_tts_audio_v5(self, text, service_name, voice_id, options):
@@ -233,8 +264,7 @@ class ServiceManager():
             errors.PermanentError: On failures that will not succeed on retry.
         """
         try:
-            service_enum = cloudlanguagetools.constants.Service[service_name]
-            service = self.services[service_enum]
+            service = self.get_service(service_name)
             return service.get_tts_audio(text, voice_id, options)
         except (cloudlanguagetools.errors.TransientError, cloudlanguagetools.errors.PermanentError):
             # these exceptions are already properly categorized, so just re-throw them
@@ -248,8 +278,7 @@ class ServiceManager():
 
     def get_translation(self, text, service_name: str, from_language_key, to_language_key):
         """return text"""
-        service_enum = cloudlanguagetools.constants.Service[service_name]
-        service = self.services[service_enum]
+        service = self.get_service(service_name)
         return service.get_translation(text, from_language_key, to_language_key)
 
     def get_all_translations(self, text, from_language, to_language):
@@ -284,18 +313,15 @@ class ServiceManager():
         return result
 
     def get_transliteration(self, text, service_name: str, transliteration_key):
-        service_enum = cloudlanguagetools.constants.Service[service_name]
-        service = self.services[service_enum]
+        service = self.get_service(service_name)
         return service.get_transliteration(text, transliteration_key)
 
     def get_tokenization(self, text, service_name: str, tokenization_key):
-        service_enum = cloudlanguagetools.constants.Service[service_name]
-        service = self.services[service_enum]
+        service = self.get_service(service_name)
         return service.get_tokenization(text, tokenization_key)
 
     def get_dictionary_lookup(self, text, service_name, lookup_key):
-        service_enum = cloudlanguagetools.constants.Service[service_name]
-        service = self.services[service_enum]
+        service = self.get_service(service_name)
         return service.get_dictionary_lookup(text, lookup_key)
 
     def get_breakdown(self, text, tokenization_option, translation_option, transliteration_option):
@@ -352,23 +378,23 @@ class ServiceManager():
         ]        
 
     def get_pinyin(self, text, tone_numbers, spaces, corrections=[]):
-        return self.services[cloudlanguagetools.constants.Service.MandarinCantonese].get_pinyin(text, tone_numbers, spaces, corrections)
+        return self.get_service(Service.MandarinCantonese).get_pinyin(text, tone_numbers, spaces, corrections)
 
     def get_jyutping(self, text, tone_numbers, spaces, corrections=[]):
-        return self.services[cloudlanguagetools.constants.Service.MandarinCantonese].get_jyutping(text, tone_numbers, spaces, corrections)
+        return self.get_service(Service.MandarinCantonese).get_jyutping(text, tone_numbers, spaces, corrections)
 
     # LLM APIs
     # ========
 
     def openai_single_prompt(self, text, max_tokens=None):
-        return self.services[cloudlanguagetools.constants.Service.OpenAI].single_prompt(text, max_tokens)
+        return self.get_service(Service.OpenAI).single_prompt(text, max_tokens)
 
     def openai_full_query(self, messages, max_tokens=None):
-        return self.services[cloudlanguagetools.constants.Service.OpenAI].full_query(messages, max_tokens)
+        return self.get_service(Service.OpenAI).full_query(messages, max_tokens)
 
     def detect_language(self, text_list):
         """returns an enum from languages.Language"""
-        service = self.services[cloudlanguagetools.constants.Service.Azure]
+        service = self.get_service(Service.Azure)
         result = service.detect_language(text_list)
         return result
 

@@ -9,6 +9,7 @@ from pydub import AudioSegment
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import cloudlanguagetools.azure
+import cloudlanguagetools.configuration
 import cloudlanguagetools.errors
 import cloudlanguagetools.options
 from cloudlanguagetools.azure import build_dragonhd_voice_attrs, DEFAULT_TEMPERATURE, DEFAULT_TOP_P, DEFAULT_TOP_K, DEFAULT_CFG_SCALE
@@ -80,7 +81,7 @@ def _build_response(status_code=200, content=b'', text='', json_data=_MISSING):
 class TestAzureGetTtsAudioErrors:
     def _make_service(self):
         service = cloudlanguagetools.azure.AzureService()
-        service.configure({'key': 'fake-key', 'region': 'eastus'})
+        service.configure(cloudlanguagetools.configuration.AzureConfig(api_key='fake-key', region='eastus'))
         return service
 
     @patch('cloudlanguagetools.azure.requests.post')
@@ -162,7 +163,7 @@ class TestAzureGetTtsAudioErrors:
 class TestAzureGetTtsAudioRestRequest:
     def _make_service(self):
         service = cloudlanguagetools.azure.AzureService()
-        service.configure({'key': 'fake-key', 'region': 'eastus'})
+        service.configure(cloudlanguagetools.configuration.AzureConfig(api_key='fake-key', region='eastus'))
         return service
 
     @pytest.mark.parametrize(
@@ -206,7 +207,7 @@ class TestAzureGetTtsAudioRestRequest:
 class TestAzureSpeechToTextRestRequest:
     def _make_service(self):
         service = cloudlanguagetools.azure.AzureService()
-        service.configure({'key': 'fake-key', 'region': 'eastus'})
+        service.configure(cloudlanguagetools.configuration.AzureConfig(api_key='fake-key', region='eastus'))
         return service
 
     @patch('cloudlanguagetools.azure.pydub.AudioSegment.from_wav')

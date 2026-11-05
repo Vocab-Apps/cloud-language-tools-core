@@ -75,10 +75,10 @@ class NaverService(cloudlanguagetools.service.Service):
         self.service = cloudlanguagetools.constants.Service.Naver
 
     def configure(self, config):
-        self.client_id = config['client_id']
-        self.client_secret = config['client_secret']
-        self.papago_translation_client_id = config['papago_translation_client_id']
-        self.papago_translation_client_secret = config['papago_translation_client_secret']
+        self.client_id = config.client_id
+        self.client_secret = config.client_secret.get_secret_value()
+        self.papago_translation_client_id = config.papago_translation_client_id
+        self.papago_translation_client_secret = config.papago_translation_client_secret.get_secret_value()
 
     def get_translation(self, text, from_language_key, to_language_key):
         url = 'https://papago.apigw.ntruss.com/nmt/v1/translation'

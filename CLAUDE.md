@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - pytest config lives in `[tool.pytest.ini_options]` in `pyproject.toml` (there is no pytest.ini)
 - **Audio tests make real API calls**: Tests in `test_audio.py` will invoke cloud APIs and may incur costs
   - This is normal and expected behavior for integration testing
-  - Requires valid API keys in `services_configuration.json`
+  - Requires `CLOUDLANGUAGETOOLS_CORE_KEY` to decrypt the service keys in `cloudlanguagetools/keys.py`
   - Only use `@skip_unreliable_clt_test()` for services that are genuinely unreliable
 - Tests should be located in the `tests/` directory
 - Python imports should always be placed at the top of the file.
@@ -87,10 +87,10 @@ The codebase follows a plugin-based service architecture where each cloud provid
 - `TtsVoice`: Represents available voices for TTS
 - `TranslationLanguage`: Language pairs for translation
 - `TransliterationLanguage`: Language pairs for transliteration
-- Service configurations stored in `services_configuration.json`
+- `ServicesConfiguration` (`configuration.py`): versioned pydantic model enabling/configuring services
 
 **Request Flow**:
-1. ServiceManager loads all available services on initialization
+1. ServiceManager instantiates and configures only the services enabled in the `ServicesConfiguration`
 2. Client requests routed through ServiceManager to appropriate service
 3. Each service handles authentication, API calls, and response formatting
 4. Common error handling through `cloudlanguagetools.errors`
@@ -104,14 +104,28 @@ Each service module (e.g., `azure.py`, `google.py`) follows this pattern:
 - Uses common utilities from base class for HTTP requests and audio processing
 
 ### Configuration and Keys
-- Service API keys stored in `services_configuration.json` (dev/test only)
-- Production uses encrypted key management through `encryption.py`
-- Each service can be configured independently
-- Test services available via `CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES=yes`
+- `cloudlanguagetools/configuration.py`: `ServicesConfiguration` (version 1) has one optional sub-model per
+  service (`azure`, `google`, `gemini`, `deepl`, ...). Present = enabled; absent = disabled, never consulted for
+  lists, and `ServiceManager.get_service()` raises `errors.ServiceNotEnabledError` (a `PermanentError`).
+  Secrets are `SecretStr` (hidden in repr, serialized in clear by `dump_json()`).
+- `ServiceManager(configuration)` or `manager.configure(configuration)` (re-configuring replaces the services and
+  clears the per-instance list cache). `configure_default()` / `configure_services()` no longer exist.
+- Each `Service.configure(config)` receives its typed sub-model, not a dict.
+- Keyless services (Epitran, Spacy, PyThaiNLP, MandarinCantonese, Wenlin) are enabled with an empty sub-model,
+  see `ServicesConfiguration.with_keyless_services()`.
+- Google and Gemini each take a service account key and build in-memory credentials
+  (`google_tts_common.get_service_account_credentials`); no temp key file, no `GOOGLE_APPLICATION_CREDENTIALS`.
+- Backend: `encryption.load_configuration()` decrypts `keys.py` with `EncryptionSettings` (from
+  `CLOUDLANGUAGETOOLS_CORE_KEY`). `utils/service_keys.py --action decrypt_write_json|encrypt` round-trips it
+  through the gitignored `services_configuration.json`. Legacy (unversioned) data is converted by
+  `configuration.from_legacy_dict`.
+- Mock services: enable `test_service_a` / `test_service_b` in the configuration (see `tests/test_mock_services.py`);
+  the `CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES` environment variable is gone.
 
 ### Testing Strategy
 - Comprehensive test suite covering all service types
-- Mock services (`test_services.py`) for testing without API calls
+- Mock services (`test_services.py`) for testing without API calls; `tests/test_configuration.py` covers the
+  configuration model, enabling/disabling and encryption without API calls
 - Integration tests against real APIs (when keys available)
 - Audio processing tests using `pydub` for validation
 - **Audio tests**: Located in `tests/test_audio.py` and follow the pattern of existing tests like `test_mandarin_amazon`

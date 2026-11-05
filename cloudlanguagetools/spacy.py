@@ -33,12 +33,16 @@ class SpacyService(cloudlanguagetools.service.Service):
     BASE_URL = 'https://clt-nlp-api.vocab.ai'
 
     def __init__(self):
-        self.BASE_URL = os.environ.get('SPACY_URL_OVERRIDE', self.BASE_URL)
+        self.base_url = os.environ.get('SPACY_URL_OVERRIDE', self.BASE_URL)
+
+    def configure(self, config):
+        if config.base_url is not None:
+            self.base_url = config.base_url
 
     def get_tokenization(self, text, tokenization_key):
         model_name = tokenization_key['model_name']
 
-        query_url = self.BASE_URL + '/spacy/v1/tokenize'
+        query_url = self.base_url + '/spacy/v1/tokenize'
         response = requests.post(query_url, json={'language': model_name, 'text': text}, timeout=cloudlanguagetools.constants.RequestTimeout)
         response_data = response.json()        
 

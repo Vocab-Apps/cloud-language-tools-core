@@ -6,14 +6,14 @@ import shutil
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import cloudlanguagetools.servicemanager
+import cloudlanguagetools.encryption
 import cloudlanguagetools.constants
 
 # temporary debugging helpers, run with: uv run python utils/debug.py <function name>
 
 
 def get_manager():
-    manager = cloudlanguagetools.servicemanager.ServiceManager()
-    manager.configure_default()
+    manager = cloudlanguagetools.servicemanager.ServiceManager(cloudlanguagetools.encryption.load_configuration())
     return manager
 
 

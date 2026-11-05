@@ -6,7 +6,6 @@ import tempfile
 from typing import List
 
 import requests
-import google.auth
 import google.auth.exceptions
 import google.auth.transport.requests
 from google.api_core.client_options import ClientOptions
@@ -37,7 +36,6 @@ DEFAULT_MODEL = 'gemini-3.8-flash-tts'
 
 # Gemini Enterprise (formerly Vertex AI) endpoint, authenticated with the Google service account
 GEMINI_ENTERPRISE_URL = 'https://aiplatform.googleapis.com/v1/projects/{project}/locations/global/publishers/google/models/{model}:generateContent'
-GOOGLE_CLOUD_PLATFORM_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
 # generateContent returns 24 kHz, mono, 16-bit audio (WAV by default, or headerless audio/L16)
 GENERATE_CONTENT_SAMPLE_RATE = 24000
 DEFAULT_RATE_LIMIT_RETRY_AFTER = 60
@@ -262,23 +260,20 @@ class GeminiService(cloudlanguagetools.service.Service):
         self.google_project = None
 
     def configure(self, config):
-        # we rely on os.environ['GOOGLE_APPLICATION_CREDENTIALS'] from the Google service
-        pass
+        # Gemini has its own service account configuration, independent from the Google service
+        self.google_credentials = cloudlanguagetools.google_tts_common.get_service_account_credentials(config.service_account)
+        self.google_project = config.project_id or config.service_account.project_id
 
     def get_client(self):
         return google.cloud.texttospeech.TextToSpeechClient(
+            credentials=self.google_credentials,
             client_options=ClientOptions(api_endpoint='texttospeech.googleapis.com')
         )
 
     def get_access_token_and_project(self):
-        """Return (access token, project id) from the Google service account credentials."""
+        """Return (access token, project id) from the Gemini service account credentials."""
         if self.google_credentials is None:
-            credentials, project = google.auth.default(scopes=[GOOGLE_CLOUD_PLATFORM_SCOPE])
-            if not project:
-                raise cloudlanguagetools.errors.AuthenticationError(
-                    'Gemini TTS: could not determine the Google Cloud project id from the credentials')
-            self.google_credentials = credentials
-            self.google_project = project
+            raise cloudlanguagetools.errors.AuthenticationError('Gemini TTS: service is not configured')
         if not self.google_credentials.valid:
             self.google_credentials.refresh(google.auth.transport.requests.Request())
         return self.google_credentials.token, self.google_project

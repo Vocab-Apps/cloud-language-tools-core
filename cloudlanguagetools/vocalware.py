@@ -44,9 +44,9 @@ class VocalWareService(cloudlanguagetools.service.Service):
         pass
 
     def configure(self, config):
-        self.secret_phrase = config['secret_phrase']
-        self.account_id = config['account_id']
-        self.api_id = config['api_id']
+        self.secret_phrase = config.secret_phrase.get_secret_value()
+        self.account_id = config.account_id
+        self.api_id = config.api_id
 
     def get_translation(self, text, from_language_key, to_language_key):
         raise cloudlanguagetools.errors.RequestError('not supported')

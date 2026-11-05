@@ -34,6 +34,10 @@ class EpitranService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.base_url = os.environ.get('EPITRAN_URL_OVERRIDE', self.BASE_URL)
 
+    def configure(self, config):
+        if config.base_url is not None:
+            self.base_url = config.base_url
+
     def post_request(self, text, language_code, endpoint):
         query_url = self.base_url + endpoint
         response = requests.post(query_url, 

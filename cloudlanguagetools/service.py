@@ -82,6 +82,11 @@ class Service():
         response_format_parameter = format_map[response_format]
         return response_format_parameter, response_format
 
+    def configure(self, config):
+        """Configure the service with its cloudlanguagetools.configuration sub-model
+        (e.g. AzureConfig). The default implementation is for services without settings."""
+        pass
+
     # used for pre-loading models
     def load_data(self):
         pass

@@ -20,6 +20,7 @@ The same configuration as JSON (what `ServicesConfiguration.model_validate_json`
     {"version": 1, "azure": {"api_key": "...", "region": "eastus"}, "mandarin_cantonese": {}}
 """
 
+import enum
 from typing import Annotated, Dict, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, SecretStr, StringConstraints
@@ -45,12 +46,84 @@ class ServiceConfig(BaseModel):
     model_config = ConfigDict(extra='forbid', frozen=True)
 
 
+# cloud regions
+# =============
+
+class AzureRegion(enum.StrEnum):
+    """Azure regions of the Speech service (speech to text, text to speech, translation), the
+    region of the Azure Speech / AI Services resource the key belongs to.
+    https://learn.microsoft.com/en-us/azure/ai-services/speech-service/regions"""
+    southafricanorth = 'southafricanorth'
+    eastasia = 'eastasia'
+    southeastasia = 'southeastasia'
+    australiaeast = 'australiaeast'
+    centralindia = 'centralindia'
+    japaneast = 'japaneast'
+    japanwest = 'japanwest'
+    koreacentral = 'koreacentral'
+    canadacentral = 'canadacentral'
+    canadaeast = 'canadaeast'
+    northeurope = 'northeurope'
+    westeurope = 'westeurope'
+    francecentral = 'francecentral'
+    germanywestcentral = 'germanywestcentral'
+    italynorth = 'italynorth'
+    norwayeast = 'norwayeast'
+    swedencentral = 'swedencentral'
+    switzerlandnorth = 'switzerlandnorth'
+    switzerlandwest = 'switzerlandwest'
+    uksouth = 'uksouth'
+    ukwest = 'ukwest'
+    uaenorth = 'uaenorth'
+    brazilsouth = 'brazilsouth'
+    qatarcentral = 'qatarcentral'
+    centralus = 'centralus'
+    eastus = 'eastus'
+    eastus2 = 'eastus2'
+    northcentralus = 'northcentralus'
+    southcentralus = 'southcentralus'
+    westcentralus = 'westcentralus'
+    westus = 'westus'
+    westus2 = 'westus2'
+    westus3 = 'westus3'
+
+
+class AmazonRegion(enum.StrEnum):
+    """AWS regions of Amazon Polly (text to speech), from botocore's endpoint data. Amazon Translate
+    is available in a subset of these (not in af-south-1, ap-northeast-3, ap-southeast-5,
+    ap-southeast-7, eu-central-2, eu-south-2, me-south-1, sa-east-1)."""
+    af_south_1 = 'af-south-1'
+    ap_east_1 = 'ap-east-1'
+    ap_northeast_1 = 'ap-northeast-1'
+    ap_northeast_2 = 'ap-northeast-2'
+    ap_northeast_3 = 'ap-northeast-3'
+    ap_south_1 = 'ap-south-1'
+    ap_southeast_1 = 'ap-southeast-1'
+    ap_southeast_2 = 'ap-southeast-2'
+    ap_southeast_5 = 'ap-southeast-5'
+    ap_southeast_7 = 'ap-southeast-7'
+    ca_central_1 = 'ca-central-1'
+    eu_central_1 = 'eu-central-1'
+    eu_central_2 = 'eu-central-2'
+    eu_north_1 = 'eu-north-1'
+    eu_south_2 = 'eu-south-2'
+    eu_west_1 = 'eu-west-1'
+    eu_west_2 = 'eu-west-2'
+    eu_west_3 = 'eu-west-3'
+    me_south_1 = 'me-south-1'
+    sa_east_1 = 'sa-east-1'
+    us_east_1 = 'us-east-1'
+    us_east_2 = 'us-east-2'
+    us_west_1 = 'us-west-1'
+    us_west_2 = 'us-west-2'
+
+
 # services which require credentials
 # ==================================
 
 class AzureConfig(ServiceConfig):
     api_key: Secret
-    region: NonEmptyStr
+    region: AzureRegion
 
 
 class GoogleConfig(ServiceConfig):
@@ -89,7 +162,7 @@ class NaverConfig(ServiceConfig):
 class AmazonConfig(ServiceConfig):
     access_key_id: NonEmptyStr
     secret_access_key: Secret
-    region: NonEmptyStr
+    region: AmazonRegion
 
 
 class ForvoConfig(ServiceConfig):

@@ -101,7 +101,7 @@ class AmazonService(cloudlanguagetools.service.Service):
     def configure(self, config):
         aws_access_key_id = config.access_key_id
         aws_secret_access_key = config.secret_access_key.get_secret_value()
-        region_name = config.region
+        region_name = config.region.value
 
         self.polly_client = boto3.client("polly", 
             region_name=region_name,

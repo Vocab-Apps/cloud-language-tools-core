@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch, MagicMock
 
+import boto3
 import pydantic
 import cryptography.fernet
 
@@ -90,6 +91,43 @@ class TestServicesConfigurationModel(unittest.TestCase):
         self.assertNotIn('deepl', data)
         self.assertEqual(data['google'], {'api_key': 'google-key'})
         self.assertEqual(ServicesConfiguration.model_validate_json(json_str), configuration)
+
+class TestRegions(unittest.TestCase):
+    def test_azure_region(self):
+        config = AzureConfig(api_key='key', region='westeurope')
+        self.assertIs(config.region, cloudlanguagetools.configuration.AzureRegion.westeurope)
+        self.assertEqual(json.loads(ServicesConfiguration(azure=config).dump_json())['azure']['region'], 'westeurope')
+
+    def test_azure_invalid_region_rejected(self):
+        for region in ['eastus9', 'EastUS', 'us-east-1', '', 'global']:
+            with self.assertRaises(pydantic.ValidationError, msg=region):
+                AzureConfig(api_key='key', region=region)
+
+    def test_amazon_region(self):
+        config = cloudlanguagetools.configuration.AmazonConfig(access_key_id='id', secret_access_key='secret', region='eu-west-1')
+        self.assertIs(config.region, cloudlanguagetools.configuration.AmazonRegion.eu_west_1)
+        self.assertEqual(json.loads(ServicesConfiguration(amazon=config).dump_json())['amazon']['region'], 'eu-west-1')
+
+    def test_amazon_invalid_region_rejected(self):
+        for region in ['us-east-9', 'US-EAST-1', 'eastus', '']:
+            with self.assertRaises(pydantic.ValidationError, msg=region):
+                cloudlanguagetools.configuration.AmazonConfig(access_key_id='id', secret_access_key='secret', region=region)
+
+    def test_amazon_regions_match_polly(self):
+        # fails when botocore's endpoint data adds or removes a Polly region: update AmazonRegion
+        polly_regions = set(boto3.session.Session().get_available_regions('polly'))
+        self.assertEqual({region.value for region in cloudlanguagetools.configuration.AmazonRegion}, polly_regions)
+        translate_regions = set(boto3.session.Session().get_available_regions('translate'))
+        self.assertTrue(translate_regions <= polly_regions)
+
+    def test_services_receive_region_string(self):
+        manager = cloudlanguagetools.servicemanager.ServiceManager(ServicesConfiguration(
+            azure=AzureConfig(api_key='key', region='japaneast'),
+            amazon=cloudlanguagetools.configuration.AmazonConfig(access_key_id='id', secret_access_key='secret', region='ap-northeast-1')))
+        self.assertEqual(type(manager.services[Service.Azure].region), str)
+        self.assertEqual(manager.services[Service.Azure].region, 'japaneast')
+        self.assertEqual(manager.services[Service.Amazon].polly_client.meta.region_name, 'ap-northeast-1')
+
 
 class TestLegacyFormatRejected(unittest.TestCase):
     """The pre-versioned format (keyed by Service enum name) is not supported."""

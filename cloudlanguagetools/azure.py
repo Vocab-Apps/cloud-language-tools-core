@@ -333,7 +333,7 @@ class AzureService(cloudlanguagetools.service.Service):
 
     def configure(self, config):
         self.key = config.api_key.get_secret_value()
-        self.region = config.region
+        self.region = config.region.value
 
     def get_token(self):
         fetch_token_url = f"https://{self.region}.api.cognitive.microsoft.com/sts/v1.0/issueToken"

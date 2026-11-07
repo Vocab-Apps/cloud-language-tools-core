@@ -119,6 +119,9 @@ Each service module (e.g., `azure.py`, `google.py`) follows this pattern:
 - `ServiceManager(configuration)` or `manager.configure(configuration)` (re-configuring replaces the services and
   clears the per-instance list cache). `configure_default()` / `configure_services()` no longer exist.
 - Each `Service.configure(config)` receives its typed sub-model, not a dict.
+- `AzureConfig.region` / `AmazonConfig.region` are `AzureRegion` / `AmazonRegion` StrEnums (exact match, e.g. `eastus`,
+  `us-east-1`). Azure: the Speech service regions from the Azure docs. Amazon: Polly's regions from botocore;
+  `tests/test_configuration.py` fails if botocore's Polly region list changes, then update `AmazonRegion`.
 - Keyless services (Epitran, Spacy, PyThaiNLP, MandarinCantonese, Wenlin) are enabled with an empty sub-model,
   see `ServicesConfiguration.with_keyless_services()`.
 - `GoogleConfig` and `GeminiConfig` are separate models (no shared base other than `ServiceConfig`), each with

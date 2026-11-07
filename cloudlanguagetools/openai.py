@@ -160,41 +160,37 @@ class OpenAIVoice(cloudlanguagetools.ttsvoice.TtsVoice):
     def get_options(self):
         return VOICE_OPTIONS
 
+# chat model used by single_prompt / full_query (gpt-3.5-turbo was retired by OpenAI).
+# gpt-5 models take max_completion_tokens instead of max_tokens.
+CHATBOT_MODEL = 'gpt-5.4-mini'
+
 class OpenAIService(cloudlanguagetools.service.Service):
     def __init__(self):
-        self.chatbot_model = "gpt-3.5-turbo"
+        self.chatbot_model = CHATBOT_MODEL
 
     def configure(self, config):
         self.api_key = config.api_key.get_secret_value()
         self.client = OpenAI(api_key=self.api_key)
 
+    def chat_completion(self, messages, max_tokens):
+        kwargs = {}
+        if max_tokens is not None:
+            kwargs['max_completion_tokens'] = max_tokens
+        response = self.client.chat.completions.create(model=self.chatbot_model, messages=messages, **kwargs)
+        logger.debug(pprint.pformat(response))
+        return response
+
     def single_prompt(self, prompt, max_tokens):
         messages = [
             {'role': 'user', 'content': prompt}
-        ]        
-
-        if max_tokens != None:
-            response = self.client.chat.completions.create(model=self.chatbot_model,
-            messages=messages,
-            max_tokens=max_tokens)    
-        else:
-            response = self.client.chat.completions.create(model=self.chatbot_model,
-            messages=messages)    
-        logger.debug(pprint.pformat(response))
+        ]
+        response = self.chat_completion(messages, max_tokens)
         tokens_used = response.usage.total_tokens
         response_text = response.choices[0].message.content
         return response_text, tokens_used
 
     def full_query(self, messages, max_tokens):
-        if max_tokens != None:
-            response = self.client.chat.completions.create(model=self.chatbot_model,
-            messages=messages,
-            max_tokens=max_tokens)    
-        else:
-            response = self.client.chat.completions.create(model=self.chatbot_model,
-            messages=messages)    
-        logger.debug(pprint.pformat(response))
-        return response
+        return self.chat_completion(messages, max_tokens)
 
     def speech_to_text(self, filepath, audio_format: cloudlanguagetools.options.AudioFormat):
 

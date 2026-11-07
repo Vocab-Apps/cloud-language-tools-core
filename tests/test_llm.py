@@ -29,6 +29,7 @@ class TestTranslation(unittest.TestCase):
             replace('?', '').\
             replace('？', '').\
             replace('您', '你').\
+            replace('’', "'").\
             replace(':', '').lower()
         return result_text
 

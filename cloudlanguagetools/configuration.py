@@ -20,7 +20,7 @@ The same configuration as JSON (what `ServicesConfiguration.model_validate_json`
     {"version": 1, "azure": {"api_key": "...", "region": "eastus"}, "mandarin_cantonese": {}}
 """
 
-from typing import Annotated, Any, Dict, Literal, Optional
+from typing import Annotated, Dict, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, SecretStr, StringConstraints
 
@@ -199,9 +199,6 @@ SERVICE_FIELDS: Dict[str, Service] = {
     'test_service_b': Service.TestServiceB,
 }
 
-KEYLESS_SERVICE_FIELDS = ['epitran', 'pythainlp', 'spacy', 'mandarin_cantonese', 'wenlin']
-
-
 class ServicesConfiguration(BaseModel):
     """Enables services and configures them. Leave a service out (None) to disable it."""
     model_config = ConfigDict(extra='forbid', frozen=True)
@@ -268,62 +265,3 @@ def get_field_name(service: Service) -> str:
         if field_service == service:
             return field_name
     raise KeyError(f'service {service} cannot be configured')
-
-
-def load_configuration(data: Dict[str, Any]) -> ServicesConfiguration:
-    """Validate configuration data (a dict, e.g. parsed JSON). Data without a `version` key is
-    treated as the legacy services_configuration.json format and converted."""
-    if 'version' not in data:
-        return from_legacy_dict(data)
-    return ServicesConfiguration.model_validate(data)
-
-
-# legacy format
-# =============
-
-def from_legacy_dict(legacy: Dict[str, Any]) -> ServicesConfiguration:
-    """Convert the legacy services_configuration.json format (keyed by Service enum name, with
-    service-specific key names) to a ServicesConfiguration.
-
-    The keyless services are all enabled, as in the legacy ServiceManager. Google and Gemini are
-    left disabled: the legacy format holds a Google service account, and these services now only
-    accept API keys. Legacy entries for services which are not loaded by the ServiceManager
-    (e.g. Voicen) are ignored.
-    """
-    config: Dict[str, Any] = {field_name: {} for field_name in KEYLESS_SERVICE_FIELDS}
-
-    def section(name):
-        return legacy.get(name)
-
-    if (azure := section('Azure')) is not None:
-        config['azure'] = {'api_key': azure['key'], 'region': azure['region']}
-    if (watson := section('Watson')) is not None:
-        config['watson'] = dict(watson)
-    if (naver := section('Naver')) is not None:
-        config['naver'] = dict(naver)
-    if (amazon := section('Amazon')) is not None:
-        config['amazon'] = {
-            'access_key_id': amazon['AWS_ACCESS_KEY_ID'],
-            'secret_access_key': amazon['AWS_SECRET_ACCESS_KEY'],
-            'region': amazon['AWS_DEFAULT_REGION'],
-        }
-    if (forvo := section('Forvo')) is not None:
-        config['forvo'] = {'api_key': forvo['key']}
-    if (cereproc := section('CereProc')) is not None:
-        config['cereproc'] = dict(cereproc)
-    if (vocalware := section('VocalWare')) is not None:
-        config['vocalware'] = dict(vocalware)
-    if (fptai := section('FptAi')) is not None:
-        config['fptai'] = {'api_key': fptai['key']}
-    if (elevenlabs := section('ElevenLabs')) is not None:
-        config['elevenlabs'] = {'api_key': elevenlabs['api_key']}
-    if (easypronunciation := section('EasyPronunciation')) is not None:
-        config['easypronunciation'] = {'api_key': easypronunciation['api_key']}
-    if (deepl := section('DeepL')) is not None:
-        config['deepl'] = {'api_key': deepl['key']}
-    if (openai := section('OpenAI')) is not None:
-        config['openai'] = dict(openai)
-    if (alibaba := section('Alibaba')) is not None:
-        config['alibaba'] = dict(alibaba)
-
-    return ServicesConfiguration.model_validate(config)

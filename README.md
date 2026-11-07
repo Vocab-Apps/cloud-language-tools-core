@@ -41,8 +41,7 @@ manager = cloudlanguagetools.servicemanager.ServiceManager(configuration)
 ```
 
 Edit / re-encrypt it with utils/service_keys.py (`--action decrypt_write_json`, edit
-`services_configuration.json`, `--action encrypt`). Configurations in the pre-versioned format
-(keyed by service enum name) are converted automatically when loaded.
+`services_configuration.json`, `--action encrypt`).
 
 ## building releases
 see package.sh

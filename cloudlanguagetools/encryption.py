@@ -9,7 +9,6 @@ EncryptionSettings.
 """
 
 import os
-import json
 import base64
 import binascii
 from typing import Mapping, Optional
@@ -61,9 +60,9 @@ def encrypt_configuration(configuration: cloudlanguagetools.configuration.Servic
 
 
 def decrypt_configuration(token: str, settings: EncryptionSettings) -> cloudlanguagetools.configuration.ServicesConfiguration:
-    """Decrypt and validate a configuration. Configurations encrypted in the legacy format are converted."""
+    """Decrypt and validate a configuration."""
     decoded_str = settings.get_fernet().decrypt(token.encode('utf-8')).decode('utf-8')
-    return cloudlanguagetools.configuration.load_configuration(json.loads(decoded_str))
+    return cloudlanguagetools.configuration.ServicesConfiguration.model_validate_json(decoded_str)
 
 
 def load_configuration(settings: Optional[EncryptionSettings] = None) -> cloudlanguagetools.configuration.ServicesConfiguration:
@@ -78,12 +77,11 @@ def load_configuration(settings: Optional[EncryptionSettings] = None) -> cloudla
 
 def encrypt(settings: Optional[EncryptionSettings] = None, json_path: str = SERVICES_CONFIGURATION_JSON,
         keys_module_path: str = KEYS_MODULE_PATH):
-    """Validate the configuration in services_configuration.json and write it encrypted to keys.py.
-    A json file in the legacy format is converted."""
+    """Validate the configuration in services_configuration.json and write it encrypted to keys.py."""
     if settings is None:
         settings = EncryptionSettings.from_environment()
     with open(json_path) as f:
-        configuration = cloudlanguagetools.configuration.load_configuration(json.load(f))
+        configuration = cloudlanguagetools.configuration.ServicesConfiguration.model_validate_json(f.read())
     token = encrypt_configuration(configuration, settings)
     with open(keys_module_path, 'w') as f:
         f.write(f"KEYS='{token}'")

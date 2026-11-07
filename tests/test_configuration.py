@@ -91,34 +91,22 @@ class TestServicesConfigurationModel(unittest.TestCase):
         self.assertEqual(data['google'], {'api_key': 'google-key'})
         self.assertEqual(ServicesConfiguration.model_validate_json(json_str), configuration)
 
-class TestLegacyConfiguration(unittest.TestCase):
+class TestLegacyFormatRejected(unittest.TestCase):
+    """The pre-versioned format (keyed by Service enum name) is not supported."""
     LEGACY = {
         'Azure': {'region': 'eastus', 'key': 'azure-key'},
-        # a base64 service account key, which can't be used any more
-        'Google': {'key': base64.b64encode(b'{"type": "service_account"}').decode('utf-8')},
-        'Amazon': {'AWS_ACCESS_KEY_ID': 'aws-id', 'AWS_SECRET_ACCESS_KEY': 'aws-secret', 'AWS_DEFAULT_REGION': 'us-east-1'},
         'DeepL': {'key': 'deepl-key'},
-        'Voicen': {'key': 'voicen-key'},
     }
 
-    def test_from_legacy_dict(self):
-        configuration = cloudlanguagetools.configuration.load_configuration(self.LEGACY)
-        self.assertEqual(configuration.azure.api_key.get_secret_value(), 'azure-key')
-        self.assertEqual(configuration.amazon.access_key_id, 'aws-id')
-        self.assertEqual(configuration.amazon.secret_access_key.get_secret_value(), 'aws-secret')
-        self.assertEqual(configuration.amazon.region, 'us-east-1')
-        self.assertEqual(configuration.deepl.api_key.get_secret_value(), 'deepl-key')
-        # the legacy Google service account can't be converted to an API key: Google and Gemini stay disabled
-        self.assertIsNone(configuration.google)
-        self.assertIsNone(configuration.gemini)
-        # keyless services are enabled, as in the legacy ServiceManager
-        for service in [Service.Epitran, Service.PyThaiNLP, Service.Spacy, Service.MandarinCantonese, Service.Wenlin]:
-            self.assertTrue(configuration.is_enabled(service))
-        self.assertIsNone(configuration.watson)
-
-    def test_versioned_data_not_treated_as_legacy(self):
+    def test_legacy_format_rejected(self):
         with self.assertRaises(pydantic.ValidationError):
-            cloudlanguagetools.configuration.load_configuration({'version': 1, **self.LEGACY})
+            ServicesConfiguration.model_validate(self.LEGACY)
+        with self.assertRaises(pydantic.ValidationError):
+            ServicesConfiguration.model_validate({'version': 1, **self.LEGACY})
+
+    def test_no_legacy_converter(self):
+        self.assertFalse(hasattr(cloudlanguagetools.configuration, 'from_legacy_dict'))
+        self.assertFalse(hasattr(cloudlanguagetools.configuration, 'load_configuration'))
 
 
 class TestServiceManagerConfiguration(unittest.TestCase):
@@ -365,11 +353,11 @@ class TestEncryption(unittest.TestCase):
         decrypted = cloudlanguagetools.encryption.decrypt_configuration(token, self.settings)
         self.assertEqual(decrypted, configuration)
 
-    def test_decrypt_legacy_format(self):
+    def test_decrypt_legacy_format_rejected(self):
         legacy = {'DeepL': {'key': 'deepl-key'}}
         token = self.settings.get_fernet().encrypt(json.dumps(legacy).encode('utf-8')).decode('utf-8')
-        configuration = cloudlanguagetools.encryption.decrypt_configuration(token, self.settings)
-        self.assertEqual(configuration.deepl.api_key.get_secret_value(), 'deepl-key')
+        with self.assertRaises(pydantic.ValidationError):
+            cloudlanguagetools.encryption.decrypt_configuration(token, self.settings)
 
     def test_wrong_key(self):
         configuration = ServicesConfiguration(deepl=DeepLConfig(api_key='deepl-key'))

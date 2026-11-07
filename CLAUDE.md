@@ -126,8 +126,8 @@ Each service module (e.g., `azure.py`, `google.py`) follows this pattern:
 - API key files `.google_tts_translation_api_key` / `.gemini_api_key` (gitignored) hold the raw keys.
 - Backend: `encryption.load_configuration()` decrypts `keys.py` with `EncryptionSettings` (from
   `CLOUDLANGUAGETOOLS_CORE_KEY`). `utils/service_keys.py --action decrypt_write_json|encrypt` round-trips it
-  through the gitignored `services_configuration.json`. Legacy (unversioned) data is converted by
-  `configuration.from_legacy_dict` (its Google service account can't be converted, Google/Gemini stay disabled).
+  through the gitignored `services_configuration.json`. The pre-versioned format (keyed by Service enum name)
+  is not supported and fails validation.
 - Mock services: enable `test_service_a` / `test_service_b` in the configuration (see `tests/test_mock_services.py`);
   the `CLOUDLANGUAGETOOLS_CORE_TEST_SERVICES` environment variable is gone.
 

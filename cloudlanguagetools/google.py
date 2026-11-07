@@ -14,7 +14,7 @@ import cloudlanguagetools.google_tts_common
 
 logger = logging.getLogger(__name__)
 
-# Cloud Translation Basic (v2) REST API, works with both an API key and a service account
+# Cloud Translation Basic (v2) REST API, authenticated with the API key
 TRANSLATION_URL = 'https://translation.googleapis.com/language/translate/v2'
 
 # updates on google text to speech:
@@ -135,22 +135,20 @@ class GoogleService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.service = cloudlanguagetools.constants.Service.Google
         self.api_key = None
-        self.credentials = None
 
     def configure(self, config):
-        if config.api_key is not None:
-            self.api_key = config.api_key.get_secret_value()
-        else:
-            self.credentials = cloudlanguagetools.google_tts_common.get_service_account_credentials(config.service_account)
+        self.api_key = config.api_key.get_secret_value()
 
     def get_client(self):
-        if self.api_key is not None:
-            return google.cloud.texttospeech.TextToSpeechClient(client_options=ClientOptions(api_key=self.api_key))
-        return google.cloud.texttospeech.TextToSpeechClient(credentials=self.credentials)
+        if self.api_key is None:
+            raise cloudlanguagetools.errors.AuthenticationError('Google: service is not configured')
+        return google.cloud.texttospeech.TextToSpeechClient(client_options=ClientOptions(api_key=self.api_key))
 
     def translation_request(self, method, path, **kwargs):
         """Call the Cloud Translation v2 REST API, return the 'data' field of the response."""
-        headers = cloudlanguagetools.google_tts_common.get_auth_headers(self.api_key, self.credentials)
+        if self.api_key is None:
+            raise cloudlanguagetools.errors.AuthenticationError('Google: service is not configured')
+        headers = cloudlanguagetools.google_tts_common.get_api_key_headers(self.api_key)
         response = requests.request(method, TRANSLATION_URL + path, headers=headers,
             timeout=cloudlanguagetools.constants.RequestTimeout, **kwargs)
         if response.status_code >= 400:

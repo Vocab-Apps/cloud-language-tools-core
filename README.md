@@ -25,12 +25,11 @@ The same configuration as JSON (`ServicesConfiguration.model_validate_json` / `c
 {"version": 1, "azure": {"api_key": "...", "region": "eastus"}, "mandarin_cantonese": {}}
 ```
 
-Google and Gemini are configured separately, each with exactly one of:
-- `api_key`: for Google, a Google Cloud API key allowed to call Cloud Text-to-Speech and Cloud
-  Translation; for Gemini, a Gemini API key (Google AI Studio). With a Gemini API key, every model
-  goes through the Gemini API; `gemini-2.5-flash-lite-preview-tts` is not available there.
-- `service_account`: a service account key (the JSON key file content, as an object or as text).
-  Credentials stay in memory.
+Google and Gemini are configured separately, each with an API key (service accounts are not supported):
+- `GoogleConfig(api_key=...)`: a Google Cloud API key allowed to call the Cloud Text-to-Speech API
+  and the Cloud Translation API.
+- `GeminiConfig(api_key=...)`: a Gemini API key (Google AI Studio). All Gemini models go through the
+  Gemini API.
 
 ## service keys (backend deployment)
 The backend's configuration is stored encrypted in `cloudlanguagetools/keys.py`, keyed by the

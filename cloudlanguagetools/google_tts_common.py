@@ -1,46 +1,25 @@
-"""Credentials and audio format handling shared by the Google and Gemini services.
+"""Authentication and audio format handling shared by the Google and Gemini services.
 
 Both services accept the same set of output formats. Cloud Text-to-Speech
-responses (Google voices, Gemini 2.5/3.1 models) are post-processed with
-write_audio_response(). Gemini 3.8 models go through the Gemini Enterprise
-generateContent endpoint, which only returns WAV, so their output is transcoded
-locally with convert_wav_to_format().
+responses (Google voices) are post-processed with write_audio_response(). Gemini
+goes through the Gemini API generateContent endpoint, which returns WAV or
+headerless PCM, so its output is transcoded locally with convert_wav_to_format().
 """
 import tempfile
 import logging
 
 import google.cloud.texttospeech
-import google.oauth2.service_account
-import google.auth.transport.requests
 
 import cloudlanguagetools.options
-import cloudlanguagetools.configuration
-import cloudlanguagetools.errors
 import cloudlanguagetools.audio_processing
 from cloudlanguagetools.options import AudioFormat
 
 logger = logging.getLogger(__name__)
 
-GOOGLE_CLOUD_PLATFORM_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
-
-
-def get_service_account_credentials(service_account: cloudlanguagetools.configuration.GoogleServiceAccount):
-    """Build in-memory credentials from a service account key, without writing a key file or
-    setting GOOGLE_APPLICATION_CREDENTIALS (so the Google and Gemini services can use different accounts)."""
-    return google.oauth2.service_account.Credentials.from_service_account_info(
-        service_account.get_info(), scopes=[GOOGLE_CLOUD_PLATFORM_SCOPE])
-
-
-def get_auth_headers(api_key, credentials):
-    """HTTP headers authenticating a Google REST request, with an API key (sent as a header so it
-    never appears in URLs / logs) or with service account credentials (bearer token, refreshed as needed)."""
-    if api_key is not None:
-        return {'x-goog-api-key': api_key}
-    if credentials is None:
-        raise cloudlanguagetools.errors.AuthenticationError('Google credentials are not configured')
-    if not credentials.valid:
-        credentials.refresh(google.auth.transport.requests.Request())
-    return {'Authorization': f'Bearer {credentials.token}'}
+def get_api_key_headers(api_key):
+    """HTTP headers authenticating a Google REST request with an API key. The key is sent as a
+    header so that it never appears in URLs (and logs)."""
+    return {'x-goog-api-key': api_key}
 
 
 DEFAULT_AUDIO_FORMAT = AudioFormat.mp3

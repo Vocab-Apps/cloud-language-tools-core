@@ -1170,25 +1170,13 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
 
     # @skip_unreliable_clt_test() # rate limiting on gemini
     def test_gemini_model_flash_lite(self):
-        """Test Gemini TTS with gemini-2.5-flash-lite-preview-tts model."""
-        service = 'Gemini'
-        source_text = self.ENGLISH_INPUT_TEXT
+        """gemini-2.5-flash-lite-preview-tts was only served by Cloud Text-to-Speech, it is not
+        available through the Gemini API and must be rejected without being retried."""
+        with self.assertRaises(cloudlanguagetools.errors.InputError):
+            self.manager.get_tts_audio(self.ENGLISH_INPUT_TEXT, 'Gemini', {"name": "Kore"},
+                {'model': 'gemini-2.5-flash-lite-preview-tts'})
 
-        voice_key = {"name": "Kore"}
-        options = {'model': 'gemini-2.5-flash-lite-preview-tts'}
-
-        if self.manager.configuration.gemini.api_key is not None:
-            # this model is only served by Cloud TTS (service account), not by the Gemini API
-            with self.assertRaises(cloudlanguagetools.errors.InputError):
-                self.manager.get_tts_audio(source_text, service, voice_key, options)
-            return
-
-        audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
-
-        self.recognize_and_verify_text(
-            audio_temp_file, source_text, 'en-US', cloudlanguagetools.options.AudioFormat.mp3)
-
-    # Gemini 3.8 models (Gemini Enterprise generateContent endpoint)
+    # Gemini 3.8 models
     # ===============================================================
 
     def test_gemini_3_8_flash_english(self):

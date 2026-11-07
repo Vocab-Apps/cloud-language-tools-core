@@ -8,8 +8,6 @@ from unittest.mock import patch, MagicMock
 
 import pydantic
 import cryptography.fernet
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -20,31 +18,10 @@ import cloudlanguagetools.servicemanager
 import cloudlanguagetools.google
 import cloudlanguagetools.gemini
 from cloudlanguagetools.configuration import (
-    ServicesConfiguration, AzureConfig, DeepLConfig, GoogleConfig, GeminiConfig, GoogleServiceAccount,
+    ServicesConfiguration, AzureConfig, DeepLConfig, GoogleConfig, GeminiConfig,
     EpitranConfig,
 )
 from cloudlanguagetools.constants import Service
-
-
-def generate_service_account_info(project_id='test-project'):
-    """A structurally valid service account key, with a real (throwaway) RSA private key."""
-    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    private_key_pem = private_key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()).decode('utf-8')
-    return {
-        'type': 'service_account',
-        'project_id': project_id,
-        'private_key_id': 'abcdef',
-        'private_key': private_key_pem,
-        'client_email': f'tts@{project_id}.iam.gserviceaccount.com',
-        'client_id': '1234',
-        'token_uri': 'https://oauth2.googleapis.com/token',
-    }
-
-
-SERVICE_ACCOUNT_INFO = generate_service_account_info()
 
 
 class TestServicesConfigurationModel(unittest.TestCase):
@@ -103,7 +80,7 @@ class TestServicesConfigurationModel(unittest.TestCase):
     def test_json_round_trip(self):
         configuration = ServicesConfiguration(
             azure=AzureConfig(api_key='super-secret-key', region='eastus'),
-            google=GoogleConfig(service_account=SERVICE_ACCOUNT_INFO),
+            google=GoogleConfig(api_key='google-key'),
             mandarin_cantonese=cloudlanguagetools.configuration.MandarinCantoneseConfig())
         json_str = configuration.dump_json()
         data = json.loads(json_str)
@@ -111,27 +88,14 @@ class TestServicesConfigurationModel(unittest.TestCase):
         self.assertEqual(data['azure'], {'api_key': 'super-secret-key', 'region': 'eastus'})
         self.assertEqual(data['mandarin_cantonese'], {})
         self.assertNotIn('deepl', data)
-        self.assertEqual(data['google']['service_account']['client_id'], '1234')
+        self.assertEqual(data['google'], {'api_key': 'google-key'})
         self.assertEqual(ServicesConfiguration.model_validate_json(json_str), configuration)
-
-    def test_service_account_from_json_text(self):
-        service_account = GoogleServiceAccount.model_validate(json.dumps(SERVICE_ACCOUNT_INFO))
-        self.assertEqual(service_account.project_id, 'test-project')
-        self.assertEqual(service_account.get_info(), SERVICE_ACCOUNT_INFO)
-
-    def test_service_account_invalid(self):
-        with self.assertRaises(pydantic.ValidationError):
-            GoogleServiceAccount.model_validate('not json')
-        with self.assertRaises(pydantic.ValidationError):
-            GoogleServiceAccount.model_validate({**SERVICE_ACCOUNT_INFO, 'private_key': ''})
-        with self.assertRaises(pydantic.ValidationError):
-            GoogleServiceAccount.model_validate({**SERVICE_ACCOUNT_INFO, 'type': 'authorized_user'})
-
 
 class TestLegacyConfiguration(unittest.TestCase):
     LEGACY = {
         'Azure': {'region': 'eastus', 'key': 'azure-key'},
-        'Google': {'key': base64.b64encode(json.dumps(SERVICE_ACCOUNT_INFO).encode('utf-8')).decode('utf-8')},
+        # a base64 service account key, which can't be used any more
+        'Google': {'key': base64.b64encode(b'{"type": "service_account"}').decode('utf-8')},
         'Amazon': {'AWS_ACCESS_KEY_ID': 'aws-id', 'AWS_SECRET_ACCESS_KEY': 'aws-secret', 'AWS_DEFAULT_REGION': 'us-east-1'},
         'DeepL': {'key': 'deepl-key'},
         'Voicen': {'key': 'voicen-key'},
@@ -144,9 +108,10 @@ class TestLegacyConfiguration(unittest.TestCase):
         self.assertEqual(configuration.amazon.secret_access_key.get_secret_value(), 'aws-secret')
         self.assertEqual(configuration.amazon.region, 'us-east-1')
         self.assertEqual(configuration.deepl.api_key.get_secret_value(), 'deepl-key')
-        self.assertEqual(configuration.google.service_account.get_info(), SERVICE_ACCOUNT_INFO)
-        # legacy behavior: gemini uses the google service account, keyless services are enabled
-        self.assertEqual(configuration.gemini.service_account, configuration.google.service_account)
+        # the legacy Google service account can't be converted to an API key: Google and Gemini stay disabled
+        self.assertIsNone(configuration.google)
+        self.assertIsNone(configuration.gemini)
+        # keyless services are enabled, as in the legacy ServiceManager
         for service in [Service.Epitran, Service.PyThaiNLP, Service.Spacy, Service.MandarinCantonese, Service.Wenlin]:
             self.assertTrue(configuration.is_enabled(service))
         self.assertIsNone(configuration.watson)
@@ -230,43 +195,29 @@ class TestServiceManagerConfiguration(unittest.TestCase):
 
 
 class TestGoogleGeminiConfiguration(unittest.TestCase):
-    def test_google_in_memory_credentials(self):
-        previous = os.environ.pop('GOOGLE_APPLICATION_CREDENTIALS', None)
-        try:
-            service = cloudlanguagetools.google.GoogleService()
-            service.configure(GoogleConfig(service_account=SERVICE_ACCOUNT_INFO))
-            # no key file written, no environment variable set
-            self.assertNotIn('GOOGLE_APPLICATION_CREDENTIALS', os.environ)
-            self.assertEqual(service.credentials.service_account_email, SERVICE_ACCOUNT_INFO['client_email'])
-            self.assertIsNone(service.api_key)
-            # the transport may re-scope (copy) the credentials, so compare the account
-            self.assertEqual(service.get_client()._transport._credentials.service_account_email, SERVICE_ACCOUNT_INFO['client_email'])
-        finally:
-            if previous is not None:
-                os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = previous
-
-    def test_google_service_account_translation_uses_bearer_token(self):
-        service = cloudlanguagetools.google.GoogleService()
-        service.configure(GoogleConfig(service_account=SERVICE_ACCOUNT_INFO))
-        service.credentials = MagicMock(valid=True, token='bearer-token')
-        with patch('cloudlanguagetools.google.requests.request', return_value=_json_response(
-                {'data': {'translations': [{'translatedText': 'Hello &amp; welcome'}]}})) as mock_request:
-            self.assertEqual(service.get_translation('Bonjour', 'fr', 'en'), 'Hello & welcome')
-        self.assertEqual(mock_request.call_args.kwargs['headers'], {'Authorization': 'Bearer bearer-token'})
-
-    def test_credentials_exactly_one(self):
+    def test_api_key_required(self):
         for config_class in [GoogleConfig, GeminiConfig]:
             with self.assertRaises(pydantic.ValidationError):
                 config_class()
             with self.assertRaises(pydantic.ValidationError):
-                config_class(api_key='key', service_account=SERVICE_ACCOUNT_INFO)
-            with self.assertRaises(pydantic.ValidationError):
                 config_class(api_key='')
             self.assertEqual(config_class(api_key='key').api_key.get_secret_value(), 'key')
 
-    def test_gemini_project_id_requires_service_account(self):
+    def test_service_account_rejected(self):
+        for config_class in [GoogleConfig, GeminiConfig]:
+            with self.assertRaises(pydantic.ValidationError):
+                config_class(service_account={'type': 'service_account'})
+            with self.assertRaises(pydantic.ValidationError):
+                config_class(api_key='key', service_account={'type': 'service_account'})
         with self.assertRaises(pydantic.ValidationError):
             GeminiConfig(api_key='key', project_id='project')
+
+    def test_separate_config_classes(self):
+        # Google and Gemini are configured independently, with unrelated config classes
+        self.assertFalse(issubclass(GoogleConfig, GeminiConfig))
+        self.assertFalse(issubclass(GeminiConfig, GoogleConfig))
+        self.assertEqual(GoogleConfig.__bases__, (cloudlanguagetools.configuration.ServiceConfig,))
+        self.assertEqual(GeminiConfig.__bases__, (cloudlanguagetools.configuration.ServiceConfig,))
 
     def test_api_key_json_round_trip(self):
         configuration = ServicesConfiguration(google=GoogleConfig(api_key='google-key'), gemini=GeminiConfig(api_key='gemini-key'))
@@ -274,6 +225,19 @@ class TestGoogleGeminiConfiguration(unittest.TestCase):
         self.assertEqual(data['google'], {'api_key': 'google-key'})
         self.assertEqual(data['gemini'], {'api_key': 'gemini-key'})
         self.assertEqual(ServicesConfiguration.model_validate(data), configuration)
+
+    def test_gemini_independent_from_google(self):
+        manager = cloudlanguagetools.servicemanager.ServiceManager(ServicesConfiguration(
+            google=GoogleConfig(api_key='google-key'),
+            gemini=GeminiConfig(api_key='gemini-key')))
+        self.assertEqual(manager.services[Service.Google].api_key, 'google-key')
+        self.assertEqual(manager.services[Service.Gemini].api_key, 'gemini-key')
+
+    def test_gemini_without_google(self):
+        manager = cloudlanguagetools.servicemanager.ServiceManager(ServicesConfiguration(
+            gemini=GeminiConfig(api_key='gemini-key')))
+        self.assertEqual(manager.get_enabled_services(), [Service.Gemini])
+        self.assertTrue(len(manager.get_tts_voice_list_v3()) > 0)
 
 
 def _json_response(body, status_code=200):
@@ -290,7 +254,6 @@ class TestGoogleApiKey(unittest.TestCase):
 
     def test_configure(self):
         self.assertEqual(self.service.api_key, 'google-key')
-        self.assertIsNone(self.service.credentials)
         # the TTS client is built from the API key, without looking up default credentials
         self.service.get_client()
 
@@ -321,6 +284,15 @@ class TestGoogleApiKey(unittest.TestCase):
             with self.assertRaises(cloudlanguagetools.errors.AuthenticationError):
                 self.service.get_translation('text', 'fr', 'en')
 
+    def test_unconfigured(self):
+        service = cloudlanguagetools.google.GoogleService()
+        with patch('cloudlanguagetools.google.requests.request') as mock_request:
+            with self.assertRaises(cloudlanguagetools.errors.AuthenticationError):
+                service.get_translation('text', 'fr', 'en')
+        mock_request.assert_not_called()
+        with self.assertRaises(cloudlanguagetools.errors.AuthenticationError):
+            service.get_client()
+
     def test_detect_language(self):
         with patch('cloudlanguagetools.google.requests.request', return_value=_json_response(
                 {'data': {'detections': [[{'language': 'fr', 'confidence': 1, 'isReliable': False}]]}})):
@@ -342,7 +314,6 @@ class TestGeminiApiKey(unittest.TestCase):
 
     def test_configure(self):
         self.assertEqual(self.service.api_key, 'gemini-key')
-        self.assertIsNone(self.service.google_credentials)
 
     def test_gemini_3_8_request(self):
         args, kwargs = self.post('gemini-3.8-flash-tts', {'prompt': 'cheerful', 'language_code': 'fr-FR'})
@@ -354,7 +325,7 @@ class TestGeminiApiKey(unittest.TestCase):
 
     def test_older_model_request(self):
         args, kwargs = self.post('gemini-2.5-flash-tts', {'prompt': 'Say cheerfully'})
-        # Cloud TTS model name mapped to the Gemini API name
+        # library model name mapped to the Gemini API name
         self.assertEqual(args[0], 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent')
         # older models reject speechMetadata, the style prompt is a text prefix
         self.assertEqual(kwargs['json']['contents'][0]['parts'][0], {'text': 'Say cheerfully: Hello'})
@@ -367,39 +338,18 @@ class TestGeminiApiKey(unittest.TestCase):
                 self.service.get_tts_audio('Hello', {'name': 'Kore'}, {'model': 'gemini-2.5-flash-lite-preview-tts'})
         mock_post.assert_not_called()
 
-    def test_voice_options_exclude_unavailable_models(self):
+    def test_voice_options_list_supported_models(self):
         voices = self.service.get_tts_voice_list_v3()
         models = voices[0].options['model']['values']
         self.assertNotIn('gemini-2.5-flash-lite-preview-tts', models)
         self.assertIn('gemini-3.8-flash-tts', models)
         self.assertEqual(set(models), set(cloudlanguagetools.gemini.GEMINI_API_MODEL_NAMES))
-        # the module-level options (service account) are unchanged
-        self.assertIn('gemini-2.5-flash-lite-preview-tts', cloudlanguagetools.gemini.VOICE_OPTIONS['model']['values'])
 
     def test_authentication_error_hint(self):
         with patch('cloudlanguagetools.gemini.requests.post', return_value=_json_response(
                 {'error': {'message': 'API key not valid'}}, status_code=403)):
             with self.assertRaisesRegex(cloudlanguagetools.errors.AuthenticationError, 'Gemini API key'):
                 self.service.get_tts_audio('Hello', {'name': 'Kore'}, {'model': 'gemini-3.8-flash-tts'})
-
-    def test_gemini_independent_from_google(self):
-        gemini_account = generate_service_account_info('gemini-project')
-        manager = cloudlanguagetools.servicemanager.ServiceManager(ServicesConfiguration(
-            google=GoogleConfig(service_account=SERVICE_ACCOUNT_INFO),
-            gemini=GeminiConfig(service_account=gemini_account)))
-        google_service = manager.services[Service.Google]
-        gemini_service = manager.services[Service.Gemini]
-        self.assertEqual(google_service.credentials.service_account_email, SERVICE_ACCOUNT_INFO['client_email'])
-        self.assertEqual(gemini_service.google_credentials.service_account_email, gemini_account['client_email'])
-        self.assertEqual(gemini_service.google_project, 'gemini-project')
-
-    def test_gemini_without_google(self):
-        manager = cloudlanguagetools.servicemanager.ServiceManager(ServicesConfiguration(
-            gemini=GeminiConfig(service_account=SERVICE_ACCOUNT_INFO, project_id='other-project')))
-        self.assertEqual(manager.get_enabled_services(), [Service.Gemini])
-        self.assertEqual(manager.services[Service.Gemini].google_project, 'other-project')
-        self.assertTrue(len(manager.get_tts_voice_list_v3()) > 0)
-
 
 class TestEncryption(unittest.TestCase):
     def setUp(self):
@@ -408,7 +358,8 @@ class TestEncryption(unittest.TestCase):
     def test_round_trip(self):
         configuration = ServicesConfiguration.with_keyless_services(
             azure=AzureConfig(api_key='azure-key', region='eastus'),
-            google=GoogleConfig(service_account=SERVICE_ACCOUNT_INFO))
+            google=GoogleConfig(api_key='google-key'),
+            gemini=GeminiConfig(api_key='gemini-key'))
         token = cloudlanguagetools.encryption.encrypt_configuration(configuration, self.settings)
         self.assertNotIn('azure-key', token)
         decrypted = cloudlanguagetools.encryption.decrypt_configuration(token, self.settings)

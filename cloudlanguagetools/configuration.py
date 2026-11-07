@@ -20,11 +20,8 @@ The same configuration as JSON (what `ServicesConfiguration.model_validate_json`
     {"version": 1, "azure": {"api_key": "...", "region": "eastus"}, "mandarin_cantonese": {}}
 """
 
-import base64
-import json
 from typing import Annotated, Any, Dict, Literal, Optional
 
-import pydantic
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, SecretStr, StringConstraints
 
 from cloudlanguagetools.constants import Service
@@ -56,75 +53,21 @@ class AzureConfig(ServiceConfig):
     region: NonEmptyStr
 
 
-class GoogleServiceAccount(BaseModel):
-    """The content of a Google Cloud service account JSON key file.
-
-    Accepts either the parsed JSON object or the JSON text itself. Unlisted fields of the key
-    file (auth_uri, client_id, ...) are kept.
-    """
-    model_config = ConfigDict(extra='allow', frozen=True)
-
-    type: Literal['service_account'] = 'service_account'
-    project_id: NonEmptyStr
-    private_key_id: Optional[str] = None
-    private_key: Secret
-    client_email: NonEmptyStr
-    token_uri: NonEmptyStr = 'https://oauth2.googleapis.com/token'
-
-    @pydantic.model_validator(mode='before')
-    @classmethod
-    def parse_json_text(cls, data):
-        if isinstance(data, (str, bytes)):
-            try:
-                return json.loads(data)
-            except ValueError as e:
-                raise ValueError(f'service account key is not valid JSON: {e}') from e
-        return data
-
-    def get_info(self) -> Dict[str, Any]:
-        """The key file content, as expected by google.oauth2.service_account.Credentials.from_service_account_info."""
-        return self.model_dump(mode='json')
-
-
-class GoogleCredentialsConfig(ServiceConfig):
-    """Google credentials: exactly one of an API key or a service account key."""
-    api_key: Optional[Secret] = None
-    service_account: Optional[GoogleServiceAccount] = None
-
-    @pydantic.model_validator(mode='after')
-    def check_one_credential(self):
-        if (self.api_key is None) == (self.service_account is None):
-            raise ValueError('provide exactly one of api_key or service_account')
-        return self
-
-
-class GoogleConfig(GoogleCredentialsConfig):
+class GoogleConfig(ServiceConfig):
     """Google Cloud Text-to-Speech and Cloud Translation (v2).
 
-    api_key: a Google Cloud API key allowed to call the Cloud Text-to-Speech API and the Cloud
-    Translation API. service_account: a service account key with both APIs enabled on its project.
+    api_key: a Google Cloud API key allowed to call the Cloud Text-to-Speech API and the
+    Cloud Translation API.
     """
+    api_key: Secret
 
 
-class GeminiConfig(GoogleCredentialsConfig):
-    """Gemini TTS, configured independently from the Google service.
+class GeminiConfig(ServiceConfig):
+    """Gemini TTS, through the Gemini API (generativelanguage.googleapis.com).
 
-    api_key: a Gemini API key (Google AI Studio). All models go through the Gemini API
-    (generativelanguage.googleapis.com); gemini-2.5-flash-lite-preview-tts is not available there.
-
-    service_account: a service account key with the Cloud Text-to-Speech API (gemini-2.5-* /
-    gemini-3.1-* models) and the Vertex AI API with the Vertex AI User role (gemini-3.8-* models)
-    enabled on its project. It can be the same service account as the Google service.
+    api_key: a Gemini API key (Google AI Studio).
     """
-    # Google Cloud project used for the Gemini Enterprise endpoint (service account only),
-    # defaults to the project of the service account
-    project_id: Optional[NonEmptyStr] = None
-
-    @pydantic.model_validator(mode='after')
-    def check_project_id(self):
-        if self.project_id is not None and self.service_account is None:
-            raise ValueError('project_id can only be used with a service_account')
-        return self
+    api_key: Secret
 
 
 class WatsonConfig(ServiceConfig):
@@ -342,9 +285,10 @@ def from_legacy_dict(legacy: Dict[str, Any]) -> ServicesConfiguration:
     """Convert the legacy services_configuration.json format (keyed by Service enum name, with
     service-specific key names) to a ServicesConfiguration.
 
-    Matches the behavior of the legacy ServiceManager: the keyless services are all enabled,
-    and Gemini uses the Google service account. Legacy entries for services which are not loaded
-    by the ServiceManager (e.g. Voicen) are ignored.
+    The keyless services are all enabled, as in the legacy ServiceManager. Google and Gemini are
+    left disabled: the legacy format holds a Google service account, and these services now only
+    accept API keys. Legacy entries for services which are not loaded by the ServiceManager
+    (e.g. Voicen) are ignored.
     """
     config: Dict[str, Any] = {field_name: {} for field_name in KEYLESS_SERVICE_FIELDS}
 
@@ -353,10 +297,6 @@ def from_legacy_dict(legacy: Dict[str, Any]) -> ServicesConfiguration:
 
     if (azure := section('Azure')) is not None:
         config['azure'] = {'api_key': azure['key'], 'region': azure['region']}
-    if (google := section('Google')) is not None:
-        service_account = json.loads(base64.b64decode(google['key']))
-        config['google'] = {'service_account': service_account}
-        config['gemini'] = {'service_account': service_account}
     if (watson := section('Watson')) is not None:
         config['watson'] = dict(watson)
     if (naver := section('Naver')) is not None:

@@ -7,6 +7,10 @@ Two modes:
 - instant mode (chatbot): agent.run_instant() calls the CLT-AI verbs directly as tools and answers.
 
 Executing generated code is not sandboxed yet.
+
+Tracing: both modes take an `event_stream_handler` (pydantic-ai EventStreamHandler), which receives the
+agent's stream of events: thinking (OpenAI reasoning summaries, enabled with `reasoning_summary`), text,
+tool calls and tool results. utils/cltai_cli.py uses it to display what the agent is doing.
 """
 
 import io
@@ -24,7 +28,8 @@ import pydantic
 from pydantic import Field
 import pydantic_ai
 from pydantic_ai import Agent, RunContext, ModelRetry
-from pydantic_ai.models.openai import OpenAIResponsesModel
+from pydantic_ai.agent import EventStreamHandler
+from pydantic_ai.models.openai import OpenAIResponsesModel, OpenAIResponsesModelSettings
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.usage import UsageLimits
 
@@ -329,12 +334,18 @@ class CltAIAgent():
     """the CLT-AI Agent. clt is a CLT-AI client, model is an OpenAI model name or a pydantic-ai Model."""
 
     def __init__(self, clt: CltAIClientV1, model: str | pydantic_ai.models.Model = DEFAULT_AGENT_MODEL,
-            openai_api_key: str = None, retries: int = 4, request_limit: int = 40):
+            openai_api_key: str = None, retries: int = 4, request_limit: int = 40,
+            reasoning_summary: Optional[str] = 'detailed'):
+        """reasoning_summary: 'detailed', 'concise' or 'auto' to receive the model's reasoning summaries as
+        ThinkingParts (visible through event_stream_handler), None to disable. Only applies to OpenAI model names."""
         self.clt = clt
         self.retries = retries
         self.usage_limits = UsageLimits(request_limit=request_limit)
+        self.model_settings = None
         if isinstance(model, str):
             model = OpenAIResponsesModel(model, provider=OpenAIProvider(api_key=openai_api_key or self._get_openai_api_key()))
+            if reasoning_summary is not None:
+                self.model_settings = OpenAIResponsesModelSettings(openai_reasoning_summary=reasoning_summary)
         self.model = model
 
     def _get_openai_api_key(self):
@@ -373,14 +384,17 @@ class CltAIAgent():
         return agent
 
     def generate_transformation(self, instruction: str, available_fields: List[str] = None,
-            sample_row: Dict[str, Any] = None, ask_user: Callable[[str], str] = None) -> Transformation:
+            sample_row: Dict[str, Any] = None, ask_user: Callable[[str], str] = None,
+            event_stream_handler: EventStreamHandler[AgentDeps] = None) -> Transformation:
         """code generation mode: create a repeatable Transformation implementing the instruction.
         available_fields: names of the row fields / columns. sample_row: example input used for testing.
-        ask_user: callback(question) -> answer, for clarifying questions (None: the agent makes its best guess)."""
+        ask_user: callback(question) -> answer, for clarifying questions (None: the agent makes its best guess).
+        event_stream_handler: receives the agent events (thinking, tool calls, tool results) as they happen."""
         available_fields = available_fields or (list(sample_row.keys()) if sample_row else [])
         deps = AgentDeps(clt=self.clt, available_fields=available_fields, sample_row=sample_row, ask_user=ask_user)
         agent = self.build_codegen_agent(available_fields, sample_row)
-        result = agent.run_sync(instruction, deps=deps, usage_limits=self.usage_limits)
+        result = agent.run_sync(instruction, deps=deps, usage_limits=self.usage_limits,
+            model_settings=self.model_settings, event_stream_handler=event_stream_handler)
         output = result.output
         return Transformation(api_version=self.clt.api_version, instruction=instruction, description=output.description,
             input_fields=output.input_fields, output_fields=output.output_fields, code=output.code)
@@ -397,11 +411,13 @@ class CltAIAgent():
             tools=tools, retries=self.retries)
 
     def run_instant(self, message: str, standing_instructions: str = None, message_history: List[Any] = None,
-            allow_llm: bool = True) -> InstantResponse:
+            allow_llm: bool = True, event_stream_handler: EventStreamHandler[AgentDeps] = None) -> InstantResponse:
         """instant mode: fulfill a chat message by calling the CLT-AI verbs as tools.
         standing_instructions: user instructions applied to every message, e.g. "if I type chinese text,
-        give me the translation, pinyin and audio". message_history: InstantResponse.messages of the previous turn."""
+        give me the translation, pinyin and audio". message_history: InstantResponse.messages of the previous turn.
+        event_stream_handler: receives the agent events (thinking, tool calls, tool results) as they happen."""
         deps = AgentDeps(clt=self.clt, standing_instructions=standing_instructions)
         agent = self.build_instant_agent(standing_instructions, allow_llm)
-        result = agent.run_sync(message, deps=deps, message_history=message_history, usage_limits=self.usage_limits)
+        result = agent.run_sync(message, deps=deps, message_history=message_history, usage_limits=self.usage_limits,
+            model_settings=self.model_settings, event_stream_handler=event_stream_handler)
         return InstantResponse(text=result.output, results=deps.results, messages=result.all_messages())

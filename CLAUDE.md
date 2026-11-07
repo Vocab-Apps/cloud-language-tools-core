@@ -137,6 +137,11 @@ LLM-friendly, versioned API which replaced `chatapi.py`. The old ServiceManager 
   (chatbot mode, verbs as tools). Generated code runs unsandboxed for now.
 - Tests: `tests/test_cltai_mock.py` (offline, mock services + scripted pydantic-ai FunctionModel),
   `tests/test_cltai.py` (real API calls, including the agent).
+- Tracing: `generate_transformation()` / `run_instant()` take a pydantic-ai `event_stream_handler`
+  (thinking, tool calls, tool results as they happen). The agent requests OpenAI reasoning summaries
+  (`reasoning_summary='detailed'`) so thinking shows up as `ThinkingPart`s.
+- Chat CLI: `uv run python utils/cltai_cli.py [-i "<standing instructions>"] ["<single request>"]`,
+  instant mode with a live trace, keeps conversation history, plays audio with mpv (`/help` for commands).
 - Debug: `uv run python utils/debug.py cltai_generate "<instruction>" '<sample row json>'` and
   `cltai_instant "<message>" "<standing instructions>"` (set `LOG_LEVEL=WARNING` to reduce noise).
 

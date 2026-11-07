@@ -32,7 +32,6 @@ dependencies = [
     "cloud-language-tools-wenlin>=2.0.1",
     "cryptography>=44",
     "google-cloud-texttospeech>=2.29.0",
-    "google-cloud-translate>=3.16",
     "openai>=1.76.0",
     "pinyin-jyutping>=0.9",
     "pydantic>=2.12",

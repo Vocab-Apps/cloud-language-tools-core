@@ -12,3 +12,5 @@ __pycache__/
 services_configuration.json
 temp_data_files/
 .aider.*
+.google_tts_translation_api_key
+.gemini_api_key

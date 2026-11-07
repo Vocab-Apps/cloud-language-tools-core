@@ -86,20 +86,45 @@ class GoogleServiceAccount(BaseModel):
         return self.model_dump(mode='json')
 
 
-class GoogleConfig(ServiceConfig):
-    service_account: GoogleServiceAccount
+class GoogleCredentialsConfig(ServiceConfig):
+    """Google credentials: exactly one of an API key or a service account key."""
+    api_key: Optional[Secret] = None
+    service_account: Optional[GoogleServiceAccount] = None
+
+    @pydantic.model_validator(mode='after')
+    def check_one_credential(self):
+        if (self.api_key is None) == (self.service_account is None):
+            raise ValueError('provide exactly one of api_key or service_account')
+        return self
 
 
-class GeminiConfig(ServiceConfig):
+class GoogleConfig(GoogleCredentialsConfig):
+    """Google Cloud Text-to-Speech and Cloud Translation (v2).
+
+    api_key: a Google Cloud API key allowed to call the Cloud Text-to-Speech API and the Cloud
+    Translation API. service_account: a service account key with both APIs enabled on its project.
+    """
+
+
+class GeminiConfig(GoogleCredentialsConfig):
     """Gemini TTS, configured independently from the Google service.
 
-    The service account needs the Cloud Text-to-Speech API (gemini-2.5-* / gemini-3.1-* models)
-    and the Vertex AI API with the Vertex AI User role (gemini-3.8-* models) enabled on its project.
-    It can be the same service account as the Google service.
+    api_key: a Gemini API key (Google AI Studio). All models go through the Gemini API
+    (generativelanguage.googleapis.com); gemini-2.5-flash-lite-preview-tts is not available there.
+
+    service_account: a service account key with the Cloud Text-to-Speech API (gemini-2.5-* /
+    gemini-3.1-* models) and the Vertex AI API with the Vertex AI User role (gemini-3.8-* models)
+    enabled on its project. It can be the same service account as the Google service.
     """
-    service_account: GoogleServiceAccount
-    # Google Cloud project used for the Gemini Enterprise endpoint, defaults to the project of the service account
+    # Google Cloud project used for the Gemini Enterprise endpoint (service account only),
+    # defaults to the project of the service account
     project_id: Optional[NonEmptyStr] = None
+
+    @pydantic.model_validator(mode='after')
+    def check_project_id(self):
+        if self.project_id is not None and self.service_account is None:
+            raise ValueError('project_id can only be used with a service_account')
+        return self
 
 
 class WatsonConfig(ServiceConfig):

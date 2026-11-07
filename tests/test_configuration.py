@@ -4,6 +4,7 @@ import json
 import base64
 import tempfile
 import unittest
+from unittest.mock import patch, MagicMock
 
 import pydantic
 import cryptography.fernet
@@ -237,10 +238,149 @@ class TestGoogleGeminiConfiguration(unittest.TestCase):
             # no key file written, no environment variable set
             self.assertNotIn('GOOGLE_APPLICATION_CREDENTIALS', os.environ)
             self.assertEqual(service.credentials.service_account_email, SERVICE_ACCOUNT_INFO['client_email'])
-            self.assertIs(service.get_translation_client()._credentials, service.credentials)
+            self.assertIsNone(service.api_key)
+            # the transport may re-scope (copy) the credentials, so compare the account
+            self.assertEqual(service.get_client()._transport._credentials.service_account_email, SERVICE_ACCOUNT_INFO['client_email'])
         finally:
             if previous is not None:
                 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = previous
+
+    def test_google_service_account_translation_uses_bearer_token(self):
+        service = cloudlanguagetools.google.GoogleService()
+        service.configure(GoogleConfig(service_account=SERVICE_ACCOUNT_INFO))
+        service.credentials = MagicMock(valid=True, token='bearer-token')
+        with patch('cloudlanguagetools.google.requests.request', return_value=_json_response(
+                {'data': {'translations': [{'translatedText': 'Hello &amp; welcome'}]}})) as mock_request:
+            self.assertEqual(service.get_translation('Bonjour', 'fr', 'en'), 'Hello & welcome')
+        self.assertEqual(mock_request.call_args.kwargs['headers'], {'Authorization': 'Bearer bearer-token'})
+
+    def test_credentials_exactly_one(self):
+        for config_class in [GoogleConfig, GeminiConfig]:
+            with self.assertRaises(pydantic.ValidationError):
+                config_class()
+            with self.assertRaises(pydantic.ValidationError):
+                config_class(api_key='key', service_account=SERVICE_ACCOUNT_INFO)
+            with self.assertRaises(pydantic.ValidationError):
+                config_class(api_key='')
+            self.assertEqual(config_class(api_key='key').api_key.get_secret_value(), 'key')
+
+    def test_gemini_project_id_requires_service_account(self):
+        with self.assertRaises(pydantic.ValidationError):
+            GeminiConfig(api_key='key', project_id='project')
+
+    def test_api_key_json_round_trip(self):
+        configuration = ServicesConfiguration(google=GoogleConfig(api_key='google-key'), gemini=GeminiConfig(api_key='gemini-key'))
+        data = json.loads(configuration.dump_json())
+        self.assertEqual(data['google'], {'api_key': 'google-key'})
+        self.assertEqual(data['gemini'], {'api_key': 'gemini-key'})
+        self.assertEqual(ServicesConfiguration.model_validate(data), configuration)
+
+
+def _json_response(body, status_code=200):
+    response = MagicMock(status_code=status_code)
+    response.json.return_value = body
+    response.text = json.dumps(body)
+    return response
+
+
+class TestGoogleApiKey(unittest.TestCase):
+    def setUp(self):
+        self.service = cloudlanguagetools.google.GoogleService()
+        self.service.configure(GoogleConfig(api_key='google-key'))
+
+    def test_configure(self):
+        self.assertEqual(self.service.api_key, 'google-key')
+        self.assertIsNone(self.service.credentials)
+        # the TTS client is built from the API key, without looking up default credentials
+        self.service.get_client()
+
+    def test_translation(self):
+        with patch('cloudlanguagetools.google.requests.request', return_value=_json_response(
+                {'data': {'translations': [{'translatedText': 'Hello world'}]}})) as mock_request:
+            self.assertEqual(self.service.get_translation('Bonjour le monde', 'fr', 'en'), 'Hello world')
+        args, kwargs = mock_request.call_args
+        self.assertEqual(args, ('POST', cloudlanguagetools.google.TRANSLATION_URL))
+        self.assertEqual(kwargs['json'], {'q': 'Bonjour le monde', 'source': 'fr', 'target': 'en'})
+        # the key goes in a header, never in the URL
+        self.assertEqual(kwargs['headers'], {'x-goog-api-key': 'google-key'})
+        self.assertNotIn('params', kwargs)
+
+    def test_translation_languages(self):
+        with patch('cloudlanguagetools.google.requests.request', return_value=_json_response(
+                {'data': {'languages': [{'language': 'fr'}, {'language': 'en'}]}})):
+            languages = self.service.get_translation_language_list()
+        self.assertEqual(sorted(language.get_language_id() for language in languages), ['en', 'fr'])
+
+    def test_translation_errors(self):
+        with patch('cloudlanguagetools.google.requests.request', return_value=_json_response(
+                {'error': {'message': 'Invalid Value'}}, status_code=400)):
+            with self.assertRaisesRegex(cloudlanguagetools.errors.RequestError, 'Invalid Value'):
+                self.service.get_translation('text', 'xx', 'en')
+        with patch('cloudlanguagetools.google.requests.request', return_value=_json_response(
+                {'error': {'message': 'API key not valid'}}, status_code=403)):
+            with self.assertRaises(cloudlanguagetools.errors.AuthenticationError):
+                self.service.get_translation('text', 'fr', 'en')
+
+    def test_detect_language(self):
+        with patch('cloudlanguagetools.google.requests.request', return_value=_json_response(
+                {'data': {'detections': [[{'language': 'fr', 'confidence': 1, 'isReliable': False}]]}})):
+            self.assertEqual(self.service.detect_language('Bonjour')['language'], 'fr')
+
+
+class TestGeminiApiKey(unittest.TestCase):
+    def setUp(self):
+        self.service = cloudlanguagetools.gemini.GeminiService()
+        self.service.configure(GeminiConfig(api_key='gemini-key'))
+
+    def post(self, model, options=None):
+        audio = base64.b64encode(b'\x00\x00' * 2400).decode('utf-8')
+        response = _json_response({'candidates': [{'content': {'parts': [
+            {'inlineData': {'mimeType': 'audio/L16;codec=pcm;rate=24000', 'data': audio}}]}}]})
+        with patch('cloudlanguagetools.gemini.requests.post', return_value=response) as mock_post:
+            self.service.get_tts_audio('Hello', {'name': 'Kore'}, {'model': model, **(options or {})})
+        return mock_post.call_args
+
+    def test_configure(self):
+        self.assertEqual(self.service.api_key, 'gemini-key')
+        self.assertIsNone(self.service.google_credentials)
+
+    def test_gemini_3_8_request(self):
+        args, kwargs = self.post('gemini-3.8-flash-tts', {'prompt': 'cheerful', 'language_code': 'fr-FR'})
+        self.assertEqual(args[0], 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent')
+        self.assertEqual(kwargs['headers'], {'x-goog-api-key': 'gemini-key'})
+        self.assertEqual(kwargs['json']['contents'][0]['parts'][0], {'text': 'Hello', 'speechMetadata': {'style': 'cheerful'}})
+        self.assertEqual(kwargs['json']['generationConfig']['speechConfig'],
+            {'voiceConfig': {'voice': 'Kore'}, 'languageCode': 'fr-FR'})
+
+    def test_older_model_request(self):
+        args, kwargs = self.post('gemini-2.5-flash-tts', {'prompt': 'Say cheerfully'})
+        # Cloud TTS model name mapped to the Gemini API name
+        self.assertEqual(args[0], 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent')
+        # older models reject speechMetadata, the style prompt is a text prefix
+        self.assertEqual(kwargs['json']['contents'][0]['parts'][0], {'text': 'Say cheerfully: Hello'})
+        self.assertEqual(kwargs['json']['generationConfig']['speechConfig'],
+            {'voiceConfig': {'prebuiltVoiceConfig': {'voiceName': 'Kore'}}})
+
+    def test_unavailable_model(self):
+        with patch('cloudlanguagetools.gemini.requests.post') as mock_post:
+            with self.assertRaises(cloudlanguagetools.errors.InputError):
+                self.service.get_tts_audio('Hello', {'name': 'Kore'}, {'model': 'gemini-2.5-flash-lite-preview-tts'})
+        mock_post.assert_not_called()
+
+    def test_voice_options_exclude_unavailable_models(self):
+        voices = self.service.get_tts_voice_list_v3()
+        models = voices[0].options['model']['values']
+        self.assertNotIn('gemini-2.5-flash-lite-preview-tts', models)
+        self.assertIn('gemini-3.8-flash-tts', models)
+        self.assertEqual(set(models), set(cloudlanguagetools.gemini.GEMINI_API_MODEL_NAMES))
+        # the module-level options (service account) are unchanged
+        self.assertIn('gemini-2.5-flash-lite-preview-tts', cloudlanguagetools.gemini.VOICE_OPTIONS['model']['values'])
+
+    def test_authentication_error_hint(self):
+        with patch('cloudlanguagetools.gemini.requests.post', return_value=_json_response(
+                {'error': {'message': 'API key not valid'}}, status_code=403)):
+            with self.assertRaisesRegex(cloudlanguagetools.errors.AuthenticationError, 'Gemini API key'):
+                self.service.get_tts_audio('Hello', {'name': 'Kore'}, {'model': 'gemini-3.8-flash-tts'})
 
     def test_gemini_independent_from_google(self):
         gemini_account = generate_service_account_info('gemini-project')

@@ -13,7 +13,7 @@ from cloudlanguagetools.configuration import ServicesConfiguration, AzureConfig,
 
 configuration = ServicesConfiguration.with_keyless_services(  # Epitran, Spacy, PyThaiNLP, MandarinCantonese, Wenlin
     azure=AzureConfig(api_key='...', region='eastus'),
-    gemini=GeminiConfig(service_account=open('service_account.json').read()),
+    gemini=GeminiConfig(api_key='...'),  # a Gemini API key from Google AI Studio
 )
 manager = cloudlanguagetools.servicemanager.ServiceManager(configuration)
 # reconfigure later (e.g. after the user changed their keys): manager.configure(new_configuration)
@@ -25,8 +25,12 @@ The same configuration as JSON (`ServicesConfiguration.model_validate_json` / `c
 {"version": 1, "azure": {"api_key": "...", "region": "eastus"}, "mandarin_cantonese": {}}
 ```
 
-Google and Gemini are configured separately, each with a service account key (the JSON key
-file content, as an object or as text); credentials stay in memory.
+Google and Gemini are configured separately, each with exactly one of:
+- `api_key`: for Google, a Google Cloud API key allowed to call Cloud Text-to-Speech and Cloud
+  Translation; for Gemini, a Gemini API key (Google AI Studio). With a Gemini API key, every model
+  goes through the Gemini API; `gemini-2.5-flash-lite-preview-tts` is not available there.
+- `service_account`: a service account key (the JSON key file content, as an object or as text).
+  Credentials stay in memory.
 
 ## service keys (backend deployment)
 The backend's configuration is stored encrypted in `cloudlanguagetools/keys.py`, keyed by the

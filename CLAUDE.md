@@ -60,10 +60,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pydub` imports the stdlib `audioop` module, which was removed in Python 3.13, so
   `audioop-lts` is a declared runtime dependency.
 - `utils/debug_3.py` imports `convertkit` lazily; it is deliberately not a declared dependency.
-- Gemini TTS (`gemini.py`) has two transports: the `gemini-3.8-*` models call the Gemini
-  Enterprise `generateContent` REST endpoint (`aiplatform.googleapis.com`) with a bearer token
-  from the Google service-account credentials and transcode the WAV response locally; the
-  `gemini-2.5-*` / `gemini-3.1-*` models go through the Cloud Text-to-Speech API.
+- Gemini TTS (`gemini.py`) transports depend on the credentials:
+  - Gemini API key: every model calls the Gemini API `generateContent` endpoint
+    (`generativelanguage.googleapis.com`, `x-goog-api-key` header). Model names are mapped with
+    `GEMINI_API_MODEL_NAMES` (e.g. `gemini-2.5-flash-tts` -> `gemini-2.5-flash-preview-tts`);
+    `gemini-2.5-flash-lite-preview-tts` isn't served there (InputError, removed from voice options).
+    The 3.8 models take the style prompt in `speechMetadata.style`; older models reject it, so the
+    prompt is prefixed to the text (`"<prompt>: <text>"`) with `prebuiltVoiceConfig`.
+  - Service account: the `gemini-3.8-*` models call the Gemini Enterprise `generateContent`
+    endpoint (`aiplatform.googleapis.com`) with a bearer token; the `gemini-2.5-*` /
+    `gemini-3.1-*` models go through the Cloud Text-to-Speech API. (An API key can't be used on
+    those paths: the Cloud TTS Gemini models need the `aiplatform.endpoints.predict` IAM permission.)
+  - generateContent returns WAV or headerless PCM, transcoded locally.
+- Google translation uses the Cloud Translation v2 REST API (`requests`, no `google-cloud-translate`
+  dependency), authenticated with the API key header or a service-account bearer token.
 
 ## Architecture Overview
 
@@ -113,8 +123,10 @@ Each service module (e.g., `azure.py`, `google.py`) follows this pattern:
 - Each `Service.configure(config)` receives its typed sub-model, not a dict.
 - Keyless services (Epitran, Spacy, PyThaiNLP, MandarinCantonese, Wenlin) are enabled with an empty sub-model,
   see `ServicesConfiguration.with_keyless_services()`.
-- Google and Gemini each take a service account key and build in-memory credentials
-  (`google_tts_common.get_service_account_credentials`); no temp key file, no `GOOGLE_APPLICATION_CREDENTIALS`.
+- Google and Gemini each take exactly one of `api_key` or `service_account`. Service accounts become
+  in-memory credentials (`google_tts_common.get_service_account_credentials`); no temp key file, no
+  `GOOGLE_APPLICATION_CREDENTIALS`. The backend's encrypted config uses API keys for both.
+- API key files `.google_tts_translation_api_key` / `.gemini_api_key` (gitignored) hold the raw keys.
 - Backend: `encryption.load_configuration()` decrypts `keys.py` with `EncryptionSettings` (from
   `CLOUDLANGUAGETOOLS_CORE_KEY`). `utils/service_keys.py --action decrypt_write_json|encrypt` round-trips it
   through the gitignored `services_configuration.json`. Legacy (unversioned) data is converted by

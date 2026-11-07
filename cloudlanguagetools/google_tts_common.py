@@ -11,9 +11,11 @@ import logging
 
 import google.cloud.texttospeech
 import google.oauth2.service_account
+import google.auth.transport.requests
 
 import cloudlanguagetools.options
 import cloudlanguagetools.configuration
+import cloudlanguagetools.errors
 import cloudlanguagetools.audio_processing
 from cloudlanguagetools.options import AudioFormat
 
@@ -27,6 +29,18 @@ def get_service_account_credentials(service_account: cloudlanguagetools.configur
     setting GOOGLE_APPLICATION_CREDENTIALS (so the Google and Gemini services can use different accounts)."""
     return google.oauth2.service_account.Credentials.from_service_account_info(
         service_account.get_info(), scopes=[GOOGLE_CLOUD_PLATFORM_SCOPE])
+
+
+def get_auth_headers(api_key, credentials):
+    """HTTP headers authenticating a Google REST request, with an API key (sent as a header so it
+    never appears in URLs / logs) or with service account credentials (bearer token, refreshed as needed)."""
+    if api_key is not None:
+        return {'x-goog-api-key': api_key}
+    if credentials is None:
+        raise cloudlanguagetools.errors.AuthenticationError('Google credentials are not configured')
+    if not credentials.valid:
+        credentials.refresh(google.auth.transport.requests.Request())
+    return {'Authorization': f'Bearer {credentials.token}'}
 
 
 DEFAULT_AUDIO_FORMAT = AudioFormat.mp3

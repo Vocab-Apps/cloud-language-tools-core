@@ -1176,6 +1176,13 @@ Personality Affect: Friendly and approachable with a hint of sophistication; spe
 
         voice_key = {"name": "Kore"}
         options = {'model': 'gemini-2.5-flash-lite-preview-tts'}
+
+        if self.manager.configuration.gemini.api_key is not None:
+            # this model is only served by Cloud TTS (service account), not by the Gemini API
+            with self.assertRaises(cloudlanguagetools.errors.InputError):
+                self.manager.get_tts_audio(source_text, service, voice_key, options)
+            return
+
         audio_temp_file = self.get_tts_audio_with_retry(source_text, service, voice_key, options)
 
         self.recognize_and_verify_text(

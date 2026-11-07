@@ -1,9 +1,10 @@
 import html
 import logging
 import pprint
+import requests
 import google.cloud.texttospeech
-import google.cloud.translate_v2
 import google.api_core.exceptions
+from google.api_core.client_options import ClientOptions
 import cloudlanguagetools.service
 import cloudlanguagetools.constants
 import cloudlanguagetools.options
@@ -12,6 +13,9 @@ import cloudlanguagetools.errors
 import cloudlanguagetools.google_tts_common
 
 logger = logging.getLogger(__name__)
+
+# Cloud Translation Basic (v2) REST API, works with both an API key and a service account
+TRANSLATION_URL = 'https://translation.googleapis.com/language/translate/v2'
 
 # updates on google text to speech:
 # https://cloud.google.com/text-to-speech/docs/release-notes
@@ -130,16 +134,32 @@ class GoogleTranslationLanguage(cloudlanguagetools.translationlanguage.Translati
 class GoogleService(cloudlanguagetools.service.Service):
     def __init__(self):
         self.service = cloudlanguagetools.constants.Service.Google
+        self.api_key = None
         self.credentials = None
 
     def configure(self, config):
-        self.credentials = cloudlanguagetools.google_tts_common.get_service_account_credentials(config.service_account)
+        if config.api_key is not None:
+            self.api_key = config.api_key.get_secret_value()
+        else:
+            self.credentials = cloudlanguagetools.google_tts_common.get_service_account_credentials(config.service_account)
 
     def get_client(self):
+        if self.api_key is not None:
+            return google.cloud.texttospeech.TextToSpeechClient(client_options=ClientOptions(api_key=self.api_key))
         return google.cloud.texttospeech.TextToSpeechClient(credentials=self.credentials)
 
-    def get_translation_client(self):
-        return google.cloud.translate_v2.Client(credentials=self.credentials)
+    def translation_request(self, method, path, **kwargs):
+        """Call the Cloud Translation v2 REST API, return the 'data' field of the response."""
+        headers = cloudlanguagetools.google_tts_common.get_auth_headers(self.api_key, self.credentials)
+        response = requests.request(method, TRANSLATION_URL + path, headers=headers,
+            timeout=cloudlanguagetools.constants.RequestTimeout, **kwargs)
+        if response.status_code >= 400:
+            message = self._get_response_error_message(response)
+            logger.warning(f'Google translation request {path} failed with status code {response.status_code}: {message}')
+            if response.status_code in (401, 403):
+                raise cloudlanguagetools.errors.AuthenticationError(f'Google translation authentication error: {message}')
+            raise cloudlanguagetools.errors.RequestError(f'Google translation error: {message}')
+        return response.json()['data']
 
     def get_tts_audio(self, text, voice_key, options):
         audio_format = cloudlanguagetools.google_tts_common.get_audio_format(options)
@@ -252,27 +272,15 @@ class GoogleService(cloudlanguagetools.service.Service):
         return []
 
     def get_translation(self, text, from_language_key, to_language_key):
-        try:
-            client = self.get_translation_client()
-            result = client.translate(text, source_language=from_language_key, target_language=to_language_key)
-            return html.unescape(result["translatedText"])
-        except google.api_core.exceptions.BadRequest as error:
-            raise cloudlanguagetools.errors.RequestError(str(error)) from error
+        data = self.translation_request('POST', '', json={'q': text, 'source': from_language_key, 'target': to_language_key})
+        # the default (html) format escapes entities in the result
+        return html.unescape(data['translations'][0]['translatedText'])
 
     def get_translation_languages(self):
-        translate_client = self.get_translation_client()
-
-        results = translate_client.get_languages()
-
-        return results
+        """List of {'language': code} entries."""
+        return self.translation_request('GET', '/languages')['languages']
 
     def detect_language(self, input_text):
-        client = self.get_translation_client()
-
-        # Text can also be a sequence of strings, in which case this method
-        # will return a sequence of results for each text.
-        result = client.detect_language(input_text)
-
-        print("Text: {}".format(input_text))
-        print("Confidence: {}".format(result["confidence"]))
-        print("Language: {}".format(result["language"]))
+        """Return the detection ({'language', 'confidence', 'isReliable'}) for a string."""
+        data = self.translation_request('POST', '/detect', json={'q': input_text})
+        return data['detections'][0][0]

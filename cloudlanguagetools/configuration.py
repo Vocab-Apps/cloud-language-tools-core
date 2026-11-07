@@ -23,7 +23,7 @@ The same configuration as JSON (what `ServicesConfiguration.model_validate_json`
 import enum
 from typing import Annotated, Dict, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, SecretStr, StringConstraints
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, PlainSerializer, SecretStr, StringConstraints
 
 from cloudlanguagetools.constants import Service
 
@@ -32,11 +32,21 @@ CONFIGURATION_VERSION = 1
 # a non-empty string, surrounding whitespace removed
 NonEmptyStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
-# a non-empty secret: hidden in repr/str (so keys don't end up in logs), but serialized in clear
-# so that a configuration can round-trip through JSON (and through encryption.py)
+def _no_surrounding_whitespace(value: SecretStr) -> SecretStr:
+    # rejected rather than stripped, so that a mangled key (e.g. read with its trailing newline)
+    # gets fixed at the source
+    if value.get_secret_value() != value.get_secret_value().strip():
+        raise ValueError('secret must not have leading or trailing whitespace')
+    return value
+
+
+# a non-empty secret without surrounding whitespace: hidden in repr/str (so keys don't end up in
+# logs), but serialized in clear so that a configuration can round-trip through JSON (and through
+# encryption.py)
 Secret = Annotated[
     SecretStr,
     Field(min_length=1),
+    AfterValidator(_no_surrounding_whitespace),
     PlainSerializer(lambda value: value.get_secret_value(), return_type=str),
 ]
 
@@ -246,60 +256,35 @@ class TestServiceConfig(ServiceConfig):
 # the top-level model
 # ===================
 
-# configuration field name -> Service enum, in the order the services get loaded
-SERVICE_FIELDS: Dict[str, Service] = {
-    'azure': Service.Azure,
-    'google': Service.Google,
-    'watson': Service.Watson,
-    'naver': Service.Naver,
-    'amazon': Service.Amazon,
-    'forvo': Service.Forvo,
-    'cereproc': Service.CereProc,
-    'vocalware': Service.VocalWare,
-    'fptai': Service.FptAi,
-    'elevenlabs': Service.ElevenLabs,
-    'easypronunciation': Service.EasyPronunciation,
-    'epitran': Service.Epitran,
-    'deepl': Service.DeepL,
-    'pythainlp': Service.PyThaiNLP,
-    'spacy': Service.Spacy,
-    'mandarin_cantonese': Service.MandarinCantonese,
-    'wenlin': Service.Wenlin,
-    'openai': Service.OpenAI,
-    'alibaba': Service.Alibaba,
-    'gemini': Service.Gemini,
-    'test_service_a': Service.TestServiceA,
-    'test_service_b': Service.TestServiceB,
-}
-
 class ServicesConfiguration(BaseModel):
     """Enables services and configures them. Leave a service out (None) to disable it."""
     model_config = ConfigDict(extra='forbid', frozen=True)
 
     version: Literal[1] = CONFIGURATION_VERSION
 
-    azure: Optional[AzureConfig] = None
-    google: Optional[GoogleConfig] = None
-    watson: Optional[WatsonConfig] = None
-    naver: Optional[NaverConfig] = None
-    amazon: Optional[AmazonConfig] = None
-    forvo: Optional[ForvoConfig] = None
-    cereproc: Optional[CereProcConfig] = None
-    vocalware: Optional[VocalWareConfig] = None
-    fptai: Optional[FptAiConfig] = None
-    elevenlabs: Optional[ElevenLabsConfig] = None
-    easypronunciation: Optional[EasyPronunciationConfig] = None
-    epitran: Optional[EpitranConfig] = None
-    deepl: Optional[DeepLConfig] = None
-    pythainlp: Optional[PyThaiNLPConfig] = None
-    spacy: Optional[SpacyConfig] = None
-    mandarin_cantonese: Optional[MandarinCantoneseConfig] = None
-    wenlin: Optional[WenlinConfig] = None
-    openai: Optional[OpenAIConfig] = None
-    alibaba: Optional[AlibabaConfig] = None
-    gemini: Optional[GeminiConfig] = None
-    test_service_a: Optional[TestServiceConfig] = None
-    test_service_b: Optional[TestServiceConfig] = None
+    # one field per service, annotated with its Service enum, in the order the services get loaded
+    azure: Annotated[Optional[AzureConfig], Service.Azure] = None
+    google: Annotated[Optional[GoogleConfig], Service.Google] = None
+    watson: Annotated[Optional[WatsonConfig], Service.Watson] = None
+    naver: Annotated[Optional[NaverConfig], Service.Naver] = None
+    amazon: Annotated[Optional[AmazonConfig], Service.Amazon] = None
+    forvo: Annotated[Optional[ForvoConfig], Service.Forvo] = None
+    cereproc: Annotated[Optional[CereProcConfig], Service.CereProc] = None
+    vocalware: Annotated[Optional[VocalWareConfig], Service.VocalWare] = None
+    fptai: Annotated[Optional[FptAiConfig], Service.FptAi] = None
+    elevenlabs: Annotated[Optional[ElevenLabsConfig], Service.ElevenLabs] = None
+    easypronunciation: Annotated[Optional[EasyPronunciationConfig], Service.EasyPronunciation] = None
+    epitran: Annotated[Optional[EpitranConfig], Service.Epitran] = None
+    deepl: Annotated[Optional[DeepLConfig], Service.DeepL] = None
+    pythainlp: Annotated[Optional[PyThaiNLPConfig], Service.PyThaiNLP] = None
+    spacy: Annotated[Optional[SpacyConfig], Service.Spacy] = None
+    mandarin_cantonese: Annotated[Optional[MandarinCantoneseConfig], Service.MandarinCantonese] = None
+    wenlin: Annotated[Optional[WenlinConfig], Service.Wenlin] = None
+    openai: Annotated[Optional[OpenAIConfig], Service.OpenAI] = None
+    alibaba: Annotated[Optional[AlibabaConfig], Service.Alibaba] = None
+    gemini: Annotated[Optional[GeminiConfig], Service.Gemini] = None
+    test_service_a: Annotated[Optional[TestServiceConfig], Service.TestServiceA] = None
+    test_service_b: Annotated[Optional[TestServiceConfig], Service.TestServiceB] = None
 
     def get_service_config(self, service: Service) -> Optional[ServiceConfig]:
         return getattr(self, get_field_name(service))
@@ -333,8 +318,24 @@ class ServicesConfiguration(BaseModel):
         return cls(**{**keyless, **kwargs})
 
 
+def _field_service(field_name: str) -> Service:
+    services = [item for item in ServicesConfiguration.model_fields[field_name].metadata if isinstance(item, Service)]
+    if len(services) != 1:
+        raise TypeError(f'configuration field {field_name} must be annotated with exactly one Service')
+    return services[0]
+
+
+# configuration field name -> Service enum, in the order the services get loaded
+SERVICE_FIELDS: Dict[str, Service] = {
+    field_name: _field_service(field_name)
+    for field_name in ServicesConfiguration.model_fields if field_name != 'version'
+}
+# Service enum -> configuration field name
+FIELD_NAMES: Dict[Service, str] = {service: field_name for field_name, service in SERVICE_FIELDS.items()}
+
+
 def get_field_name(service: Service) -> str:
-    for field_name, field_service in SERVICE_FIELDS.items():
-        if field_service == service:
-            return field_name
-    raise KeyError(f'service {service} cannot be configured')
+    try:
+        return FIELD_NAMES[service]
+    except KeyError:
+        raise KeyError(f'service {service} cannot be configured') from None

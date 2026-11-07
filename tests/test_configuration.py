@@ -57,6 +57,16 @@ class TestServicesConfigurationModel(unittest.TestCase):
         with self.assertRaises(pydantic.ValidationError):
             AzureConfig(api_key='key', region='   ')
 
+    def test_api_key_with_surrounding_whitespace_rejected(self):
+        for api_key in ['key\n', ' key', '   ']:
+            with self.assertRaises(pydantic.ValidationError):
+                GeminiConfig(api_key=api_key)
+        self.assertEqual(GeminiConfig(api_key='key').api_key.get_secret_value(), 'key')
+
+    def test_get_field_name(self):
+        self.assertEqual(cloudlanguagetools.configuration.get_field_name(Service.MandarinCantonese), 'mandarin_cantonese')
+        self.assertEqual(list(cloudlanguagetools.configuration.SERVICE_FIELDS)[:2], ['azure', 'google'])
+
     def test_missing_field_rejected(self):
         with self.assertRaises(pydantic.ValidationError):
             ServicesConfiguration.model_validate({'version': 1, 'azure': {'api_key': 'key'}})
@@ -369,7 +379,6 @@ class TestGeminiApiKey(unittest.TestCase):
         models = voices[0].options['model']['values']
         self.assertNotIn('gemini-2.5-flash-lite-preview-tts', models)
         self.assertIn('gemini-3.8-flash-tts', models)
-        self.assertEqual(set(models), set(cloudlanguagetools.gemini.GEMINI_API_MODEL_NAMES))
 
     def test_authentication_error_hint(self):
         with patch('cloudlanguagetools.gemini.requests.post', return_value=_json_response(

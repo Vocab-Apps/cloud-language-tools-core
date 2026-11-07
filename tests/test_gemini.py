@@ -263,7 +263,6 @@ class TestGeminiVoiceList(unittest.TestCase):
             model_option = voice.options['model']
             self.assertEqual(model_option['default'], 'gemini-3.8-flash-tts')
             self.assertEqual(model_option['values'][:2], ['gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts'])
-            self.assertEqual(set(model_option['values']), set(cloudlanguagetools.gemini.GEMINI_API_MODEL_NAMES))
             self.assertNotIn('gemini-2.5-flash-lite-preview-tts', model_option['values'])
             self.assertIn(cloudlanguagetools.languages.AudioLanguage.ig_NG, voice.audio_languages)
             self.assertIn(cloudlanguagetools.languages.AudioLanguage.en_US, voice.audio_languages)

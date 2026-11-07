@@ -46,13 +46,7 @@ DEFAULT_RATE_LIMIT_RETRY_AFTER = 60
 VOICE_OPTIONS = {
     'model': {
         'type': cloudlanguagetools.options.ParameterType.list.name,
-        'values': [
-            'gemini-3.8-flash-tts',
-            'gemini-3.8-flash-lite-tts',
-            'gemini-3.1-flash-tts-preview',
-            'gemini-2.5-flash-tts',
-            'gemini-2.5-pro-tts',
-        ],
+        'values': list(GEMINI_API_MODEL_NAMES),
         'default': DEFAULT_MODEL
     },
     'language_code': {

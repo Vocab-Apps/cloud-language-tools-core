@@ -469,8 +469,11 @@ class AzureService(cloudlanguagetools.service.Service):
 
         self._raise_for_azure_response(response, 'TTS', timeout_errors=True)
         if not response.content:
-            raise cloudlanguagetools.errors.RequestError(
-                'Azure TTS request returned an empty audio response')
+            # Unsupported voice/text combinations can succeed with no audio;
+            # retrying the same input will not resolve this.
+            raise cloudlanguagetools.errors.InputError(
+                'Azure TTS request returned an empty audio response; '
+                'check that the voice supports the input language')
 
         output_temp_file = tempfile.NamedTemporaryFile(
             prefix=f'cloudlanguage_tools_{self.__class__.__name__}_audio',

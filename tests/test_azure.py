@@ -12,6 +12,7 @@ import cloudlanguagetools.azure
 import cloudlanguagetools.configuration
 import cloudlanguagetools.errors
 import cloudlanguagetools.options
+import cloudlanguagetools.servicemanager
 from cloudlanguagetools.azure import build_dragonhd_voice_attrs, DEFAULT_TEMPERATURE, DEFAULT_TOP_P, DEFAULT_TOP_K, DEFAULT_CFG_SCALE
 
 
@@ -83,6 +84,31 @@ class TestAzureGetTtsAudioErrors:
         service = cloudlanguagetools.azure.AzureService()
         service.configure(cloudlanguagetools.configuration.AzureConfig(api_key='fake-key', region='eastus'))
         return service
+
+    @pytest.mark.parametrize('through_manager', [False, True])
+    @patch('cloudlanguagetools.azure.requests.post')
+    def test_empty_success_response_is_permanent(self, mock_post, through_manager):
+        # Reproduced against Azure: JennyNeural with Chinese text returns HTTP
+        # 200 with no audio. Retrying the same voice/text pair cannot fix it.
+        mock_post.return_value = _build_response(status_code=200, content=b'')
+        service = self._make_service()
+        voice_key = {'name': 'en-US-JennyNeural'}
+
+        with pytest.raises(cloudlanguagetools.errors.InputError) as exc_info:
+            if through_manager:
+                manager = cloudlanguagetools.servicemanager.ServiceManager(
+                    cloudlanguagetools.configuration.ServicesConfiguration(
+                        azure=cloudlanguagetools.configuration.AzureConfig(
+                            api_key='fake-key', region='eastus')))
+                manager.get_tts_audio_v5('你好', 'Azure', voice_key, {})
+            else:
+                service.get_tts_audio('你好', voice_key, {})
+
+        assert isinstance(exc_info.value, cloudlanguagetools.errors.PermanentError)
+        assert not isinstance(exc_info.value, cloudlanguagetools.errors.TransientError)
+        assert 'empty audio response' in str(exc_info.value)
+        mock_post.assert_called_once()
+        assert '你好' in mock_post.call_args.kwargs['data'].decode('utf-8')
 
     @patch('cloudlanguagetools.azure.requests.post')
     def test_first_chunk_timeout_response_raises_timeout_error(self, mock_post):
